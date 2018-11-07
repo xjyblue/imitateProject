@@ -20,11 +20,11 @@ import pojo.User;
 public class NettyMemory {
 	public static ChannelGroup group = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 	/** 缓存通信上下文环境对应的登录用户 */ 
-	public static Map<Channel,User> session2UserIds  = new ConcurrentHashMap<>();
+	public static Map<Channel,User> session2UserIds  = new ConcurrentHashMap<Channel,User>();
 	/** 信道所处事件的装填*/
-	public static Map<Channel,String>eventStatus  = new ConcurrentHashMap<>();
+	public static Map<Channel,String>eventStatus  = new ConcurrentHashMap<Channel,String>();
 	/** 地图缓存到内存中 */
-	public static Map<String,Area>areaMap = new HashMap<>();
+	public static Map<String,Area>areaMap = new HashMap<String,Area>();
 	
 	/** 地图名称和编号缓存到内存中 */
 	public static Map<String,String>areaToNum = new HashMap<String,String>();

@@ -186,6 +186,7 @@
     </set>
     where username = #{username,jdbcType=VARCHAR}
   </update>
+  
   <update id="updateByPrimaryKey" parameterType="pojo.User" >
     update user
     set password = #{password,jdbcType=VARCHAR},
