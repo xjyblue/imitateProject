@@ -18,6 +18,7 @@ public class Test {
 	@org.junit.Test
 
 	public void test1() {
+//		多打一句话
 		User user = new User();
 		user.setUsername("a");
 		user.setPos("1");
