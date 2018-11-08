@@ -3,17 +3,27 @@ package Component;
 import java.util.List;
 
 public class NPC {
+	private Integer id;
+
 	private String status;
 
 	private String name;
 
 	private List<String> talks ;
 
-	public List<String> getTalk() {
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public List<String> getTalks() {
 		return talks;
 	}
 
-	public void setTalk(List<String> talks) {
+	public void setTalks(List<String> talks) {
 		this.talks = talks;
 	}
 

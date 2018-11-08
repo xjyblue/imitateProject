@@ -6,6 +6,8 @@
     <result column="password" property="password" jdbcType="VARCHAR" />
     <result column="status" property="status" jdbcType="VARCHAR" />
     <result column="pos" property="pos" jdbcType="VARCHAR" />
+    <result column="mp" property="mp" jdbcType="VARCHAR" />
+    <result column="hp" property="hp" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <where >
@@ -66,7 +68,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List" >
-    username, password, status, pos
+    username, password, status, pos, mp, hp
   </sql>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="pojo.UserExample" >
     select
@@ -100,9 +102,9 @@
   </delete>
   <insert id="insert" parameterType="pojo.User" >
     insert into user (username, password, status, 
-      pos)
+      pos, mp, hp)
     values (#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, 
-      #{pos,jdbcType=VARCHAR})
+      #{pos,jdbcType=VARCHAR}, #{mp,jdbcType=VARCHAR}, #{hp,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="pojo.User" >
     insert into user
@@ -119,6 +121,12 @@
       <if test="pos != null" >
         pos,
       </if>
+      <if test="mp != null" >
+        mp,
+      </if>
+      <if test="hp != null" >
+        hp,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="username != null" >
@@ -132,6 +140,12 @@
       </if>
       <if test="pos != null" >
         #{pos,jdbcType=VARCHAR},
+      </if>
+      <if test="mp != null" >
+        #{mp,jdbcType=VARCHAR},
+      </if>
+      <if test="hp != null" >
+        #{hp,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -156,6 +170,12 @@
       <if test="record.pos != null" >
         pos = #{record.pos,jdbcType=VARCHAR},
       </if>
+      <if test="record.mp != null" >
+        mp = #{record.mp,jdbcType=VARCHAR},
+      </if>
+      <if test="record.hp != null" >
+        hp = #{record.hp,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
@@ -166,7 +186,9 @@
     set username = #{record.username,jdbcType=VARCHAR},
       password = #{record.password,jdbcType=VARCHAR},
       status = #{record.status,jdbcType=VARCHAR},
-      pos = #{record.pos,jdbcType=VARCHAR}
+      pos = #{record.pos,jdbcType=VARCHAR},
+      mp = #{record.mp,jdbcType=VARCHAR},
+      hp = #{record.hp,jdbcType=VARCHAR}
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -183,15 +205,22 @@
       <if test="pos != null" >
         pos = #{pos,jdbcType=VARCHAR},
       </if>
+      <if test="mp != null" >
+        mp = #{mp,jdbcType=VARCHAR},
+      </if>
+      <if test="hp != null" >
+        hp = #{hp,jdbcType=VARCHAR},
+      </if>
     </set>
     where username = #{username,jdbcType=VARCHAR}
   </update>
-  
   <update id="updateByPrimaryKey" parameterType="pojo.User" >
     update user
     set password = #{password,jdbcType=VARCHAR},
       status = #{status,jdbcType=VARCHAR},
-      pos = #{pos,jdbcType=VARCHAR}
+      pos = #{pos,jdbcType=VARCHAR},
+      mp = #{mp,jdbcType=VARCHAR},
+      hp = #{hp,jdbcType=VARCHAR}
     where username = #{username,jdbcType=VARCHAR}
   </update>
 </mapper>

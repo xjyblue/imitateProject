@@ -1,9 +1,6 @@
 package memory;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import Component.Area;
@@ -12,6 +9,8 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import pojo.User;
+import skill.UserSkill;
+
 /**
  * 内存中存放channel
  * @author xiaojianyu
@@ -28,6 +27,8 @@ public class NettyMemory {
 	
 	/** 地图名称和编号缓存到内存中 */
 	public static Map<String,String>areaToNum = new HashMap<String,String>();
-	
+
+	public static Map<Integer,UserSkill>userSkillMap = new HashMap<Integer, UserSkill>();
+
 	public static Set<String>areaSet = new HashSet<String>();
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Area {
+    private Integer id;
 
     private String name;
 
@@ -14,6 +15,14 @@ public class Area {
     List<NPC> npcs;
 
     List<Monster> monsters;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public List<Monster> getMonsters() {
         return monsters;

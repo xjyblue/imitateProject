@@ -1,6 +1,7 @@
 package skill;
 
-public class MonsterSkill {
+public class UserSkill {
+
     private Integer skillId;
 
     private String skillName;
@@ -8,6 +9,16 @@ public class MonsterSkill {
     private String attackCd;
 
     private String damage;
+
+    private String skillMp;
+
+    public String getSkillMp() {
+        return skillMp;
+    }
+
+    public void setSkillMp(String skillMp) {
+        this.skillMp = skillMp;
+    }
 
     public Integer getSkillId() {
         return skillId;
@@ -40,4 +51,5 @@ public class MonsterSkill {
     public void setDamage(String damage) {
         this.damage = damage;
     }
+
 }

@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 
 import Component.Area;
 import Component.NPC;
+import skill.MonsterSkill;
+import skill.UserSkill;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -75,25 +77,54 @@ public class NettyServer {
 
 
     public void initServer() {
+//        初始化所有玩家的技能表start
+        UserSkill userSkill = new UserSkill();
+        userSkill.setSkillId(1);
+        userSkill.setSkillName("烈火攻击");
+        userSkill.setAttackCd("5");
+        userSkill.setDamage("1500");
+        userSkill.setSkillMp("600");
+        NettyMemory.userSkillMap.put(1,userSkill);
+        userSkill = new UserSkill();
+        userSkill.setSkillId(2);
+        userSkill.setSkillName("喷水攻击");
+        userSkill.setAttackCd("10");
+        userSkill.setDamage("1200");
+        userSkill.setSkillMp("1000");
+        NettyMemory.userSkillMap.put(2,userSkill);
+//        初始化所有玩家的技能表end
+
+
 //		起始之地
         Area area = new Area();
         area.setName("起始之地");
         Set<String> areaSet = new HashSet<String>();
         areaSet.add("村子");
         area.setAreaSet(areaSet);
+//        初始化NPC和会话
         NPC npc = new NPC("1", "起始之地-塞里亚");
-
         List<String> talkList = new ArrayList<String>();
         talkList.add("我是塞里亚，欢迎来到起始之地");
-        npc.setTalk(talkList);
-
+        npc.setTalks(talkList);
         List<NPC>npcs = new ArrayList<NPC>();
         npcs.add(npc);
         area.setNpcs(npcs);
+//      初始化怪物
+        MonsterSkill monsterSkill = new MonsterSkill();
+        monsterSkill.setAttackCd("5");
+        monsterSkill.setDamage("10");
+        monsterSkill.setSkillName("闪电");
+        monsterSkill.setSkillId(1);
+        List<MonsterSkill> skills = new ArrayList<>();
+        skills.add(monsterSkill);
+        Monster monster = new Monster("起始之地哥伦布","0","1000",skills,"1");
+        List<Monster> monsters = new ArrayList<>();
+        monsters.add(monster);
+        area.setMonsters(monsters);
+
+
         NettyMemory.areaMap.put("0", area);
         NettyMemory.areaToNum.put("起始之地", "0");
-
-        List<Monster> list = new ArrayList<Monster>();
 
 //		村子
         area = new Area();
@@ -103,15 +134,28 @@ public class NettyServer {
         areaSet.add("城堡");
         areaSet.add("森林");
         area.setAreaSet(areaSet);
-
+//        初始化NPC和会话
         npc = new NPC("1", "村子-村民");
         talkList = new ArrayList<String>();
         talkList.add("我是村民，欢迎来到村子");
-        npc.setTalk(talkList);
-
+        npc.setTalks(talkList);
         npcs = new ArrayList<NPC>();
         npcs.add(npc);
         area.setNpcs(npcs);
+
+//      初始化怪物
+        monsterSkill = new MonsterSkill();
+        monsterSkill.setAttackCd("20");
+        monsterSkill.setDamage("100");
+        monsterSkill.setSkillName("锄头攻击");
+        monsterSkill.setSkillId(2);
+        skills = new ArrayList<>();
+        skills.add(monsterSkill);
+        monster = new Monster("村子村霸","0","1500",skills,"1");
+        monsters = new ArrayList<>();
+        monsters.add(monster);
+        area.setMonsters(monsters);
+
         NettyMemory.areaMap.put("1", area);
         NettyMemory.areaToNum.put("村子", "1");
 
@@ -121,15 +165,28 @@ public class NettyServer {
         areaSet = new HashSet<String>();
         areaSet.add("村子");
         area.setAreaSet(areaSet);
-
+//        初始化NPC和会话
         npc = new NPC("1", "森林-植物精灵");
         talkList = new ArrayList<String>();
         talkList.add("我是植物精灵，欢迎来到森林");
-        npc.setTalk(talkList);
-
+        npc.setTalks(talkList);
         npcs = new ArrayList<NPC>();
         npcs.add(npc);
         area.setNpcs(npcs);
+
+//      初始化怪物
+        monsterSkill = new MonsterSkill();
+        monsterSkill.setAttackCd("40");
+        monsterSkill.setDamage("100000");
+        monsterSkill.setSkillName("藤蔓攻击");
+        monsterSkill.setSkillId(3);
+        skills = new ArrayList<>();
+        skills.add(monsterSkill);
+        monster = new Monster("野兽","0","15000",skills,"1");
+        monsters = new ArrayList<>();
+        monsters.add(monster);
+        area.setMonsters(monsters);
+
         NettyMemory.areaMap.put("2", area);
         NettyMemory.areaToNum.put("森林", "2");
 
@@ -139,15 +196,27 @@ public class NettyServer {
         areaSet = new HashSet<String>();
         areaSet.add("村子");
         area.setAreaSet(areaSet);
-
+//        初始化NPC和会话
         npc = new NPC("1", "城堡-骑士");
         talkList = new ArrayList<String>();
         talkList.add("我是骑士，欢迎来到城堡");
-        npc.setTalk(talkList);
-
+        npc.setTalks(talkList);
         npcs = new ArrayList<NPC>();
         npcs.add(npc);
         area.setNpcs(npcs);
+
+//      初始化怪物
+        monsterSkill = new MonsterSkill();
+        monsterSkill.setAttackCd("40");
+        monsterSkill.setDamage("100000");
+        monsterSkill.setSkillName("锄头攻击");
+        monsterSkill.setSkillId(4);
+        skills = new ArrayList<>();
+        skills.add(monsterSkill);
+        monster = new Monster("帝国势力","0","10",skills,"1");
+        monsters = new ArrayList<>();
+        monsters.add(monster);
+        area.setMonsters(monsters);
         NettyMemory.areaToNum.put("城堡", "3");
         NettyMemory.areaMap.put("3", area);
         NettyMemory.areaSet.add("村子");
