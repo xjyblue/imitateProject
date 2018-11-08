@@ -94,10 +94,7 @@ public class EventDistributor {
 							}
 						}
 					}
-				}else {
-					ctx.writeAndFlush(DelimiterUtils.addDelimiter("请输入有效指令"));
-				}
-				if(msg.startsWith("aoi")) {
+				}else if(msg.startsWith("aoi")) {
 					User user = NettyMemory.session2UserIds.get(ch);
 					String allStatus = "玩家"+user.getUsername()+"---"+user.getStatus()
 							+"处于"+NettyMemory.areaMap.get(user.getPos()).getName()
@@ -111,6 +108,8 @@ public class EventDistributor {
 						allStatus+="NPC:"+npc.getName()+"---"+npc.getStatus()+System.getProperty("line.separator");
 					}
 					ctx.writeAndFlush(DelimiterUtils.addDelimiter(allStatus));
+				}else {
+					ctx.writeAndFlush(DelimiterUtils.addDelimiter("请输入有效指令"));
 				}
 			    break;
 			}

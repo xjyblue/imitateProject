@@ -19,7 +19,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 	private static Logger logger = Logger.getLogger(NettyServerHandler.class);
 	
 	public static final ChannelGroup group = NettyMemory.group;
-	
+
+
 	@Autowired
 	private EventDistributor eventDistributor;
 	
