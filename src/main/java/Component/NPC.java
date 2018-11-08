@@ -1,11 +1,22 @@
 package Component;
 
+import java.util.List;
+
 public class NPC {
 	private String status;
 
 	private String name;
-	
-	
+
+	private List<String> talks ;
+
+	public List<String> getTalk() {
+		return talks;
+	}
+
+	public void setTalk(List<String> talks) {
+		this.talks = talks;
+	}
+
 	public NPC(String status, String name) {
 		super();
 		this.status = status;
