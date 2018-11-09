@@ -1,10 +1,10 @@
 package Event;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.math.BigInteger;
+import java.util.*;
 import java.util.Map.Entry;
+
 
 import mapper.UserskillrelationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,6 @@ import utils.DelimiterUtils;
 public class EventDistributor {
     @Autowired
     private UserMapper userMapper;
-
     @Autowired
     private UserskillrelationMapper userskillrelationMapper;
 
@@ -59,16 +58,19 @@ public class EventDistributor {
                         if (user2 == null || (!user2.getPassword().equals(temp[1]))) {
                             ctx.writeAndFlush(DelimiterUtils.addDelimiter("账户密码出错"));
                         } else {
+                            //                             初始化玩家的技能start
                             UserskillrelationExample userskillrelationExample = new UserskillrelationExample();
                             UserskillrelationExample.Criteria criteria = userskillrelationExample.createCriteria();
                             criteria.andUsernameEqualTo(user2.getUsername());
                             List<Userskillrelation> userskillrelations = userskillrelationMapper.selectByExample(userskillrelationExample);
-                            Map<String, UserSkill> userSkillMap = new HashMap<String, UserSkill>();
+                            Map<String, Userskillrelation> userskillrelationMap = new HashMap<>();
                             for (Userskillrelation userskillrelation : userskillrelations) {
-                                userSkillMap.put(userskillrelation.getKeypos(), NettyMemory.userSkillMap.get(userskillrelation.getSkillid()));
+                                userskillrelationMap.put(userskillrelation.getKeypos(), userskillrelation);
                             }
-                            user2.setMap(userSkillMap);
+                            NettyMemory.userskillrelationMap.put(ch, userskillrelationMap);
+//                              初始化玩家的技能end
                             NettyMemory.session2UserIds.put(ch, user2);
+
                             ctx.writeAndFlush(DelimiterUtils.addDelimiter("登录成功，你已进入" + NettyMemory.areaMap.get(user2.getPos()).getName()));
                             NettyMemory.eventStatus.put(ch, EventStatus.STOPAREA);
                         }
@@ -121,6 +123,9 @@ public class EventDistributor {
                                 + "--------玩家的HP量：" + user.getHp()
                                 + "--------玩家的MP量：" + user.getMp()
                                 + System.getProperty("line.separator");
+                        for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
+                            allStatus += "怪物：" + monster.getName() + "的血量为：" + monster.getValueOfLife() + System.getProperty("line.separator");
+                        }
                         for (Entry<Channel, User> entry : NettyMemory.session2UserIds.entrySet()) {
                             if (!user.getUsername().equals(entry.getValue().getUsername()) && user.getPos().equals(entry.getValue().getPos())) {
                                 allStatus += "其他玩家" + entry.getValue().getUsername() + "---" + entry.getValue().getStatus() + System.getProperty("line.separator");
@@ -153,22 +158,95 @@ public class EventDistributor {
                     } else if (msg.equals("skillCheckout")) {
                         NettyMemory.eventStatus.put(ch, EventStatus.SKILLMANAGER);
                         ctx.writeAndFlush(DelimiterUtils.addDelimiter("请输入lookSkill查看技能，请输入change-技能名-键位配置技能"));
-                    } else if(msg.startsWith("attack")) {
+                    } else if (msg.startsWith("attack")) {
                         temp = msg.split("-");
-//                        if(temp[1].equals(NettyMemory.))
-                    }else {
+//                        输入的键位是否存在
+                        if (temp.length == 3 && NettyMemory.userskillrelationMap.get(ch).containsKey(temp[2])) {
+                            User user = NettyMemory.session2UserIds.get(ch);
+                            for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
+//                                输入的怪物是否存在
+                                if (monster.getName().equals(temp[1])) {
+                                    Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(ch).get(temp[2]);
+                                    UserSkill userSkill = NettyMemory.SkillMap.get(userskillrelation.getSkillid());
+//                                    判断人物MP量是否足够
+                                    BigInteger userMp = new BigInteger(user.getMp());
+                                    BigInteger skillMp = new BigInteger(userSkill.getSkillMp());
+                                    if (userMp.compareTo(skillMp) > 0) {
+                                        userMp = userMp.subtract(skillMp);
+                                        user.setMp(userMp.toString());
+//                                    判断技能冷却
+                                        if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
+                                            Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(ch);
+//                                    切换到攻击模式
+                                            NettyMemory.eventStatus.put(ch, EventStatus.ATTACK);
+//                                    怪物掉血
+                                            BigInteger attackDamage = new BigInteger(userSkill.getDamage());
+                                            BigInteger monsterLife = new BigInteger(monster.getValueOfLife());
+                                            monsterLife = monsterLife.subtract(attackDamage);
+                                            monster.setValueOfLife(monsterLife.toString());
+                                            String resp = System.getProperty("line.separator")
+                                                    + "[技能]:" + userSkill.getSkillName()
+                                                    + System.getProperty("line.separator")
+                                                    + "对[" + monster.getName()
+                                                    + "]造成了" + userSkill.getDamage() + "点伤害"
+                                                    + System.getProperty("line.separator")
+                                                    + "[怪物血量]:" + monster.getValueOfLife()
+                                                    + System.getProperty("line.separator")
+                                                    + "[消耗蓝量]:" + user.getMp()
+                                                    + System.getProperty("line.separator");
+                                            ctx.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+
+                                            //TODO:更新数据库人物技能蓝量
+//                                    刷新技能时间
+                                            userskillrelation.setSkillcds(System.currentTimeMillis());
+//                                    人物掉血
+                                            Timer timer = new Timer();
+                                            //前一次执行程序结束后 2000ms 后开始执行下一次程序
+                                            timer.schedule(new TimerTask() {
+                                                public void run() {
+                                                    BigInteger userMp = new BigInteger(user.getMp());
+                                                    BigInteger monsterDamage = new BigInteger(monster.getMonsterSkillList().get(0).getDamage());
+                                                    userMp = userMp.subtract(monsterDamage);
+                                                    String resp = "怪物名称:" + monster.getName()
+                                                            + "-----怪物技能:" + monster.getMonsterSkillList().get(0).getSkillName()
+                                                            + "-----怪物的伤害:" + monster.getMonsterSkillList().get(0).getDamage()
+                                                            + "-----你的剩余血:" + userMp.toString()
+                                                            + System.getProperty("line.separator");
+                                                    User user = NettyMemory.session2UserIds.get(ch);
+                                                    user.setMp(userMp.toString());
+                                                    NettyMemory.session2UserIds.put(ch, user);
+                                                    //TODO:更新用户血量到数据库
+                                                    ctx.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+                                                    NettyMemory.eventStatus.put(ch, EventStatus.ATTACK);
+
+                                                }
+                                            }, 0, 2000);
+                                            NettyMemory.channelTimerMap.put(ch, timer);
+//                                          提醒用户你已进入战斗模式
+                                            ctx.writeAndFlush(DelimiterUtils.addDelimiter("你已经进入战斗模式"));
+                                        }
+                                    } else {
+                                        ctx.writeAndFlush(DelimiterUtils.addDelimiter("人物MP值不足"));
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
                         ctx.writeAndFlush(DelimiterUtils.addDelimiter("请输入有效指令"));
                     }
                     break;
                 case EventStatus.SKILLMANAGER:
                     if (msg.equals("lookSkill")) {
                         String skillLook = "";
-                        Map<String, UserSkill> userSkillMap = NettyMemory.session2UserIds.get(ch).getMap();
-                        for (Map.Entry<String, UserSkill> entry : userSkillMap.entrySet()) {
+                        ctx.writeAndFlush(DelimiterUtils.addDelimiter(skillLook));
+                        Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(ch);
+                        for (Map.Entry<String, Userskillrelation> entry : map.entrySet()) {
+                            UserSkill userSkill = NettyMemory.SkillMap.get(entry.getValue().getSkillid());
                             skillLook += "键位:" + entry.getKey()
-                                    + "----技能名称:" + entry.getValue().getSkillName()
-                                    + "----技能伤害:" + entry.getValue().getDamage()
-                                    + "----技能cd:" + entry.getValue().getAttackCd()
+                                    + "----技能名称:" + userSkill.getSkillName()
+                                    + "----技能伤害:" + userSkill.getDamage()
+                                    + "----技能cd:" + userSkill.getAttackCd()
                                     + System.getProperty("line.separator");
                         }
                         ctx.writeAndFlush(DelimiterUtils.addDelimiter(skillLook));
@@ -176,22 +254,21 @@ public class EventDistributor {
                         temp = msg.split("-");
                         if (temp.length == 3) {
                             boolean flag = false;
-                            Map<String, UserSkill> userSkillMap = NettyMemory.session2UserIds.get(ch).getMap();
-                            for (Map.Entry<String, UserSkill> entry : userSkillMap.entrySet()) {
-                                if (entry.getValue().getSkillName().equals(temp[1])) {
+                            Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(ch);
+                            for (Map.Entry<String, Userskillrelation> entry : map.entrySet()) {
+                                UserSkill userSkill = NettyMemory.SkillMap.get(entry.getValue().getSkillid());
+                                if (userSkill.getSkillName().equals(temp[1])) {
                                     flag = true;
-                                    UserSkill tempSkill = entry.getValue();
-                                    userSkillMap.remove(entry.getKey());
-                                    userSkillMap.put(temp[2], tempSkill);
+                                    Userskillrelation userskillrelation = entry.getValue();
+                                    map.remove(entry.getKey());
+                                    map.put(temp[2], userskillrelation);
 //                                    更新session
                                     User user = NettyMemory.session2UserIds.get(ch);
-                                    user.setMap(userSkillMap);
-                                    NettyMemory.session2UserIds.put(ch, user);
 //                                    更新数据库
                                     UserskillrelationExample userskillrelationExample = new UserskillrelationExample();
                                     UserskillrelationExample.Criteria criteria = userskillrelationExample.createCriteria();
                                     criteria.andUsernameEqualTo(user.getUsername());
-                                    criteria.andSkillidEqualTo(tempSkill.getSkillId());
+                                    criteria.andSkillidEqualTo(userSkill.getSkillId());
                                     List<Userskillrelation> userskillrelations = userskillrelationMapper.selectByExample(userskillrelationExample);
                                     userskillrelations.get(0).setKeypos(temp[2]);
                                     userskillrelationMapper.updateByExample(userskillrelations.get(0), userskillrelationExample);
@@ -208,6 +285,52 @@ public class EventDistributor {
                         NettyMemory.eventStatus.put(ch, EventStatus.STOPAREA);
                     } else {
                         ctx.writeAndFlush(DelimiterUtils.addDelimiter("请输入有效指令"));
+                    }
+                    break;
+                case EventStatus.ATTACK:
+                    if (msg.equals("q")) {
+                        NettyMemory.channelTimerMap.get(ch).cancel();
+                        NettyMemory.channelTimerMap.remove(ch);
+                        ctx.writeAndFlush(DelimiterUtils.addDelimiter("退出战斗"));
+                    } else {
+                        if (NettyMemory.userskillrelationMap.get(ch).containsKey(msg)) {
+                            User user = NettyMemory.session2UserIds.get(ch);
+                            for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
+                                UserSkill userSkill = NettyMemory.SkillMap.get(NettyMemory.userskillrelationMap.get(ch).get(msg).getSkillid());
+                                Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(ch).get(msg);
+//                              技能CD检查
+                                if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
+//                                    人物蓝量检查
+                                    BigInteger userMp = new BigInteger(user.getMp());
+                                    BigInteger skillMp = new BigInteger(userSkill.getSkillMp());
+                                    if (userMp.compareTo(skillMp) > 0) {
+//                              攻击逻辑
+                                        BigInteger attackDamage = new BigInteger(userSkill.getDamage());
+                                        BigInteger monsterLife = new BigInteger(monster.getValueOfLife());
+                                        monsterLife = monsterLife.subtract(attackDamage);
+                                        monster.setValueOfLife(monsterLife.toString());
+                                        String resp =
+                                                System.getProperty("line.separator")
+//                                                        + "[" + userSkill.getSkillName()
+//                                                        + "]技能对" + monster.getName()
+//                                                        + "造成了" + userSkill.getDamage() + "点伤害"
+//                                                        + System.getProperty("line.separator")
+//                                                        + "[消耗MP量:]" + userSkill.getSkillMp()
+//                                                        + System.getProperty("line.separator")
+//                                                        + " [当前MP值:]" + user.getMp()
+                                                        + System.getProperty("line.separator")
+                                                        + "怪物剩余血量:" + monster.getValueOfLife();
+                                        userskillrelation.setSkillcds(System.currentTimeMillis());
+                                        //TODO:数据库更新技能时间
+                                        ctx.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+                                    } else {
+                                        ctx.writeAndFlush(DelimiterUtils.addDelimiter("技能蓝量不足"));
+                                    }
+                                } else {
+                                    ctx.writeAndFlush(DelimiterUtils.addDelimiter("技能冷却中，不要做任何操作"));
+                                }
+                            }
+                        }
                     }
                     break;
             }

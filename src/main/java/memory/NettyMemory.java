@@ -9,6 +9,7 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import pojo.User;
+import pojo.Userskillrelation;
 import skill.UserSkill;
 
 /**
@@ -24,11 +25,14 @@ public class NettyMemory {
 	public static Map<Channel,String>eventStatus  = new ConcurrentHashMap<Channel,String>();
 	/** 地图缓存到内存中 */
 	public static Map<String,Area>areaMap = new HashMap<String,Area>();
-	
 	/** 地图名称和编号缓存到内存中 */
 	public static Map<String,String>areaToNum = new HashMap<String,String>();
-
-	public static Map<Integer,UserSkill>userSkillMap = new HashMap<Integer, UserSkill>();
-
+	/** 初始化全局技能伤害*/
+	public static Map<Integer,UserSkill>SkillMap = new HashMap<Integer, UserSkill>();
+	/**初始化地图Set集合*/
 	public static Set<String>areaSet = new HashSet<String>();
+	/**初始化渠道定时任务*/
+	public static Map<Channel,Timer>channelTimerMap = new ConcurrentHashMap<Channel,Timer>();
+	/**初始化玩家技能*/
+	public static Map<Channel, Map<String,Userskillrelation>> userskillrelationMap = new ConcurrentHashMap<Channel, Map<String,Userskillrelation>>();
 }

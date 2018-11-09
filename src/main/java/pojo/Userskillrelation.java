@@ -9,6 +9,8 @@ public class Userskillrelation {
 
     private String keypos;
 
+    private Long skillcds;
+
     public Integer getId() {
         return id;
     }
@@ -39,5 +41,13 @@ public class Userskillrelation {
 
     public void setKeypos(String keypos) {
         this.keypos = keypos == null ? null : keypos.trim();
+    }
+
+    public Long getSkillcds() {
+        return skillcds;
+    }
+
+    public void setSkillcds(Long skillcds) {
+        this.skillcds = skillcds;
     }
 }

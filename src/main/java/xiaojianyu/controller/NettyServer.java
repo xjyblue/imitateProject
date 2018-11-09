@@ -4,10 +4,7 @@ import Component.Monster;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -15,6 +12,7 @@ import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
+import mapper.UserskillrelationMapper;
 import memory.NettyMemory;
 
 import org.apache.log4j.Logger;
@@ -61,7 +59,7 @@ public class NettyServer {
                             ByteBuf delimiter = Unpooled.copiedBuffer("$_".getBytes());
                             ch.pipeline().addLast(new StringDecoder(CharsetUtil.UTF_8));
                             ch.pipeline().addLast(new StringEncoder(CharsetUtil.UTF_8));
-                            ch.pipeline().addLast(new DelimiterBasedFrameDecoder(1024, delimiter));
+                            ch.pipeline().addLast(new DelimiterBasedFrameDecoder(2048, delimiter));
                             ch.pipeline().addLast(nettyServerHandler);
                         }
                     });
@@ -77,22 +75,22 @@ public class NettyServer {
 
 
     public void initServer() {
-//        初始化所有玩家的技能表start
+//        初始化技能表start
         UserSkill userSkill = new UserSkill();
         userSkill.setSkillId(1);
         userSkill.setSkillName("烈火攻击");
-        userSkill.setAttackCd("5");
-        userSkill.setDamage("1500");
+        userSkill.setAttackCd(10000l);
+        userSkill.setDamage("150000");
         userSkill.setSkillMp("600");
-        NettyMemory.userSkillMap.put(1,userSkill);
+        NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
         userSkill = new UserSkill();
         userSkill.setSkillId(2);
         userSkill.setSkillName("喷水攻击");
-        userSkill.setAttackCd("10");
+        userSkill.setAttackCd(2000l);
         userSkill.setDamage("1200");
         userSkill.setSkillMp("1000");
-        NettyMemory.userSkillMap.put(2,userSkill);
-//        初始化所有玩家的技能表end
+        NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
+//        初始化技能表end
 
 
 //		起始之地
@@ -106,7 +104,7 @@ public class NettyServer {
         List<String> talkList = new ArrayList<String>();
         talkList.add("我是塞里亚，欢迎来到起始之地");
         npc.setTalks(talkList);
-        List<NPC>npcs = new ArrayList<NPC>();
+        List<NPC> npcs = new ArrayList<NPC>();
         npcs.add(npc);
         area.setNpcs(npcs);
 //      初始化怪物
@@ -117,7 +115,7 @@ public class NettyServer {
         monsterSkill.setSkillId(1);
         List<MonsterSkill> skills = new ArrayList<>();
         skills.add(monsterSkill);
-        Monster monster = new Monster("起始之地哥伦布","0","1000",skills,"1");
+        Monster monster = new Monster("起始之地哥伦布", "0", "10000000", skills, "1");
         List<Monster> monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);
@@ -151,7 +149,7 @@ public class NettyServer {
         monsterSkill.setSkillId(2);
         skills = new ArrayList<>();
         skills.add(monsterSkill);
-        monster = new Monster("村子村霸","0","1500",skills,"1");
+        monster = new Monster("村子村霸", "0", "15000000", skills, "1");
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);
@@ -182,7 +180,7 @@ public class NettyServer {
         monsterSkill.setSkillId(3);
         skills = new ArrayList<>();
         skills.add(monsterSkill);
-        monster = new Monster("野兽","0","15000",skills,"1");
+        monster = new Monster("野兽", "0", "15000000", skills, "1");
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);
@@ -213,7 +211,7 @@ public class NettyServer {
         monsterSkill.setSkillId(4);
         skills = new ArrayList<>();
         skills.add(monsterSkill);
-        monster = new Monster("帝国势力","0","10",skills,"1");
+        monster = new Monster("帝国势力", "0", "100000000", skills, "1");
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);

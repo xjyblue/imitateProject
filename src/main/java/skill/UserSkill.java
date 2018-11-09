@@ -6,7 +6,7 @@ public class UserSkill {
 
     private String skillName;
 
-    private String attackCd;
+    private Long attackCd;
 
     private String damage;
 
@@ -36,11 +36,11 @@ public class UserSkill {
         this.skillName = skillName;
     }
 
-    public String getAttackCd() {
+    public Long getAttackCd() {
         return attackCd;
     }
 
-    public void setAttackCd(String attackCd) {
+    public void setAttackCd(Long attackCd) {
         this.attackCd = attackCd;
     }
 

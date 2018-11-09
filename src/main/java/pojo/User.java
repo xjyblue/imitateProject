@@ -1,9 +1,5 @@
 package pojo;
 
-import skill.UserSkill;
-
-import java.util.Map;
-
 public class User {
     private String username;
 
@@ -16,16 +12,6 @@ public class User {
     private String mp;
 
     private String hp;
-
-    private Map<String, UserSkill> map;
-
-    public Map<String, UserSkill> getMap() {
-        return map;
-    }
-
-    public void setMap(Map<String, UserSkill> map) {
-        this.map = map;
-    }
 
     public String getUsername() {
         return username;
@@ -55,15 +41,15 @@ public class User {
         return pos;
     }
 
-    public void setPos(String pos) {
+    public  void setPos(String pos) {
         this.pos = pos == null ? null : pos.trim();
     }
 
-    public String getMp() {
+    public  String getMp() {
         return mp;
     }
 
-    public void setMp(String mp) {
+    public  synchronized  void setMp(String mp) {
         this.mp = mp == null ? null : mp.trim();
     }
 

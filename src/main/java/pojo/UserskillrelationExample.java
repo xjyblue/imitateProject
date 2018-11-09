@@ -363,6 +363,66 @@ public class UserskillrelationExample {
             addCriterion("keypos not between", value1, value2, "keypos");
             return (Criteria) this;
         }
+
+        public Criteria andSkillcdsIsNull() {
+            addCriterion("skillCDS is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andSkillcdsIsNotNull() {
+            addCriterion("skillCDS is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andSkillcdsEqualTo(Long value) {
+            addCriterion("skillCDS =", value, "skillcds");
+            return (Criteria) this;
+        }
+
+        public Criteria andSkillcdsNotEqualTo(Long value) {
+            addCriterion("skillCDS <>", value, "skillcds");
+            return (Criteria) this;
+        }
+
+        public Criteria andSkillcdsGreaterThan(Long value) {
+            addCriterion("skillCDS >", value, "skillcds");
+            return (Criteria) this;
+        }
+
+        public Criteria andSkillcdsGreaterThanOrEqualTo(Long value) {
+            addCriterion("skillCDS >=", value, "skillcds");
+            return (Criteria) this;
+        }
+
+        public Criteria andSkillcdsLessThan(Long value) {
+            addCriterion("skillCDS <", value, "skillcds");
+            return (Criteria) this;
+        }
+
+        public Criteria andSkillcdsLessThanOrEqualTo(Long value) {
+            addCriterion("skillCDS <=", value, "skillcds");
+            return (Criteria) this;
+        }
+
+        public Criteria andSkillcdsIn(List<Long> values) {
+            addCriterion("skillCDS in", values, "skillcds");
+            return (Criteria) this;
+        }
+
+        public Criteria andSkillcdsNotIn(List<Long> values) {
+            addCriterion("skillCDS not in", values, "skillcds");
+            return (Criteria) this;
+        }
+
+        public Criteria andSkillcdsBetween(Long value1, Long value2) {
+            addCriterion("skillCDS between", value1, value2, "skillcds");
+            return (Criteria) this;
+        }
+
+        public Criteria andSkillcdsNotBetween(Long value1, Long value2) {
+            addCriterion("skillCDS not between", value1, value2, "skillcds");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

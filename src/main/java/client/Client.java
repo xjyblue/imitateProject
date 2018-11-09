@@ -49,7 +49,7 @@ public class Client {
 	        						ByteBuf delimiter = Unpooled.copiedBuffer("$_".getBytes());
 	        						socketChannel.pipeline().addLast(new StringEncoder(CharsetUtil.UTF_8));
 	        						socketChannel.pipeline().addLast(new StringDecoder(CharsetUtil.UTF_8));
-	        						socketChannel.pipeline().addLast(new DelimiterBasedFrameDecoder(1024, delimiter));
+	        						socketChannel.pipeline().addLast(new DelimiterBasedFrameDecoder(2048, delimiter));
 	        						socketChannel.pipeline().addLast(
 	        								new ClientHandler());
 	        					}
