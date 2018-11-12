@@ -24,11 +24,13 @@ import Component.Area;
 import Component.NPC;
 import skill.MonsterSkill;
 import skill.UserSkill;
+import task.MyTask;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author xiaojianyu
@@ -76,6 +78,8 @@ public class NettyServer {
 
 
     public void initServer() {
+//        初始化定时任务
+        NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new MyTask(), 0, 1, TimeUnit.SECONDS);
 //        初始化技能表start
         UserSkill userSkill = new UserSkill();
         userSkill.setSkillId(1);

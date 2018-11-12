@@ -1,8 +1,11 @@
 package memory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import Component.Area;
+import Component.Monster;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -19,7 +22,7 @@ import skill.UserSkill;
 public class NettyMemory {
 	public static ChannelGroup group = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 	/** 缓存通信上下文环境对应的登录用户 */ 
-	public static Map<Channel,User> session2UserIds  = new ConcurrentHashMap<Channel,User>();
+	public static Map<Channel, User> session2UserIds  = new ConcurrentHashMap<Channel,User>();
 	/** 信道所处事件的装填*/
 	public static Map<Channel,String>eventStatus  = new ConcurrentHashMap<Channel,String>();
 	/** 地图缓存到内存中 */
@@ -30,10 +33,10 @@ public class NettyMemory {
 	public static Map<Integer,UserSkill>SkillMap = new HashMap<Integer, UserSkill>();
 	/**初始化地图Set集合*/
 	public static Set<String>areaSet = new HashSet<String>();
-	/**初始化channel怪物攻击定时任务*/
-	public static Map<Channel,Timer>monsterAttackMap = new ConcurrentHashMap<Channel,Timer>();
 	/**初始化channel人物回蓝定时人物*/
-	public static Map<Channel, Timer>mpReplyMap = new ConcurrentHashMap<Channel, Timer>();
+	public static ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(5);
 	/**初始化玩家技能*/
 	public static Map<Channel, Map<String,Userskillrelation>> userskillrelationMap = new ConcurrentHashMap<Channel, Map<String,Userskillrelation>>();
+	/**缓存用户所攻击的怪兽*/
+	public static Map<User, List<Monster>>monsterMap = new HashMap<>();
 }

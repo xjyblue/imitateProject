@@ -13,10 +13,7 @@ import skill.UserSkill;
 import utils.DelimiterUtils;
 
 import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 @Component("stopAreaEvent")
 public class StopAreaEvent {
@@ -153,56 +150,11 @@ public class StopAreaEvent {
                                     //TODO:更新数据库人物技能蓝量
 //                                    刷新技能时间
                                     userskillrelation.setSkillcds(System.currentTimeMillis());
-//                                    人物掉血
-                                    Timer timer = new Timer();
-                                    //前一次执行程序结束后 2000ms 后开始执行下一次程序
-                                    timer.schedule(new TimerTask() {
-                                        public void run() {
-                                            BigInteger userHp = new BigInteger(user.getHp());
-                                            if (userHp.compareTo(new BigInteger("0")) <= 0) {
-                                                channel.writeAndFlush(DelimiterUtils.addDelimiter("人物已死亡"));
-                                                NettyMemory.monsterAttackMap.get(channel).cancel();
-                                                NettyMemory.monsterAttackMap.remove(channel);
-                                                NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
-                                            } else {
-                                                BigInteger monsterDamage = new BigInteger(monster.getMonsterSkillList().get(0).getDamage());
-                                                userHp = userHp.subtract(monsterDamage);
-                                                String resp = "怪物名称:" + monster.getName()
-                                                        + "-----怪物技能:" + monster.getMonsterSkillList().get(0).getSkillName()
-                                                        + "-----怪物的伤害:" + monster.getMonsterSkillList().get(0).getDamage()
-                                                        + "-----你的剩余血:" + userHp.toString()
-                                                        + "-----你的蓝量：" + user.getMp()
-                                                        + System.getProperty("line.separator");
-                                                User user = NettyMemory.session2UserIds.get(channel);
-                                                user.setHp(userHp.toString());
-                                                NettyMemory.session2UserIds.put(channel, user);
-                                                //TODO:更新用户血量到数据库
-                                                channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
-                                                NettyMemory.eventStatus.put(channel, EventStatus.ATTACK);
-                                            }
-                                        }
-                                    }, 0, 2000);
-
-                                    Timer mpReply = new Timer();
-                                    timer.schedule(new TimerTask() {
-                                        public void run() {
-                                            User user = NettyMemory.session2UserIds.get(channel);
-                                            if (NettyMemory.eventStatus.get(channel).equals(EventStatus.ATTACK) || !user.getMp().equals("10000")) {
-                                                if (!user.getMp().equals("10000")) {
-                                                    user = NettyMemory.session2UserIds.get(channel);
-                                                    user.addMp("10");
-                                                    NettyMemory.mpReplyMap.put(channel, mpReply);
-                                                    NettyMemory.session2UserIds.put(channel,user);
-                                                }
-                                            } else {
-                                                NettyMemory.mpReplyMap.get(channel).cancel();
-                                                NettyMemory.mpReplyMap.remove(channel);
-                                            }
-                                        }
-                                    }, 0, 1000);
-
-                                    NettyMemory.monsterAttackMap.put(channel, timer);
-//                                              提醒用户你已进入战斗模式
+//                                  记录任务当前攻击的怪物
+                                    List<Monster> monsters = new ArrayList<Monster>();
+                                    monsters.add(monster);
+                                    NettyMemory.monsterMap.put(user,monsters);
+//                                    提醒用户你已进入战斗模式
                                     channel.writeAndFlush(DelimiterUtils.addDelimiter("你已经进入战斗模式"));
                                 }
                             }

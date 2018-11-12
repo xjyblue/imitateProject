@@ -16,8 +16,7 @@ import java.math.BigInteger;
 public class AttackEvent {
     public void attack(Channel channel, String msg) {
         if (msg.equals("q")) {
-            NettyMemory.monsterAttackMap.get(channel).cancel();
-            NettyMemory.monsterAttackMap.remove(channel);
+            NettyMemory.monsterMap.remove(NettyMemory.session2UserIds.get(channel));
             channel.writeAndFlush(DelimiterUtils.addDelimiter("退出战斗"));
             NettyMemory.eventStatus.put(channel,EventStatus.STOPAREA);
         } else {
@@ -56,9 +55,8 @@ public class AttackEvent {
 //                                         修改怪物状态
                                 monster.setValueOfLife("0");
                                 monster.setStatus("0");
-//                                          检查怪物攻击定时器
-                                NettyMemory.monsterAttackMap.get(channel).cancel();
-                                NettyMemory.monsterAttackMap.remove(channel);
+//                                  移除任务攻击记录
+                                NettyMemory.monsterMap.remove(user);
 //                                           切换场景
                                 NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
                             } else {
