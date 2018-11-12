@@ -80,14 +80,14 @@ public class NettyServer {
         userSkill.setSkillId(1);
         userSkill.setSkillName("烈火攻击");
         userSkill.setAttackCd(10000l);
-        userSkill.setDamage("150000");
+        userSkill.setDamage("10000");
         userSkill.setSkillMp("600");
         NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
         userSkill = new UserSkill();
         userSkill.setSkillId(2);
         userSkill.setSkillName("喷水攻击");
         userSkill.setAttackCd(2000l);
-        userSkill.setDamage("1200");
+        userSkill.setDamage("120");
         userSkill.setSkillMp("1000");
         NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
 //        初始化技能表end
@@ -149,7 +149,7 @@ public class NettyServer {
         monsterSkill.setSkillId(2);
         skills = new ArrayList<>();
         skills.add(monsterSkill);
-        monster = new Monster("村子村霸", "0", "15000000", skills, "1");
+        monster = new Monster("村子村霸", "0", "15000", skills, "1");
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);

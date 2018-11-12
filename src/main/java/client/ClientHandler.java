@@ -2,7 +2,11 @@ package client;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import memory.NettyMemory;
 import utils.DelimiterUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 
@@ -10,11 +14,17 @@ import utils.DelimiterUtils;
  *
  */
 public class ClientHandler extends ChannelHandlerAdapter {
-	 
-    @Override
+
+
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
     	msg = DelimiterUtils.removeDelimiter(msg.toString());
-        System.out.println("客户端收到：" +msg.toString());
+    	String[] temp=((String) msg).split("#");
+    	if(temp.length==3){
+                ClientMemory.skillTime.put(temp[2],Long.parseLong(temp[1]));
+                System.out.println("客户端收到：" +temp[0]);
+        }else {
+            System.out.println("客户端收到：" +msg.toString());
+        }
     }
     
     @Override

@@ -11,18 +11,18 @@ import java.awt.event.KeyListener;
  * @author xiaojianyu
  *
  */
-public class ClientStrat extends JFrame implements KeyListener {
-    private static ClientStrat frm;
+public class ClientStart extends JFrame implements KeyListener {
+    private static ClientStart frm;
     private static JTextField txt;
     private static Client bootstrap;
-    ClientStrat() {
+    ClientStart() {
         setTitle("TextField Test");
         setLocation(400, 400);
         setSize(220, 100);
     }
 
     public static void main(String[] args) {
-        frm = new ClientStrat();
+        frm = new ClientStart();
         frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frm.setLayout(new FlowLayout());
         txt = new JTextField(12);
@@ -37,8 +37,17 @@ public class ClientStrat extends JFrame implements KeyListener {
             if (e.getKeyCode() == KeyEvent.VK_ENTER) //判断按下的键是否是回车键
             {
                 String req = txt.getText();
-                bootstrap.sendMessage(DelimiterUtils.addDelimiter(req));
                 txt.setText("");
+                if(ClientMemory.skillTime.containsKey(req)){
+                    Long time = System.currentTimeMillis();
+                    if((ClientMemory.skillTime.get(req)>=time)){
+                        System.out.println("客户端收到：技能冷却中，请勿着急");
+                    }else{
+                        bootstrap.sendMessage(DelimiterUtils.addDelimiter(req));
+                    }
+                }else{
+                    bootstrap.sendMessage(DelimiterUtils.addDelimiter(req));
+                }
             }
         }
     }
