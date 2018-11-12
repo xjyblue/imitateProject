@@ -32,7 +32,7 @@ public class LoginEvent {
             if (user2 == null || (!user2.getPassword().equals(temp[1]))) {
                 channel.writeAndFlush(DelimiterUtils.addDelimiter("账户密码出错"));
             } else {
-                //                             初始化玩家的技能start
+ //                             初始化玩家的技能start
                 UserskillrelationExample userskillrelationExample = new UserskillrelationExample();
                 UserskillrelationExample.Criteria criteria = userskillrelationExample.createCriteria();
                 criteria.andUsernameEqualTo(user2.getUsername());

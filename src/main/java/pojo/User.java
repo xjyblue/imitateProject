@@ -1,5 +1,7 @@
 package pojo;
 
+import java.math.BigInteger;
+
 public class User {
     private String username;
 
@@ -45,7 +47,7 @@ public class User {
         this.pos = pos == null ? null : pos.trim();
     }
 
-    public  String getMp() {
+    public synchronized String getMp() {
         return mp;
     }
 
@@ -60,4 +62,19 @@ public class User {
     public void setHp(String hp) {
         this.hp = hp == null ? null : hp.trim();
     }
+
+    public synchronized void addMp(String changeNum){
+        BigInteger userMp = new BigInteger(this.getMp());
+        BigInteger addMp = new BigInteger(changeNum);
+        userMp = userMp.add(addMp);
+        this.setMp(userMp.toString());
+    }
+
+    public synchronized void subMp(String changeNum){
+        BigInteger userMp = new BigInteger(this.getMp());
+        BigInteger subMp = new BigInteger(changeNum);
+        userMp = userMp.subtract(subMp);
+        this.setMp(userMp.toString());
+    }
+
 }

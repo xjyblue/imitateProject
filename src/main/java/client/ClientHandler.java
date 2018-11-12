@@ -18,13 +18,7 @@ public class ClientHandler extends ChannelHandlerAdapter {
 
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
     	msg = DelimiterUtils.removeDelimiter(msg.toString());
-    	String[] temp=((String) msg).split("#");
-    	if(temp.length==3){
-                ClientMemory.skillTime.put(temp[2],Long.parseLong(temp[1]));
-                System.out.println("客户端收到：" +temp[0]);
-        }else {
-            System.out.println("客户端收到：" +msg.toString());
-        }
+    	System.out.println("客户端收到：" +msg.toString());
     }
     
     @Override

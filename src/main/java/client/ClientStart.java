@@ -38,16 +38,8 @@ public class ClientStart extends JFrame implements KeyListener {
             {
                 String req = txt.getText();
                 txt.setText("");
-                if(ClientMemory.skillTime.containsKey(req)){
-                    Long time = System.currentTimeMillis();
-                    if((ClientMemory.skillTime.get(req)>=time)){
-                        System.out.println("客户端收到：技能冷却中，请勿着急");
-                    }else{
-                        bootstrap.sendMessage(DelimiterUtils.addDelimiter(req));
-                    }
-                }else{
-                    bootstrap.sendMessage(DelimiterUtils.addDelimiter(req));
-                }
+                bootstrap.sendMessage(DelimiterUtils.addDelimiter(req));
+
             }
         }
     }

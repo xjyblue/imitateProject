@@ -1,5 +1,4 @@
 package memory;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,8 +30,10 @@ public class NettyMemory {
 	public static Map<Integer,UserSkill>SkillMap = new HashMap<Integer, UserSkill>();
 	/**初始化地图Set集合*/
 	public static Set<String>areaSet = new HashSet<String>();
-	/**初始化渠道定时任务*/
-	public static Map<Channel,Timer>channelTimerMap = new ConcurrentHashMap<Channel,Timer>();
+	/**初始化channel怪物攻击定时任务*/
+	public static Map<Channel,Timer>monsterAttackMap = new ConcurrentHashMap<Channel,Timer>();
+	/**初始化channel人物回蓝定时人物*/
+	public static Map<Channel, Timer>mpReplyMap = new ConcurrentHashMap<Channel, Timer>();
 	/**初始化玩家技能*/
 	public static Map<Channel, Map<String,Userskillrelation>> userskillrelationMap = new ConcurrentHashMap<Channel, Map<String,Userskillrelation>>();
 }

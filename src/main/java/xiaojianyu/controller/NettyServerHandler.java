@@ -40,9 +40,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 		if(NettyMemory.eventStatus.containsKey(ctx.channel())) {
 			NettyMemory.eventStatus.remove(ctx.channel());
 		}
-		if(NettyMemory.channelTimerMap.containsKey(ctx.channel())){
-			NettyMemory.channelTimerMap.get(ctx.channel()).cancel();
-			NettyMemory.channelTimerMap.remove(ctx.channel());
+		if(NettyMemory.monsterAttackMap.containsKey(ctx.channel())){
+			NettyMemory.monsterAttackMap.get(ctx.channel()).cancel();
+			NettyMemory.monsterAttackMap.remove(ctx.channel());
 		}
 	}
 

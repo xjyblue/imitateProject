@@ -52,6 +52,7 @@ public class NettyServer {
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .option(ChannelOption.TCP_NODELAY, true)
+                    .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(2048))
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel ch) throws Exception {
@@ -88,7 +89,7 @@ public class NettyServer {
         userSkill.setSkillName("喷水攻击");
         userSkill.setAttackCd(2000l);
         userSkill.setDamage("120");
-        userSkill.setSkillMp("1000");
+        userSkill.setSkillMp("50");
         NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
 //        初始化技能表end
 
