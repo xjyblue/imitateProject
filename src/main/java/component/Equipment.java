@@ -1,4 +1,4 @@
-package Component;
+package component;
 
 public class Equipment {
     //耐久度

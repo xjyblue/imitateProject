@@ -2,19 +2,26 @@ package Event;
 
 import io.netty.channel.Channel;
 import memory.NettyMemory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userskillrelation;
 import skill.UserSkill;
-import sun.nio.ch.Net;
 import utils.DelimiterUtils;
-import Component.Monster;
+import component.Monster;
 
 import java.math.BigInteger;
 
 @Component("attackEvent")
 public class AttackEvent {
+    @Autowired
+    private CommonEvent commonEvent;
+
     public void attack(Channel channel, String msg) {
+        if(msg.equals("b")||msg.startsWith("b-")){
+            commonEvent.common(channel,msg);
+            return;
+        }
         if (msg.equals("q")) {
             NettyMemory.monsterMap.remove(NettyMemory.session2UserIds.get(channel));
             channel.writeAndFlush(DelimiterUtils.addDelimiter("退出战斗"));

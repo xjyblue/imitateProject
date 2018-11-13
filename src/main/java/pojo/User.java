@@ -1,6 +1,7 @@
 package pojo;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public class User {
     private String username;
@@ -14,6 +15,26 @@ public class User {
     private String mp;
 
     private String hp;
+
+    private Integer mpBuffer;
+
+    List<Userbag> userBag;
+
+    public List<Userbag> getUserBag() {
+        return userBag;
+    }
+
+    public void setUserBag(List<Userbag> userBag) {
+        this.userBag = userBag;
+    }
+
+    public Integer getMpBuffer() {
+        return mpBuffer;
+    }
+
+    public void setMpBuffer(Integer mpBuffer) {
+        this.mpBuffer = mpBuffer;
+    }
 
     public String getUsername() {
         return username;

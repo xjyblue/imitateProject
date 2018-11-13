@@ -1,6 +1,7 @@
 package xiaojianyu.controller;
 
-import Component.Monster;
+import component.Monster;
+import component.MpMedicine;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -12,24 +13,20 @@ import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
-import mapper.UserskillrelationMapper;
 import memory.NettyMemory;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import Component.Area;
-import Component.NPC;
+import component.Area;
+import component.NPC;
 import skill.MonsterSkill;
 import skill.UserSkill;
-import task.MyTask;
+import task.AttackHintsTask;
+import task.MpTask;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -78,8 +75,31 @@ public class NettyServer {
 
 
     public void initServer() {
-//        初始化定时任务
-        NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new MyTask(), 0, 1, TimeUnit.SECONDS);
+//      初始化人物背包
+        Map<Integer,Integer> map = new HashMap<>();
+        map.put(1001,10);
+        map.put(1002,10);
+        NettyMemory.userBagMap.put("z",map);
+
+
+
+//        初始化定时任务 start
+//        回蓝定时任务
+        NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new MpTask(), 0, 1, TimeUnit.SECONDS);
+//        攻击回显定时任务
+        NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new AttackHintsTask(), 0, 1, TimeUnit.SECONDS);
+//        初始化定时任务 end
+
+
+//        初始化即时回复MP
+        MpMedicine mpMedicineQuick = new MpMedicine(1001,"2000",true,"0",0);
+//        初始化缓慢回复MP
+        MpMedicine mpMedicineSlow = new MpMedicine(1002,"500",false,"50",10);
+        MpMedicine mpMedicineSlow2 = new MpMedicine(1003,"1000",false,"100",10);
+        NettyMemory.mpMedicineMap.put(mpMedicineQuick.getId(),mpMedicineQuick);
+        NettyMemory.mpMedicineMap.put(mpMedicineSlow.getId(),mpMedicineSlow);
+        NettyMemory.mpMedicineMap.put(mpMedicineSlow2.getId(),mpMedicineSlow2);
+
 //        初始化技能表start
         UserSkill userSkill = new UserSkill();
         userSkill.setSkillId(1);
@@ -93,7 +113,7 @@ public class NettyServer {
         userSkill.setSkillName("喷水攻击");
         userSkill.setAttackCd(2000l);
         userSkill.setDamage("120");
-        userSkill.setSkillMp("50");
+        userSkill.setSkillMp("500");
         NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
 //        初始化技能表end
 

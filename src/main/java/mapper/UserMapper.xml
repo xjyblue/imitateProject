@@ -223,4 +223,37 @@
       hp = #{hp,jdbcType=VARCHAR}
     where username = #{username,jdbcType=VARCHAR}
   </update>
+
+  <resultMap type="pojo.User" id="userMap">
+    <id column="username" property="username"/>
+    <result column="status" property="status"/>
+    <result column="pos" property="pos"/>
+    <result column="mp" property="mp"/>
+    <result column="hp" property="hp"/>
+    <collection property="userBag" ofType="pojo.Userbag" column="sid">
+      <id column="sid" property="id"/><!-- 这里的column对应的是下面查询的别名，而不是表字段名 -->
+      <result column="wid" property="wid"/><!-- property对应JavaBean中的属性名 -->
+      <result column="num" property="num"/>
+      <result column="sname" property="name"/>
+    </collection>
+  </resultMap>
+
+  <!-- 查询所有的老师级各自的所有学生 -->
+  <select id="getUser" resultMap="userMap">
+		SELECT
+		 u.username,
+		 u.status,
+		 u.pos,
+		 u.mp,
+		 u.hp,
+		 s.id AS sid,
+		 s.wid,
+		 s.num,
+		 s.name AS sname
+		FROM
+		USER u
+		INNER JOIN userbag s ON u.username = s.name
+		where u.username = #{username}
+		and u.password = #{password};
+	</select>
 </mapper>

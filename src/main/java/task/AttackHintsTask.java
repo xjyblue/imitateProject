@@ -1,6 +1,6 @@
 package task;
 
-import Component.Monster;
+import component.Monster;
 import Event.EventStatus;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
@@ -10,7 +10,7 @@ import utils.DelimiterUtils;
 import java.math.BigInteger;
 import java.util.Map;
 
-public class MyTask implements Runnable {
+public class AttackHintsTask  implements Runnable{
     @Override
     public void run() {
         Map<Channel, User> map = NettyMemory.session2UserIds;
@@ -19,7 +19,7 @@ public class MyTask implements Runnable {
             Channel channel = entry.getKey();
             User user = entry.getValue();
             BigInteger userHp = new BigInteger(user.getHp());
-            if (userHp.compareTo(new BigInteger("0")) <= 0&&user.getStatus().equals("1")) {
+            if (userHp.compareTo(new BigInteger("0")) <= 0 && user.getStatus().equals("1")) {
                 channel.writeAndFlush(DelimiterUtils.addDelimiter("人物已死亡"));
                 user.setHp("0");
                 user.setStatus("0");
@@ -44,16 +44,6 @@ public class MyTask implements Runnable {
                     NettyMemory.eventStatus.put(channel, EventStatus.ATTACK);
                 }
             }
-
-
-//          自动回蓝
-            BigInteger userMp = new BigInteger(entry.getValue().getMp());
-            BigInteger maxMp = new BigInteger("10000");
-            if (userMp.compareTo(maxMp) < 0) {
-                userMp = userMp.add(new BigInteger("10"));
-                entry.getValue().setMp(userMp.toString());
-            }
         }
-
     }
 }

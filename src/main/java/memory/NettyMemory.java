@@ -4,8 +4,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import Component.Area;
-import Component.Monster;
+import component.Area;
+import component.Monster;
+import component.MpMedicine;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -39,4 +40,10 @@ public class NettyMemory {
 	public static Map<Channel, Map<String,Userskillrelation>> userskillrelationMap = new ConcurrentHashMap<Channel, Map<String,Userskillrelation>>();
 	/**缓存用户所攻击的怪兽*/
 	public static Map<User, List<Monster>>monsterMap = new HashMap<>();
+	/**初始化缓慢回蓝Buffer的截止时间*/
+	public static Map<User,Long> mpEndTime = new HashMap<>();
+	/**初始化药物属性*/
+	public static Map<Integer, MpMedicine> mpMedicineMap = new HashMap<>();
+	/**增加用户背包*/
+	public static Map<String,Map<Integer,Integer>> userBagMap = new HashMap<>();
 }

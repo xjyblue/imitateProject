@@ -1,7 +1,7 @@
 package Event;
 
-import Component.Monster;
-import Component.NPC;
+import component.Monster;
+import component.NPC;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import memory.NettyMemory;
@@ -19,8 +19,13 @@ import java.util.*;
 public class StopAreaEvent {
     @Autowired
     private UserMapper userMapper;
-
+    @Autowired
+    private CommonEvent commonEvent;
     public void stopArea(Channel channel, String msg) {
+        if(msg.equals("b")||msg.startsWith("b-")){
+            commonEvent.common(channel,msg);
+            return;
+        }
         String temp[] = null;
         if (msg.startsWith("move")) {
             temp = msg.split("-");

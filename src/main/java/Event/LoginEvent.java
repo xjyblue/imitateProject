@@ -2,13 +2,12 @@ package Event;
 
 import io.netty.channel.Channel;
 import mapper.UserMapper;
+import mapper.UserbagMapper;
 import mapper.UserskillrelationMapper;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pojo.User;
-import pojo.Userskillrelation;
-import pojo.UserskillrelationExample;
+import pojo.*;
 import utils.DelimiterUtils;
 
 import java.util.HashMap;
@@ -19,7 +18,6 @@ public class LoginEvent {
 
     @Autowired
     private UserMapper userMapper;
-
     @Autowired
     private UserskillrelationMapper userskillrelationMapper;
 
@@ -28,11 +26,11 @@ public class LoginEvent {
         if (temp.length != 2) {
             channel.writeAndFlush(DelimiterUtils.addDelimiter("输入错误命令"));
         } else {
-            User user2 = userMapper.selectByPrimaryKey(temp[0]);
-            if (user2 == null || (!user2.getPassword().equals(temp[1]))) {
+            User user2 = userMapper.getUser(temp[0],temp[1]);
+            if (user2 == null) {
                 channel.writeAndFlush(DelimiterUtils.addDelimiter("账户密码出错"));
             } else {
- //                             初始化玩家的技能start
+ //             初始化玩家的技能start
                 UserskillrelationExample userskillrelationExample = new UserskillrelationExample();
                 UserskillrelationExample.Criteria criteria = userskillrelationExample.createCriteria();
                 criteria.andUsernameEqualTo(user2.getUsername());
@@ -42,7 +40,13 @@ public class LoginEvent {
                     userskillrelationMap.put(userskillrelation.getKeypos(), userskillrelation);
                 }
                 NettyMemory.userskillrelationMap.put(channel, userskillrelationMap);
-//                              初始化玩家的技能end
+//                初始化自动回蓝buffer
+                user2.setMpBuffer(1000);
+//                初始化玩家背包
+
+
+
+//                初始化玩家的技能end
                 NettyMemory.session2UserIds.put(channel, user2);
 
                 channel.writeAndFlush(DelimiterUtils.addDelimiter("登录成功，你已进入" + NettyMemory.areaMap.get(user2.getPos()).getName()));
