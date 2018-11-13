@@ -18,7 +18,17 @@ public class User {
 
     private Integer mpBuffer;
 
-    List<Userbag> userBag;
+    private List<Userbag> userBag;
+
+    private List<Weaponequipmentbar> weaponequipmentbars;
+
+    public List<Weaponequipmentbar> getWeaponequipmentbars() {
+        return weaponequipmentbars;
+    }
+
+    public void setWeaponequipmentbars(List<Weaponequipmentbar> weaponequipmentbars) {
+        this.weaponequipmentbars = weaponequipmentbars;
+    }
 
     public List<Userbag> getUserBag() {
         return userBag;

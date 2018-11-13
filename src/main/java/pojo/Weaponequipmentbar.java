@@ -1,17 +1,15 @@
 package pojo;
 
-public class Userbag {
+public class Weaponequipmentbar {
     private Integer id;
 
-    private String name;
+    private String username;
 
     private Integer wid;
 
-    private Integer num;
+    private Integer durability;
 
     private String typeof;
-
-    private Integer durability;
 
     public Integer getId() {
         return id;
@@ -21,12 +19,12 @@ public class Userbag {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name == null ? null : name.trim();
+    public void setUsername(String username) {
+        this.username = username == null ? null : username.trim();
     }
 
     public Integer getWid() {
@@ -37,12 +35,12 @@ public class Userbag {
         this.wid = wid;
     }
 
-    public Integer getNum() {
-        return num;
+    public Integer getDurability() {
+        return durability;
     }
 
-    public void setNum(Integer num) {
-        this.num = num;
+    public void setDurability(Integer durability) {
+        this.durability = durability;
     }
 
     public String getTypeof() {
@@ -51,13 +49,5 @@ public class Userbag {
 
     public void setTypeof(String typeof) {
         this.typeof = typeof == null ? null : typeof.trim();
-    }
-
-    public Integer getDurability() {
-        return durability;
-    }
-
-    public void setDurability(Integer durability) {
-        this.durability = durability;
     }
 }

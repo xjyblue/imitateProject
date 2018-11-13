@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import component.Area;
+import component.Equipment;
 import component.Monster;
 import component.MpMedicine;
 import io.netty.channel.Channel;
@@ -44,6 +45,6 @@ public class NettyMemory {
 	public static Map<User,Long> mpEndTime = new HashMap<>();
 	/**初始化药物属性*/
 	public static Map<Integer, MpMedicine> mpMedicineMap = new HashMap<>();
-	/**增加用户背包*/
-	public static Map<String,Map<Integer,Integer>> userBagMap = new HashMap<>();
+	/**初始化武器*/
+	public static Map<Integer, Equipment>equipmentMap = new HashMap<>();
 }

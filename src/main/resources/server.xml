@@ -15,7 +15,8 @@
 		base-package="xiaojianyu.controller" />
 	<context:component-scan
 		base-package="Event" />
-		
+	<context:component-scan
+			base-package="caculation" />
 		
 	<context:property-placeholder
 		location="classpath*:config.properties" ignore-unresolvable="true" />

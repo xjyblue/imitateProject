@@ -1,5 +1,7 @@
 package Event;
 
+import caculation.AttackCaculation;
+import component.Equipment;
 import component.Monster;
 import component.NPC;
 import io.netty.channel.Channel;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userskillrelation;
+import pojo.Weaponequipmentbar;
 import skill.UserSkill;
 import utils.DelimiterUtils;
 
@@ -21,9 +24,13 @@ public class StopAreaEvent {
     private UserMapper userMapper;
     @Autowired
     private CommonEvent commonEvent;
+    @Autowired
+    private AttackCaculation attackCaculation;
+
     public void stopArea(Channel channel, String msg) {
-        if(msg.equals("b")||msg.startsWith("b-")){
-            commonEvent.common(channel,msg);
+        if (msg.equals("b") || msg.startsWith("b-") || msg.equals("w")
+                || msg.startsWith("w-")||msg.startsWith("fix-")||msg.startsWith("ww-")||msg.startsWith("wq-")) {
+            commonEvent.common(channel, msg);
             return;
         }
         String temp[] = null;
@@ -48,7 +55,8 @@ public class StopAreaEvent {
             }
         } else if (msg.startsWith("aoi")) {
             User user = NettyMemory.session2UserIds.get(channel);
-            String allStatus = "玩家" + user.getUsername()
+            String allStatus = System.getProperty("line.separator")
+                    + "玩家" + user.getUsername()
                     + "--------玩家的状态" + user.getStatus()
                     + "--------处于" + NettyMemory.areaMap.get(user.getPos()).getName()
                     + "--------玩家的HP量：" + user.getHp()
@@ -110,14 +118,18 @@ public class StopAreaEvent {
 //                               判断攻击完怪物是否死亡，生命值计算逻辑
                                 BigInteger monsterLife = new BigInteger(monster.getValueOfLife());
                                 BigInteger attackDamage = new BigInteger(userSkill.getDamage());
-                                //                              蓝量计算逻辑
+                                StringBuffer stringBuffer = new StringBuffer();
+                                //                             攻击逻辑计算
+                                attackDamage = attackCaculation.caculate(user, attackDamage);
+                                String resp = out(user);
+//                              蓝量计算逻辑
                                 user.subMp(userSkill.getSkillMp());
                                 if (attackDamage.compareTo(monsterLife) >= 0) {
-                                    String resp = System.getProperty("line.separator")
+                                    resp += System.getProperty("line.separator")
                                             + "[技能]:" + userSkill.getSkillName()
                                             + System.getProperty("line.separator")
                                             + "对[" + monster.getName()
-                                            + "]造成了" + userSkill.getDamage() + "点伤害"
+                                            + "]造成了" + attackDamage + "点伤害"
                                             + System.getProperty("line.separator")
                                             + "[怪物血量]:" + 0
                                             + System.getProperty("line.separator")
@@ -139,11 +151,11 @@ public class StopAreaEvent {
                                     monster.setValueOfLife(monsterLife.toString());
 //                                  蓝量计算逻辑
                                     user.subMp(userSkill.getSkillMp());
-                                    String resp = System.getProperty("line.separator")
+                                    resp += System.getProperty("line.separator")
                                             + "[技能]:" + userSkill.getSkillName()
                                             + System.getProperty("line.separator")
                                             + "对[" + monster.getName()
-                                            + "]造成了" + userSkill.getDamage() + "点伤害"
+                                            + "]造成了" + attackDamage + "点伤害"
                                             + System.getProperty("line.separator")
                                             + "[怪物血量]:" + monster.getValueOfLife()
                                             + System.getProperty("line.separator")
@@ -158,7 +170,7 @@ public class StopAreaEvent {
 //                                  记录任务当前攻击的怪物
                                     List<Monster> monsters = new ArrayList<Monster>();
                                     monsters.add(monster);
-                                    NettyMemory.monsterMap.put(user,monsters);
+                                    NettyMemory.monsterMap.put(user, monsters);
 //                                    提醒用户你已进入战斗模式
                                     channel.writeAndFlush(DelimiterUtils.addDelimiter("你已经进入战斗模式"));
                                 }
@@ -173,6 +185,17 @@ public class StopAreaEvent {
         } else {
             channel.writeAndFlush(DelimiterUtils.addDelimiter("请输入有效指令"));
         }
+    }
+
+    private String out(User user) {
+        String resp = "";
+        for(Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()){
+            Equipment equipment = NettyMemory.equipmentMap.get(weaponequipmentbar.getWid());
+            resp += System.getProperty("line.separator")
+                    + equipment.getName()+"剩余耐久为:" +weaponequipmentbar.getDurability()
+                    ;
+        }
+        return resp;
     }
 
 }

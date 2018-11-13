@@ -3,14 +3,14 @@ package pojo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserbagExample {
+public class WeaponequipmentbarExample {
     protected String orderByClause;
 
     protected boolean distinct;
 
     protected List<Criteria> oredCriteria;
 
-    public UserbagExample() {
+    public WeaponequipmentbarExample() {
         oredCriteria = new ArrayList<Criteria>();
     }
 
@@ -164,73 +164,73 @@ public class UserbagExample {
             return (Criteria) this;
         }
 
-        public Criteria andNameIsNull() {
-            addCriterion("name is null");
+        public Criteria andUsernameIsNull() {
+            addCriterion("username is null");
             return (Criteria) this;
         }
 
-        public Criteria andNameIsNotNull() {
-            addCriterion("name is not null");
+        public Criteria andUsernameIsNotNull() {
+            addCriterion("username is not null");
             return (Criteria) this;
         }
 
-        public Criteria andNameEqualTo(String value) {
-            addCriterion("name =", value, "name");
+        public Criteria andUsernameEqualTo(String value) {
+            addCriterion("username =", value, "username");
             return (Criteria) this;
         }
 
-        public Criteria andNameNotEqualTo(String value) {
-            addCriterion("name <>", value, "name");
+        public Criteria andUsernameNotEqualTo(String value) {
+            addCriterion("username <>", value, "username");
             return (Criteria) this;
         }
 
-        public Criteria andNameGreaterThan(String value) {
-            addCriterion("name >", value, "name");
+        public Criteria andUsernameGreaterThan(String value) {
+            addCriterion("username >", value, "username");
             return (Criteria) this;
         }
 
-        public Criteria andNameGreaterThanOrEqualTo(String value) {
-            addCriterion("name >=", value, "name");
+        public Criteria andUsernameGreaterThanOrEqualTo(String value) {
+            addCriterion("username >=", value, "username");
             return (Criteria) this;
         }
 
-        public Criteria andNameLessThan(String value) {
-            addCriterion("name <", value, "name");
+        public Criteria andUsernameLessThan(String value) {
+            addCriterion("username <", value, "username");
             return (Criteria) this;
         }
 
-        public Criteria andNameLessThanOrEqualTo(String value) {
-            addCriterion("name <=", value, "name");
+        public Criteria andUsernameLessThanOrEqualTo(String value) {
+            addCriterion("username <=", value, "username");
             return (Criteria) this;
         }
 
-        public Criteria andNameLike(String value) {
-            addCriterion("name like", value, "name");
+        public Criteria andUsernameLike(String value) {
+            addCriterion("username like", value, "username");
             return (Criteria) this;
         }
 
-        public Criteria andNameNotLike(String value) {
-            addCriterion("name not like", value, "name");
+        public Criteria andUsernameNotLike(String value) {
+            addCriterion("username not like", value, "username");
             return (Criteria) this;
         }
 
-        public Criteria andNameIn(List<String> values) {
-            addCriterion("name in", values, "name");
+        public Criteria andUsernameIn(List<String> values) {
+            addCriterion("username in", values, "username");
             return (Criteria) this;
         }
 
-        public Criteria andNameNotIn(List<String> values) {
-            addCriterion("name not in", values, "name");
+        public Criteria andUsernameNotIn(List<String> values) {
+            addCriterion("username not in", values, "username");
             return (Criteria) this;
         }
 
-        public Criteria andNameBetween(String value1, String value2) {
-            addCriterion("name between", value1, value2, "name");
+        public Criteria andUsernameBetween(String value1, String value2) {
+            addCriterion("username between", value1, value2, "username");
             return (Criteria) this;
         }
 
-        public Criteria andNameNotBetween(String value1, String value2) {
-            addCriterion("name not between", value1, value2, "name");
+        public Criteria andUsernameNotBetween(String value1, String value2) {
+            addCriterion("username not between", value1, value2, "username");
             return (Criteria) this;
         }
 
@@ -294,63 +294,63 @@ public class UserbagExample {
             return (Criteria) this;
         }
 
-        public Criteria andNumIsNull() {
-            addCriterion("num is null");
+        public Criteria andDurabilityIsNull() {
+            addCriterion("durability is null");
             return (Criteria) this;
         }
 
-        public Criteria andNumIsNotNull() {
-            addCriterion("num is not null");
+        public Criteria andDurabilityIsNotNull() {
+            addCriterion("durability is not null");
             return (Criteria) this;
         }
 
-        public Criteria andNumEqualTo(Integer value) {
-            addCriterion("num =", value, "num");
+        public Criteria andDurabilityEqualTo(Integer value) {
+            addCriterion("durability =", value, "durability");
             return (Criteria) this;
         }
 
-        public Criteria andNumNotEqualTo(Integer value) {
-            addCriterion("num <>", value, "num");
+        public Criteria andDurabilityNotEqualTo(Integer value) {
+            addCriterion("durability <>", value, "durability");
             return (Criteria) this;
         }
 
-        public Criteria andNumGreaterThan(Integer value) {
-            addCriterion("num >", value, "num");
+        public Criteria andDurabilityGreaterThan(Integer value) {
+            addCriterion("durability >", value, "durability");
             return (Criteria) this;
         }
 
-        public Criteria andNumGreaterThanOrEqualTo(Integer value) {
-            addCriterion("num >=", value, "num");
+        public Criteria andDurabilityGreaterThanOrEqualTo(Integer value) {
+            addCriterion("durability >=", value, "durability");
             return (Criteria) this;
         }
 
-        public Criteria andNumLessThan(Integer value) {
-            addCriterion("num <", value, "num");
+        public Criteria andDurabilityLessThan(Integer value) {
+            addCriterion("durability <", value, "durability");
             return (Criteria) this;
         }
 
-        public Criteria andNumLessThanOrEqualTo(Integer value) {
-            addCriterion("num <=", value, "num");
+        public Criteria andDurabilityLessThanOrEqualTo(Integer value) {
+            addCriterion("durability <=", value, "durability");
             return (Criteria) this;
         }
 
-        public Criteria andNumIn(List<Integer> values) {
-            addCriterion("num in", values, "num");
+        public Criteria andDurabilityIn(List<Integer> values) {
+            addCriterion("durability in", values, "durability");
             return (Criteria) this;
         }
 
-        public Criteria andNumNotIn(List<Integer> values) {
-            addCriterion("num not in", values, "num");
+        public Criteria andDurabilityNotIn(List<Integer> values) {
+            addCriterion("durability not in", values, "durability");
             return (Criteria) this;
         }
 
-        public Criteria andNumBetween(Integer value1, Integer value2) {
-            addCriterion("num between", value1, value2, "num");
+        public Criteria andDurabilityBetween(Integer value1, Integer value2) {
+            addCriterion("durability between", value1, value2, "durability");
             return (Criteria) this;
         }
 
-        public Criteria andNumNotBetween(Integer value1, Integer value2) {
-            addCriterion("num not between", value1, value2, "num");
+        public Criteria andDurabilityNotBetween(Integer value1, Integer value2) {
+            addCriterion("durability not between", value1, value2, "durability");
             return (Criteria) this;
         }
 
@@ -421,66 +421,6 @@ public class UserbagExample {
 
         public Criteria andTypeofNotBetween(String value1, String value2) {
             addCriterion("typeOf not between", value1, value2, "typeof");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityIsNull() {
-            addCriterion("durability is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityIsNotNull() {
-            addCriterion("durability is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityEqualTo(Integer value) {
-            addCriterion("durability =", value, "durability");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityNotEqualTo(Integer value) {
-            addCriterion("durability <>", value, "durability");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityGreaterThan(Integer value) {
-            addCriterion("durability >", value, "durability");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityGreaterThanOrEqualTo(Integer value) {
-            addCriterion("durability >=", value, "durability");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityLessThan(Integer value) {
-            addCriterion("durability <", value, "durability");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityLessThanOrEqualTo(Integer value) {
-            addCriterion("durability <=", value, "durability");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityIn(List<Integer> values) {
-            addCriterion("durability in", values, "durability");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityNotIn(List<Integer> values) {
-            addCriterion("durability not in", values, "durability");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityBetween(Integer value1, Integer value2) {
-            addCriterion("durability between", value1, value2, "durability");
-            return (Criteria) this;
-        }
-
-        public Criteria andDurabilityNotBetween(Integer value1, Integer value2) {
-            addCriterion("durability not between", value1, value2, "durability");
             return (Criteria) this;
         }
     }

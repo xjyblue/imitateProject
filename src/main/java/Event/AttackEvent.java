@@ -1,11 +1,14 @@
 package Event;
 
+import caculation.AttackCaculation;
+import component.Equipment;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userskillrelation;
+import pojo.Weaponequipmentbar;
 import skill.UserSkill;
 import utils.DelimiterUtils;
 import component.Monster;
@@ -16,9 +19,11 @@ import java.math.BigInteger;
 public class AttackEvent {
     @Autowired
     private CommonEvent commonEvent;
-
+    @Autowired
+    private AttackCaculation attackCaculation;
     public void attack(Channel channel, String msg) {
-        if(msg.equals("b")||msg.startsWith("b-")){
+        if(msg.equals("b")||msg.startsWith("b-")||msg.equals("w")||
+                msg.startsWith("w-")||msg.startsWith("fix-")||msg.startsWith("ww-")||msg.startsWith("wq-")){
             commonEvent.common(channel,msg);
             return;
         }
@@ -41,15 +46,19 @@ public class AttackEvent {
 //                          攻击逻辑
                             BigInteger attackDamage = new BigInteger(userSkill.getDamage());
                             BigInteger monsterLife = new BigInteger(monster.getValueOfLife());
-//                         检查怪物血量
+//                          增加装备攻击属性
+//                          更新武器耐久度
+                            attackDamage = attackCaculation.caculate(user,attackDamage);
+                            String resp = out(user);
+//                         检查怪物血量s
                             if (attackDamage.compareTo(monsterLife) >= 0) {
 //                              蓝量计算逻辑
                                 user.subMp(skillMp.toString());
-                                String resp = System.getProperty("line.separator")
+                                resp  += System.getProperty("line.separator")
                                         + "[技能]:" + userSkill.getSkillName()
                                         + System.getProperty("line.separator")
                                         + "对[" + monster.getName()
-                                        + "]造成了" + userSkill.getDamage() + "点伤害"
+                                        + "]造成了" + attackDamage + "点伤害"
                                         + System.getProperty("line.separator")
                                         + "[怪物血量]:" + 0
                                         + System.getProperty("line.separator")
@@ -72,11 +81,11 @@ public class AttackEvent {
                                 monster.setValueOfLife(monsterLife.toString());
 //                              蓝量计算逻辑
                                 user.subMp(skillMp.toString());
-                                String resp =
+                                resp +=
                                         System.getProperty("line.separator")
                                                 + "[" + userSkill.getSkillName()
                                                 + "]技能对" + monster.getName()
-                                                + "造成了" + userSkill.getDamage() + "点伤害"
+                                                + "造成了" + attackDamage + "点伤害"
                                                 + System.getProperty("line.separator")
                                                 + "[消耗蓝量:]" + userSkill.getSkillMp()
                                                 + System.getProperty("line.separator")
@@ -96,5 +105,16 @@ public class AttackEvent {
                 }
             }
         }
+    }
+
+    private String out(User user) {
+        String resp = "";
+        for(Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()){
+            Equipment equipment = NettyMemory.equipmentMap.get(weaponequipmentbar.getWid());
+            resp += System.getProperty("line.separator")
+                    + equipment.getName()+"剩余耐久为:" +weaponequipmentbar.getDurability()
+                    ;
+        }
+        return resp;
     }
 }

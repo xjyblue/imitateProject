@@ -1,7 +1,6 @@
 package xiaojianyu.controller;
 
-import component.Monster;
-import component.MpMedicine;
+import component.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -19,8 +18,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import component.Area;
-import component.NPC;
 import skill.MonsterSkill;
 import skill.UserSkill;
 import task.AttackHintsTask;
@@ -75,14 +72,9 @@ public class NettyServer {
 
 
     public void initServer() {
-//      初始化人物背包
-        Map<Integer,Integer> map = new HashMap<>();
-        map.put(1001,10);
-        map.put(1002,10);
-        NettyMemory.userBagMap.put("z",map);
-
-
-
+//      初始化武器
+        Equipment equipment = new Equipment(1004,"屠龙刀",10,300);
+        NettyMemory.equipmentMap.put(equipment.getId(),equipment);
 //        初始化定时任务 start
 //        回蓝定时任务
         NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new MpTask(), 0, 1, TimeUnit.SECONDS);
@@ -174,7 +166,7 @@ public class NettyServer {
         monsterSkill.setSkillId(2);
         skills = new ArrayList<>();
         skills.add(monsterSkill);
-        monster = new Monster("村子村霸", "0", "15000", skills, "1");
+        monster = new Monster("村子村霸", "0", "15000000000", skills, "1");
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);
