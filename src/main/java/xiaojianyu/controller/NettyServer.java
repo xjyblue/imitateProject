@@ -1,5 +1,6 @@
 package xiaojianyu.controller;
 
+import buffer.Buff;
 import component.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -20,9 +21,15 @@ import org.springframework.stereotype.Service;
 
 import skill.MonsterSkill;
 import skill.UserSkill;
+import task.AttackBufferTask;
 import task.AttackHintsTask;
 import task.MpTask;
+import test.ExcelUtil;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -39,7 +46,7 @@ public class NettyServer {
     private NettyServerHandler nettyServerHandler;
 
     // 程序初始方法入口注解，提示spring这个程序先执行这里
-    public void serverStart() throws InterruptedException {
+    public void serverStart() throws InterruptedException, IOException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -71,7 +78,7 @@ public class NettyServer {
     }
 
 
-    public void initServer() {
+    public void initServer() throws IOException {
 //      初始化武器
         Equipment equipment = new Equipment(1004,"屠龙刀",10,300);
         NettyMemory.equipmentMap.put(equipment.getId(),equipment);
@@ -80,6 +87,8 @@ public class NettyServer {
         NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new MpTask(), 0, 1, TimeUnit.SECONDS);
 //        攻击回显定时任务
         NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new AttackHintsTask(), 0, 1, TimeUnit.SECONDS);
+//        攻击buffer定时任务
+        NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new AttackBufferTask(), 0, 1, TimeUnit.SECONDS);
 //        初始化定时任务 end
 
 
@@ -92,6 +101,22 @@ public class NettyServer {
         NettyMemory.mpMedicineMap.put(mpMedicineSlow.getId(),mpMedicineSlow);
         NettyMemory.mpMedicineMap.put(mpMedicineSlow2.getId(),mpMedicineSlow2);
 
+//      初始化全图buff
+        FileInputStream fis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Buff.xls"));
+        LinkedHashMap<String, String> alias = new LinkedHashMap<>();
+        alias.put("buff名称", "name");
+        alias.put("每秒回复时间","addSecondValue");
+        alias.put("buff类别", "type");
+        alias.put("buffId", "bufferId");
+        alias.put("持续时间", "keepTime");
+        alias.put("每秒减免伤害", "injurySecondValue");
+        List<Buff> buffList = ExcelUtil.excel2Pojo(fis, Buff.class, alias);
+        for(Buff buff:buffList){
+            NettyMemory.buffMap.put(buff.getBufferId(),buff);
+        }
+//      初始化全图buff
+
+
 //        初始化技能表start
         UserSkill userSkill = new UserSkill();
         userSkill.setSkillId(1);
@@ -100,12 +125,25 @@ public class NettyServer {
         userSkill.setDamage("10000");
         userSkill.setSkillMp("600");
         NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
+
         userSkill = new UserSkill();
         userSkill.setSkillId(2);
         userSkill.setSkillName("喷水攻击");
         userSkill.setAttackCd(2000l);
         userSkill.setDamage("120");
-        userSkill.setSkillMp("500");
+        userSkill.setSkillMp("1000");
+        NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
+
+//      中毒buff
+        userSkill = new UserSkill();
+        userSkill.setSkillId(3);
+        userSkill.setSkillName("毒液攻击");
+        userSkill.setAttackCd(2000l);
+        userSkill.setDamage("120");
+        userSkill.setSkillMp("1000");
+        Map<String,Integer> bufMap = new HashMap<>();
+        bufMap.put("poisoningBuff",2001);
+        userSkill.setBuffMap(bufMap);
         NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
 //        初始化技能表end
 
@@ -117,7 +155,7 @@ public class NettyServer {
         areaSet.add("村子");
         area.setAreaSet(areaSet);
 //        初始化NPC和会话
-        NPC npc = new NPC("1", "起始之地-塞里亚");
+        NPC npc = new NPC("1", "赛利亚");
         List<String> talkList = new ArrayList<String>();
         talkList.add("我是塞里亚，欢迎来到起始之地");
         npc.setTalks(talkList);
@@ -150,7 +188,7 @@ public class NettyServer {
         areaSet.add("森林");
         area.setAreaSet(areaSet);
 //        初始化NPC和会话
-        npc = new NPC("1", "村子-村民");
+        npc = new NPC("1", "村民");
         talkList = new ArrayList<String>();
         talkList.add("我是村民，欢迎来到村子");
         npc.setTalks(talkList);
@@ -166,7 +204,7 @@ public class NettyServer {
         monsterSkill.setSkillId(2);
         skills = new ArrayList<>();
         skills.add(monsterSkill);
-        monster = new Monster("村子村霸", "0", "15000000000", skills, "1");
+        monster = new Monster("村子村霸", "0", "15000", skills, "1");
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);
@@ -181,7 +219,7 @@ public class NettyServer {
         areaSet.add("村子");
         area.setAreaSet(areaSet);
 //        初始化NPC和会话
-        npc = new NPC("1", "森林-植物精灵");
+        npc = new NPC("1", "植物精灵");
         talkList = new ArrayList<String>();
         talkList.add("我是植物精灵，欢迎来到森林");
         npc.setTalks(talkList);
@@ -212,7 +250,7 @@ public class NettyServer {
         areaSet.add("村子");
         area.setAreaSet(areaSet);
 //        初始化NPC和会话
-        npc = new NPC("1", "城堡-骑士");
+        npc = new NPC("1", "骑士");
         talkList = new ArrayList<String>();
         talkList.add("我是骑士，欢迎来到城堡");
         npc.setTalks(talkList);

@@ -17,17 +17,17 @@ public class MpTask implements Runnable {
             BigInteger maxMp = new BigInteger("10000");
             User user = entry.getValue();
             if (userMp.compareTo(maxMp) < 0) {
-                if (user.getMpBuffer().equals(1000)) {
+                if (user.getBufferMap().get("mpBuff").equals(1000)) {
                     userMp = userMp.add(new BigInteger("10"));
                     entry.getValue().setMp(userMp.toString());
                 } else {
-                    MpMedicine mpMedicine = NettyMemory.mpMedicineMap.get(user.getMpBuffer());
+                    MpMedicine mpMedicine = NettyMemory.mpMedicineMap.get(user.getBufferMap().get("mpBuff"));
                     Long endTime = null;
-                    if (!NettyMemory.mpEndTime.containsKey(user)) {
+                    if (!NettyMemory.buffEndTime.containsKey(user)) {
                         endTime = System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000;
-                        NettyMemory.mpEndTime.put(user, endTime);
+                        NettyMemory.buffEndTime.get(user).put("mpBuff",endTime);
                     } else {
-                        endTime = NettyMemory.mpEndTime.get(user);
+                        endTime = NettyMemory.buffEndTime.get(user).get("mpBuff");
                     }
                     Long currentTime = System.currentTimeMillis();
                     if (endTime > currentTime) {
@@ -37,13 +37,12 @@ public class MpTask implements Runnable {
                         }
                         user.setMp(userMp.toString());
                     } else {
-                        user.setMpBuffer(1000);
+                        user.getBufferMap().put("mpBuff",1000);
                         userMp = userMp.add(new BigInteger("10"));
                         if(userMp.compareTo(maxMp)>=0){
                             userMp = maxMp;
                         }
                         user.setMp(userMp.toString());
-                        NettyMemory.mpEndTime.remove(user);
                     }
                 }
             }

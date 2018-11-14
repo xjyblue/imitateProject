@@ -29,7 +29,7 @@ public class StopAreaEvent {
 
     public void stopArea(Channel channel, String msg) {
         if (msg.equals("b") || msg.startsWith("b-") || msg.equals("w")
-                || msg.startsWith("w-")||msg.startsWith("fix-")||msg.startsWith("ww-")||msg.startsWith("wq-")) {
+                || msg.startsWith("w-") || msg.startsWith("fix-") || msg.startsWith("ww-") || msg.startsWith("wq-")) {
             commonEvent.common(channel, msg);
             return;
         }
@@ -87,16 +87,16 @@ public class StopAreaEvent {
                 List<NPC> npcs = NettyMemory.areaMap.get(NettyMemory.session2UserIds.get(channel).getPos())
                         .getNpcs();
                 for (NPC npc : npcs) {
-                    if (npc.getName().split("-")[1].equals(temp[1])) {
+                    if (npc.getName().equals(temp[1])) {
                         channel.writeAndFlush(DelimiterUtils.addDelimiter(npc.getTalks().get(0)));
-                        break;
+                        return;
                     }
                 }
                 channel.writeAndFlush(DelimiterUtils.addDelimiter("找不到此NPC"));
             }
         } else if (msg.equals("skillCheckout")) {
             NettyMemory.eventStatus.put(channel, EventStatus.SKILLMANAGER);
-            channel.writeAndFlush(DelimiterUtils.addDelimiter("请输入lookSkill查看技能，请输入change-技能名-键位配置技能"));
+            channel.writeAndFlush(DelimiterUtils.addDelimiter("请输入lookSkill查看技能，请输入change-技能名-键位配置技能,请输入quitSkill退出技能管理界面"));
         } else if (msg.startsWith("attack")) {
             temp = msg.split("-");
 //                        输入的键位是否存在
@@ -116,15 +116,17 @@ public class StopAreaEvent {
 //                                    判断技能冷却
                             if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
 //                               判断攻击完怪物是否死亡，生命值计算逻辑
-                                BigInteger monsterLife = new BigInteger(monster.getValueOfLife());
                                 BigInteger attackDamage = new BigInteger(userSkill.getDamage());
-                                StringBuffer stringBuffer = new StringBuffer();
-                                //                             攻击逻辑计算
+//                              攻击逻辑计算
                                 attackDamage = attackCaculation.caculate(user, attackDamage);
+//                              怪物掉血，生命值计算逻辑
+                                BigInteger monsterLife = monster.subLife(attackDamage);
                                 String resp = out(user);
+                                BigInteger minValueOfLife = new BigInteger("0");
 //                              蓝量计算逻辑
                                 user.subMp(userSkill.getSkillMp());
-                                if (attackDamage.compareTo(monsterLife) >= 0) {
+                                if (monsterLife.compareTo(minValueOfLife) <= 0) {
+                                    monster.setValueOfLife(minValueOfLife.toString());
                                     resp += System.getProperty("line.separator")
                                             + "[技能]:" + userSkill.getSkillName()
                                             + System.getProperty("line.separator")
@@ -146,9 +148,6 @@ public class StopAreaEvent {
                                     Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(channel);
 //                                    切换到攻击模式
                                     NettyMemory.eventStatus.put(channel, EventStatus.ATTACK);
-//                                    怪物掉血，生命值计算逻辑
-                                    monsterLife = monsterLife.subtract(attackDamage);
-                                    monster.setValueOfLife(monsterLife.toString());
 //                                  蓝量计算逻辑
                                     user.subMp(userSkill.getSkillMp());
                                     resp += System.getProperty("line.separator")
@@ -189,11 +188,11 @@ public class StopAreaEvent {
 
     private String out(User user) {
         String resp = "";
-        for(Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()){
+        for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
             Equipment equipment = NettyMemory.equipmentMap.get(weaponequipmentbar.getWid());
             resp += System.getProperty("line.separator")
-                    + equipment.getName()+"剩余耐久为:" +weaponequipmentbar.getDurability()
-                    ;
+                    + equipment.getName() + "剩余耐久为:" + weaponequipmentbar.getDurability()
+            ;
         }
         return resp;
     }

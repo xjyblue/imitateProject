@@ -78,14 +78,16 @@ public class CommonEvent {
                         user.addMp(mpMedicine.getReplyValue());
                     }
                 } else {
-                    if (user.getMpBuffer() == mpMedicine.getId()) {
-                        NettyMemory.mpEndTime.put(user, (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
+                    if (user.getBufferMap().get("mpBuff") == mpMedicine.getId()) {
+                        NettyMemory.buffEndTime.get(user).put("mpBuff",(System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
                     } else {
-                        if (NettyMemory.mpEndTime.containsKey(user)) {
-                            NettyMemory.mpEndTime.remove(user);
-                        }
+                        user.getBufferMap().put("mpBuff",mpMedicine.getId());
+                        NettyMemory.buffEndTime.get(user).put("mpBuff",(System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
+//                        if (NettyMemory.mpEndTime.containsKey(user)) {
+//                            NettyMemory.mpEndTime.remove(user);
+//                        }
                     }
-                    user.setMpBuffer(mpMedicine.getId());
+                    user.getBufferMap().put("mpBuff",mpMedicine.getId());
                 }
             } else {
                 channel.writeAndFlush(DelimiterUtils.addDelimiter("该物品不存在"));
@@ -137,6 +139,14 @@ public class CommonEvent {
             if (NettyMemory.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
                 for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
                     if (weaponequipmentbar.getWid() == Integer.parseInt(temp[1])) {
+                        for(Userbag userbag: user.getUserBag()){
+                            if(userbag.getWid() == Integer.parseInt(temp[1])){
+                                channel.writeAndFlush(DelimiterUtils.addDelimiter("背包已有["
+                                        +NettyMemory.equipmentMap.get(Integer.parseInt(temp[1])).getName()
+                                        +"]装备，武器不支持叠加"));
+                                return;
+                            }
+                        }
                         Userbag userbag = new Userbag();
                         userbag.setNum(1);
                         userbag.setDurability(weaponequipmentbar.getDurability());

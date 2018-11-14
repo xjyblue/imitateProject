@@ -1,5 +1,10 @@
 package skill;
 
+import buffer.Buff;
+
+import java.util.List;
+import java.util.Map;
+
 public class UserSkill {
 
     private Integer skillId;
@@ -11,6 +16,16 @@ public class UserSkill {
     private String damage;
 
     private String skillMp;
+
+    private Map<String,Integer>buffMap;
+
+    public Map<String, Integer> getBuffMap() {
+        return buffMap;
+    }
+
+    public void setBuffMap(Map<String, Integer> buffMap) {
+        this.buffMap = buffMap;
+    }
 
     public String getSkillMp() {
         return skillMp;

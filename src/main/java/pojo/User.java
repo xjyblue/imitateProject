@@ -2,6 +2,7 @@ package pojo;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 public class User {
     private String username;
@@ -16,11 +17,19 @@ public class User {
 
     private String hp;
 
-    private Integer mpBuffer;
-
     private List<Userbag> userBag;
 
     private List<Weaponequipmentbar> weaponequipmentbars;
+
+    private Map<String,Integer> buffMap;
+
+    public Map<String, Integer> getBufferMap() {
+        return buffMap;
+    }
+
+    public void setBufferMap(Map<String, Integer> bufferMap) {
+        this.buffMap = bufferMap;
+    }
 
     public List<Weaponequipmentbar> getWeaponequipmentbars() {
         return weaponequipmentbars;
@@ -36,14 +45,6 @@ public class User {
 
     public void setUserBag(List<Userbag> userBag) {
         this.userBag = userBag;
-    }
-
-    public Integer getMpBuffer() {
-        return mpBuffer;
-    }
-
-    public void setMpBuffer(Integer mpBuffer) {
-        this.mpBuffer = mpBuffer;
     }
 
     public String getUsername() {

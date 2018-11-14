@@ -1,50 +1,30 @@
 package test;
 
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timeout;
-import io.netty.util.Timer;
-import io.netty.util.TimerTask;
+import buffer.Buff;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
- * Created by lihong10 on 2017/6/19.
+ * xiaojianyu
  */
 public class TestSecond {
-
-
-    public static void main(String[] argv) {
-
-        final Timer timer = new HashedWheelTimer(Executors.defaultThreadFactory(), 5, TimeUnit.SECONDS, 2);
-
-        TimerTask task1 = new TimerTask() {
-            public void run(Timeout timeout) throws Exception {
-                System.out.println("task 1 will run per 5 seconds ");
-                timer.newTimeout(this, 5, TimeUnit.SECONDS);//结束时候再次注册
-            }
-        };
-        timer.newTimeout(task1, 5, TimeUnit.SECONDS);
-
-
-//        TimerTask task2 = new TimerTask() {
-//            public void run(Timeout timeout) throws Exception {
-//                System.out.println("task 2 will run per 10 seconds");
-//                timer.newTimeout(this, 10, TimeUnit.SECONDS);//结束时候再注册
-//            }
-//        };
-//        timer.newTimeout(task2, 10, TimeUnit.SECONDS);
-//
-//
-//        //该任务仅仅运行一次
-//        timer.newTimeout(new TimerTask() {
-//            public void run(Timeout timeout) throws Exception {
-//                System.out.println("task 3 run only once ! ");
-//            }
-//        }, 15, TimeUnit.SECONDS);
-
+    public static void main(String[] argv) throws Exception {
+        //指定输入文件
+        FileInputStream fis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Buff.xls"));
+        //指定每列对应的类属性
+        LinkedHashMap<String, String> alias = new LinkedHashMap<>();
+        alias.put("buff名称", "name");
+        alias.put("每秒回复时间","addSecondValue");
+        alias.put("buff类别", "type");
+        alias.put("buffId", "bufferId");
+        alias.put("持续时间", "keepTime");
+        alias.put("每秒减免伤害", "injurySecondValue");
+        //转换成指定类型的对象数组
+        List<Buff> pojoList = ExcelUtil.excel2Pojo(fis, Buff.class, alias);
+        System.out.println("kk");
     }
-
-
 }
 

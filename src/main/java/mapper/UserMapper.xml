@@ -238,13 +238,14 @@
             <result column="num" property="num"/>
             <result column="sname" property="name"/>
             <result column="stype" property="typeof"/>
+            <result column="sdurability" property="durability"/>
         </collection>
         <collection property="weaponequipmentbars" ofType="pojo.Weaponequipmentbar" column="sid">
             <id column="w_id" property="id"/><!-- 这里的column对应的是下面查询的别名，而不是表字段名 -->
             <result column="wwid" property="wid"/><!-- property对应JavaBean中的属性名 -->
-            <result column="durability" property="durability"/>
             <result column="wname" property="username"/>
             <result column="wtype" property="typeof"/>
+            <result column="wdurability" property="durability"/>
         </collection>
     </resultMap>
 
@@ -261,8 +262,9 @@
 		 s.num,
 		 s.name AS sname,
 		 s.typeOf AS stype,
+		 s.durability AS sdurability,
 		 w.id AS w_id,
-		 w.durability,
+		 w.durability AS wdurability,
 		 w.username AS wname,
 		 w.wid AS wwid,
 		 w.typeOf AS wtype

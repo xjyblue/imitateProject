@@ -2,6 +2,7 @@ package component;
 
 import skill.MonsterSkill;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class Monster {
@@ -57,11 +58,11 @@ public class Monster {
         this.type = type;
     }
 
-    public String getValueOfLife() {
+    public synchronized String getValueOfLife() {
         return valueOfLife;
     }
 
-    public void setValueOfLife(String valueOfLife) {
+    public synchronized void setValueOfLife(String valueOfLife) {
         this.valueOfLife = valueOfLife;
     }
 
@@ -71,5 +72,12 @@ public class Monster {
 
     public void setMonsterSkillList(List<MonsterSkill> monsterSkillList) {
         this.monsterSkillList = monsterSkillList;
+    }
+
+    public synchronized BigInteger subLife(BigInteger attackDamage) {
+        BigInteger monsterLife = new BigInteger(this.valueOfLife);
+        this.valueOfLife = monsterLife.subtract(attackDamage).toString();
+        return new BigInteger(this.valueOfLife);
+
     }
 }
