@@ -8,6 +8,9 @@ import java.math.BigInteger;
 import java.util.Map;
 
 public class MpTask implements Runnable {
+
+    private BigInteger add = new BigInteger("10");
+
     @Override
     public void run() {
         Map<Channel, User> map = NettyMemory.session2UserIds;
@@ -18,7 +21,7 @@ public class MpTask implements Runnable {
             User user = entry.getValue();
             if (userMp.compareTo(maxMp) < 0) {
                 if (user.getBufferMap().get("mpBuff").equals(1000)) {
-                    userMp = userMp.add(new BigInteger("10"));
+                    userMp = userMp.add(add);
                     entry.getValue().setMp(userMp.toString());
                 } else {
                     MpMedicine mpMedicine = NettyMemory.mpMedicineMap.get(user.getBufferMap().get("mpBuff"));
@@ -46,6 +49,7 @@ public class MpTask implements Runnable {
                     }
                 }
             }
+            System.out.println(user.getUsername()+"--的蓝量--"+userMp.toString());
         }
 
     }

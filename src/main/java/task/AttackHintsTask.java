@@ -41,7 +41,6 @@ public class AttackHintsTask implements Runnable{
                             + "-----怪物技能:" + monster.getMonsterSkillList().get(0).getSkillName()
                             + "-----怪物的伤害:" + monster.getMonsterSkillList().get(0).getDamage()
                             + "-----你的剩余血:" + userHp.toString()
-                            + "-----你的蓝量：" + user.getMp()
                             + "-----怪物血量:" + monster.getValueOfLife()
                             + System.getProperty("line.separator");
                     user.setHp(userHp.toString());
