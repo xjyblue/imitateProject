@@ -49,6 +49,9 @@ public class AttackEvent {
                             attackDamage = attackCaculation.caculate(user,attackDamage);
 //                          攻击逻辑
                             BigInteger monsterLife = monster.subLife(attackDamage);
+//                         蓝量计算
+                            userMp = userMp.subtract(skillMp);
+                            user.setMp(userMp.toString());
                             String resp = out(user);
                             BigInteger minValueOfLife = new BigInteger("0");
 //                         检查怪物血量s
@@ -78,8 +81,6 @@ public class AttackEvent {
 //                                           切换场景
                                 NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
                             } else {
-//                              蓝量计算逻辑
-                                user.subMp(skillMp.toString());
                                 resp +=
                                         System.getProperty("line.separator")
                                                 + "[" + userSkill.getSkillName()

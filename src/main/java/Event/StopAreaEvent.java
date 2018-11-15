@@ -111,6 +111,7 @@ public class StopAreaEvent {
                         BigInteger userMp = new BigInteger(user.getMp());
                         BigInteger skillMp = new BigInteger(userSkill.getSkillMp());
                         if (userMp.compareTo(skillMp) > 0) {
+//                      蓝量计算
                             userMp = userMp.subtract(skillMp);
                             user.setMp(userMp.toString());
 //                                    判断技能冷却
@@ -123,8 +124,6 @@ public class StopAreaEvent {
                                 BigInteger monsterLife = monster.subLife(attackDamage);
                                 String resp = out(user);
                                 BigInteger minValueOfLife = new BigInteger("0");
-//                              蓝量计算逻辑
-                                user.subMp(userSkill.getSkillMp());
                                 if (monsterLife.compareTo(minValueOfLife) <= 0) {
                                     monster.setValueOfLife(minValueOfLife.toString());
                                     resp += System.getProperty("line.separator")
@@ -148,8 +147,6 @@ public class StopAreaEvent {
                                     Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(channel);
 //                                    切换到攻击模式
                                     NettyMemory.eventStatus.put(channel, EventStatus.ATTACK);
-//                                  蓝量计算逻辑
-                                    user.subMp(userSkill.getSkillMp());
                                     resp += System.getProperty("line.separator")
                                             + "[技能]:" + userSkill.getSkillName()
                                             + System.getProperty("line.separator")

@@ -79,9 +79,22 @@ public class NettyServer {
 
 
     public void initServer() throws IOException {
-//      初始化武器
-        Equipment equipment = new Equipment(1004,"屠龙刀",10,300);
-        NettyMemory.equipmentMap.put(equipment.getId(),equipment);
+
+//      初始化武器start
+        FileInputStream equipFis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Equipment.xls"));
+        LinkedHashMap<String, String> equipAlias = new LinkedHashMap<>();
+        equipAlias.put("武器id","id");
+        equipAlias.put("武器名称","name");
+        equipAlias.put("武器耐久度","durability");
+        equipAlias.put("武器增加伤害","addValue");
+        List<Equipment> equipmentList = ExcelUtil.excel2Pojo(equipFis, Equipment.class, equipAlias);
+       if(equipmentList!=null&&equipmentList.size()>0){
+           for(Equipment equipment:equipmentList){
+               NettyMemory.equipmentMap.put(equipment.getId(),equipment);
+           }
+       }
+//      初始化武器end
+
 //        初始化定时任务 start
 //        回蓝定时任务
         NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new MpTask(), 0, 1, TimeUnit.SECONDS);
@@ -123,7 +136,7 @@ public class NettyServer {
         userSkill.setSkillName("烈火攻击");
         userSkill.setAttackCd(10000l);
         userSkill.setDamage("10000");
-        userSkill.setSkillMp("600");
+        userSkill.setSkillMp("1000");
         NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
 
         userSkill = new UserSkill();
@@ -131,7 +144,7 @@ public class NettyServer {
         userSkill.setSkillName("喷水攻击");
         userSkill.setAttackCd(2000l);
         userSkill.setDamage("120");
-        userSkill.setSkillMp("1000");
+        userSkill.setSkillMp("500");
         NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
 
 //      中毒buff

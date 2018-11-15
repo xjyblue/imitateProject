@@ -17,6 +17,10 @@ public class Equipment {
         this.addValue = addValue;
     }
 
+    public Equipment(){
+
+    }
+
     public String getName() {
         return name;
     }
