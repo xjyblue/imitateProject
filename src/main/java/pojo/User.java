@@ -13,15 +13,25 @@ public class User {
 
     private String pos;
 
-    private String mp;
+    private volatile String mp;
 
-    private String hp;
+    private volatile String hp;
+
+    private String teamId;
 
     private List<Userbag> userBag;
 
     private List<Weaponequipmentbar> weaponequipmentbars;
 
     private Map<String,Integer> buffMap;
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
+    }
 
     public Map<String, Integer> getBufferMap() {
         return buffMap;
@@ -79,11 +89,11 @@ public class User {
         this.pos = pos == null ? null : pos.trim();
     }
 
-    public synchronized String getMp() {
+    public String getMp() {
         return mp;
     }
 
-    public  synchronized  void setMp(String mp) {
+    public synchronized void setMp(String mp) {
         this.mp = mp == null ? null : mp.trim();
     }
 

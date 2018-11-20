@@ -1,4 +1,4 @@
-package buffer;
+package buff;
 
 public class Buff {
 

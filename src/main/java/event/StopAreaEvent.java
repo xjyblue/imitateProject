@@ -1,4 +1,4 @@
-package Event;
+package event;
 
 import caculation.AttackCaculation;
 import component.Equipment;
@@ -13,10 +13,14 @@ import pojo.User;
 import pojo.Userskillrelation;
 import pojo.Weaponequipmentbar;
 import skill.UserSkill;
+import task.BossAttackTask;
+import task.MonsterAttackTask;
 import utils.DelimiterUtils;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 @Component("stopAreaEvent")
 public class StopAreaEvent {
@@ -26,10 +30,23 @@ public class StopAreaEvent {
     private CommonEvent commonEvent;
     @Autowired
     private AttackCaculation attackCaculation;
+    @Autowired
+    private TeamEvent teamEvent;
+    @Autowired
+    private BossEvent bossEvent;
+
+
 
     public void stopArea(Channel channel, String msg) {
-        if (msg.equals("b") || msg.startsWith("b-") || msg.equals("w")
-                || msg.startsWith("w-") || msg.startsWith("fix-") || msg.startsWith("ww-") || msg.startsWith("wq-")) {
+        if(msg.equals("f")){
+            bossEvent.enterBossArea(channel,msg);
+            return;
+        }
+        if(msg.startsWith("t")){
+            teamEvent.team(channel,msg);
+            return;
+        }
+        if (msg.startsWith("b")|| msg.startsWith("w") || msg.startsWith("fix-")) {
             commonEvent.common(channel, msg);
             return;
         }
@@ -168,6 +185,9 @@ public class StopAreaEvent {
                                     monsters.add(monster);
                                     NettyMemory.monsterMap.put(user, monsters);
 //                                    提醒用户你已进入战斗模式
+                                    String jobId= UUID.randomUUID().toString();
+                                    MonsterAttackTask monsterAttackTask = new MonsterAttackTask(channel,jobId, NettyMemory.futureMap);
+                                    Future future = NettyMemory.monsterThreadPool.scheduleAtFixedRate(monsterAttackTask, 0, 1, TimeUnit.SECONDS);
                                     channel.writeAndFlush(DelimiterUtils.addDelimiter("你已经进入战斗模式"));
                                 }
                             }

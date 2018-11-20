@@ -1,7 +1,7 @@
 package task;
 
-import Event.EventStatus;
-import buffer.Buff;
+import event.EventStatus;
+import buff.Buff;
 import component.Monster;
 import io.netty.channel.Channel;
 import memory.NettyMemory;

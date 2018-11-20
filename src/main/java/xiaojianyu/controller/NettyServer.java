@@ -1,6 +1,6 @@
 package xiaojianyu.controller;
 
-import buffer.Buff;
+import buff.Buff;
 import component.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -22,13 +22,11 @@ import org.springframework.stereotype.Service;
 import skill.MonsterSkill;
 import skill.UserSkill;
 import task.AttackBufferTask;
-import task.AttackHintsTask;
 import task.MpTask;
 import test.ExcelUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -98,21 +96,26 @@ public class NettyServer {
 //        初始化定时任务 start
 //        回蓝定时任务
         NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new MpTask(), 0, 1, TimeUnit.SECONDS);
-//        攻击回显定时任务
-        NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new AttackHintsTask(), 0, 1, TimeUnit.SECONDS);
 //        攻击buffer定时任务
         NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new AttackBufferTask(), 0, 1, TimeUnit.SECONDS);
 //        初始化定时任务 end
 
 
-//        初始化即时回复MP
-        MpMedicine mpMedicineQuick = new MpMedicine(1001,"2000",true,"0",0);
-//        初始化缓慢回复MP
-        MpMedicine mpMedicineSlow = new MpMedicine(1002,"500",false,"50",10);
-        MpMedicine mpMedicineSlow2 = new MpMedicine(1003,"1000",false,"100",10);
-        NettyMemory.mpMedicineMap.put(mpMedicineQuick.getId(),mpMedicineQuick);
-        NettyMemory.mpMedicineMap.put(mpMedicineSlow.getId(),mpMedicineSlow);
-        NettyMemory.mpMedicineMap.put(mpMedicineSlow2.getId(),mpMedicineSlow2);
+//       初始化即时回复MP start
+        FileInputStream mpMedicineFis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Medicine.xls"));
+        LinkedHashMap<String, String> mpMedicineAlias = new LinkedHashMap<>();
+        mpMedicineAlias.put("蓝药id","id");
+        mpMedicineAlias.put("回复总值","replyValue");
+        mpMedicineAlias.put("是否立刻回复","immediate");
+        mpMedicineAlias.put("每秒回复的值","secondValue");
+        mpMedicineAlias.put("持续时间","keepTime");
+        List<MpMedicine> mpMedicineList = ExcelUtil.excel2Pojo(mpMedicineFis, MpMedicine.class, mpMedicineAlias);
+        if(mpMedicineList!=null&&mpMedicineList.size()>0){
+            for(MpMedicine mpMedicine:mpMedicineList){
+                NettyMemory.mpMedicineMap.put(mpMedicine.getId(),mpMedicine);
+            }
+        }
+//       初始化即时回复MP end
 
 //      初始化全图buff
         FileInputStream fis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Buff.xls"));
@@ -130,34 +133,19 @@ public class NettyServer {
 //      初始化全图buff
 
 
+
 //        初始化技能表start
-        UserSkill userSkill = new UserSkill();
-        userSkill.setSkillId(1);
-        userSkill.setSkillName("烈火攻击");
-        userSkill.setAttackCd(10000l);
-        userSkill.setDamage("10000");
-        userSkill.setSkillMp("1000");
-        NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
-
-        userSkill = new UserSkill();
-        userSkill.setSkillId(2);
-        userSkill.setSkillName("喷水攻击");
-        userSkill.setAttackCd(2000l);
-        userSkill.setDamage("120");
-        userSkill.setSkillMp("500");
-        NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
-
-//      中毒buff
-        userSkill = new UserSkill();
-        userSkill.setSkillId(3);
-        userSkill.setSkillName("毒液攻击");
-        userSkill.setAttackCd(2000l);
-        userSkill.setDamage("120");
-        userSkill.setSkillMp("1000");
-        Map<String,Integer> bufMap = new HashMap<>();
-        bufMap.put("poisoningBuff",2001);
-        userSkill.setBuffMap(bufMap);
-        NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
+        FileInputStream userSkillfis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\UserSkill.xls"));
+        LinkedHashMap<String, String> userSkillalias = new LinkedHashMap<>();
+        userSkillalias.put("技能id", "skillId");
+        userSkillalias.put("技能名称","skillName");
+        userSkillalias.put("技能攻击时间", "attackCd");
+        userSkillalias.put("技能伤害", "damage");
+        userSkillalias.put("技能消耗Mp", "skillMp");
+        List<UserSkill> userSkillList = ExcelUtil.excel2Pojo(userSkillfis, UserSkill.class, userSkillalias);
+        for(UserSkill userSkill:userSkillList){
+            NettyMemory.SkillMap.put(userSkill.getSkillId(),userSkill);
+        }
 //        初始化技能表end
 
 

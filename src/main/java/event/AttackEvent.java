@@ -1,4 +1,4 @@
-package Event;
+package event;
 
 import caculation.AttackCaculation;
 import component.Equipment;
@@ -10,10 +10,14 @@ import pojo.User;
 import pojo.Userskillrelation;
 import pojo.Weaponequipmentbar;
 import skill.UserSkill;
+import team.Team;
 import utils.DelimiterUtils;
 import component.Monster;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component("attackEvent")
 public class AttackEvent {
@@ -22,8 +26,7 @@ public class AttackEvent {
     @Autowired
     private AttackCaculation attackCaculation;
     public void attack(Channel channel, String msg) {
-        if(msg.equals("b")||msg.startsWith("b-")||msg.equals("w")||
-                msg.startsWith("w-")||msg.startsWith("fix-")||msg.startsWith("ww-")||msg.startsWith("wq-")){
+        if(msg.startsWith("b")||msg.startsWith("w")||msg.startsWith("fix-")){
             commonEvent.common(channel,msg);
             return;
         }
@@ -34,7 +37,14 @@ public class AttackEvent {
         } else {
             if (NettyMemory.userskillrelationMap.get(channel).containsKey(msg)) {
                 User user = NettyMemory.session2UserIds.get(channel);
-                for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
+                Map<String,Monster>monsterMap = null;
+                if(user.getTeamId()!=null&&NettyMemory.bossAreaMap.containsKey(user.getTeamId())){
+                    monsterMap = getMonsterMap(user);
+                }else{
+                    monsterMap = changeToMap(user);
+                }
+                for (Map.Entry<String, Monster> entry:monsterMap.entrySet()) {
+                    Monster monster = entry.getValue();
                     UserSkill userSkill = NettyMemory.SkillMap.get(NettyMemory.userskillrelationMap.get(channel).get(msg).getSkillid());
                     Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(channel).get(msg);
 //                  技能CD检查
@@ -54,7 +64,7 @@ public class AttackEvent {
                             user.setMp(userMp.toString());
                             String resp = out(user);
                             BigInteger minValueOfLife = new BigInteger("0");
-//                         检查怪物血量s
+//                         检查怪物血量
                             if (monsterLife.compareTo(minValueOfLife) <= 0) {
 //                              蓝量计算逻辑
                                 monster.setValueOfLife(minValueOfLife.toString());
@@ -78,8 +88,10 @@ public class AttackEvent {
                                 monster.setStatus("0");
 //                                  移除任务攻击记录
                                 NettyMemory.monsterMap.remove(user);
-//                                           切换场景
-                                NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
+//                              切换场景
+                                if(NettyMemory.eventStatus.get(channel).equals(EventStatus.ATTACK)){
+                                    NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
+                                }
                             } else {
                                 resp +=
                                         System.getProperty("line.separator")
@@ -94,6 +106,16 @@ public class AttackEvent {
                                                 + "怪物剩余血量:" + monster.getValueOfLife();
                                 userskillrelation.setSkillcds(System.currentTimeMillis());
                                 //TODO:数据库更新技能时间
+                                //  更新用户总战斗伤害的值
+                                if(user.getTeamId()!=null&&NettyMemory.bossAreaMap.get(user.getTeamId())!=null){
+                                    if(!NettyMemory.bossAreaMap.get(user.getTeamId()).getDamageAll().containsKey(user)){
+                                        NettyMemory.bossAreaMap.get(user.getTeamId()).getDamageAll().put(user,attackDamage.toString());
+                                    }else {
+                                        String newDamageValue = NettyMemory.bossAreaMap.get(user.getTeamId()).getDamageAll().get(user);
+                                        BigInteger newDamageValueI = new BigInteger(newDamageValue).add(attackDamage);
+                                        NettyMemory.bossAreaMap.get(user.getTeamId()).getDamageAll().put(user,newDamageValueI.toString());
+                                    }
+                                }
                                 channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
                             }
                         } else {
@@ -107,6 +129,15 @@ public class AttackEvent {
         }
     }
 
+    private Map<String, Monster> changeToMap(User user) {
+        List<Monster> monsterList = NettyMemory.areaMap.get(user.getPos()).getMonsters();
+        Map<String,Monster> map = new HashMap<>();
+        for(Monster monster:monsterList){
+            map.put(monster.getId()+"",monster);
+        }
+        return map;
+    }
+
     private String out(User user) {
         String resp = "";
         for(Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()){
@@ -116,5 +147,14 @@ public class AttackEvent {
                     ;
         }
         return resp;
+    }
+
+    private Map<String,Monster> getMonsterMap(User user){
+        return NettyMemory.bossAreaMap.get(getTeam(user).getTeamId()).getMap();
+    }
+
+    private Team getTeam(User user) {
+        if(!NettyMemory.teamMap.containsKey(user.getTeamId()))return null;
+        return NettyMemory.teamMap.get(user.getTeamId());
     }
 }

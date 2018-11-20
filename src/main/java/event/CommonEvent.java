@@ -1,4 +1,4 @@
-package Event;
+package event;
 
 import component.Equipment;
 import io.netty.channel.Channel;

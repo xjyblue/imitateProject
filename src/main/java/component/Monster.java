@@ -12,7 +12,7 @@ public class Monster {
 
     private String type;
 
-    private String valueOfLife;
+    private volatile String valueOfLife;
 
     private String status;
 
@@ -58,7 +58,7 @@ public class Monster {
         this.type = type;
     }
 
-    public synchronized String getValueOfLife() {
+    public String getValueOfLife() {
         return valueOfLife;
     }
 

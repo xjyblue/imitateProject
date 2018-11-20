@@ -2,13 +2,11 @@ package memory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
-import buffer.Buff;
-import component.Area;
-import component.Equipment;
-import component.Monster;
-import component.MpMedicine;
+import buff.Buff;
+import component.*;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -16,6 +14,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import pojo.User;
 import pojo.Userskillrelation;
 import skill.UserSkill;
+import team.Team;
 
 /**
  * 内存中存放channel
@@ -26,6 +25,8 @@ public class NettyMemory {
 	public static ChannelGroup group = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 	/** 缓存通信上下文环境对应的登录用户 */ 
 	public static Map<Channel, User> session2UserIds  = new ConcurrentHashMap<Channel,User>();
+	/** 根据用户拿去对应的渠道 */
+	public static Map<User,Channel> userToChannelMap  = new ConcurrentHashMap<User,Channel>();
 	/** 信道所处事件的装填*/
 	public static Map<Channel,String>eventStatus  = new ConcurrentHashMap<Channel,String>();
 	/** 地图缓存到内存中 */
@@ -50,4 +51,16 @@ public class NettyMemory {
 	public static Map<Integer, Equipment>equipmentMap = new HashMap<>();
 	/**初始化全局武器特殊buf效果*/
 	public static Map<Integer, Buff> buffMap = new HashMap<>();
+	/**记录玩家队伍*/
+	public static Map<String, Team> teamMap = new ConcurrentHashMap<>();
+	/**每个boss副本和teamId挂钩*/
+	public static Map<String, BossArea> bossAreaMap = new ConcurrentHashMap<>();
+	/**记录每个队伍挑战副本的截止时间，超过时间就GG*/
+	public static Map<String,Long> endBossAreaTime = new ConcurrentHashMap<>();
+	/** 副本boss定时攻击的任务*/
+	public static ScheduledExecutorService bossAreaThreadPool = Executors.newScheduledThreadPool(5);
+	/** 普通小怪定时攻击的任务*/
+	public static ScheduledExecutorService monsterThreadPool = Executors.newScheduledThreadPool(5);
+	/** 辅助定时任务关闭的工具类*/
+	public static ConcurrentHashMap<String, Future> futureMap = new ConcurrentHashMap<String, Future>();
 }

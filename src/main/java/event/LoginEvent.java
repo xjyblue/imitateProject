@@ -1,8 +1,7 @@
-package Event;
+package event;
 
 import io.netty.channel.Channel;
 import mapper.UserMapper;
-import mapper.UserbagMapper;
 import mapper.UserskillrelationMapper;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +55,7 @@ public class LoginEvent {
                 }
 //                初始化玩家的技能end
                 NettyMemory.session2UserIds.put(channel, user);
-
+                NettyMemory.userToChannelMap.put(user,channel);
                 channel.writeAndFlush(DelimiterUtils.addDelimiter("登录成功，你已进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
                 NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
             }

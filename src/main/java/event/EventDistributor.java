@@ -1,4 +1,4 @@
-package Event;
+package event;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +26,8 @@ public class EventDistributor {
     private SkillEvent skillEvent;
     @Autowired
     private AttackEvent attackEvent;
+    @Autowired
+    private BossEvent bossEvent;
     public void distributeEvent(ChannelHandlerContext ctx, String msg) {
         Channel ch = ctx.channel();
         if (!NettyMemory.eventStatus.containsKey(ch)) {
@@ -55,6 +57,9 @@ public class EventDistributor {
                     break;
                 case EventStatus.ATTACK:
                     attackEvent.attack(ctx.channel(),msg);
+                    break;
+                case EventStatus.BOSSAREA:
+                    bossEvent.attack(ctx.channel(),msg);
                     break;
             }
         }

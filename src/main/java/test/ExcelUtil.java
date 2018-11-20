@@ -16,11 +16,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.slf4j.Logger;
@@ -28,6 +26,13 @@ import org.slf4j.LoggerFactory;
 
 public class ExcelUtil {
     private static final Logger logger=LoggerFactory.getLogger(ExcelUtil.class);
+
+    public static LinkedHashMap<String,String> objleibie22 = null;
+
+    public static <T>void pojo2Excel(List<T> pojoList,OutputStream out,LinkedHashMap<String,String> alias,String headLine,LinkedHashMap<String,String> objleibie) throws Exception {
+        objleibie22 = objleibie;
+        pojo2Excel(pojoList,out,alias,headLine);
+    }
     /**
      * 将对象数组转换成excel
      * @param pojoList 	对象数组
@@ -162,7 +167,6 @@ public class ExcelUtil {
 
             //获取列的迭代
             Set<Entry<String, String>> entrySet = alias.entrySet();
-
             //从第0个格子开始创建
             int columnNum=0;
             for (Entry<String, String> entry : entrySet) {

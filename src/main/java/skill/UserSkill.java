@@ -1,8 +1,5 @@
 package skill;
 
-import buffer.Buff;
-
-import java.util.List;
 import java.util.Map;
 
 public class UserSkill {

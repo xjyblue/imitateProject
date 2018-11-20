@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/nettySpringServer.iml" filepath="$PROJECT_DIR$/nettySpringServer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/imitateProject.iml" filepath="$PROJECT_DIR$/.idea/imitateProject.iml" />
     </modules>
   </component>
 </project>

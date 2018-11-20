@@ -14,7 +14,7 @@
 	<context:component-scan
 		base-package="xiaojianyu.controller" />
 	<context:component-scan
-		base-package="Event" />
+		base-package="event" />
 	<context:component-scan
 			base-package="caculation" />
 		

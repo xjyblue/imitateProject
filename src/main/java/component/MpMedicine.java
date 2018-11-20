@@ -2,6 +2,10 @@ package component;
 
 public class MpMedicine {
 
+    public MpMedicine(){
+
+    }
+
     public MpMedicine(Integer id,String replyValue, boolean immediate, String secondValue, Integer keepTime) {
         this.id =id;
         this.replyValue = replyValue;
