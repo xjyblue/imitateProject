@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userskillrelation;
 import pojo.Weaponequipmentbar;
-import skill.MonsterSkill;
 import skill.UserSkill;
 import task.BossAttackTask;
 import team.Team;
@@ -49,7 +48,7 @@ public class BossEvent {
             team = getTeam(user);
         }
         if(!team.getLeader().getUsername().equals(user.getUsername())){
-            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.YOUARENOLEADER));
+            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.YOUARENOLEADER));
             return;
         }
         BossArea bossArea = new BossArea();
@@ -65,7 +64,7 @@ public class BossEvent {
         for(Map.Entry<String,User>entry:team.getUserMap().entrySet()){
             Channel channel = NettyMemory.userToChannelMap.get(entry.getValue());
             NettyMemory.eventStatus.put(channel,EventStatus.BOSSAREA);
-            channel.writeAndFlush(DelimiterUtils.addDelimiter("进入boss副本,出现boss"+bossArea.getBossName()+""));
+            channel.writeAndFlush(DelimiterUtils.turnToPacket("进入boss副本,出现boss"+bossArea.getBossName()+""));
         }
     }
 
@@ -142,7 +141,7 @@ public class BossEvent {
                                         + System.getProperty("line.separator")
                                         + "[人物剩余蓝量]:" + user.getMp()
                                         + System.getProperty("line.separator");
-                                channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+                                channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
                                 //TODO:更新数据库人物技能蓝量
 //                                    刷新技能时间
                                 userskillrelation.setSkillcds(System.currentTimeMillis());
@@ -154,7 +153,7 @@ public class BossEvent {
 //                                    提醒用户你已进入战斗模式
                                 if(!NettyMemory.bossAreaMap.get(user.getTeamId()).isFight()){
                                     NettyMemory.bossAreaMap.get(user.getTeamId()).setFight(true);
-                                    channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ENTERFIGHT));
+                                    channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ENTERFIGHT));
                                     String jobId= UUID.randomUUID().toString();
                                     BossAttackTask bossAttackTask = new BossAttackTask(user.getTeamId(),channel,jobId, NettyMemory.futureMap);
                                     Future future = NettyMemory.bossAreaThreadPool.scheduleAtFixedRate(bossAttackTask, 0, 1, TimeUnit.SECONDS);
@@ -165,7 +164,7 @@ public class BossEvent {
                             }
                         }
                     } else {
-                        channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.UNENOUGHMP));
+                        channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.UNENOUGHMP));
                     }
                     break;
                 }
@@ -181,9 +180,9 @@ public class BossEvent {
             if(entry.getValue()==user){
                 resp += System.getProperty("line.separator")
                         + monster.getName()+MessageConfig.BOSSAREASUCCESS;
-                channelTemp.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+                channelTemp.writeAndFlush(DelimiterUtils.turnToPacket(resp));
             }else {
-                channelTemp.writeAndFlush(DelimiterUtils.addDelimiter(monster.getName()+MessageConfig.BOSSAREASUCCESS));
+                channelTemp.writeAndFlush(DelimiterUtils.turnToPacket(monster.getName()+MessageConfig.BOSSAREASUCCESS));
             }
         }
     }

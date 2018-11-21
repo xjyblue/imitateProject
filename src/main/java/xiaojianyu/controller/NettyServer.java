@@ -4,22 +4,21 @@ import buff.Buff;
 import component.*;
 import component.parent.Good;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
-import io.netty.util.CharsetUtil;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
+import io.netty.handler.timeout.IdleStateHandler;
 import memory.NettyMemory;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import common.PacketProto;
 import skill.MonsterSkill;
 import skill.UserSkill;
 import task.AttackBufferTask;
@@ -39,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 public class NettyServer {
     private static Logger logger = Logger.getLogger(NettyServer.class);
 
-    private static final int portNumber = 8080;
+    private static final int portNumber = 8081;
 
     @Autowired
     private NettyServerHandler nettyServerHandler;
@@ -54,15 +53,15 @@ public class NettyServer {
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .option(ChannelOption.TCP_NODELAY, true)
-                    .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(2048))
+//                  .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(2048))
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel ch) throws Exception {
                             // 初始化编码器，解码器，处理器
-                            ByteBuf delimiter = Unpooled.copiedBuffer("$_".getBytes());
-                            ch.pipeline().addLast(new StringDecoder(CharsetUtil.UTF_8));
-                            ch.pipeline().addLast(new StringEncoder(CharsetUtil.UTF_8));
-                            ch.pipeline().addLast(new DelimiterBasedFrameDecoder(2048, delimiter));
+                            ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
+                            ch.pipeline().addLast(new ProtobufEncoder());
+                            ch.pipeline().addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
+                            ch.pipeline().addLast(new IdleStateHandler(6, 0, 0));
                             ch.pipeline().addLast(nettyServerHandler);
                         }
                     });

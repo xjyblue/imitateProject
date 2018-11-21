@@ -22,7 +22,7 @@ public class TeamEvent {
     public void team(Channel channel, String msg) {
         if (msg.equals("t")) {
             if (getUser(channel).getTeamId() == null) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOTEAMMESSAGE));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.NOTEAMMESSAGE));
                 return;
             } else {
                 Team team = getTeam(getUser(channel));
@@ -32,9 +32,9 @@ public class TeamEvent {
                         resp += entry.getKey() + "  ";
                     }
                     resp+="]该队伍队长是["+team.getLeader().getUsername()+"]";
-                    channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+                    channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
                 } else {
-                    channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOTEAMMESSAGE));
+                    channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.NOTEAMMESSAGE));
                     return;
                 }
             }
@@ -43,7 +43,7 @@ public class TeamEvent {
         if(msg.equals("t-create")){
             User user = getUser(channel);
             if (getUser(channel).getTeamId() != null&&getTeam(getUser(channel))!=null) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.INTEAMNOCREATETEAM));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.INTEAMNOCREATETEAM));
                 return;
             }else {
                 Team team = new Team();
@@ -54,7 +54,7 @@ public class TeamEvent {
                 teamUserMap.put(user.getUsername(),user);
                 team.setUserMap(teamUserMap);
                 NettyMemory.teamMap.put(user.getTeamId(),team);
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.CREATETEAMSUCCESSMESSAGE));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.CREATETEAMSUCCESSMESSAGE));
                 return;
             }
         }
@@ -63,7 +63,7 @@ public class TeamEvent {
             User user = getUser(channel);
             Team team = getTeam(getUser(channel));
             if(team==null){
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOINTEAMERRORMESSAGE));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.NOINTEAMERRORMESSAGE));
                 return;
             }
             if(team!=null&&team.getLeader().getUsername().equals(user.getUsername())){
@@ -71,13 +71,13 @@ public class TeamEvent {
                 for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
                    entry.getValue().setTeamId(null);
                 }
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.DISSOLUTIONTEAM));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.DISSOLUTIONTEAM));
             }else {
                 if(team.getUserMap().containsKey(user.getUsername())){
                     team.getUserMap().remove(user.getUsername());
                 }
                 user.setTeamId(null);
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.SIGNOUTTEAM));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.SIGNOUTTEAM));
             }
         }
 
@@ -86,14 +86,14 @@ public class TeamEvent {
             String temp[] = msg.split("-");
             User userLeader = getUserByName(temp[2]);
             if(userLeader==null||getTeam(userLeader)==null){
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOFOUNDTEAM));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.NOFOUNDTEAM));
                 return;
             }else {
                 Team team = getTeam(userLeader);
                 if(team != null){
                     user.setTeamId(team.getTeamId());
                     team.getUserMap().put(user.getUsername(),user);
-                    channel.writeAndFlush(DelimiterUtils.addDelimiter("成功加入"+userLeader.getUsername()+"的队伍"));
+                    channel.writeAndFlush(DelimiterUtils.turnToPacket("成功加入"+userLeader.getUsername()+"的队伍"));
                     return;
                 }
             }

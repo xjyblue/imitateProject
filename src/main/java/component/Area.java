@@ -38,7 +38,6 @@ public class Area {
         this.name = name;
     }
 
-
     public List<NPC> getNpcs() {
         return npcs;
     }

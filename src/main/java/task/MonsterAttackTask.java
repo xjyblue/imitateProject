@@ -65,7 +65,7 @@ public class MonsterAttackTask implements Runnable{
             return;
         }
         if (userHp.compareTo(new BigInteger("0")) <= 0 && user.getStatus().equals("1")) {
-            channel.writeAndFlush(DelimiterUtils.addDelimiter("人物已死亡"));
+            channel.writeAndFlush(DelimiterUtils.turnToPacket("人物已死亡"));
             user.setHp("0");
             user.setStatus("0");
             NettyMemory.monsterMap.remove(user);
@@ -76,7 +76,7 @@ public class MonsterAttackTask implements Runnable{
                 Monster monster = NettyMemory.monsterMap.get(user).get(0);
                 if(monster!=null&&NettyMemory.monsterMap.get(user).get(0).getStatus().equals("0")) {
                     NettyMemory.monsterMap.remove(user);
-                    channel.writeAndFlush(DelimiterUtils.addDelimiter("怪物已死亡"));
+                    channel.writeAndFlush(DelimiterUtils.turnToPacket("怪物已死亡"));
                     NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
                     return;
                 }
@@ -92,7 +92,7 @@ public class MonsterAttackTask implements Runnable{
                 user.setHp(userHp.toString());
                 NettyMemory.session2UserIds.put(channel, user);
                 //TODO:更新用户血量到数据库
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
                 NettyMemory.eventStatus.put(channel, EventStatus.ATTACK);
             }
         }

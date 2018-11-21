@@ -33,7 +33,7 @@ public class AttackEvent {
         }
         if (msg.equals("q")) {
             NettyMemory.monsterMap.remove(NettyMemory.session2UserIds.get(channel));
-            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.RETREATFIGHT));
+            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.RETREATFIGHT));
             NettyMemory.eventStatus.put(channel,EventStatus.STOPAREA);
         } else {
             if (NettyMemory.userskillrelationMap.get(channel).containsKey(msg)) {
@@ -83,7 +83,7 @@ public class AttackEvent {
                                         + "[人物剩余蓝量]:" + user.getMp()
                                         + System.getProperty("line.separator")
                                         + "怪物已死亡";
-                                channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+                                channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
 //                                         修改怪物状态
                                 monster.setValueOfLife("0");
                                 monster.setStatus("0");
@@ -117,13 +117,13 @@ public class AttackEvent {
                                         NettyMemory.bossAreaMap.get(user.getTeamId()).getDamageAll().put(user,newDamageValueI.toString());
                                     }
                                 }
-                                channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+                                channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
                             }
                         } else {
-                            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.UNENOUGHMP));
+                            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.UNENOUGHMP));
                         }
                     } else {
-                            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.UNSKILLCD));
+                            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.UNSKILLCD));
                     }
                 }
             }

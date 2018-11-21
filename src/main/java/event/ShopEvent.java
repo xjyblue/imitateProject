@@ -53,23 +53,23 @@ public class ShopEvent {
             }
             resp += "[购买武器请输入s-物品编号-数量 即可购买]" + System.getProperty("line.separator");
             resp += "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
-            channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+            channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
         }
 
         if (msg.startsWith("s-")) {
             String temp[] = msg.split("-");
             if (temp.length != 3) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ERRORORDER));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORORDER));
                 return;
             }
 //          校验是否为有效的物品id
             if (!checkIfGoodId(temp[1])) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.FAILGOODID));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.FAILGOODID));
                 return;
             }
 //          校验用户的金钱是否足够
             if (!checkUserMoneyEnough(temp[2],temp[1], channel)) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.UNENOUGHMONEY));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.UNENOUGHMONEY));
                 return;
             }
 //           处理蓝药购买逻辑
@@ -91,7 +91,7 @@ public class ShopEvent {
                     user.getUserBag().add(userbag);
                 }
                 String goodAllMoney = changeUserMoney(mpMedicine.getBuyMoney(),temp[2],user);
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("您已购买了"+mpMedicine.getName()+temp[2]+"件"+"[花费:"+goodAllMoney+"]"+"[用户剩余金币:"+user.getMoney()+"]"));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket("您已购买了"+mpMedicine.getName()+temp[2]+"件"+"[花费:"+goodAllMoney+"]"+"[用户剩余金币:"+user.getMoney()+"]"));
             }
 //            处理装备购买逻辑
             if (NettyMemory.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
@@ -110,7 +110,7 @@ public class ShopEvent {
                     count--;
                 }
                 String goodAllMoney = changeUserMoney(equipment.getBuyMoney(),temp[2],user);
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("您已购买了"+equipment.getName()+temp[2]+"件"+"[花费:"+goodAllMoney+"]"+"[用户剩余金币:"+user.getMoney()+"]"));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket("您已购买了"+equipment.getName()+temp[2]+"件"+"[花费:"+goodAllMoney+"]"+"[用户剩余金币:"+user.getMoney()+"]"));
             }
         }
     }

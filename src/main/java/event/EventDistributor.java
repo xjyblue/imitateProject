@@ -36,11 +36,11 @@ public class EventDistributor {
         if (!NettyMemory.eventStatus.containsKey(ch)) {
             if (msg.equals("d")) {
                 NettyMemory.eventStatus.put(ch, EventStatus.LOGIN);
-                ctx.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.LOGINMESSAGE));
+                ctx.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.LOGINMESSAGE));
             }
             if (msg.equals("z")) {
                 NettyMemory.eventStatus.put(ch, EventStatus.REGISTER);
-                ctx.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.REGISTERMESSAGE));
+                ctx.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.REGISTERMESSAGE));
             }
         } else {
             String status = NettyMemory.eventStatus.get(ch);

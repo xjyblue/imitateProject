@@ -1,16 +1,18 @@
 package client;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
-import io.netty.util.CharsetUtil;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
+import common.PacketProto;
+import io.netty.handler.timeout.IdleStateHandler;
+
+import static common.PacketProto.Packet.newBuilder;
 
 /**
  * @author xiaojianyu
@@ -19,7 +21,8 @@ public class Client {
     private int port;
     private String host;
     private SocketChannel socketChannel;
-
+    private static Bootstrap bootstrap;
+    private static Channel ch;
     public Client(int port, String host) {
         this.host = host;
         this.port = port;
@@ -31,23 +34,24 @@ public class Client {
         Thread thread = new Thread(new Runnable() {
             public void run() {
                 EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-                Bootstrap bootstrap = new Bootstrap();
+                bootstrap = new Bootstrap();
                 bootstrap.channel(NioSocketChannel.class)
                         // 保持连接
                         .option(ChannelOption.SO_KEEPALIVE, true)
                         // 有数据立即发送
                         .option(ChannelOption.TCP_NODELAY, true)
-                        .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(2048))
+//                        .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(2048))
                         // 绑定处理group
                         .group(eventLoopGroup).remoteAddress(host, port)
                         .handler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             protected void initChannel(SocketChannel socketChannel) throws Exception {
                                 // 初始化编码器，解码器，处理器
-                                ByteBuf delimiter = Unpooled.copiedBuffer("$_".getBytes());
-                                socketChannel.pipeline().addLast(new StringEncoder(CharsetUtil.UTF_8));
-                                socketChannel.pipeline().addLast(new StringDecoder(CharsetUtil.UTF_8));
-                                socketChannel.pipeline().addLast(new DelimiterBasedFrameDecoder(2048, delimiter));
+                                ChannelPipeline pipeline = socketChannel.pipeline();
+                                pipeline.addLast(new ProtobufVarint32FrameDecoder());
+                                pipeline.addLast(new ProtobufEncoder());
+                                pipeline.addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
+                                pipeline.addLast(new IdleStateHandler(0, 5, 0));
                                 socketChannel.pipeline().addLast(
                                         new ClientHandler());
                             }
@@ -56,6 +60,7 @@ public class Client {
                 ChannelFuture future;
                 try {
                     future = bootstrap.connect(host, port).sync();
+                    ch = future.channel();
                     // 判断是否连接成功
                     if (future.isSuccess()) {
                         // 得到管道，便于通信
@@ -74,13 +79,23 @@ public class Client {
                 }
             }
         });
-
         thread.start();
+    }
+
+    /**
+     * 抽取出该方法 (断线重连时使用)
+     */
+    public static void doConnect() throws InterruptedException {
+        ch = bootstrap.connect("127.0.0.1", 8081).sync().channel();
     }
 
     public void sendMessage(Object msg) {
         if (socketChannel != null) {
-            socketChannel.writeAndFlush(msg);
+            PacketProto.Packet.Builder builder = newBuilder();
+            builder.setPacketType(PacketProto.Packet.PacketType.DATA);
+            builder.setData((String) msg);
+            PacketProto.Packet packet = builder.build();
+            socketChannel.writeAndFlush(packet);
         }
     }
 }

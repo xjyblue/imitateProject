@@ -6,15 +6,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
 /**
  * 客户端主程序入口
- * @author xiaojianyu
  *
+ * @author xiaojianyu
  */
 public class ClientStart extends JFrame implements KeyListener {
     private static ClientStart frm;
     private static JTextField txt;
     private static Client bootstrap;
+
     ClientStart() {
         setTitle("TextField Test");
         setLocation(400, 400);
@@ -29,7 +31,7 @@ public class ClientStart extends JFrame implements KeyListener {
         txt.addKeyListener(frm);
         frm.add(txt);
         frm.setVisible(true);
-        bootstrap = new Client(8080, "127.0.0.1");
+        bootstrap = new Client(8081, "127.0.0.1");
     }
 
     public void keyPressed(KeyEvent e) {
@@ -38,18 +40,17 @@ public class ClientStart extends JFrame implements KeyListener {
             {
                 String req = txt.getText();
                 txt.setText("");
-                bootstrap.sendMessage(DelimiterUtils.addDelimiter(req));
+                bootstrap.sendMessage(req);
 
             }
         }
     }
 
+
     public void keyReleased(KeyEvent e) {
     }
 
 
-    @Override
     public void keyTyped(KeyEvent e) {
-
     }
 }

@@ -14,7 +14,6 @@ import pojo.User;
 import pojo.Userskillrelation;
 import pojo.Weaponequipmentbar;
 import skill.UserSkill;
-import task.BossAttackTask;
 import task.MonsterAttackTask;
 import utils.DelimiterUtils;
 
@@ -59,18 +58,18 @@ public class StopAreaEvent {
             temp = msg.split("-");
             User user = NettyMemory.session2UserIds.get(channel);
             if (temp[1].equals(NettyMemory.areaMap.get(user.getPos()).getName())) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.UNMOVELOCAL));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.UNMOVELOCAL));
             } else {
                 if (!NettyMemory.areaSet.contains(temp[1])) {
-                    channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOTARGETTOMOVE));
+                    channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.NOTARGETTOMOVE));
                 } else {
                     if (NettyMemory.areaMap.get(user.getPos()).getAreaSet().contains(temp[1])) {
                         user.setPos(NettyMemory.areaToNum.get(temp[1]));
                         userMapper.updateByPrimaryKeySelective(user);
                         NettyMemory.session2UserIds.put(channel, user);
-                        channel.writeAndFlush(DelimiterUtils.addDelimiter("已移动到" + temp[1]));
+                        channel.writeAndFlush(DelimiterUtils.turnToPacket("已移动到" + temp[1]));
                     } else {
-                        channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.REMOTEMOVEMESSAGE));
+                        channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.REMOTEMOVEMESSAGE));
                     }
                 }
             }
@@ -99,25 +98,25 @@ public class StopAreaEvent {
                         + "---攻击技能为---" + monster.getMonsterSkillList().get(0).getSkillName()
                         + "伤害为：" + monster.getMonsterSkillList().get(0).getDamage() + System.getProperty("line.separator");
             }
-            channel.writeAndFlush(DelimiterUtils.addDelimiter(allStatus));
+            channel.writeAndFlush(DelimiterUtils.turnToPacket(allStatus));
         } else if (msg.startsWith("talk")) {
             temp = msg.split("-");
             if (temp.length != 2) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ERRORORDER));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORORDER));
             } else {
                 List<NPC> npcs = NettyMemory.areaMap.get(NettyMemory.session2UserIds.get(channel).getPos())
                         .getNpcs();
                 for (NPC npc : npcs) {
                     if (npc.getName().equals(temp[1])) {
-                        channel.writeAndFlush(DelimiterUtils.addDelimiter(npc.getTalks().get(0)));
+                        channel.writeAndFlush(DelimiterUtils.turnToPacket(npc.getTalks().get(0)));
                         return;
                     }
                 }
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOFOUNDNPC));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.NOFOUNDNPC));
             }
         } else if (msg.equals("skillCheckout")) {
             NettyMemory.eventStatus.put(channel, EventStatus.SKILLMANAGER);
-            channel.writeAndFlush(DelimiterUtils.addDelimiter("请输入lookSkill查看技能，请输入change-技能名-键位配置技能,请输入quitSkill退出技能管理界面"));
+            channel.writeAndFlush(DelimiterUtils.turnToPacket("请输入lookSkill查看技能，请输入change-技能名-键位配置技能,请输入quitSkill退出技能管理界面"));
         } else if (msg.startsWith("attack")) {
             temp = msg.split("-");
 //                        输入的键位是否存在
@@ -161,7 +160,7 @@ public class StopAreaEvent {
                                             + System.getProperty("line.separator")
                                             + "怪物已死亡";
                                     monster.setValueOfLife("0");
-                                    channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+                                    channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
 //                                                修改怪物状态
                                     monster.setStatus("0");
                                 } else {
@@ -180,7 +179,7 @@ public class StopAreaEvent {
                                             + System.getProperty("line.separator")
                                             + "[人物剩余蓝量]:" + user.getMp()
                                             + System.getProperty("line.separator");
-                                    channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
+                                    channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
                                     //TODO:更新数据库人物技能蓝量
 //                                    刷新技能时间
                                     userskillrelation.setSkillcds(System.currentTimeMillis());
@@ -192,18 +191,18 @@ public class StopAreaEvent {
                                     String jobId= UUID.randomUUID().toString();
                                     MonsterAttackTask monsterAttackTask = new MonsterAttackTask(channel,jobId, NettyMemory.futureMap);
                                     Future future = NettyMemory.monsterThreadPool.scheduleAtFixedRate(monsterAttackTask, 0, 1, TimeUnit.SECONDS);
-                                    channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ENTERFIGHT));
+                                    channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ENTERFIGHT));
                                 }
                             }
                         } else {
-                            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.UNENOUGHMP));
+                            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.UNENOUGHMP));
                         }
                         break;
                     }
                 }
             }
         } else {
-            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ERRORORDER));
+            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORORDER));
         }
     }
 

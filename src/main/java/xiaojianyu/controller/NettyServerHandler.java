@@ -1,4 +1,5 @@
 package xiaojianyu.controller;
+import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,13 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.util.ReferenceCountUtil;
 import memory.NettyMemory;
-import utils.DelimiterUtils;
+import common.PacketProto;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static common.PacketProto.Packet.newBuilder;
+
 @Sharable
 @Service("nettyServerHandler")
 public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
@@ -20,12 +27,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 	
 	public static final ChannelGroup group = NettyMemory.group;
 
+	public static final Map<Channel,Integer> heartCounts = new ConcurrentHashMap<>();
+
 	@Autowired
 	private EventDistributor eventDistributor;
 	
 	public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
 	    Channel channel = ctx.channel();
 	    group.add(channel);
+		heartCounts.put(channel,0);
 	}
 	
 	@Override
@@ -45,7 +55,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		Channel channel = ctx.channel();
 		logger.info(channel.remoteAddress() + "客户端与服务端连接开始...");
-		ctx.writeAndFlush(DelimiterUtils.addDelimiter("d:登录 z:注册"));
+		PacketProto.Packet.Builder builder = newBuilder();
+		builder.setPacketType(PacketProto.Packet.PacketType.DATA);
+		builder.setData("d:登录 z:注册");
+		PacketProto.Packet packetResp = builder.build();
+		ctx.writeAndFlush(packetResp);
 	}
 
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
@@ -55,13 +69,17 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		try {
-			Channel channel = ctx.channel();
-			String msg_ = DelimiterUtils.removeDelimiter(msg.toString());
-			logger.info(channel.remoteAddress() + "输入结果：" + msg.toString());
-			System.out.println(group.size());
-			for(Channel ch : group) {
-				if(ch == channel) {
-					eventDistributor.distributeEvent(ctx, msg_);
+			if (msg instanceof PacketProto.Packet) {
+				PacketProto.Packet packet = (PacketProto.Packet) msg;
+				switch (packet.getPacketType()) {
+					case HEARTBEAT:
+						handleHeartbreat(ctx, packet);
+						break;
+					case DATA:
+						handleData(ctx, packet);
+						break;
+					default:
+						break;
 				}
 			}
 		} finally {
@@ -69,9 +87,47 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 		}
 	}
 
+	private void handleData(ChannelHandlerContext ctx, PacketProto.Packet packet) {
+		for (Channel ch : group) {
+			if (ch == ctx.channel()) {
+				heartCounts.put(ch,0);
+				eventDistributor.distributeEvent(ctx, packet.getData());
+			}
+		}
+	}
+
+
+	@Override
+	public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+		if (evt instanceof IdleStateEvent) {
+			int counter = heartCounts.get(ctx.channel());
+			// 空闲6s之后触发 (心跳包丢失)
+			if (counter >= 3) {
+				// 连续丢失3个心跳包 (断开连接)
+				ctx.channel().close().sync();
+				System.out.println("已与Client断开连接");
+			} else {
+				counter++;
+				System.out.println(ctx.channel().remoteAddress()+"丢失了第 " + counter + " 个心跳包");
+			}
+			heartCounts.put(ctx.channel(),counter);
+		}
+	}
+
 	@Override
 	protected void messageReceived(ChannelHandlerContext ctx, String msg) throws Exception {
 
+	}
+
+	/**
+	 * 处理心跳包
+	 */
+	private void handleHeartbreat(ChannelHandlerContext ctx, PacketProto.Packet packet) {
+		// 将心跳丢失计数器置为0
+		// counter = 0;
+		heartCounts.put(ctx.channel(),0);
+		System.out.println("收到"+ctx.channel().remoteAddress()+"心跳包");
+		ReferenceCountUtil.release(packet);
 	}
 
 }

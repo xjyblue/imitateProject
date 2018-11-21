@@ -23,11 +23,11 @@ public class LoginEvent {
     public void login(Channel channel, String msg) {
         String temp[] = msg.split("-");
         if (temp.length != 2) {
-            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ERRORORDER));
+            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORORDER));
         } else {
             User user = userMapper.getUser(temp[0],temp[1]);
             if (user == null) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ERRORPASSWORD));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORPASSWORD));
             } else {
  //             初始化玩家的技能start
                 UserskillrelationExample userskillrelationExample = new UserskillrelationExample();
@@ -57,7 +57,7 @@ public class LoginEvent {
 //                初始化玩家的技能end
                 NettyMemory.session2UserIds.put(channel, user);
                 NettyMemory.userToChannelMap.put(user,channel);
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("登录成功，你已进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
+                channel.writeAndFlush(DelimiterUtils.turnToPacket("登录成功，你已进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
                 NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
             }
         }
