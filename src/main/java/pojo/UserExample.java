@@ -523,6 +523,76 @@ public class UserExample {
             addCriterion("hp not between", value1, value2, "hp");
             return (Criteria) this;
         }
+
+        public Criteria andMoneyIsNull() {
+            addCriterion("money is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyIsNotNull() {
+            addCriterion("money is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyEqualTo(String value) {
+            addCriterion("money =", value, "money");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyNotEqualTo(String value) {
+            addCriterion("money <>", value, "money");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyGreaterThan(String value) {
+            addCriterion("money >", value, "money");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyGreaterThanOrEqualTo(String value) {
+            addCriterion("money >=", value, "money");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyLessThan(String value) {
+            addCriterion("money <", value, "money");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyLessThanOrEqualTo(String value) {
+            addCriterion("money <=", value, "money");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyLike(String value) {
+            addCriterion("money like", value, "money");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyNotLike(String value) {
+            addCriterion("money not like", value, "money");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyIn(List<String> values) {
+            addCriterion("money in", values, "money");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyNotIn(List<String> values) {
+            addCriterion("money not in", values, "money");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyBetween(String value1, String value2) {
+            addCriterion("money between", value1, value2, "money");
+            return (Criteria) this;
+        }
+
+        public Criteria andMoneyNotBetween(String value1, String value2) {
+            addCriterion("money not between", value1, value2, "money");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

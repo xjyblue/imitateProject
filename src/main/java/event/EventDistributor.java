@@ -1,6 +1,7 @@
 package event;
 
 
+import config.MessageConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,20 +29,21 @@ public class EventDistributor {
     private AttackEvent attackEvent;
     @Autowired
     private BossEvent bossEvent;
+    @Autowired
+    private ShopEvent shopEvent;
     public void distributeEvent(ChannelHandlerContext ctx, String msg) {
         Channel ch = ctx.channel();
         if (!NettyMemory.eventStatus.containsKey(ch)) {
             if (msg.equals("d")) {
                 NettyMemory.eventStatus.put(ch, EventStatus.LOGIN);
-                ctx.writeAndFlush(DelimiterUtils.addDelimiter("请输入：用户名-密码"));
+                ctx.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.LOGINMESSAGE));
             }
             if (msg.equals("z")) {
                 NettyMemory.eventStatus.put(ch, EventStatus.REGISTER);
-                ctx.writeAndFlush(DelimiterUtils.addDelimiter("请输入：用户名-密码-确认密码"));
+                ctx.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.REGISTERMESSAGE));
             }
         } else {
             String status = NettyMemory.eventStatus.get(ch);
-            String temp[] = null;
             switch (status) {
                 case EventStatus.LOGIN:
                     loginEvent.login(ctx.channel(),msg);
@@ -60,6 +62,9 @@ public class EventDistributor {
                     break;
                 case EventStatus.BOSSAREA:
                     bossEvent.attack(ctx.channel(),msg);
+                    break;
+                case EventStatus.SHOPAREA:
+                    shopEvent.shop(ctx.channel(),msg);
                     break;
             }
         }

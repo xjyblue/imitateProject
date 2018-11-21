@@ -1,5 +1,6 @@
 package event;
 
+import config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
@@ -22,11 +23,11 @@ public class LoginEvent {
     public void login(Channel channel, String msg) {
         String temp[] = msg.split("-");
         if (temp.length != 2) {
-            channel.writeAndFlush(DelimiterUtils.addDelimiter("输入错误命令"));
+            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ERRORORDER));
         } else {
             User user = userMapper.getUser(temp[0],temp[1]);
             if (user == null) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("账户密码出错"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ERRORPASSWORD));
             } else {
  //             初始化玩家的技能start
                 UserskillrelationExample userskillrelationExample = new UserskillrelationExample();

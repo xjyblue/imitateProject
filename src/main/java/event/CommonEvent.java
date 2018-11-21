@@ -1,6 +1,8 @@
 package event;
 
 import component.Equipment;
+import component.parent.Good;
+import config.MessageConfig;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import org.springframework.stereotype.Component;
@@ -22,7 +24,7 @@ public class CommonEvent {
                     + "按b-物品编号使用蓝药"
                     + "-------按ww-物品编号装备武器";
             for (Userbag userbag : user.getUserBag()) {
-                if (userbag.getTypeof().equals("0")) {
+                if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
                     MpMedicine mpMedicine = NettyMemory.mpMedicineMap.get(userbag.getWid());
                     bagResp += System.getProperty("line.separator")
                             + "物品id" + mpMedicine.getId()
@@ -33,7 +35,7 @@ public class CommonEvent {
                         bagResp += "----即时回复";
                     }
                     bagResp += "----数量:" + userbag.getNum();
-                } else if (userbag.getTypeof().equals("1")) {
+                } else if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
                     Equipment equipment = NettyMemory.equipmentMap.get(userbag.getWid());
                     bagResp += System.getProperty("line.separator")
                             + "物品id:" + equipment.getId()
@@ -65,7 +67,7 @@ public class CommonEvent {
                     user.getUserBag().remove(userbagRemove);
                 }
                 if (userbagNow == null) {
-                    channel.writeAndFlush(DelimiterUtils.addDelimiter("背包中该物品为空"));
+                    channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.GOODNOEXISTBAG));
                     return;
                 }
                 if (mpMedicine.isImmediate()) {
@@ -90,14 +92,14 @@ public class CommonEvent {
                     user.getBufferMap().put("mpBuff",mpMedicine.getId());
                 }
             } else {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("该物品不存在"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.GOODNOEXIST));
             }
         }
         if (msg.equals("w")) {
             User user = NettyMemory.session2UserIds.get(channel);
             String wresp = "";
             wresp += System.getProperty("line.separator")
-                    + "穿上装备按ww-装备编号"
+                    + "穿上装备按ww-装备编号-耐久度"
                     + "卸下按装备wq-装备编号"
                     + System.getProperty("line.separator");
             for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
@@ -115,7 +117,7 @@ public class CommonEvent {
             User user = NettyMemory.session2UserIds.get(channel);
             String temp[] = msg.split("-");
             if (!NettyMemory.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("待修复的武器不存在"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.GOODNOEXIST));
                 return;
             }
             for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
@@ -130,7 +132,7 @@ public class CommonEvent {
                     }
                 }
             }
-            channel.writeAndFlush(DelimiterUtils.addDelimiter("该人物无此装备"));
+            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOEQUIPGOOD));
         }
 
         if (msg.startsWith("wq-")) {
@@ -139,42 +141,41 @@ public class CommonEvent {
             if (NettyMemory.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
                 for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
                     if (weaponequipmentbar.getWid() == Integer.parseInt(temp[1])) {
-                        for(Userbag userbag: user.getUserBag()){
-                            if(userbag.getWid() == Integer.parseInt(temp[1])){
-                                channel.writeAndFlush(DelimiterUtils.addDelimiter("背包已有["
-                                        +NettyMemory.equipmentMap.get(Integer.parseInt(temp[1])).getName()
-                                        +"]装备，武器不支持叠加"));
-                                return;
-                            }
-                        }
                         Userbag userbag = new Userbag();
                         userbag.setNum(1);
                         userbag.setDurability(weaponequipmentbar.getDurability());
                         userbag.setId(200);
                         userbag.setName(weaponequipmentbar.getUsername());
-                        userbag.setTypeof("1");
+                        userbag.setTypeof(Good.EQUIPMENT);
                         userbag.setWid(weaponequipmentbar.getWid());
                         user.getUserBag().add(userbag);
                         user.getWeaponequipmentbars().remove(weaponequipmentbar);
                         channel.writeAndFlush(DelimiterUtils.addDelimiter("你成功卸下" + NettyMemory.equipmentMap.get(weaponequipmentbar.getWid()).getName()));
                         return;
-                    } else {
-                        channel.writeAndFlush(DelimiterUtils.addDelimiter("你无此装备"));
-                        return;
                     }
                 }
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOEQUIPGOOD));
+                return;
             } else {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("你所卸下的装备不存在"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.GOODNOEXIST));
             }
         }
         if(msg.startsWith("ww-")){
             User user = NettyMemory.session2UserIds.get(channel);
             String temp[] = msg.split("-");
+            if(temp.length!=3){
+                channel.writeAndFlush(DelimiterUtils.addDelimiter("请按照ww-物品id-耐久度来装备物品"));
+                return;
+            }
+            if(user.getWeaponequipmentbars().size()>0){
+                channel.writeAndFlush(DelimiterUtils.addDelimiter("请卸下你的主武器再进行装备"));
+                return;
+            }
             if(NettyMemory.equipmentMap.containsKey(Integer.parseInt(temp[1]))){
                 for(Userbag userbag:user.getUserBag()){
-                    if(userbag.getWid()==Integer.parseInt(temp[1])){
-                        if(userbag.getTypeof().equals("0")){
-                            channel.writeAndFlush(DelimiterUtils.addDelimiter("该装备不能穿戴"));
+                    if(userbag.getWid()==Integer.parseInt(temp[1])&&userbag.getDurability()==Integer.parseInt(temp[2])){
+                        if(userbag.getTypeof().equals(Good.MPMEDICINE)){
+                            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOBELONGTOEQUIP));
                             return;
                         }else{
                             Weaponequipmentbar weaponequipmentbar = new Weaponequipmentbar();
@@ -190,9 +191,9 @@ public class CommonEvent {
                         }
                     }
                 }
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("背包中该装备不存在"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.GOODNOEXISTBAG));
             }else {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("你穿戴的装备不存在"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.GOODNOEXIST));
             }
         }
     }

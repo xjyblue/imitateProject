@@ -1,237 +1,253 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="mapper.UserMapper">
-    <resultMap id="BaseResultMap" type="pojo.User">
-        <id column="username" property="username" jdbcType="VARCHAR"/>
-        <result column="password" property="password" jdbcType="VARCHAR"/>
-        <result column="status" property="status" jdbcType="VARCHAR"/>
-        <result column="pos" property="pos" jdbcType="VARCHAR"/>
-        <result column="mp" property="mp" jdbcType="VARCHAR"/>
-        <result column="hp" property="hp" jdbcType="VARCHAR"/>
-    </resultMap>
-    <sql id="Example_Where_Clause">
-        <where>
-            <foreach collection="oredCriteria" item="criteria" separator="or">
-                <if test="criteria.valid">
-                    <trim prefix="(" suffix=")" prefixOverrides="and">
-                        <foreach collection="criteria.criteria" item="criterion">
-                            <choose>
-                                <when test="criterion.noValue">
-                                    and ${criterion.condition}
-                                </when>
-                                <when test="criterion.singleValue">
-                                    and ${criterion.condition} #{criterion.value}
-                                </when>
-                                <when test="criterion.betweenValue">
-                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
-                                </when>
-                                <when test="criterion.listValue">
-                                    and ${criterion.condition}
-                                    <foreach collection="criterion.value" item="listItem" open="(" close=")"
-                                             separator=",">
-                                        #{listItem}
-                                    </foreach>
-                                </when>
-                            </choose>
-                        </foreach>
-                    </trim>
-                </if>
+<mapper namespace="mapper.UserMapper" >
+  <resultMap id="BaseResultMap" type="pojo.User" >
+    <id column="username" property="username" jdbcType="VARCHAR" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="pos" property="pos" jdbcType="VARCHAR" />
+    <result column="mp" property="mp" jdbcType="VARCHAR" />
+    <result column="hp" property="hp" jdbcType="VARCHAR" />
+    <result column="money" property="money" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
             </foreach>
-        </where>
-    </sql>
-    <sql id="Update_By_Example_Where_Clause">
-        <where>
-            <foreach collection="example.oredCriteria" item="criteria" separator="or">
-                <if test="criteria.valid">
-                    <trim prefix="(" suffix=")" prefixOverrides="and">
-                        <foreach collection="criteria.criteria" item="criterion">
-                            <choose>
-                                <when test="criterion.noValue">
-                                    and ${criterion.condition}
-                                </when>
-                                <when test="criterion.singleValue">
-                                    and ${criterion.condition} #{criterion.value}
-                                </when>
-                                <when test="criterion.betweenValue">
-                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
-                                </when>
-                                <when test="criterion.listValue">
-                                    and ${criterion.condition}
-                                    <foreach collection="criterion.value" item="listItem" open="(" close=")"
-                                             separator=",">
-                                        #{listItem}
-                                    </foreach>
-                                </when>
-                            </choose>
-                        </foreach>
-                    </trim>
-                </if>
-            </foreach>
-        </where>
-    </sql>
-    <sql id="Base_Column_List">
-    username, password, status, pos, mp, hp
+          </trim>
+        </if>
+      </foreach>
+    </where>
   </sql>
-    <select id="selectByExample" resultMap="BaseResultMap" parameterType="pojo.UserExample">
-        select
-        <if test="distinct">
-            distinct
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
         </if>
-        <include refid="Base_Column_List"/>
-        from user
-        <if test="_parameter != null">
-            <include refid="Example_Where_Clause"/>
-        </if>
-        <if test="orderByClause != null">
-            order by ${orderByClause}
-        </if>
-    </select>
-    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
-        select
-        <include refid="Base_Column_List"/>
-        from user
-        where username = #{username,jdbcType=VARCHAR}
-    </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    username, password, status, pos, mp, hp, money
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="pojo.UserExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from user
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from user
+    where username = #{username,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from user
     where username = #{username,jdbcType=VARCHAR}
   </delete>
-    <delete id="deleteByExample" parameterType="pojo.UserExample">
-        delete from user
-        <if test="_parameter != null">
-            <include refid="Example_Where_Clause"/>
-        </if>
-    </delete>
-    <insert id="insert" parameterType="pojo.User">
+  <delete id="deleteByExample" parameterType="pojo.UserExample" >
+    delete from user
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="pojo.User" >
     insert into user (username, password, status, 
-      pos, mp, hp)
+      pos, mp, hp, money
+      )
     values (#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, 
-      #{pos,jdbcType=VARCHAR}, #{mp,jdbcType=VARCHAR}, #{hp,jdbcType=VARCHAR})
+      #{pos,jdbcType=VARCHAR}, #{mp,jdbcType=VARCHAR}, #{hp,jdbcType=VARCHAR}, #{money,jdbcType=VARCHAR}
+      )
   </insert>
-    <insert id="insertSelective" parameterType="pojo.User">
-        insert into user
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="username != null">
-                username,
-            </if>
-            <if test="password != null">
-                password,
-            </if>
-            <if test="status != null">
-                status,
-            </if>
-            <if test="pos != null">
-                pos,
-            </if>
-            <if test="mp != null">
-                mp,
-            </if>
-            <if test="hp != null">
-                hp,
-            </if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="username != null">
-                #{username,jdbcType=VARCHAR},
-            </if>
-            <if test="password != null">
-                #{password,jdbcType=VARCHAR},
-            </if>
-            <if test="status != null">
-                #{status,jdbcType=VARCHAR},
-            </if>
-            <if test="pos != null">
-                #{pos,jdbcType=VARCHAR},
-            </if>
-            <if test="mp != null">
-                #{mp,jdbcType=VARCHAR},
-            </if>
-            <if test="hp != null">
-                #{hp,jdbcType=VARCHAR},
-            </if>
-        </trim>
-    </insert>
-    <select id="countByExample" parameterType="pojo.UserExample" resultType="java.lang.Integer">
-        select count(*) from user
-        <if test="_parameter != null">
-            <include refid="Example_Where_Clause"/>
-        </if>
-    </select>
-    <update id="updateByExampleSelective" parameterType="map">
-        update user
-        <set>
-            <if test="record.username != null">
-                username = #{record.username,jdbcType=VARCHAR},
-            </if>
-            <if test="record.password != null">
-                password = #{record.password,jdbcType=VARCHAR},
-            </if>
-            <if test="record.status != null">
-                status = #{record.status,jdbcType=VARCHAR},
-            </if>
-            <if test="record.pos != null">
-                pos = #{record.pos,jdbcType=VARCHAR},
-            </if>
-            <if test="record.mp != null">
-                mp = #{record.mp,jdbcType=VARCHAR},
-            </if>
-            <if test="record.hp != null">
-                hp = #{record.hp,jdbcType=VARCHAR},
-            </if>
-        </set>
-        <if test="_parameter != null">
-            <include refid="Update_By_Example_Where_Clause"/>
-        </if>
-    </update>
-    <update id="updateByExample" parameterType="map">
-        update user
-        set username = #{record.username,jdbcType=VARCHAR},
+  <insert id="insertSelective" parameterType="pojo.User" >
+    insert into user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="username != null" >
+        username,
+      </if>
+      <if test="password != null" >
+        password,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="pos != null" >
+        pos,
+      </if>
+      <if test="mp != null" >
+        mp,
+      </if>
+      <if test="hp != null" >
+        hp,
+      </if>
+      <if test="money != null" >
+        money,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="username != null" >
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="pos != null" >
+        #{pos,jdbcType=VARCHAR},
+      </if>
+      <if test="mp != null" >
+        #{mp,jdbcType=VARCHAR},
+      </if>
+      <if test="hp != null" >
+        #{hp,jdbcType=VARCHAR},
+      </if>
+      <if test="money != null" >
+        #{money,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="pojo.UserExample" resultType="java.lang.Integer" >
+    select count(*) from user
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update user
+    <set >
+      <if test="record.username != null" >
+        username = #{record.username,jdbcType=VARCHAR},
+      </if>
+      <if test="record.password != null" >
         password = #{record.password,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null" >
         status = #{record.status,jdbcType=VARCHAR},
+      </if>
+      <if test="record.pos != null" >
         pos = #{record.pos,jdbcType=VARCHAR},
+      </if>
+      <if test="record.mp != null" >
         mp = #{record.mp,jdbcType=VARCHAR},
-        hp = #{record.hp,jdbcType=VARCHAR}
-        <if test="_parameter != null">
-            <include refid="Update_By_Example_Where_Clause"/>
-        </if>
-    </update>
-    <update id="updateByPrimaryKeySelective" parameterType="pojo.User">
-        update user
-        <set>
-            <if test="password != null">
-                password = #{password,jdbcType=VARCHAR},
-            </if>
-            <if test="status != null">
-                status = #{status,jdbcType=VARCHAR},
-            </if>
-            <if test="pos != null">
-                pos = #{pos,jdbcType=VARCHAR},
-            </if>
-            <if test="mp != null">
-                mp = #{mp,jdbcType=VARCHAR},
-            </if>
-            <if test="hp != null">
-                hp = #{hp,jdbcType=VARCHAR},
-            </if>
-        </set>
-        where username = #{username,jdbcType=VARCHAR}
-    </update>
-    <update id="updateByPrimaryKey" parameterType="pojo.User">
+      </if>
+      <if test="record.hp != null" >
+        hp = #{record.hp,jdbcType=VARCHAR},
+      </if>
+      <if test="record.money != null" >
+        money = #{record.money,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update user
+    set username = #{record.username,jdbcType=VARCHAR},
+      password = #{record.password,jdbcType=VARCHAR},
+      status = #{record.status,jdbcType=VARCHAR},
+      pos = #{record.pos,jdbcType=VARCHAR},
+      mp = #{record.mp,jdbcType=VARCHAR},
+      hp = #{record.hp,jdbcType=VARCHAR},
+      money = #{record.money,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="pojo.User" >
+    update user
+    <set >
+      <if test="password != null" >
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="pos != null" >
+        pos = #{pos,jdbcType=VARCHAR},
+      </if>
+      <if test="mp != null" >
+        mp = #{mp,jdbcType=VARCHAR},
+      </if>
+      <if test="hp != null" >
+        hp = #{hp,jdbcType=VARCHAR},
+      </if>
+      <if test="money != null" >
+        money = #{money,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where username = #{username,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="pojo.User" >
     update user
     set password = #{password,jdbcType=VARCHAR},
       status = #{status,jdbcType=VARCHAR},
       pos = #{pos,jdbcType=VARCHAR},
       mp = #{mp,jdbcType=VARCHAR},
-      hp = #{hp,jdbcType=VARCHAR}
+      hp = #{hp,jdbcType=VARCHAR},
+      money = #{money,jdbcType=VARCHAR}
     where username = #{username,jdbcType=VARCHAR}
   </update>
-
-    <resultMap type="pojo.User" id="userMap">
+  
+  <resultMap type="pojo.User" id="userMap">
         <id column="username" property="username"/>
         <result column="status" property="status"/>
         <result column="pos" property="pos"/>
         <result column="mp" property="mp"/>
         <result column="hp" property="hp"/>
+        <result column="money" property="money"/>
         <collection property="userBag" ofType="pojo.Userbag" column="sid">
             <id column="sid" property="id"/><!-- 这里的column对应的是下面查询的别名，而不是表字段名 -->
             <result column="wid" property="wid"/><!-- property对应JavaBean中的属性名 -->
@@ -249,9 +265,10 @@
         </collection>
     </resultMap>
 
-    <!-- 查询所有的老师级各自的所有学生 -->
+
     <select id="getUser" resultMap="userMap">
 		SELECT
+		 u.money,
 		 u.username,
 		 u.status,
 		 u.pos,

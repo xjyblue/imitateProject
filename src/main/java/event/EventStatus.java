@@ -8,4 +8,5 @@ public class EventStatus {
 	public static final String SKILLMANAGER = "skillmanager";
 	public static final String ATTACK = "attack";
 	public static final String BOSSAREA = "bossArea";
+	public static final String SHOPAREA = "shopArea";
 }

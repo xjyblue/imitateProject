@@ -25,6 +25,24 @@ public class User {
 
     private Map<String,Integer> buffMap;
 
+    private String money;
+
+    public Map<String, Integer> getBuffMap() {
+        return buffMap;
+    }
+
+    public void setBuffMap(Map<String, Integer> buffMap) {
+        this.buffMap = buffMap;
+    }
+
+    public String getMoney() {
+        return money;
+    }
+
+    public void setMoney(String money) {
+        this.money = money;
+    }
+
     public String getTeamId() {
         return teamId;
     }

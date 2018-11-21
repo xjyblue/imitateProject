@@ -8,11 +8,11 @@ public class Area {
 
     private String name;
 
-    Set<String> areaSet;
+    public Set<String> areaSet;
 
-    List<NPC> npcs;
+    public List<NPC> npcs;
 
-    List<Monster> monsters;
+    public List<Monster> monsters;
 
     public Integer getId() {
         return id;

@@ -1,5 +1,6 @@
 package event;
 
+import config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.UserskillrelationMapper;
 import memory.NettyMemory;
@@ -60,7 +61,7 @@ public class SkillEvent {
                     }
                 }
                 if (!flag) {
-                    channel.writeAndFlush(DelimiterUtils.addDelimiter("请输入有效指令"));
+                    channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ERRORORDER));
                 }
             }
         } else if (msg.equals("quitSkill")) {
@@ -68,7 +69,7 @@ public class SkillEvent {
             channel.writeAndFlush(DelimiterUtils.addDelimiter("您已退出技能管理模块，进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
             NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
         } else {
-            channel.writeAndFlush(DelimiterUtils.addDelimiter("请输入有效指令"));
+            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ERRORORDER));
         }
     }
 }

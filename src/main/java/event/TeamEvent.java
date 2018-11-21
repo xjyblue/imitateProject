@@ -1,5 +1,6 @@
 package event;
 
+import config.MessageConfig;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ public class TeamEvent {
     public void team(Channel channel, String msg) {
         if (msg.equals("t")) {
             if (getUser(channel).getTeamId() == null) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("你还没有队伍，可以输入t-create创建队伍或者t-add-（已有队伍的玩家名）加入队伍"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOTEAMMESSAGE));
                 return;
             } else {
                 Team team = getTeam(getUser(channel));
@@ -33,7 +34,7 @@ public class TeamEvent {
                     resp+="]该队伍队长是["+team.getLeader().getUsername()+"]";
                     channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
                 } else {
-                    channel.writeAndFlush(DelimiterUtils.addDelimiter("你还没有队伍，可以输入t-create创建队伍或者t-add-（已有队伍的玩家名）加入队伍"));
+                    channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOTEAMMESSAGE));
                     return;
                 }
             }
@@ -42,7 +43,7 @@ public class TeamEvent {
         if(msg.equals("t-create")){
             User user = getUser(channel);
             if (getUser(channel).getTeamId() != null&&getTeam(getUser(channel))!=null) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("你已在队伍中无法创建队伍"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.INTEAMNOCREATETEAM));
                 return;
             }else {
                 Team team = new Team();
@@ -53,7 +54,7 @@ public class TeamEvent {
                 teamUserMap.put(user.getUsername(),user);
                 team.setUserMap(teamUserMap);
                 NettyMemory.teamMap.put(user.getTeamId(),team);
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("你成功创建队伍"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.CREATETEAMSUCCESSMESSAGE));
                 return;
             }
         }
@@ -62,7 +63,7 @@ public class TeamEvent {
             User user = getUser(channel);
             Team team = getTeam(getUser(channel));
             if(team==null){
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("你不在队伍中请不要做无效操作"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOINTEAMERRORMESSAGE));
                 return;
             }
             if(team!=null&&team.getLeader().getUsername().equals(user.getUsername())){
@@ -70,13 +71,13 @@ public class TeamEvent {
                 for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
                    entry.getValue().setTeamId(null);
                 }
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("你已经解散当前队伍"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.DISSOLUTIONTEAM));
             }else {
                 if(team.getUserMap().containsKey(user.getUsername())){
                     team.getUserMap().remove(user.getUsername());
                 }
                 user.setTeamId(null);
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("你已退出当前队伍"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.SIGNOUTTEAM));
             }
         }
 
@@ -85,7 +86,7 @@ public class TeamEvent {
             String temp[] = msg.split("-");
             User userLeader = getUserByName(temp[2]);
             if(userLeader==null||getTeam(userLeader)==null){
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("你所要加入的玩家队伍不存在"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOFOUNDTEAM));
                 return;
             }else {
                 Team team = getTeam(userLeader);

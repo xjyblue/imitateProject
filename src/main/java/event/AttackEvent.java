@@ -2,6 +2,7 @@ package event;
 
 import caculation.AttackCaculation;
 import component.Equipment;
+import config.MessageConfig;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class AttackEvent {
         }
         if (msg.equals("q")) {
             NettyMemory.monsterMap.remove(NettyMemory.session2UserIds.get(channel));
-            channel.writeAndFlush(DelimiterUtils.addDelimiter("退出战斗"));
+            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.RETREATFIGHT));
             NettyMemory.eventStatus.put(channel,EventStatus.STOPAREA);
         } else {
             if (NettyMemory.userskillrelationMap.get(channel).containsKey(msg)) {
@@ -119,10 +120,10 @@ public class AttackEvent {
                                 channel.writeAndFlush(DelimiterUtils.addDelimiter(resp));
                             }
                         } else {
-                            channel.writeAndFlush(DelimiterUtils.addDelimiter("技能蓝量不足"));
+                            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.UNENOUGHMP));
                         }
                     } else {
-                            channel.writeAndFlush(DelimiterUtils.addDelimiter("技能冷却中"));
+                            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.UNSKILLCD));
                     }
                 }
             }

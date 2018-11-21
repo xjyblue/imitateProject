@@ -117,7 +117,7 @@ public class BossAttackTask implements Runnable {
         Team team = NettyMemory.teamMap.get(bossArea.getTeamId());
         for(Map.Entry<String,User> entry:team.getUserMap().entrySet()){
             Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
-            channelTemp.writeAndFlush(DelimiterUtils.addDelimiter(bossArea.getBossName()+"副本攻略成功，热烈庆祝各位参与的小伙伴"));
+            channelTemp.writeAndFlush(DelimiterUtils.addDelimiter(bossArea.getBossName() + "副本攻略成功，热烈庆祝各位参与的小伙伴"));
             NettyMemory.eventStatus.put(channelTemp,EventStatus.STOPAREA);
             if(NettyMemory.monsterMap.containsKey(entry.getValue())){
                 NettyMemory.monsterMap.remove(entry.getValue());

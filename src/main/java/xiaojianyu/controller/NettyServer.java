@@ -2,6 +2,7 @@ package xiaojianyu.controller;
 
 import buff.Buff;
 import component.*;
+import component.parent.Good;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -78,21 +79,6 @@ public class NettyServer {
 
     public void initServer() throws IOException {
 
-//      初始化武器start
-        FileInputStream equipFis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Equipment.xls"));
-        LinkedHashMap<String, String> equipAlias = new LinkedHashMap<>();
-        equipAlias.put("武器id","id");
-        equipAlias.put("武器名称","name");
-        equipAlias.put("武器耐久度","durability");
-        equipAlias.put("武器增加伤害","addValue");
-        List<Equipment> equipmentList = ExcelUtil.excel2Pojo(equipFis, Equipment.class, equipAlias);
-       if(equipmentList!=null&&equipmentList.size()>0){
-           for(Equipment equipment:equipmentList){
-               NettyMemory.equipmentMap.put(equipment.getId(),equipment);
-           }
-       }
-//      初始化武器end
-
 //        初始化定时任务 start
 //        回蓝定时任务
         NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new MpTask(), 0, 1, TimeUnit.SECONDS);
@@ -100,6 +86,23 @@ public class NettyServer {
         NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new AttackBufferTask(), 0, 1, TimeUnit.SECONDS);
 //        初始化定时任务 end
 
+
+//      初始化武器start
+        FileInputStream equipFis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Equipment.xls"));
+        LinkedHashMap<String, String> equipAlias = new LinkedHashMap<>();
+        equipAlias.put("武器id","id");
+        equipAlias.put("武器名称","name");
+        equipAlias.put("武器耐久度","durability");
+        equipAlias.put("武器增加伤害","addValue");
+        equipAlias.put("购入价值","buyMoney");
+        List<Equipment> equipmentList = ExcelUtil.excel2Pojo(equipFis, Equipment.class, equipAlias);
+       if(equipmentList!=null&&equipmentList.size()>0){
+           for(Equipment equipment:equipmentList){
+               equipment.setType(Good.EQUIPMENT);
+               NettyMemory.equipmentMap.put(equipment.getId(),equipment);
+           }
+       }
+//      初始化武器end
 
 //       初始化即时回复MP start
         FileInputStream mpMedicineFis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Medicine.xls"));
@@ -109,9 +112,12 @@ public class NettyServer {
         mpMedicineAlias.put("是否立刻回复","immediate");
         mpMedicineAlias.put("每秒回复的值","secondValue");
         mpMedicineAlias.put("持续时间","keepTime");
+        mpMedicineAlias.put("蓝药名称","name");
+        mpMedicineAlias.put("购入价值","buyMoney");
         List<MpMedicine> mpMedicineList = ExcelUtil.excel2Pojo(mpMedicineFis, MpMedicine.class, mpMedicineAlias);
         if(mpMedicineList!=null&&mpMedicineList.size()>0){
             for(MpMedicine mpMedicine:mpMedicineList){
+                mpMedicine.setType(Good.MPMEDICINE);
                 NettyMemory.mpMedicineMap.put(mpMedicine.getId(),mpMedicine);
             }
         }
@@ -131,7 +137,6 @@ public class NettyServer {
             NettyMemory.buffMap.put(buff.getBufferId(),buff);
         }
 //      初始化全图buff
-
 
 
 //        初始化技能表start

@@ -20,7 +20,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 	
 	public static final ChannelGroup group = NettyMemory.group;
 
-
 	@Autowired
 	private EventDistributor eventDistributor;
 	
@@ -54,19 +53,25 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 	}
 
 	@Override
-	protected void messageReceived(ChannelHandlerContext ctx, String msg) throws Exception {
+	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		try {
 			Channel channel = ctx.channel();
-			msg = DelimiterUtils.removeDelimiter(msg.toString());
+			String msg_ = DelimiterUtils.removeDelimiter(msg.toString());
 			logger.info(channel.remoteAddress() + "输入结果：" + msg.toString());
 			System.out.println(group.size());
 			for(Channel ch : group) {
-				if(ch == channel) {	
-					eventDistributor.distributeEvent(ctx, msg);
+				if(ch == channel) {
+					eventDistributor.distributeEvent(ctx, msg_);
 				}
 			}
 		} finally {
 			ReferenceCountUtil.release(msg);
 		}
 	}
+
+	@Override
+	protected void messageReceived(ChannelHandlerContext ctx, String msg) throws Exception {
+
+	}
+
 }

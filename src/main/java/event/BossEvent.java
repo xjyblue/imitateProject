@@ -4,6 +4,7 @@ import caculation.AttackCaculation;
 import component.BossArea;
 import component.Equipment;
 import component.Monster;
+import config.MessageConfig;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class BossEvent {
             team = getTeam(user);
         }
         if(!team.getLeader().getUsername().equals(user.getUsername())){
-            channel.writeAndFlush(DelimiterUtils.addDelimiter("你无权带队进入副本，你不是队长"));
+            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.YOUARENOLEADER));
             return;
         }
         BossArea bossArea = new BossArea();
@@ -153,7 +154,7 @@ public class BossEvent {
 //                                    提醒用户你已进入战斗模式
                                 if(!NettyMemory.bossAreaMap.get(user.getTeamId()).isFight()){
                                     NettyMemory.bossAreaMap.get(user.getTeamId()).setFight(true);
-                                    channel.writeAndFlush(DelimiterUtils.addDelimiter("你已经进入战斗模式"));
+                                    channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ENTERFIGHT));
                                     String jobId= UUID.randomUUID().toString();
                                     BossAttackTask bossAttackTask = new BossAttackTask(user.getTeamId(),channel,jobId, NettyMemory.futureMap);
                                     Future future = NettyMemory.bossAreaThreadPool.scheduleAtFixedRate(bossAttackTask, 0, 1, TimeUnit.SECONDS);
@@ -164,7 +165,7 @@ public class BossEvent {
                             }
                         }
                     } else {
-                        channel.writeAndFlush(DelimiterUtils.addDelimiter("人物MP值不足"));
+                        channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.UNENOUGHMP));
                     }
                     break;
                 }
@@ -179,10 +180,10 @@ public class BossEvent {
             NettyMemory.eventStatus.put(channelTemp,EventStatus.STOPAREA);
             if(entry.getValue()==user){
                 resp += System.getProperty("line.separator")
-                        + monster.getName()+"副本攻略成功，热烈庆祝各位参与的小伙伴";
+                        + monster.getName()+MessageConfig.BOSSAREASUCCESS;
                 channelTemp.writeAndFlush(DelimiterUtils.addDelimiter(resp));
             }else {
-                channelTemp.writeAndFlush(DelimiterUtils.addDelimiter(monster.getName()+"副本攻略成功，热烈庆祝各位参与的小伙伴"));
+                channelTemp.writeAndFlush(DelimiterUtils.addDelimiter(monster.getName()+MessageConfig.BOSSAREASUCCESS));
             }
         }
     }

@@ -4,6 +4,7 @@ import caculation.AttackCaculation;
 import component.Equipment;
 import component.Monster;
 import component.NPC;
+import config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import memory.NettyMemory;
@@ -34,10 +35,13 @@ public class StopAreaEvent {
     private TeamEvent teamEvent;
     @Autowired
     private BossEvent bossEvent;
-
-
-
+    @Autowired
+    private ShopEvent shopEvent;
     public void stopArea(Channel channel, String msg) {
+        if(msg.startsWith("s")){
+            shopEvent.shop(channel,msg);
+            return;
+        }
         if(msg.equals("f")){
             bossEvent.enterBossArea(channel,msg);
             return;
@@ -55,10 +59,10 @@ public class StopAreaEvent {
             temp = msg.split("-");
             User user = NettyMemory.session2UserIds.get(channel);
             if (temp[1].equals(NettyMemory.areaMap.get(user.getPos()).getName())) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("原地无需移动"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.UNMOVELOCAL));
             } else {
                 if (!NettyMemory.areaSet.contains(temp[1])) {
-                    channel.writeAndFlush(DelimiterUtils.addDelimiter("移动地点不存在"));
+                    channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOTARGETTOMOVE));
                 } else {
                     if (NettyMemory.areaMap.get(user.getPos()).getAreaSet().contains(temp[1])) {
                         user.setPos(NettyMemory.areaToNum.get(temp[1]));
@@ -66,7 +70,7 @@ public class StopAreaEvent {
                         NettyMemory.session2UserIds.put(channel, user);
                         channel.writeAndFlush(DelimiterUtils.addDelimiter("已移动到" + temp[1]));
                     } else {
-                        channel.writeAndFlush(DelimiterUtils.addDelimiter("请充值才能启用传送门"));
+                        channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.REMOTEMOVEMESSAGE));
                     }
                 }
             }
@@ -99,7 +103,7 @@ public class StopAreaEvent {
         } else if (msg.startsWith("talk")) {
             temp = msg.split("-");
             if (temp.length != 2) {
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("输入错误命令"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ERRORORDER));
             } else {
                 List<NPC> npcs = NettyMemory.areaMap.get(NettyMemory.session2UserIds.get(channel).getPos())
                         .getNpcs();
@@ -109,7 +113,7 @@ public class StopAreaEvent {
                         return;
                     }
                 }
-                channel.writeAndFlush(DelimiterUtils.addDelimiter("找不到此NPC"));
+                channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.NOFOUNDNPC));
             }
         } else if (msg.equals("skillCheckout")) {
             NettyMemory.eventStatus.put(channel, EventStatus.SKILLMANAGER);
@@ -188,18 +192,18 @@ public class StopAreaEvent {
                                     String jobId= UUID.randomUUID().toString();
                                     MonsterAttackTask monsterAttackTask = new MonsterAttackTask(channel,jobId, NettyMemory.futureMap);
                                     Future future = NettyMemory.monsterThreadPool.scheduleAtFixedRate(monsterAttackTask, 0, 1, TimeUnit.SECONDS);
-                                    channel.writeAndFlush(DelimiterUtils.addDelimiter("你已经进入战斗模式"));
+                                    channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ENTERFIGHT));
                                 }
                             }
                         } else {
-                            channel.writeAndFlush(DelimiterUtils.addDelimiter("人物MP值不足"));
+                            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.UNENOUGHMP));
                         }
                         break;
                     }
                 }
             }
         } else {
-            channel.writeAndFlush(DelimiterUtils.addDelimiter("请输入有效指令"));
+            channel.writeAndFlush(DelimiterUtils.addDelimiter(MessageConfig.ERRORORDER));
         }
     }
 
