@@ -8,9 +8,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
-import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import common.PacketProto;
 import io.netty.handler.timeout.IdleStateHandler;
+
+import java.util.concurrent.TimeUnit;
 
 import static common.PacketProto.Packet.newBuilder;
 
@@ -20,9 +21,9 @@ import static common.PacketProto.Packet.newBuilder;
 public class Client {
     private int port;
     private String host;
-    private SocketChannel socketChannel;
-    private static Bootstrap bootstrap;
-    private static Channel ch;
+    private Bootstrap bootstrap;
+    private Channel channel;
+
     public Client(int port, String host) {
         this.host = host;
         this.port = port;
@@ -30,72 +31,72 @@ public class Client {
     }
 
     private void start() {
-
-        Thread thread = new Thread(new Runnable() {
-            public void run() {
-                EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-                bootstrap = new Bootstrap();
-                bootstrap.channel(NioSocketChannel.class)
-                        // 保持连接
-                        .option(ChannelOption.SO_KEEPALIVE, true)
-                        // 有数据立即发送
-                        .option(ChannelOption.TCP_NODELAY, true)
-//                        .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(2048))
-                        // 绑定处理group
-                        .group(eventLoopGroup).remoteAddress(host, port)
-                        .handler(new ChannelInitializer<SocketChannel>() {
-                            @Override
-                            protected void initChannel(SocketChannel socketChannel) throws Exception {
-                                // 初始化编码器，解码器，处理器
-                                ChannelPipeline pipeline = socketChannel.pipeline();
-                                pipeline.addLast(new ProtobufVarint32FrameDecoder());
-                                pipeline.addLast(new ProtobufEncoder());
-                                pipeline.addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
-                                pipeline.addLast(new IdleStateHandler(0, 5, 0));
-                                socketChannel.pipeline().addLast(
-                                        new ClientHandler());
-                            }
-                        });
-                // 进行连接
-                ChannelFuture future;
-                try {
-                    future = bootstrap.connect(host, port).sync();
-                    ch = future.channel();
-                    // 判断是否连接成功
-                    if (future.isSuccess()) {
-                        // 得到管道，便于通信
-                        socketChannel = (SocketChannel) future.channel();
-                        System.out.println("客户端开启成功..");
-                    } else {
-                        System.out.println("客户端开启失败...");
+        EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
+        bootstrap = new Bootstrap();
+        bootstrap.channel(NioSocketChannel.class)
+                // 保持连接
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                // 有数据立即发送
+                .option(ChannelOption.TCP_NODELAY, true)
+//              .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(2048))
+                // 绑定处理group
+                .group(eventLoopGroup).remoteAddress(host, port)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        // 初始化编码器，解码器，处理器
+                        ChannelPipeline pipeline = socketChannel.pipeline();
+                        pipeline.addLast(new ProtobufVarint32FrameDecoder());
+                        pipeline.addLast(new ProtobufEncoder());
+                        pipeline.addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
+//                       读空闲心跳，写空闲心跳，读或者写空闲心跳
+                        pipeline.addLast(new IdleStateHandler(0, 0, 1));
+                        socketChannel.pipeline().addLast(
+                                new ClientHandler(Client.this));
                     }
-                    // 等待客户端链路关闭，就是由于这里会将线程阻塞，导致无法发送信息，所以我这里开了线程
-                    future.channel().closeFuture().sync();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } finally {
-                    //优雅地退出，释放相关资源
-                    eventLoopGroup.shutdownGracefully();
-                }
-            }
-        });
-        thread.start();
+                });
+        // 进行连接
+        doConnect();
     }
 
     /**
      * 抽取出该方法 (断线重连时使用)
      */
-    public static void doConnect() throws InterruptedException {
-        ch = bootstrap.connect("127.0.0.1", 8081).sync().channel();
+    protected void doConnect() {
+        if (channel != null && channel.isActive()) {
+            return;
+        }
+        ChannelFuture future = bootstrap.connect("127.0.0.1", 8081);
+//      监听通道异步连接
+        future.addListener(new ChannelFutureListener() {
+            public void operationComplete(ChannelFuture futureListener) throws Exception {
+                if (futureListener.isSuccess()) {
+                    channel = futureListener.channel();
+                    System.out.println("客户端连接成功");
+                } else {
+                    System.out.println("失败尝试5s后重连");
+//                  EventLoop 始终由一个线程驱动
+//                  一个 EventLoop 可以被指派来服务多个 Channel
+//                  一个 Channel 只拥有一个 EventLoop
+                    futureListener.channel().eventLoop().schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            doConnect();
+                        }
+                    }, 5, TimeUnit.SECONDS);
+                }
+            }
+        });
     }
 
+
     public void sendMessage(Object msg) {
-        if (socketChannel != null) {
+        if (channel != null) {
             PacketProto.Packet.Builder builder = newBuilder();
             builder.setPacketType(PacketProto.Packet.PacketType.DATA);
             builder.setData((String) msg);
             PacketProto.Packet packet = builder.build();
-            socketChannel.writeAndFlush(packet);
+            channel.writeAndFlush(packet);
         }
     }
 }

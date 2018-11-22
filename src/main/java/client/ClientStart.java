@@ -31,6 +31,7 @@ public class ClientStart extends JFrame implements KeyListener {
         txt.addKeyListener(frm);
         frm.add(txt);
         frm.setVisible(true);
+
         bootstrap = new Client(8081, "127.0.0.1");
     }
 

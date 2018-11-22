@@ -11,9 +11,14 @@ import static common.PacketProto.Packet.newBuilder;
  * @author xiaojianyu
  */
 public class ClientHandler extends ChannelHandlerAdapter {
+    private Client client;
 
+    ClientHandler(Client client) {
+        this.client = client;
+    }
 
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+//      收到玩家消息的时候触发
         if (msg instanceof PacketProto.Packet) {
             PacketProto.Packet packet = (PacketProto.Packet) msg;
             System.out.println("客户端收到：" + packet.getData());
@@ -23,23 +28,14 @@ public class ClientHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+//      玩家网络掉线的时候触发---------客户端
         System.out.println("--- Server is inactive ---");
-        // 10s 之后尝试重新连接服务器
-        //TODO:有点问题
-//        System.out.println("5s 之后尝试重新连接服务器...");
-//        int count = 0;
-//        while (true) {
-//            if(count ==5)break;
-//            Thread.sleep(5 * 1000);
-//            Client.doConnect();
-//            count++;
-//        }
-
+        super.channelInactive(ctx);
+        client.doConnect();
     }
 
 
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-
     }
 
     @Override
@@ -61,7 +57,7 @@ public class ClientHandler extends ChannelHandlerAdapter {
      * 发送心跳包
      */
     private void sendHeartbeatPacket(ChannelHandlerContext ctx) {
-        System.out.println("开始发送心跳包");
+//        System.out.println("开始发送心跳包");
         PacketProto.Packet.Builder builder = newBuilder();
         builder.setPacketType(PacketProto.Packet.PacketType.HEARTBEAT);
         PacketProto.Packet packet = builder.build();
