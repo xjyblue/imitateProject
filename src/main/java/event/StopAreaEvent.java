@@ -15,7 +15,7 @@ import pojo.Userskillrelation;
 import pojo.Weaponequipmentbar;
 import skill.UserSkill;
 import task.MonsterAttackTask;
-import utils.DelimiterUtils;
+import utils.MessageUtil;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -36,20 +36,22 @@ public class StopAreaEvent {
     private BossEvent bossEvent;
     @Autowired
     private ShopEvent shopEvent;
+    @Autowired
+    private OutfitEquipmentEvent outfitEquipmentEvent;
     public void stopArea(Channel channel, String msg) {
-        if(msg.startsWith("s")){
-            shopEvent.shop(channel,msg);
+        if (msg.startsWith("s")) {
+            shopEvent.shop(channel, msg);
             return;
         }
-        if(msg.equals("f")){
-            bossEvent.enterBossArea(channel,msg);
+        if (msg.equals("f")) {
+            bossEvent.enterBossArea(channel, msg);
             return;
         }
-        if(msg.startsWith("t")){
-            teamEvent.team(channel,msg);
+        if (msg.startsWith("t")) {
+            teamEvent.team(channel, msg);
             return;
         }
-        if (msg.startsWith("b")|| msg.startsWith("w") || msg.startsWith("fix-")) {
+        if (msg.startsWith("b") || msg.startsWith("w") || msg.startsWith("fix-")) {
             commonEvent.common(channel, msg);
             return;
         }
@@ -58,18 +60,18 @@ public class StopAreaEvent {
             temp = msg.split("-");
             User user = NettyMemory.session2UserIds.get(channel);
             if (temp[1].equals(NettyMemory.areaMap.get(user.getPos()).getName())) {
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.UNMOVELOCAL));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNMOVELOCAL));
             } else {
                 if (!NettyMemory.areaSet.contains(temp[1])) {
-                    channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.NOTARGETTOMOVE));
+                    channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTARGETTOMOVE));
                 } else {
                     if (NettyMemory.areaMap.get(user.getPos()).getAreaSet().contains(temp[1])) {
                         user.setPos(NettyMemory.areaToNum.get(temp[1]));
                         userMapper.updateByPrimaryKeySelective(user);
                         NettyMemory.session2UserIds.put(channel, user);
-                        channel.writeAndFlush(DelimiterUtils.turnToPacket("已移动到" + temp[1]));
+                        channel.writeAndFlush(MessageUtil.turnToPacket("已移动到" + temp[1]));
                     } else {
-                        channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.REMOTEMOVEMESSAGE));
+                        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REMOTEMOVEMESSAGE));
                     }
                 }
             }
@@ -81,6 +83,7 @@ public class StopAreaEvent {
                     + "--------处于" + NettyMemory.areaMap.get(user.getPos()).getName()
                     + "--------玩家的HP量：" + user.getHp()
                     + "--------玩家的MP量：" + user.getMp()
+                    + "--------玩家的金币：" + user.getMoney()
                     + System.getProperty("line.separator");
             for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
                 allStatus += "怪物：" + monster.getName() + "的血量为：" + monster.getValueOfLife() + System.getProperty("line.separator");
@@ -98,25 +101,25 @@ public class StopAreaEvent {
                         + "---攻击技能为---" + monster.getMonsterSkillList().get(0).getSkillName()
                         + "伤害为：" + monster.getMonsterSkillList().get(0).getDamage() + System.getProperty("line.separator");
             }
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(allStatus));
+            channel.writeAndFlush(MessageUtil.turnToPacket(allStatus));
         } else if (msg.startsWith("talk")) {
             temp = msg.split("-");
             if (temp.length != 2) {
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORORDER));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             } else {
                 List<NPC> npcs = NettyMemory.areaMap.get(NettyMemory.session2UserIds.get(channel).getPos())
                         .getNpcs();
                 for (NPC npc : npcs) {
                     if (npc.getName().equals(temp[1])) {
-                        channel.writeAndFlush(DelimiterUtils.turnToPacket(npc.getTalks().get(0)));
+                        channel.writeAndFlush(MessageUtil.turnToPacket(npc.getTalks().get(0)));
                         return;
                     }
                 }
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.NOFOUNDNPC));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDNPC));
             }
         } else if (msg.equals("skillCheckout")) {
             NettyMemory.eventStatus.put(channel, EventStatus.SKILLMANAGER);
-            channel.writeAndFlush(DelimiterUtils.turnToPacket("请输入lookSkill查看技能，请输入change-技能名-键位配置技能,请输入quitSkill退出技能管理界面"));
+            channel.writeAndFlush(MessageUtil.turnToPacket("请输入lookSkill查看技能，请输入change-技能名-键位配置技能,请输入quitSkill退出技能管理界面"));
         } else if (msg.startsWith("attack")) {
             temp = msg.split("-");
 //                        输入的键位是否存在
@@ -160,9 +163,11 @@ public class StopAreaEvent {
                                             + System.getProperty("line.separator")
                                             + "怪物已死亡";
                                     monster.setValueOfLife("0");
-                                    channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
+                                    channel.writeAndFlush(MessageUtil.turnToPacket(resp));
 //                                                修改怪物状态
                                     monster.setStatus("0");
+//                                  爆装备
+                                    outfitEquipmentEvent.getGoods(channel,msg,monster);
                                 } else {
                                     Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(channel);
 //                                    切换到攻击模式
@@ -179,7 +184,7 @@ public class StopAreaEvent {
                                             + System.getProperty("line.separator")
                                             + "[人物剩余蓝量]:" + user.getMp()
                                             + System.getProperty("line.separator");
-                                    channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
+                                    channel.writeAndFlush(MessageUtil.turnToPacket(resp));
                                     //TODO:更新数据库人物技能蓝量
 //                                    刷新技能时间
                                     userskillrelation.setSkillcds(System.currentTimeMillis());
@@ -188,21 +193,21 @@ public class StopAreaEvent {
                                     monsters.add(monster);
                                     NettyMemory.monsterMap.put(user, monsters);
 //                                    提醒用户你已进入战斗模式
-                                    String jobId= UUID.randomUUID().toString();
-                                    MonsterAttackTask monsterAttackTask = new MonsterAttackTask(channel,jobId, NettyMemory.futureMap);
+                                    String jobId = UUID.randomUUID().toString();
+                                    MonsterAttackTask monsterAttackTask = new MonsterAttackTask(channel, jobId, NettyMemory.futureMap);
                                     Future future = NettyMemory.monsterThreadPool.scheduleAtFixedRate(monsterAttackTask, 0, 1, TimeUnit.SECONDS);
-                                    channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ENTERFIGHT));
+                                    channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFIGHT));
                                 }
                             }
                         } else {
-                            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.UNENOUGHMP));
+                            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNENOUGHMP));
                         }
                         break;
                     }
                 }
             }
         } else {
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORORDER));
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
         }
     }
 

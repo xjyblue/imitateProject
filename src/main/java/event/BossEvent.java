@@ -15,7 +15,7 @@ import pojo.Weaponequipmentbar;
 import skill.UserSkill;
 import task.BossAttackTask;
 import team.Team;
-import utils.DelimiterUtils;
+import utils.MessageUtil;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -32,6 +32,12 @@ public class BossEvent {
     private AttackEvent attackEvent;
     @Autowired
     private AttackCaculation attackCaculation;
+    @Autowired
+    private ShopEvent shopEvent;
+    @Autowired
+    private CommonEvent commonEvent;
+    @Autowired
+    private OutfitEquipmentEvent outfitEquipmentEvent;
     public void enterBossArea(Channel channel, String msg) {
         User user = getUser(channel);
         Team team = null;
@@ -48,7 +54,7 @@ public class BossEvent {
             team = getTeam(user);
         }
         if(!team.getLeader().getUsername().equals(user.getUsername())){
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.YOUARENOLEADER));
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.YOUARENOLEADER));
             return;
         }
         BossArea bossArea = new BossArea();
@@ -64,11 +70,19 @@ public class BossEvent {
         for(Map.Entry<String,User>entry:team.getUserMap().entrySet()){
             Channel channel = NettyMemory.userToChannelMap.get(entry.getValue());
             NettyMemory.eventStatus.put(channel,EventStatus.BOSSAREA);
-            channel.writeAndFlush(DelimiterUtils.turnToPacket("进入boss副本,出现boss"+bossArea.getBossName()+""));
+            channel.writeAndFlush(MessageUtil.turnToPacket("进入boss副本,出现boss"+bossArea.getBossName()+""));
         }
     }
 
     public void attack(Channel channel, String msg) {
+        if(msg.startsWith("s")){
+            shopEvent.shop(channel,msg);
+            return;
+        }
+        if(msg.startsWith("b")||msg.startsWith("w")||msg.startsWith("fix-")){
+            commonEvent.common(channel,msg);
+            return;
+        }
         String temp[] = msg.split("-");
         if (temp.length == 3 && NettyMemory.userskillrelationMap.get(channel).containsKey(temp[2])) {
             User user = NettyMemory.session2UserIds.get(channel);
@@ -124,6 +138,8 @@ public class BossEvent {
                                 monster.setValueOfLife("0");
 //                              修改怪物状态
                                 monster.setStatus("0");
+                                //                              爆装备
+                                outfitEquipmentEvent.getGoods(channel,msg,monster);
                                 successMessToAll(user,monster,resp);
                             } else {
                                 Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(channel);
@@ -141,7 +157,7 @@ public class BossEvent {
                                         + System.getProperty("line.separator")
                                         + "[人物剩余蓝量]:" + user.getMp()
                                         + System.getProperty("line.separator");
-                                channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
+                                channel.writeAndFlush(MessageUtil.turnToPacket(resp));
                                 //TODO:更新数据库人物技能蓝量
 //                                    刷新技能时间
                                 userskillrelation.setSkillcds(System.currentTimeMillis());
@@ -153,7 +169,7 @@ public class BossEvent {
 //                                    提醒用户你已进入战斗模式
                                 if(!NettyMemory.bossAreaMap.get(user.getTeamId()).isFight()){
                                     NettyMemory.bossAreaMap.get(user.getTeamId()).setFight(true);
-                                    channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ENTERFIGHT));
+                                    channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFIGHT));
                                     String jobId= UUID.randomUUID().toString();
                                     BossAttackTask bossAttackTask = new BossAttackTask(user.getTeamId(),channel,jobId, NettyMemory.futureMap);
                                     Future future = NettyMemory.bossAreaThreadPool.scheduleAtFixedRate(bossAttackTask, 0, 1, TimeUnit.SECONDS);
@@ -164,7 +180,7 @@ public class BossEvent {
                             }
                         }
                     } else {
-                        channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.UNENOUGHMP));
+                        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNENOUGHMP));
                     }
                     break;
                 }
@@ -180,9 +196,9 @@ public class BossEvent {
             if(entry.getValue()==user){
                 resp += System.getProperty("line.separator")
                         + monster.getName()+MessageConfig.BOSSAREASUCCESS;
-                channelTemp.writeAndFlush(DelimiterUtils.turnToPacket(resp));
+                channelTemp.writeAndFlush(MessageUtil.turnToPacket(resp));
             }else {
-                channelTemp.writeAndFlush(DelimiterUtils.turnToPacket(monster.getName()+MessageConfig.BOSSAREASUCCESS));
+                channelTemp.writeAndFlush(MessageUtil.turnToPacket(monster.getName()+MessageConfig.BOSSAREASUCCESS));
             }
         }
     }

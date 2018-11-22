@@ -50,7 +50,7 @@ public class Client {
                         pipeline.addLast(new ProtobufEncoder());
                         pipeline.addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
 //                       读空闲心跳，写空闲心跳，读或者写空闲心跳
-                        pipeline.addLast(new IdleStateHandler(0, 0, 1));
+                        pipeline.addLast(new IdleStateHandler(0, 5, 0));
                         socketChannel.pipeline().addLast(
                                 new ClientHandler(Client.this));
                     }

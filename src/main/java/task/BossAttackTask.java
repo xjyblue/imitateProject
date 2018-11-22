@@ -7,7 +7,7 @@ import io.netty.channel.Channel;
 import memory.NettyMemory;
 import pojo.User;
 import team.Team;
-import utils.DelimiterUtils;
+import utils.MessageUtil;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -115,7 +115,7 @@ public class BossAttackTask implements Runnable {
         Team team = NettyMemory.teamMap.get(bossArea.getTeamId());
         for(Map.Entry<String,User> entry:team.getUserMap().entrySet()){
             Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
-            channelTemp.writeAndFlush(DelimiterUtils.turnToPacket(bossArea.getBossName() + "副本攻略成功，热烈庆祝各位参与的小伙伴"));
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket(bossArea.getBossName() + "副本攻略成功，热烈庆祝各位参与的小伙伴"));
             NettyMemory.eventStatus.put(channelTemp,EventStatus.STOPAREA);
             if(NettyMemory.monsterMap.containsKey(entry.getValue())){
                 NettyMemory.monsterMap.remove(entry.getValue());
@@ -131,7 +131,7 @@ public class BossAttackTask implements Runnable {
             if(NettyMemory.monsterMap.containsKey(entry.getValue())){
                 NettyMemory.monsterMap.remove(entry.getValue());
             }
-            channelTemp.writeAndFlush(DelimiterUtils.turnToPacket(user.getUsername() + "被" + bossArea.getBossName() + "打死"));
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "被" + bossArea.getBossName() + "打死"));
         }
     }
 
@@ -141,7 +141,7 @@ public class BossAttackTask implements Runnable {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
             NettyMemory.eventStatus.put(channelTemp,EventStatus.STOPAREA);
-            channelTemp.writeAndFlush(DelimiterUtils.turnToPacket("挑战失败，人物已死光,可按f重新挑战"));
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket("挑战失败，人物已死光,可按f重新挑战"));
         }
     }
 
@@ -190,7 +190,7 @@ public class BossAttackTask implements Runnable {
                         + System.getProperty("line.separator");
             }
             Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
-            channelTemp.writeAndFlush(DelimiterUtils.turnToPacket(resp));
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket(resp));
         }
     }
 
@@ -222,7 +222,7 @@ public class BossAttackTask implements Runnable {
             if(NettyMemory.monsterMap.containsKey(entry.getValue())){
                 NettyMemory.monsterMap.remove(entry.getValue());
             }
-            channelTemp.writeAndFlush(DelimiterUtils.turnToPacket("时间结束挑战副本失败,你已退出副本世界，重刷副本请按F"));
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket("时间结束挑战副本失败,你已退出副本世界，重刷副本请按F"));
         }
         NettyMemory.bossAreaMap.remove(team.getTeamId());
     }

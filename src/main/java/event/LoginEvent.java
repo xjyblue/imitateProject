@@ -8,7 +8,7 @@ import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.*;
-import utils.DelimiterUtils;
+import utils.MessageUtil;
 
 import java.util.*;
 
@@ -23,11 +23,11 @@ public class LoginEvent {
     public void login(Channel channel, String msg) {
         String temp[] = msg.split("-");
         if (temp.length != 2) {
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORORDER));
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
         } else {
             User user = userMapper.getUser(temp[0],temp[1]);
             if (user == null) {
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORPASSWORD));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORPASSWORD));
             } else {
  //             初始化玩家的技能start
                 UserskillrelationExample userskillrelationExample = new UserskillrelationExample();
@@ -57,7 +57,7 @@ public class LoginEvent {
 //                初始化玩家的技能end
                 NettyMemory.session2UserIds.put(channel, user);
                 NettyMemory.userToChannelMap.put(user,channel);
-                channel.writeAndFlush(DelimiterUtils.turnToPacket("登录成功，你已进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
+                channel.writeAndFlush(MessageUtil.turnToPacket("登录成功，你已进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
                 NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
             }
         }

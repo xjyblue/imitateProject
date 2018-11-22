@@ -75,7 +75,7 @@ public class BossArea {
         monsterSkill.setAttackCd("5");
         List<MonsterSkill> monsterSkills = new ArrayList<>();
         monsterSkills.add(monsterSkill);
-        Monster boss = new Monster("七天连锁酒店王","1","800000",monsterSkills,"1");
+        Monster boss = new Monster("七天连锁酒店王",Monster.TYPEOFBOSS,"10000",monsterSkills,"1");
         Map<String,Monster>monsterMap = new HashMap<>();
         monsterMap.put(boss.getName(),boss);
         setMap(monsterMap);

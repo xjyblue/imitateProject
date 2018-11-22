@@ -63,6 +63,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 	}
 
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		System.out.println(cause);
 		ctx.close();
 	}
 

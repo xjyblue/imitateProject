@@ -61,7 +61,7 @@ public class NettyServer {
                             ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
                             ch.pipeline().addLast(new ProtobufEncoder());
                             ch.pipeline().addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
-                            ch.pipeline().addLast(new IdleStateHandler(6, 0, 0));
+                            ch.pipeline().addLast(new IdleStateHandler(5, 0, 0));
                             ch.pipeline().addLast(nettyServerHandler);
                         }
                     });
@@ -175,7 +175,7 @@ public class NettyServer {
         monsterSkill.setSkillId(1);
         List<MonsterSkill> skills = new ArrayList<>();
         skills.add(monsterSkill);
-        Monster monster = new Monster("起始之地哥伦布", "0", "10000000", skills, "1");
+        Monster monster = new Monster("起始之地哥伦布", Monster.TYPEOFCOMMONMONSTER, "6000", skills, "1");
         List<Monster> monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);
@@ -209,7 +209,7 @@ public class NettyServer {
         monsterSkill.setSkillId(2);
         skills = new ArrayList<>();
         skills.add(monsterSkill);
-        monster = new Monster("村子村霸", "0", "15000", skills, "1");
+        monster = new Monster("村子村霸", Monster.TYPEOFCOMMONMONSTER, "13000", skills, "1");
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);
@@ -235,12 +235,12 @@ public class NettyServer {
 //      初始化怪物
         monsterSkill = new MonsterSkill();
         monsterSkill.setAttackCd("40");
-        monsterSkill.setDamage("100000");
+        monsterSkill.setDamage("200");
         monsterSkill.setSkillName("藤蔓攻击");
         monsterSkill.setSkillId(3);
         skills = new ArrayList<>();
         skills.add(monsterSkill);
-        monster = new Monster("野兽", "0", "15000000", skills, "1");
+        monster = new Monster("野兽", Monster.TYPEOFCOMMONMONSTER, "15000", skills, "1");
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);
@@ -266,12 +266,12 @@ public class NettyServer {
 //      初始化怪物
         monsterSkill = new MonsterSkill();
         monsterSkill.setAttackCd("40");
-        monsterSkill.setDamage("100000");
+        monsterSkill.setDamage("330");
         monsterSkill.setSkillName("锄头攻击");
         monsterSkill.setSkillId(4);
         skills = new ArrayList<>();
         skills.add(monsterSkill);
-        monster = new Monster("帝国势力", "0", "100000000", skills, "1");
+        monster = new Monster("帝国势力", Monster.TYPEOFCOMMONMONSTER, "10000", skills, "1");
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);

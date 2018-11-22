@@ -6,6 +6,10 @@ import java.math.BigInteger;
 import java.util.List;
 
 public class Monster {
+    public static final String TYPEOFBOSS = "1";
+
+    public static final String TYPEOFCOMMONMONSTER = "0";
+
     private Integer id;
 
     private String name;

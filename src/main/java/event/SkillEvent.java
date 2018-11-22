@@ -10,7 +10,7 @@ import pojo.User;
 import pojo.Userskillrelation;
 import pojo.UserskillrelationExample;
 import skill.UserSkill;
-import utils.DelimiterUtils;
+import utils.MessageUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,7 @@ public class SkillEvent {
         String temp[] = null;
         if (msg.equals("lookSkill")) {
             String skillLook = "";
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(skillLook));
+            channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
             Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(channel);
             for (Map.Entry<String, Userskillrelation> entry : map.entrySet()) {
                 UserSkill userSkill = NettyMemory.SkillMap.get(entry.getValue().getSkillid());
@@ -34,7 +34,7 @@ public class SkillEvent {
                         + "----技能cd:" + userSkill.getAttackCd()
                         + System.getProperty("line.separator");
             }
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(skillLook));
+            channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
         } else if (msg.startsWith("change")) {
             temp = msg.split("-");
             if (temp.length == 3) {
@@ -61,15 +61,15 @@ public class SkillEvent {
                     }
                 }
                 if (!flag) {
-                    channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORORDER));
+                    channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
                 }
             }
         } else if (msg.equals("quitSkill")) {
             User user = NettyMemory.session2UserIds.get(channel);
-            channel.writeAndFlush(DelimiterUtils.turnToPacket("您已退出技能管理模块，进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
+            channel.writeAndFlush(MessageUtil.turnToPacket("您已退出技能管理模块，进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
             NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
         } else {
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORORDER));
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
         }
     }
 }

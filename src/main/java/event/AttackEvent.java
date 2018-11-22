@@ -12,7 +12,7 @@ import pojo.Userskillrelation;
 import pojo.Weaponequipmentbar;
 import skill.UserSkill;
 import team.Team;
-import utils.DelimiterUtils;
+import utils.MessageUtil;
 import component.Monster;
 
 import java.math.BigInteger;
@@ -26,14 +26,22 @@ public class AttackEvent {
     private CommonEvent commonEvent;
     @Autowired
     private AttackCaculation attackCaculation;
+    @Autowired
+    private OutfitEquipmentEvent outfitEquipmentEvent;
+    @Autowired
+    private ShopEvent shopEvent;
     public void attack(Channel channel, String msg) {
+        if(msg.startsWith("s")){
+            shopEvent.shop(channel,msg);
+            return;
+        }
         if(msg.startsWith("b")||msg.startsWith("w")||msg.startsWith("fix-")){
             commonEvent.common(channel,msg);
             return;
         }
         if (msg.equals("q")) {
             NettyMemory.monsterMap.remove(NettyMemory.session2UserIds.get(channel));
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.RETREATFIGHT));
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RETREATFIGHT));
             NettyMemory.eventStatus.put(channel,EventStatus.STOPAREA);
         } else {
             if (NettyMemory.userskillrelationMap.get(channel).containsKey(msg)) {
@@ -83,12 +91,14 @@ public class AttackEvent {
                                         + "[人物剩余蓝量]:" + user.getMp()
                                         + System.getProperty("line.separator")
                                         + "怪物已死亡";
-                                channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
+                                channel.writeAndFlush(MessageUtil.turnToPacket(resp));
 //                                         修改怪物状态
                                 monster.setValueOfLife("0");
                                 monster.setStatus("0");
-//                                  移除任务攻击记录
+//                              移除任务攻击记录
                                 NettyMemory.monsterMap.remove(user);
+//                              爆装备
+                                outfitEquipmentEvent.getGoods(channel,msg,monster);
 //                              切换场景
                                 if(NettyMemory.eventStatus.get(channel).equals(EventStatus.ATTACK)){
                                     NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
@@ -117,13 +127,13 @@ public class AttackEvent {
                                         NettyMemory.bossAreaMap.get(user.getTeamId()).getDamageAll().put(user,newDamageValueI.toString());
                                     }
                                 }
-                                channel.writeAndFlush(DelimiterUtils.turnToPacket(resp));
+                                channel.writeAndFlush(MessageUtil.turnToPacket(resp));
                             }
                         } else {
-                            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.UNENOUGHMP));
+                            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNENOUGHMP));
                         }
                     } else {
-                            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.UNSKILLCD));
+                            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNSKILLCD));
                     }
                 }
             }

@@ -34,6 +34,12 @@ public class User {
     public void setBuffMap(Map<String, Integer> buffMap) {
         this.buffMap = buffMap;
     }
+//  保证原子性
+    public synchronized void addMoney(BigInteger add){
+        BigInteger userMoney = new BigInteger(this.getMoney());
+        userMoney = userMoney.add(add);
+        this.money = userMoney.toString();
+    }
 
     public String getMoney() {
         return money;

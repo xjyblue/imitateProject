@@ -7,7 +7,7 @@ import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
-import utils.DelimiterUtils;
+import utils.MessageUtil;
 
 @Component("registerEvent")
 public class RegisterEvent {
@@ -17,10 +17,10 @@ public class RegisterEvent {
     public void register(Channel channel, String msg) {
         String []temp = msg.split("-");
         if (temp.length != 3) {
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.ERRORORDER));
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
         } else {
             if (!temp[1].equals(temp[2])) {
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.DOUBLEPASSWORDERROR));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DOUBLEPASSWORDERROR));
             } else {
                 User user = new User();
                 user.setUsername(temp[0]);
@@ -28,7 +28,7 @@ public class RegisterEvent {
                 user.setStatus("1");
                 user.setPos("0");
                 userMapper.insert(user);
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.REGISTERSUCCESS));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERSUCCESS));
                 NettyMemory.eventStatus.put(channel, EventStatus.LOGIN);
             }
         }

@@ -1,7 +1,5 @@
 package client;
 
-import utils.DelimiterUtils;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;

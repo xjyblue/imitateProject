@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userbag;
 import pojo.Weaponequipmentbar;
-import utils.DelimiterUtils;
+import utils.MessageUtil;
 import component.MpMedicine;
 
 import java.math.BigInteger;
@@ -45,7 +45,7 @@ public class CommonEvent {
                             + "----武器数量:" + userbag.getNum();
                 }
             }
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(bagResp));
+            channel.writeAndFlush(MessageUtil.turnToPacket(bagResp));
         }
         if (msg.startsWith("b-")) {
             String temp[] = msg.split("-");
@@ -67,7 +67,7 @@ public class CommonEvent {
                     user.getUserBag().remove(userbagRemove);
                 }
                 if (userbagNow == null) {
-                    channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.GOODNOEXISTBAG));
+                    channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXISTBAG));
                     return;
                 }
                 if (mpMedicine.isImmediate()) {
@@ -92,7 +92,7 @@ public class CommonEvent {
                     user.getBufferMap().put("mpBuff",mpMedicine.getId());
                 }
             } else {
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.GOODNOEXIST));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
             }
         }
         if (msg.equals("w")) {
@@ -111,28 +111,28 @@ public class CommonEvent {
                         + "----当前耐久" + weaponequipmentbar.getDurability()
                         + System.getProperty("line.separator");
             }
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(wresp));
+            channel.writeAndFlush(MessageUtil.turnToPacket(wresp));
         }
         if (msg.startsWith("fix-")) {
             User user = NettyMemory.session2UserIds.get(channel);
             String temp[] = msg.split("-");
             if (!NettyMemory.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.GOODNOEXIST));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
                 return;
             }
             for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
                 if (weaponequipmentbar.getWid() == Integer.parseInt(temp[1])) {
                     if (weaponequipmentbar.getDurability() < NettyMemory.equipmentMap.get(weaponequipmentbar.getWid()).getDurability()) {
                         weaponequipmentbar.setDurability(NettyMemory.equipmentMap.get(weaponequipmentbar.getWid()).getDurability());
-                        channel.writeAndFlush(DelimiterUtils.turnToPacket("[" + NettyMemory.equipmentMap.get(weaponequipmentbar.getWid()).getName() + "]" + "武器修复成功"));
+                        channel.writeAndFlush(MessageUtil.turnToPacket("[" + NettyMemory.equipmentMap.get(weaponequipmentbar.getWid()).getName() + "]" + "武器修复成功"));
                         return;
                     } else {
-                        channel.writeAndFlush(DelimiterUtils.turnToPacket("[" + NettyMemory.equipmentMap.get(weaponequipmentbar.getWid()).getName() + "]" + "武器无需修复"));
+                        channel.writeAndFlush(MessageUtil.turnToPacket("[" + NettyMemory.equipmentMap.get(weaponequipmentbar.getWid()).getName() + "]" + "武器无需修复"));
                         return;
                     }
                 }
             }
-            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.NOEQUIPGOOD));
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEQUIPGOOD));
         }
 
         if (msg.startsWith("wq-")) {
@@ -150,32 +150,32 @@ public class CommonEvent {
                         userbag.setWid(weaponequipmentbar.getWid());
                         user.getUserBag().add(userbag);
                         user.getWeaponequipmentbars().remove(weaponequipmentbar);
-                        channel.writeAndFlush(DelimiterUtils.turnToPacket("你成功卸下" + NettyMemory.equipmentMap.get(weaponequipmentbar.getWid()).getName()));
+                        channel.writeAndFlush(MessageUtil.turnToPacket("你成功卸下" + NettyMemory.equipmentMap.get(weaponequipmentbar.getWid()).getName()));
                         return;
                     }
                 }
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.NOEQUIPGOOD));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEQUIPGOOD));
                 return;
             } else {
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.GOODNOEXIST));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
             }
         }
         if(msg.startsWith("ww-")){
             User user = NettyMemory.session2UserIds.get(channel);
             String temp[] = msg.split("-");
             if(temp.length!=3){
-                channel.writeAndFlush(DelimiterUtils.turnToPacket("请按照ww-物品id-耐久度来装备物品"));
+                channel.writeAndFlush(MessageUtil.turnToPacket("请按照ww-物品id-耐久度来装备物品"));
                 return;
             }
             if(user.getWeaponequipmentbars().size()>0){
-                channel.writeAndFlush(DelimiterUtils.turnToPacket("请卸下你的主武器再进行装备"));
+                channel.writeAndFlush(MessageUtil.turnToPacket("请卸下你的主武器再进行装备"));
                 return;
             }
             if(NettyMemory.equipmentMap.containsKey(Integer.parseInt(temp[1]))){
                 for(Userbag userbag:user.getUserBag()){
                     if(userbag.getWid()==Integer.parseInt(temp[1])&&userbag.getDurability()==Integer.parseInt(temp[2])){
                         if(userbag.getTypeof().equals(Good.MPMEDICINE)){
-                            channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.NOBELONGTOEQUIP));
+                            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOBELONGTOEQUIP));
                             return;
                         }else{
                             Weaponequipmentbar weaponequipmentbar = new Weaponequipmentbar();
@@ -186,14 +186,14 @@ public class CommonEvent {
                             weaponequipmentbar.setWid(userbag.getWid());
                             user.getWeaponequipmentbars().add(weaponequipmentbar);
                             user.getUserBag().remove(userbag);
-                            channel.writeAndFlush(DelimiterUtils.turnToPacket("["+NettyMemory.equipmentMap.get(userbag.getWid()).getName()+"]"+"该装备穿戴成功"));
+                            channel.writeAndFlush(MessageUtil.turnToPacket("["+NettyMemory.equipmentMap.get(userbag.getWid()).getName()+"]"+"该装备穿戴成功"));
                             return;
                         }
                     }
                 }
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.GOODNOEXISTBAG));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXISTBAG));
             }else {
-                channel.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.GOODNOEXIST));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
             }
         }
     }

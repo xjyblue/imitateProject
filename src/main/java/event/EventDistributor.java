@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import memory.NettyMemory;
-import utils.DelimiterUtils;
+import utils.MessageUtil;
 
 /**
  * 具体事件分发器
@@ -36,11 +36,11 @@ public class EventDistributor {
         if (!NettyMemory.eventStatus.containsKey(ch)) {
             if (msg.equals("d")) {
                 NettyMemory.eventStatus.put(ch, EventStatus.LOGIN);
-                ctx.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.LOGINMESSAGE));
+                ctx.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LOGINMESSAGE));
             }
             if (msg.equals("z")) {
                 NettyMemory.eventStatus.put(ch, EventStatus.REGISTER);
-                ctx.writeAndFlush(DelimiterUtils.turnToPacket(MessageConfig.REGISTERMESSAGE));
+                ctx.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERMESSAGE));
             }
         } else {
             String status = NettyMemory.eventStatus.get(ch);
