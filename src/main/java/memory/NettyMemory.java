@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import buff.Buff;
 import component.*;
+import email.Mail;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -17,9 +18,7 @@ import skill.UserSkill;
 import team.Team;
 
 /**
- * 内存中存放channel
  * @author xiaojianyu
- *
  */
 public class NettyMemory {
 	public static ChannelGroup group = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
@@ -63,4 +62,6 @@ public class NettyMemory {
 	public static ScheduledExecutorService monsterThreadPool = Executors.newScheduledThreadPool(5);
 	/** 辅助定时任务关闭的工具类*/
 	public static ConcurrentHashMap<String, Future> futureMap = new ConcurrentHashMap<String, Future>();
+	/** 缓存邮件信息 */
+	public static Map<String,ConcurrentHashMap<String, Mail>> userEmailMap = new ConcurrentHashMap<String,  ConcurrentHashMap<String, Mail>>();
 }

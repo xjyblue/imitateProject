@@ -49,8 +49,8 @@ public class Client {
                         pipeline.addLast(new ProtobufVarint32FrameDecoder());
                         pipeline.addLast(new ProtobufEncoder());
                         pipeline.addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
-//                       读空闲心跳，写空闲心跳，读或者写空闲心跳
-                        pipeline.addLast(new IdleStateHandler(0, 5, 0));
+//                       读空闲心跳，写空闲心跳，读或者写空闲心跳,读空闲每隔两秒发送心跳包
+                        pipeline.addLast(new IdleStateHandler(0, 2, 0));
                         socketChannel.pipeline().addLast(
                                 new ClientHandler(Client.this));
                     }

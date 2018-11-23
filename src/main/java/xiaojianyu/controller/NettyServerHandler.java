@@ -63,7 +63,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 	}
 
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		System.out.println(cause);
+		cause.printStackTrace();
 		ctx.close();
 	}
 
@@ -102,7 +102,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 	public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 		if (evt instanceof IdleStateEvent) {
 			int counter = heartCounts.get(ctx.channel());
-			// 空闲6s之后触发 (心跳包丢失)
+			// 空闲5s之后触发 (心跳包丢失)
 			if (counter >= 3) {
 				// 连续丢失3个心跳包 (断开连接)
 				ctx.channel().close().sync();

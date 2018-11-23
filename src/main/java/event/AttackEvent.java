@@ -30,7 +30,13 @@ public class AttackEvent {
     private OutfitEquipmentEvent outfitEquipmentEvent;
     @Autowired
     private ShopEvent shopEvent;
+    @Autowired
+    private ChatEvent chatEvent;
     public void attack(Channel channel, String msg) {
+        if(msg.startsWith("chat")){
+            chatEvent.chat(channel,msg);
+            return;
+        }
         if(msg.startsWith("s")){
             shopEvent.shop(channel,msg);
             return;

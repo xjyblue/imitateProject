@@ -38,7 +38,19 @@ public class StopAreaEvent {
     private ShopEvent shopEvent;
     @Autowired
     private OutfitEquipmentEvent outfitEquipmentEvent;
+    @Autowired
+    private ChatEvent chatEvent;
+    @Autowired
+    private EmailEvent emailEvent;
     public void stopArea(Channel channel, String msg) {
+        if(msg.startsWith("email")){
+            emailEvent.email(channel,msg);
+            return;
+        }
+        if(msg.startsWith("chat")){
+            chatEvent.chat(channel,msg);
+            return;
+        }
         if (msg.startsWith("s")) {
             shopEvent.shop(channel, msg);
             return;

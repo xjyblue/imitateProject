@@ -38,6 +38,8 @@ public class BossEvent {
     private CommonEvent commonEvent;
     @Autowired
     private OutfitEquipmentEvent outfitEquipmentEvent;
+    @Autowired
+    private ChatEvent chatEvent;
     public void enterBossArea(Channel channel, String msg) {
         User user = getUser(channel);
         Team team = null;
@@ -75,6 +77,10 @@ public class BossEvent {
     }
 
     public void attack(Channel channel, String msg) {
+        if(msg.startsWith("chat")){
+            chatEvent.chat(channel,msg);
+            return;
+        }
         if(msg.startsWith("s")){
             shopEvent.shop(channel,msg);
             return;

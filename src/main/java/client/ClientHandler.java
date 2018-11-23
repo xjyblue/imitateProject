@@ -12,7 +12,6 @@ import static common.PacketProto.Packet.newBuilder;
  */
 public class ClientHandler extends ChannelHandlerAdapter {
     private Client client;
-
     ClientHandler(Client client) {
         this.client = client;
     }
@@ -33,6 +32,7 @@ public class ClientHandler extends ChannelHandlerAdapter {
         super.channelInactive(ctx);
         client.doConnect();
     }
+
 
 
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {

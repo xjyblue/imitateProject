@@ -10,6 +10,7 @@ public class MessageConfig {
     public static final String ERRORPASSWORD = "账户密码出错";
     public static final String DOUBLEPASSWORDERROR = "两次密码不一致";
     public static final String REGISTERSUCCESS = "注册成功请输入：用户名-密码进行登录";
+    public static final String REPEATUSER = "你的账号已在其他地方登陆，无法重复登陆";
 
     public static final String UNMOVELOCAL = "原地无需移动";
     public static final String NOTARGETTOMOVE = "移动地点不存在";
@@ -40,4 +41,5 @@ public class MessageConfig {
     public static final String SIGNOUTTEAM = "你已退出当前队伍";
     public static final String NOFOUNDTEAM = "你所要加入的玩家队伍不存在";
 
+    public static final String EMPTYEMAIL = "您当前的邮箱为空";
 }

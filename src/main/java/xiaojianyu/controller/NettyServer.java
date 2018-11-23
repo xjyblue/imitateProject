@@ -3,6 +3,7 @@ package xiaojianyu.controller;
 import buff.Buff;
 import component.*;
 import component.parent.Good;
+import email.Mail;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -11,6 +12,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import memory.NettyMemory;
 
@@ -29,6 +32,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,10 +61,12 @@ public class NettyServer {
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            // 初始化编码器，解码器，处理器
+                       // 初始化编码器，解码器，处理器
+//                            ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
                             ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
                             ch.pipeline().addLast(new ProtobufEncoder());
                             ch.pipeline().addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
+//                            写空闲,每隔5秒触发心跳包丢失统计
                             ch.pipeline().addLast(new IdleStateHandler(5, 0, 0));
                             ch.pipeline().addLast(nettyServerHandler);
                         }
@@ -77,6 +83,10 @@ public class NettyServer {
 
 
     public void initServer() throws IOException {
+
+//        模拟从数据库初始化所有用户的邮件系统
+        NettyMemory.userEmailMap.put("z",new ConcurrentHashMap<String, Mail>());
+        NettyMemory.userEmailMap.put("k",new ConcurrentHashMap<String, Mail>());
 
 //        初始化定时任务 start
 //        回蓝定时任务
