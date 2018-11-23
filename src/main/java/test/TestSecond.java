@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * xiaojianyu
@@ -23,7 +24,7 @@ public class TestSecond {
 
         //转换成指定类型的对象数组
         List<Equipment> pojoList = ExcelUtil.excel2Pojo(fis, Equipment.class, alias);
-        System.out.println("kk");
+//        System.out.println(UUID.randomUUID().toString());
     }
 }
 

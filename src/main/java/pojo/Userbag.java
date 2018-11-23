@@ -1,7 +1,10 @@
 package pojo;
 
+import component.parent.Good;
+import memory.NettyMemory;
+
 public class Userbag {
-    private Integer id;
+    private String id;
 
     private String name;
 
@@ -13,12 +16,22 @@ public class Userbag {
 
     private Integer durability;
 
-    public Integer getId() {
+    public static String getGoodNameByUserBag(Userbag userbag) {
+        switch (userbag.getTypeof()){
+            case Good.EQUIPMENT:
+                return NettyMemory.equipmentMap.get(userbag.getWid()).getName();
+            case Good.MPMEDICINE:
+                return NettyMemory.mpMedicineMap.get(userbag.getWid()).getName();
+        }
+        return null;
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setId(String id) {
+        this.id = id == null ? null : id.trim();
     }
 
     public String getName() {

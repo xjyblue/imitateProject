@@ -10,7 +10,7 @@ public interface UserbagMapper {
 
     int deleteByExample(UserbagExample example);
 
-    int deleteByPrimaryKey(Integer id);
+    int deleteByPrimaryKey(String id);
 
     int insert(Userbag record);
 
@@ -18,7 +18,7 @@ public interface UserbagMapper {
 
     List<Userbag> selectByExample(UserbagExample example);
 
-    Userbag selectByPrimaryKey(Integer id);
+    Userbag selectByPrimaryKey(String id);
 
     int updateByExampleSelective(@Param("record") Userbag record, @Param("example") UserbagExample example);
 

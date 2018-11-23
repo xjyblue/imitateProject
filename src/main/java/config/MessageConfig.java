@@ -20,6 +20,7 @@ public class MessageConfig {
     public static final String ERRORORDER = "您输入的指令有误,请输入有效的指令";
     public static final String FAILGOODID = "请输入有效的物品ID";
     public static final String UNENOUGHMONEY = "您的金钱不足，请充值";
+    public static final String NOUSERBAGID = "背包ID不存在";
 
     public static final String RETREATFIGHT = "您已退出战斗";
     public static final String UNENOUGHMP = "您当前蓝量(MP)不足";
@@ -42,4 +43,8 @@ public class MessageConfig {
     public static final String NOFOUNDTEAM = "你所要加入的玩家队伍不存在";
 
     public static final String EMPTYEMAIL = "您当前的邮箱为空";
+    public static final String NOEMAILUSER = "系统无此用户，无法发送邮件";
+    public static final String SUCCESSSENDEMIAL = "邮件发送成功";
+    public static final String RECEIVEEMAILSUCCESS = "成功接收邮件";
+    public static final String RECEIVEEMAILFAIL = "接收邮件编号不存在";
 }

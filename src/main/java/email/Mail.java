@@ -7,6 +7,7 @@ import pojo.Userbag;
  * Created by xiaojianyu on 2018/11/23 10:29
  */
 public class Mail {
+    private boolean ifUserBag;
 
     private String emailId;
 
@@ -17,6 +18,14 @@ public class Mail {
     private String toUser;
 
     private Userbag userbag;
+
+    public boolean isIfUserBag() {
+        return ifUserBag;
+    }
+
+    public void setIfUserBag(boolean ifUserBag) {
+        this.ifUserBag = ifUserBag;
+    }
 
     public String getEmailText() {
         return emailText;
