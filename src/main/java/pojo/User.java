@@ -1,8 +1,11 @@
 package pojo;
 
+import sun.misc.Unsafe;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class User {
     private String username;
@@ -34,6 +37,7 @@ public class User {
     public void setBuffMap(Map<String, Integer> buffMap) {
         this.buffMap = buffMap;
     }
+
 //  保证原子性
     public synchronized void addMoney(BigInteger add){
         BigInteger userMoney = new BigInteger(this.getMoney());
@@ -121,7 +125,7 @@ public class User {
         this.mp = mp == null ? null : mp.trim();
     }
 
-    public String getHp() {
+    public synchronized String getHp() {
         return hp;
     }
 
@@ -143,4 +147,10 @@ public class User {
         this.setMp(userMp.toString());
     }
 
+    public synchronized void subHp(String changeNum) {
+        BigInteger userHp = new BigInteger(this.getHp());
+        BigInteger subHp = new BigInteger(changeNum);
+        userHp = userHp.subtract(subHp);
+        this.setHp(userHp.toString());
+    }
 }

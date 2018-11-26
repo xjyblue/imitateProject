@@ -12,8 +12,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import memory.NettyMemory;
 
@@ -21,7 +19,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import common.PacketProto;
+import packet.PacketProto;
 import skill.MonsterSkill;
 import skill.UserSkill;
 import task.AttackBufferTask;
@@ -220,9 +218,23 @@ public class NettyServer {
         skills = new ArrayList<>();
         skills.add(monsterSkill);
         monster = new Monster("村子村霸", Monster.TYPEOFCOMMONMONSTER, "13000", skills, "1");
+        monster.setIfExist(true);
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);
+
+        monsterSkill = new MonsterSkill();
+        monsterSkill.setAttackCd("20");
+        monsterSkill.setDamage("1000");
+        monsterSkill.setSkillName("黄金锄头攻击");
+        monsterSkill.setSkillId(2);
+        skills = new ArrayList<>();
+        skills.add(monsterSkill);
+        monster = new Monster("稀有黄金村子村霸", Monster.TYPEOFCOMMONMONSTER, "130000", skills, "1");
+        monster.setIfExist(false);
+        monsters.add(monster);
+        area.setMonsters(monsters);
+
 
         NettyMemory.areaMap.put("1", area);
         NettyMemory.areaToNum.put("村子", "1");

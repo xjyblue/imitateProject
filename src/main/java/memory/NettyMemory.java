@@ -63,5 +63,5 @@ public class NettyMemory {
 	/** 辅助定时任务关闭的工具类*/
 	public static ConcurrentHashMap<String, Future> futureMap = new ConcurrentHashMap<String, Future>();
 	/** 缓存邮件信息 */
-	public static Map<String,ConcurrentHashMap<String, Mail>> userEmailMap = new ConcurrentHashMap<String,  ConcurrentHashMap<String, Mail>>();
+	public static Map<String,ConcurrentHashMap<String, Mail>> userEmailMap = new HashMap<String,  ConcurrentHashMap<String, Mail>>();
 }

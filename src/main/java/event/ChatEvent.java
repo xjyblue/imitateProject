@@ -43,8 +43,8 @@ public class ChatEvent {
                     return;
                 }
             }
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOONLINEUSER));
             //若用户未登陆，要保存该用户的聊天信息，一般保存在数据库，这里我保存在内存中
-
         }else {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
         }

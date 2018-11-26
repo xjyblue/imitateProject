@@ -1,6 +1,8 @@
 package event;
 
 import component.Equipment;
+import component.Monster;
+import component.NPC;
 import component.parent.Good;
 import config.MessageConfig;
 import io.netty.channel.Channel;
@@ -13,6 +15,7 @@ import utils.MessageUtil;
 import component.MpMedicine;
 
 import java.math.BigInteger;
+import java.util.Map;
 import java.util.UUID;
 
 @Component("commonEvent")
@@ -175,7 +178,7 @@ public class CommonEvent {
                 return;
             }
             Userbag userbag = getUserBagById(temp[1], user);
-            if(userbag == null){
+            if (userbag == null) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
                 return;
             }
@@ -198,6 +201,33 @@ public class CommonEvent {
             } else {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
             }
+        }
+        if (msg.equals("aoi")) {
+            User user = NettyMemory.session2UserIds.get(channel);
+            String allStatus = System.getProperty("line.separator")
+                    + "玩家" + user.getUsername()
+                    + "--------玩家的状态" + user.getStatus()
+                    + "--------处于" + NettyMemory.areaMap.get(user.getPos()).getName()
+                    + "--------玩家的HP量：" + user.getHp()
+                    + "--------玩家的MP量：" + user.getMp()
+                    + "--------玩家的金币：" + user.getMoney()
+                    + System.getProperty("line.separator");
+            for (Map.Entry<Channel, User> entry : NettyMemory.session2UserIds.entrySet()) {
+                if (!user.getUsername().equals(entry.getValue().getUsername()) && user.getPos().equals(entry.getValue().getPos())) {
+                    allStatus += "其他玩家" + entry.getValue().getUsername() + "---" + entry.getValue().getStatus() + System.getProperty("line.separator");
+                }
+            }
+            for (NPC npc : NettyMemory.areaMap.get(user.getPos()).getNpcs()) {
+                allStatus += "NPC:" + npc.getName() + " 状态[" + npc.getStatus() + "]" + System.getProperty("line.separator");
+            }
+            for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
+                if (monster.isIfExist()) {
+                    allStatus += "怪物有" + monster.getName() + " 生命值[" + monster.getValueOfLife()
+                            + "] 攻击技能为[" + monster.getMonsterSkillList().get(0).getSkillName()
+                            + "] 伤害为：[" + monster.getMonsterSkillList().get(0).getDamage() + "]" + System.getProperty("line.separator");
+                }
+            }
+            channel.writeAndFlush(MessageUtil.turnToPacket(allStatus));
         }
     }
 

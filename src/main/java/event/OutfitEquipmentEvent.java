@@ -11,6 +11,7 @@ import pojo.Userbag;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * Description ：nettySpringServer
@@ -19,7 +20,7 @@ import java.math.BigInteger;
 @Component("qutfitEquipmentEvent")
 public class OutfitEquipmentEvent {
 
-    public void getGoods(Channel channel, String msg, Monster monster) {
+    public void getGoods(Channel channel, Monster monster) {
         User user = getUser(channel);
         int num = (int) (Math.random() * 100);
         if (monster.getType().equals(Monster.TYPEOFCOMMONMONSTER)) {
@@ -41,7 +42,10 @@ public class OutfitEquipmentEvent {
             } else {
                 BigInteger addMoney = new BigInteger("20000000");
                 user.addMoney(addMoney);
-                channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + addMoney.toString() + "金币,当前人物金币为[" + user.getMoney() + "]"));
+                for(Map.Entry<String,User>entry:NettyMemory.teamMap.get(user.getTeamId()).getUserMap().entrySet()){
+                    Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
+                    channelTemp.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + addMoney.toString() + "金币,当前人物金币为[" + user.getMoney() + "]"));
+                }
             }
         }
     }

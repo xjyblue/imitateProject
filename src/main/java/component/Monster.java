@@ -22,6 +22,26 @@ public class Monster {
 
     private List<MonsterSkill> monsterSkillList;
 
+    private Integer probability;
+
+    private boolean ifExist;
+
+    public boolean isIfExist() {
+        return ifExist;
+    }
+
+    public void setIfExist(boolean ifExist) {
+        this.ifExist = ifExist;
+    }
+
+    public Integer getProbability() {
+        return probability;
+    }
+
+    public void setProbability(Integer probability) {
+        this.probability = probability;
+    }
+
     public String getStatus() {
         return status;
     }

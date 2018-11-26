@@ -42,7 +42,13 @@ public class StopAreaEvent {
     private ChatEvent chatEvent;
     @Autowired
     private EmailEvent emailEvent;
+    @Autowired
+    private PKEvent pkEvent;
     public void stopArea(Channel channel, String msg) {
+        if(msg.startsWith("pk")){
+            pkEvent.pkOthers(channel,msg);
+            return;
+        }
         if(msg.startsWith("email")){
             emailEvent.email(channel,msg);
             return;
@@ -63,6 +69,10 @@ public class StopAreaEvent {
             teamEvent.team(channel, msg);
             return;
         }
+        if(msg.equals("aoi")){
+            commonEvent.common(channel,msg);
+            return;
+        }
         if (msg.startsWith("b") || msg.startsWith("w") || msg.startsWith("fix-")) {
             commonEvent.common(channel, msg);
             return;
@@ -70,6 +80,10 @@ public class StopAreaEvent {
         String temp[] = null;
         if (msg.startsWith("move")) {
             temp = msg.split("-");
+            if(temp.length!=2){
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+                return;
+            }
             User user = NettyMemory.session2UserIds.get(channel);
             if (temp[1].equals(NettyMemory.areaMap.get(user.getPos()).getName())) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNMOVELOCAL));
@@ -87,33 +101,6 @@ public class StopAreaEvent {
                     }
                 }
             }
-        } else if (msg.startsWith("aoi")) {
-            User user = NettyMemory.session2UserIds.get(channel);
-            String allStatus = System.getProperty("line.separator")
-                    + "玩家" + user.getUsername()
-                    + "--------玩家的状态" + user.getStatus()
-                    + "--------处于" + NettyMemory.areaMap.get(user.getPos()).getName()
-                    + "--------玩家的HP量：" + user.getHp()
-                    + "--------玩家的MP量：" + user.getMp()
-                    + "--------玩家的金币：" + user.getMoney()
-                    + System.getProperty("line.separator");
-            for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
-                allStatus += "怪物：" + monster.getName() + "的血量为：" + monster.getValueOfLife() + System.getProperty("line.separator");
-            }
-            for (Map.Entry<Channel, User> entry : NettyMemory.session2UserIds.entrySet()) {
-                if (!user.getUsername().equals(entry.getValue().getUsername()) && user.getPos().equals(entry.getValue().getPos())) {
-                    allStatus += "其他玩家" + entry.getValue().getUsername() + "---" + entry.getValue().getStatus() + System.getProperty("line.separator");
-                }
-            }
-            for (NPC npc : NettyMemory.areaMap.get(user.getPos()).getNpcs()) {
-                allStatus += "NPC:" + npc.getName() + "---" + npc.getStatus() + System.getProperty("line.separator");
-            }
-            for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
-                allStatus += "怪物有" + monster.getName() + "---生命值---" + monster.getValueOfLife()
-                        + "---攻击技能为---" + monster.getMonsterSkillList().get(0).getSkillName()
-                        + "伤害为：" + monster.getMonsterSkillList().get(0).getDamage() + System.getProperty("line.separator");
-            }
-            channel.writeAndFlush(MessageUtil.turnToPacket(allStatus));
         } else if (msg.startsWith("talk")) {
             temp = msg.split("-");
             if (temp.length != 2) {
@@ -134,7 +121,7 @@ public class StopAreaEvent {
             channel.writeAndFlush(MessageUtil.turnToPacket("请输入lookSkill查看技能，请输入change-技能名-键位配置技能,请输入quitSkill退出技能管理界面"));
         } else if (msg.startsWith("attack")) {
             temp = msg.split("-");
-//                        输入的键位是否存在
+//          输入的键位是否存在
             if (temp.length == 3 && NettyMemory.userskillrelationMap.get(channel).containsKey(temp[2])) {
                 User user = NettyMemory.session2UserIds.get(channel);
                 for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
@@ -149,7 +136,7 @@ public class StopAreaEvent {
 //                      蓝量计算
                             userMp = userMp.subtract(skillMp);
                             user.setMp(userMp.toString());
-//                                    判断技能冷却
+//                          判断技能冷却
                             if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
 //                               判断攻击完怪物是否死亡，生命值计算逻辑
                                 BigInteger attackDamage = new BigInteger(userSkill.getDamage());
@@ -179,7 +166,7 @@ public class StopAreaEvent {
 //                                                修改怪物状态
                                     monster.setStatus("0");
 //                                  爆装备
-                                    outfitEquipmentEvent.getGoods(channel,msg,monster);
+                                    outfitEquipmentEvent.getGoods(channel,monster);
                                 } else {
                                     Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(channel);
 //                                    切换到攻击模式
@@ -217,6 +204,8 @@ public class StopAreaEvent {
                         break;
                     }
                 }
+            }else {
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
             }
         } else {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -228,8 +217,7 @@ public class StopAreaEvent {
         for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
             Equipment equipment = NettyMemory.equipmentMap.get(weaponequipmentbar.getWid());
             resp += System.getProperty("line.separator")
-                    + equipment.getName() + "剩余耐久为:" + weaponequipmentbar.getDurability()
-            ;
+                    + equipment.getName() + "剩余耐久为:" + weaponequipmentbar.getDurability();
         }
         return resp;
     }

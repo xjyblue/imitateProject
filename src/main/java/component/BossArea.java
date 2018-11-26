@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Description ：nettySpringServer
@@ -29,6 +28,8 @@ public class BossArea {
     private volatile boolean isEnd;
 
     private volatile boolean isFight;
+
+    private Monster firstMonster;
 
     public boolean isFight() {
         return isFight;
@@ -64,6 +65,14 @@ public class BossArea {
         this.keepTime = keepTime;
     }
 
+    public Monster getFirstMonster() {
+        return firstMonster;
+    }
+
+    public void setFirstMonster(Monster firstMonster) {
+        this.firstMonster = firstMonster;
+    }
+
     public BossArea(){
         init();
     }
@@ -76,10 +85,15 @@ public class BossArea {
         List<MonsterSkill> monsterSkills = new ArrayList<>();
         monsterSkills.add(monsterSkill);
         Monster boss = new Monster("七天连锁酒店王",Monster.TYPEOFBOSS,"10000",monsterSkills,"1");
+        firstMonster = boss;
+
+        Monster bossSecond = new Monster("迪拜酒店王",Monster.TYPEOFBOSS,"20000",monsterSkills,"1");
         Map<String,Monster>monsterMap = new HashMap<>();
         monsterMap.put(boss.getName(),boss);
+        monsterMap.put(bossSecond.getName(),bossSecond);
+
         setMap(monsterMap);
-        this.bossName = "七天连锁酒店王";
+        this.bossName = "酒店怪兽副本";
         this.isEnd = false;
         this.isFight = false;
         this.damageAll = new HashMap<User, String>();

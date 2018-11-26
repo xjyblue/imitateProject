@@ -2,10 +2,10 @@ package client;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
-import common.PacketProto;
+import packet.PacketProto;
 import io.netty.handler.timeout.IdleStateEvent;
 
-import static common.PacketProto.Packet.newBuilder;
+import static packet.PacketProto.Packet.newBuilder;
 
 /**
  * @author xiaojianyu

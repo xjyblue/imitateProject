@@ -2,14 +2,19 @@ package task;
 
 import component.BossArea;
 import component.Monster;
+import config.MessageConfig;
 import event.EventStatus;
+import event.OutfitEquipmentEvent;
 import io.netty.channel.Channel;
+import io.netty.handler.traffic.ChannelTrafficShapingHandler;
 import memory.NettyMemory;
 import pojo.User;
 import team.Team;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -28,11 +33,27 @@ public class BossAttackTask implements Runnable {
 
     private String teamId;
 
-    public BossAttackTask(String teamId, Channel channel, String jobId, ConcurrentHashMap<String, Future> futureMap) {
+    private Monster monster = null;
+
+    private OutfitEquipmentEvent outfitEquipmentEvent;
+
+
+
+    public BossAttackTask(Monster monster,String teamId, Channel channel, String jobId, ConcurrentHashMap<String, Future> futureMap,OutfitEquipmentEvent outfitEquipmentEvent) {
+        this.monster = monster;
         this.channel = channel;
         this.jobId = jobId;
         this.futureMap = futureMap;
         this.teamId = teamId;
+        this.outfitEquipmentEvent = outfitEquipmentEvent;
+    }
+
+    public Monster getMonster() {
+        return monster;
+    }
+
+    public void setMonster(Monster monster) {
+        this.monster = monster;
     }
 
     public Channel getChannel() {
@@ -64,14 +85,36 @@ public class BossAttackTask implements Runnable {
         User user = NettyMemory.session2UserIds.get(channel);
         BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
         User userTarget = getMaxDamageUser(bossArea);
+
+//      重新锁定boss
+        if (monster == null || (monster != null && monster.getStatus().equals("0"))) {
+            for (Map.Entry<String, Monster> entry : bossArea.getMap().entrySet()) {
+                if (entry.getValue().getStatus().equals("1")) {
+                    if (monster != null) {
+                        sendMessageToAll(teamId, "出现第二boss" + monster.getName());
+//                      移除所有小组成员
+                        removeMonster(teamId);
+                        addMonster(teamId, entry.getValue());
+                    }
+                    monster = entry.getValue();
+                    break;
+                }
+            }
+        }
+
         BigInteger userHp = new BigInteger(userTarget.getHp());
-        if (userHp.compareTo(new BigInteger("0")) <= 0 ) {
+        Channel channelTarget = NettyMemory.userToChannelMap.get(userTarget);
+        if (userHp.compareTo(new BigInteger("0")) <= 0) {
             userTarget.setHp("0");
             userTarget.setStatus("0");
-            NettyMemory.monsterMap.remove(user);
-            NettyMemory.eventStatus.put(channel, EventStatus.BOSSAREA);
+//            NettyMemory.monsterMap.remove(userTarget);
+
+//          人物战斗中死亡
+            NettyMemory.eventStatus.put(channelTarget, EventStatus.DEADAREA);
+            channelTarget.writeAndFlush(MessageUtil.turnToPacket("你已死亡"));
+
 //          全队死亡检查，是否副本失败
-            if (checkAllDead(bossArea,userTarget)) {
+            if (checkAllDead(bossArea, userTarget)) {
                 Future future = futureMap.remove(jobId);
                 future.cancel(true);
                 failMessageToAll(bossArea);
@@ -92,35 +135,69 @@ public class BossAttackTask implements Runnable {
             Future future = futureMap.remove(jobId);
             future.cancel(true);
             NettyMemory.bossAreaMap.remove(user.getTeamId());
-//          改变小组所有队员的副本状态
-            changeEventStatus(user, EventStatus.STOPAREA);
+            sendTimeOutToAll(teamId,MessageConfig.BOSSAREATIMEOUT);
             return;
         }
-//        推送战斗消息
-        for(Map.Entry<String,Monster> entry:bossArea.getMap().entrySet()){
-            Monster monster = entry.getValue();
-//            战斗胜利
-            if (monster != null &&monster.getStatus().equals("0")) {
-                successMessToAll(bossArea);
-                Future future = futureMap.remove(jobId);
-                future.cancel(true);
-                return;
-            }
+//     战斗胜利
+        if (monster != null && monster.getStatus().equals("0")) {
+            successMessToAll(bossArea,channel);
+            Future future = futureMap.remove(jobId);
+            future.cancel(true);
+            return;
+        }
 //           此处构建最简单的bossAI，就是根据谁的伤害最高打谁
-            attack(user, monster);
+        attack(user, monster);
+
+    }
+
+    private void addMonster(String teamId, Monster monster) {
+        Map<String, User> map = NettyMemory.teamMap.get(teamId).getUserMap();
+        for (Map.Entry<String, User> entry : map.entrySet()) {
+            List<Monster> list = new ArrayList<>();
+            list.add(monster);
+            NettyMemory.monsterMap.put(entry.getValue(),list);
         }
     }
 
-    private void successMessToAll(BossArea bossArea) {
-        Team team = NettyMemory.teamMap.get(bossArea.getTeamId());
-        for(Map.Entry<String,User> entry:team.getUserMap().entrySet()){
-            Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket(bossArea.getBossName() + "副本攻略成功，热烈庆祝各位参与的小伙伴"));
-            NettyMemory.eventStatus.put(channelTemp,EventStatus.STOPAREA);
-            if(NettyMemory.monsterMap.containsKey(entry.getValue())){
+    private void removeMonster(String teamId) {
+        Map<String, User> map = NettyMemory.teamMap.get(teamId).getUserMap();
+        for (Map.Entry<String, User> entry : map.entrySet()) {
+            if (NettyMemory.monsterMap.containsKey(entry.getValue())) {
                 NettyMemory.monsterMap.remove(entry.getValue());
             }
         }
+    }
+
+    private void sendMessageToAll(String teamId, String msg) {
+        Map<String, User> map = NettyMemory.teamMap.get(teamId).getUserMap();
+        for (Map.Entry<String, User> entry : map.entrySet()) {
+            Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
+        }
+    }
+
+    private void sendTimeOutToAll(String teamId, String msg) {
+        Map<String, User> map = NettyMemory.teamMap.get(teamId).getUserMap();
+        for (Map.Entry<String, User> entry : map.entrySet()) {
+            Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
+            if(!NettyMemory.eventStatus.get(channelTemp).equals(EventStatus.DEADAREA)){
+                NettyMemory.eventStatus.put(channelTemp,EventStatus.STOPAREA);
+            }
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
+        }
+    }
+
+    private void successMessToAll(BossArea bossArea,Channel channel) {
+        Team team = NettyMemory.teamMap.get(bossArea.getTeamId());
+        for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
+            Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket(bossArea.getBossName() + "副本攻略成功，热烈庆祝各位参与的小伙伴"));
+            NettyMemory.eventStatus.put(channelTemp, EventStatus.STOPAREA);
+            if (NettyMemory.monsterMap.containsKey(entry.getValue())) {
+                NettyMemory.monsterMap.remove(entry.getValue());
+            }
+        }
+        outfitEquipmentEvent.getGoods(channel,monster);
         NettyMemory.bossAreaMap.remove(team.getTeamId());
     }
 
@@ -128,10 +205,7 @@ public class BossAttackTask implements Runnable {
         Map<String, User> userMap = NettyMemory.teamMap.get(bossArea.getTeamId()).getUserMap();
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
-            if(NettyMemory.monsterMap.containsKey(entry.getValue())){
-                NettyMemory.monsterMap.remove(entry.getValue());
-            }
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "被" + bossArea.getBossName() + "打死"));
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "被" + monster.getName() + "打死"));
         }
     }
 
@@ -140,14 +214,14 @@ public class BossAttackTask implements Runnable {
         NettyMemory.bossAreaMap.remove(bossArea.getTeamId());
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
-            NettyMemory.eventStatus.put(channelTemp,EventStatus.STOPAREA);
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket("挑战失败，人物已死光,可按f重新挑战"));
+            NettyMemory.eventStatus.put(channelTemp, EventStatus.DEADAREA);
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.BOSSFAIL));
         }
     }
 
-    private boolean checkAllDead(BossArea bossArea,User userTarget) {
+    private boolean checkAllDead(BossArea bossArea, User userTarget) {
         for (Map.Entry<String, User> entry : NettyMemory.teamMap.get(bossArea.getTeamId()).getUserMap().entrySet()) {
-            if (entry.getValue().getStatus().equals("1")&&entry.getValue()!=userTarget) {
+            if (entry.getValue().getStatus().equals("1") && entry.getValue() != userTarget) {
                 return false;
             }
         }
@@ -162,12 +236,16 @@ public class BossAttackTask implements Runnable {
         BigInteger monsterDamage = new BigInteger(monster.getMonsterSkillList().get(0).getDamage());
         for (Map.Entry<String, User> entry : NettyMemory.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
             String resp = null;
+            if(NettyMemory.eventStatus.get(NettyMemory.userToChannelMap.get(entry.getValue())).equals(EventStatus.STOPAREA)){
+                continue;
+            }
+            Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
             if (entry.getValue().getUsername().equals(userTarget.getUsername())) {
                 BigInteger userHp = new BigInteger(userTarget.getHp());
                 BigInteger minHp = new BigInteger("0");
                 userHp = userHp.subtract(monsterDamage);
                 userTarget.setHp(userHp.toString());
-                if(userHp.compareTo(minHp)<=0){
+                if (userHp.compareTo(minHp) <= 0) {
                     userTarget.setHp("0");
                 }
                 resp = "怪物的仇恨值在你身上"
@@ -177,6 +255,7 @@ public class BossAttackTask implements Runnable {
                         + "-----你的剩余血:" + userTarget.getHp()
                         + "-----你的蓝量" + userTarget.getMp()
                         + "-----怪物血量:" + monster.getValueOfLife()
+                        + "----你处于["+NettyMemory.eventStatus.get(channelTemp)+"]状态"
                         + System.getProperty("line.separator");
                 //TODO:更新用户血量到数据库
             } else {
@@ -187,9 +266,9 @@ public class BossAttackTask implements Runnable {
                         + "-----你的剩余血:" + entry.getValue().getHp()
                         + "-----你的蓝量" + entry.getValue().getMp()
                         + "-----怪物血量:" + monster.getValueOfLife()
+                        + "----你处于["+NettyMemory.eventStatus.get(channelTemp)+"]状态"
                         + System.getProperty("line.separator");
             }
-            Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
             channelTemp.writeAndFlush(MessageUtil.turnToPacket(resp));
         }
     }
@@ -204,9 +283,9 @@ public class BossAttackTask implements Runnable {
                 userTarget = entry.getKey();
             }
         }
-        if(userTarget==null){
+        if (userTarget == null) {
             for (Map.Entry<String, User> entry : NettyMemory.teamMap.get(bossArea.getTeamId()).getUserMap().entrySet()) {
-                if(!entry.getValue().getStatus().equals("0")){
+                if (!entry.getValue().getStatus().equals("0")) {
                     userTarget = entry.getValue();
                 }
             }
@@ -219,10 +298,10 @@ public class BossAttackTask implements Runnable {
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
             NettyMemory.eventStatus.put(channelTemp, stoparea);
-            if(NettyMemory.monsterMap.containsKey(entry.getValue())){
+            if (NettyMemory.monsterMap.containsKey(entry.getValue())) {
                 NettyMemory.monsterMap.remove(entry.getValue());
             }
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket("时间结束挑战副本失败,你已退出副本世界，重刷副本请按F"));
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.BOSSAREATIMEOUT));
         }
         NettyMemory.bossAreaMap.remove(team.getTeamId());
     }

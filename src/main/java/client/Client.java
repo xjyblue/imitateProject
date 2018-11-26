@@ -8,12 +8,12 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
-import common.PacketProto;
+import packet.PacketProto;
 import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.concurrent.TimeUnit;
 
-import static common.PacketProto.Packet.newBuilder;
+import static packet.PacketProto.Packet.newBuilder;
 
 /**
  * @author xiaojianyu

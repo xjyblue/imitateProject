@@ -1,8 +1,8 @@
 package utils;
 
-import common.PacketProto;
+import packet.PacketProto;
 
-import static common.PacketProto.Packet.newBuilder;
+import static packet.PacketProto.Packet.newBuilder;
 
 public class MessageUtil {
 

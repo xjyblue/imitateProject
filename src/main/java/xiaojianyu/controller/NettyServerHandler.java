@@ -1,4 +1,5 @@
 package xiaojianyu.controller;
+import event.EventStatus;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +13,12 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.util.ReferenceCountUtil;
 import memory.NettyMemory;
-import common.PacketProto;
+import packet.PacketProto;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static common.PacketProto.Packet.newBuilder;
+import static packet.PacketProto.Packet.newBuilder;
 
 @Sharable
 @Service("nettyServerHandler")
@@ -37,7 +38,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 	    group.add(channel);
 		heartCounts.put(channel,0);
 	}
-	
+
+//	Channel注册到EventLoop
+	@Override
+	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+		super.channelRegistered(ctx);
+	}
+
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		logger.info("客户端与服务端连接断开");
@@ -55,6 +62,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		Channel channel = ctx.channel();
 		logger.info(channel.remoteAddress() + "客户端与服务端连接开始...");
+		NettyMemory.eventStatus.put(channel, EventStatus.COMING);
 		PacketProto.Packet.Builder builder = newBuilder();
 		builder.setPacketType(PacketProto.Packet.PacketType.DATA);
 		builder.setData("d:登录 z:注册");

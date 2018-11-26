@@ -5,7 +5,6 @@ import memory.NettyMemory;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Weaponequipmentbar;
-
 import java.math.BigInteger;
 
 @Component("attackCaculation")

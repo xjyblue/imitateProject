@@ -31,42 +31,41 @@ public class EventDistributor {
     private BossEvent bossEvent;
     @Autowired
     private ShopEvent shopEvent;
+    @Autowired
+    private ConnectEvent connectEvent;
+    @Autowired
+    private DeadEvent deadEvent;
     public void distributeEvent(ChannelHandlerContext ctx, String msg) {
         Channel ch = ctx.channel();
-        if (!NettyMemory.eventStatus.containsKey(ch)) {
-            if (msg.equals("d")) {
-                NettyMemory.eventStatus.put(ch, EventStatus.LOGIN);
-                ctx.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LOGINMESSAGE));
-            }
-            if (msg.equals("z")) {
-                NettyMemory.eventStatus.put(ch, EventStatus.REGISTER);
-                ctx.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERMESSAGE));
-            }
-        } else {
-            String status = NettyMemory.eventStatus.get(ch);
-            switch (status) {
-                case EventStatus.LOGIN:
-                    loginEvent.login(ctx.channel(),msg);
-                    break;
-                case EventStatus.REGISTER:
-                    registerEvent.register(ctx.channel(),msg);
-                    break;
-                case EventStatus.STOPAREA:
-                    stopAreaEvent.stopArea(ctx.channel(),msg);
-                    break;
-                case EventStatus.SKILLMANAGER:
-                    skillEvent.skill(ctx.channel(),msg);
-                    break;
-                case EventStatus.ATTACK:
-                    attackEvent.attack(ctx.channel(),msg);
-                    break;
-                case EventStatus.BOSSAREA:
-                    bossEvent.attack(ctx.channel(),msg);
-                    break;
-                case EventStatus.SHOPAREA:
-                    shopEvent.shop(ctx.channel(),msg);
-                    break;
-            }
+        String status = NettyMemory.eventStatus.get(ch);
+        switch (status) {
+            case EventStatus.COMING:
+                connectEvent.connect(ctx.channel(),msg);
+                break;
+            case EventStatus.LOGIN:
+                loginEvent.login(ctx.channel(), msg);
+                break;
+            case EventStatus.REGISTER:
+                registerEvent.register(ctx.channel(), msg);
+                break;
+            case EventStatus.STOPAREA:
+                stopAreaEvent.stopArea(ctx.channel(), msg);
+                break;
+            case EventStatus.SKILLMANAGER:
+                skillEvent.skill(ctx.channel(), msg);
+                break;
+            case EventStatus.ATTACK:
+                attackEvent.attack(ctx.channel(), msg);
+                break;
+            case EventStatus.BOSSAREA:
+                bossEvent.attack(ctx.channel(), msg);
+                break;
+            case EventStatus.SHOPAREA:
+                shopEvent.shop(ctx.channel(), msg);
+                break;
+            case EventStatus.DEADAREA:
+                deadEvent.dead(ctx.channel(),msg);
+                break;
         }
     }
 }

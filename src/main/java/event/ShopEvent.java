@@ -13,6 +13,7 @@ import utils.MessageUtil;
 
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Description ：nettySpringServer
@@ -87,6 +88,7 @@ public class ShopEvent {
                     userbag.setWid(mpMedicine.getId());
                     userbag.setName(mpMedicine.getName());
                     userbag.setNum(Integer.parseInt(temp[2]));
+                    userbag.setId(UUID.randomUUID().toString());
                     userbag.setTypeof(Good.MPMEDICINE);
                     user.getUserBag().add(userbag);
                 }
@@ -104,6 +106,7 @@ public class ShopEvent {
                     userbag.setNum(1);
                     userbag.setTypeof(Good.EQUIPMENT);
                     userbag.setName(equipment.getName());
+                    userbag.setId(UUID.randomUUID().toString());
                     userbag.setWid(equipment.getId());
                     userbag.setDurability(equipment.getDurability());
                     user.getUserBag().add(userbag);

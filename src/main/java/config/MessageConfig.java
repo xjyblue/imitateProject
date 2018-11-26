@@ -28,6 +28,8 @@ public class MessageConfig {
     public static final String YOUARENOLEADER = "你无权带队进入副本，你不是队长";
     public static final String ENTERFIGHT = "你已进入战斗状态";
     public static final String BOSSAREASUCCESS = "副本攻略成功，热烈庆祝各位参与的小伙伴";
+    public static final String BOSSFAIL = "挑战副本失败，人物已死光,按Y复活到起始之地";
+    public static final String BOSSAREATIMEOUT = "时间结束挑战副本失败,你已退出副本世界，重刷副本请按F";
 
     public static final String GOODNOEXISTBAG = "背包中该物品为空";
     public static final String GOODNOEXIST = "不存在该ID的物品";
@@ -47,4 +49,18 @@ public class MessageConfig {
     public static final String SUCCESSSENDEMIAL = "邮件发送成功";
     public static final String RECEIVEEMAILSUCCESS = "成功接收邮件";
     public static final String RECEIVEEMAILFAIL = "接收邮件编号不存在";
+    public static final String NOFOUNDPKPERSON = "你要PK的玩家不存在";
+    public static final String NOPKSELF = "PK对象不能是自己";
+    public static final String NOKEYSKILL = "您无此键位的技能";
+
+
+    public static final String DEADNOOPERATE = "请不要做死亡后的无效操作";
+    public static final String SELECTLIVEWAY = "你可以选择Y复活到起始之地,或者在商城购买复活符按P立刻原地复活";
+    public static final String LIVEINSTART = "你已在起始之地复活";
+    public static final String NOONLINEUSER = "用户离线无法收到聊天消息";
+    public static final String NOSUPPORTREMOTEPK = "不支持跨场景pk";
+    public static final String RESURRECTIONNOPK = "起始之地不允许玩家pk";
+    public static final String DEADNOOPERATEINBOSSAREA = "您已在副本中死亡，请不要做无效操作";
+    public static final String ALLDEADINBOSSAREA = "全队已死亡，挑战副本失败";
+    public static final String REBRORNANDCONNECTBOSSAREA = "你复活后重新加入当前副本";
 }
