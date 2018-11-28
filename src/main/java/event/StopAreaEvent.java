@@ -5,6 +5,7 @@ import component.Equipment;
 import component.Monster;
 import component.NPC;
 import config.MessageConfig;
+import config.StatusConfig;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import memory.NettyMemory;
@@ -44,6 +45,8 @@ public class StopAreaEvent {
     private EmailEvent emailEvent;
     @Autowired
     private PKEvent pkEvent;
+    @Autowired
+    private BuffEvent buffEvent;
     public void stopArea(Channel channel, String msg) {
         if(msg.startsWith("pk")){
             pkEvent.pkOthers(channel,msg);
@@ -65,7 +68,7 @@ public class StopAreaEvent {
             bossEvent.enterBossArea(channel, msg);
             return;
         }
-        if (msg.startsWith("t")) {
+        if (msg.startsWith("t")&&!msg.startsWith("talk")) {
             teamEvent.team(channel, msg);
             return;
         }
@@ -125,8 +128,12 @@ public class StopAreaEvent {
             if (temp.length == 3 && NettyMemory.userskillrelationMap.get(channel).containsKey(temp[2])) {
                 User user = NettyMemory.session2UserIds.get(channel);
                 for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
-//                                输入的怪物是否存在
-                    if (monster.getName().equals(temp[1]) && !monster.getStatus().equals("0")) {
+//                 输入的怪物是否存在
+                    if (monster.getName().equals(temp[1])) {
+                        if(monster.getStatus().equals(StatusConfig.DEAD)){
+                           channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DONOTATTACKDEADMONSTER));
+                           return;
+                        }
                         Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(channel).get(temp[2]);
                         UserSkill userSkill = NettyMemory.SkillMap.get(userskillrelation.getSkillid());
 //                                    判断人物MP量是否足够
@@ -138,6 +145,10 @@ public class StopAreaEvent {
                             user.setMp(userMp.toString());
 //                          判断技能冷却
                             if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
+
+//                               处理用户攻击产生的一系列buff
+                                buffEvent.buffSolve(userSkill,monster,user);
+
 //                               判断攻击完怪物是否死亡，生命值计算逻辑
                                 BigInteger attackDamage = new BigInteger(userSkill.getDamage());
 //                              攻击逻辑计算
@@ -164,7 +175,7 @@ public class StopAreaEvent {
                                     monster.setValueOfLife("0");
                                     channel.writeAndFlush(MessageUtil.turnToPacket(resp));
 //                                                修改怪物状态
-                                    monster.setStatus("0");
+                                    monster.setStatus(StatusConfig.DEAD);
 //                                  爆装备
                                     outfitEquipmentEvent.getGoods(channel,monster);
                                 } else {
@@ -193,7 +204,7 @@ public class StopAreaEvent {
                                     NettyMemory.monsterMap.put(user, monsters);
 //                                    提醒用户你已进入战斗模式
                                     String jobId = UUID.randomUUID().toString();
-                                    MonsterAttackTask monsterAttackTask = new MonsterAttackTask(channel, jobId, NettyMemory.futureMap);
+                                    MonsterAttackTask monsterAttackTask = new MonsterAttackTask(channel, jobId, NettyMemory.futureMap,outfitEquipmentEvent,buffEvent);
                                     Future future = NettyMemory.monsterThreadPool.scheduleAtFixedRate(monsterAttackTask, 0, 1, TimeUnit.SECONDS);
                                     channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFIGHT));
                                 }

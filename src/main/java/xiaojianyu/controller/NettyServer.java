@@ -3,6 +3,7 @@ package xiaojianyu.controller;
 import buff.Buff;
 import component.*;
 import component.parent.Good;
+import config.BuffConfig;
 import email.Mail;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -22,8 +23,7 @@ import org.springframework.stereotype.Service;
 import packet.PacketProto;
 import skill.MonsterSkill;
 import skill.UserSkill;
-import task.AttackBufferTask;
-import task.MpTask;
+import task.BufferTask;
 import test.ExcelUtil;
 
 import java.io.File;
@@ -59,7 +59,7 @@ public class NettyServer {
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel ch) throws Exception {
-                       // 初始化编码器，解码器，处理器
+                            // 初始化编码器，解码器，处理器
 //                            ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
                             ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
                             ch.pipeline().addLast(new ProtobufEncoder());
@@ -83,49 +83,47 @@ public class NettyServer {
     public void initServer() throws IOException {
 
 //        模拟从数据库初始化所有用户的邮件系统
-        NettyMemory.userEmailMap.put("z",new ConcurrentHashMap<String, Mail>());
-        NettyMemory.userEmailMap.put("k",new ConcurrentHashMap<String, Mail>());
+        NettyMemory.userEmailMap.put("z", new ConcurrentHashMap<String, Mail>());
+        NettyMemory.userEmailMap.put("k", new ConcurrentHashMap<String, Mail>());
 
 //        初始化定时任务 start
-//        回蓝定时任务
-        NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new MpTask(), 0, 1, TimeUnit.SECONDS);
-//        攻击buffer定时任务
-        NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new AttackBufferTask(), 0, 1, TimeUnit.SECONDS);
+//         回蓝定时任务
+        NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new BufferTask(), 0, 1, TimeUnit.SECONDS);
 //        初始化定时任务 end
 
 
 //      初始化武器start
         FileInputStream equipFis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Equipment.xls"));
         LinkedHashMap<String, String> equipAlias = new LinkedHashMap<>();
-        equipAlias.put("武器id","id");
-        equipAlias.put("武器名称","name");
-        equipAlias.put("武器耐久度","durability");
-        equipAlias.put("武器增加伤害","addValue");
-        equipAlias.put("购入价值","buyMoney");
+        equipAlias.put("武器id", "id");
+        equipAlias.put("武器名称", "name");
+        equipAlias.put("武器耐久度", "durability");
+        equipAlias.put("武器增加伤害", "addValue");
+        equipAlias.put("购入价值", "buyMoney");
         List<Equipment> equipmentList = ExcelUtil.excel2Pojo(equipFis, Equipment.class, equipAlias);
-       if(equipmentList!=null&&equipmentList.size()>0){
-           for(Equipment equipment:equipmentList){
-               equipment.setType(Good.EQUIPMENT);
-               NettyMemory.equipmentMap.put(equipment.getId(),equipment);
-           }
-       }
+        if (equipmentList != null && equipmentList.size() > 0) {
+            for (Equipment equipment : equipmentList) {
+                equipment.setType(Good.EQUIPMENT);
+                NettyMemory.equipmentMap.put(equipment.getId(), equipment);
+            }
+        }
 //      初始化武器end
 
 //       初始化即时回复MP start
         FileInputStream mpMedicineFis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Medicine.xls"));
         LinkedHashMap<String, String> mpMedicineAlias = new LinkedHashMap<>();
-        mpMedicineAlias.put("蓝药id","id");
-        mpMedicineAlias.put("回复总值","replyValue");
-        mpMedicineAlias.put("是否立刻回复","immediate");
-        mpMedicineAlias.put("每秒回复的值","secondValue");
-        mpMedicineAlias.put("持续时间","keepTime");
-        mpMedicineAlias.put("蓝药名称","name");
-        mpMedicineAlias.put("购入价值","buyMoney");
+        mpMedicineAlias.put("蓝药id", "id");
+        mpMedicineAlias.put("回复总值", "replyValue");
+        mpMedicineAlias.put("是否立刻回复", "immediate");
+        mpMedicineAlias.put("每秒回复的值", "secondValue");
+        mpMedicineAlias.put("持续时间", "keepTime");
+        mpMedicineAlias.put("蓝药名称", "name");
+        mpMedicineAlias.put("购入价值", "buyMoney");
         List<MpMedicine> mpMedicineList = ExcelUtil.excel2Pojo(mpMedicineFis, MpMedicine.class, mpMedicineAlias);
-        if(mpMedicineList!=null&&mpMedicineList.size()>0){
-            for(MpMedicine mpMedicine:mpMedicineList){
+        if (mpMedicineList != null && mpMedicineList.size() > 0) {
+            for (MpMedicine mpMedicine : mpMedicineList) {
                 mpMedicine.setType(Good.MPMEDICINE);
-                NettyMemory.mpMedicineMap.put(mpMedicine.getId(),mpMedicine);
+                NettyMemory.mpMedicineMap.put(mpMedicine.getId(), mpMedicine);
             }
         }
 //       初始化即时回复MP end
@@ -134,14 +132,15 @@ public class NettyServer {
         FileInputStream fis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Buff.xls"));
         LinkedHashMap<String, String> alias = new LinkedHashMap<>();
         alias.put("buff名称", "name");
-        alias.put("每秒回复时间","addSecondValue");
+        alias.put("每秒造成伤害", "addSecondValue");
         alias.put("buff类别", "type");
         alias.put("buffId", "bufferId");
         alias.put("持续时间", "keepTime");
         alias.put("每秒减免伤害", "injurySecondValue");
+        alias.put("buff类型", "typeOf");
         List<Buff> buffList = ExcelUtil.excel2Pojo(fis, Buff.class, alias);
-        for(Buff buff:buffList){
-            NettyMemory.buffMap.put(buff.getBufferId(),buff);
+        for (Buff buff : buffList) {
+            NettyMemory.buffMap.put(buff.getBufferId(), buff);
         }
 //      初始化全图buff
 
@@ -150,13 +149,23 @@ public class NettyServer {
         FileInputStream userSkillfis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\UserSkill.xls"));
         LinkedHashMap<String, String> userSkillalias = new LinkedHashMap<>();
         userSkillalias.put("技能id", "skillId");
-        userSkillalias.put("技能名称","skillName");
+        userSkillalias.put("技能名称", "skillName");
         userSkillalias.put("技能攻击时间", "attackCd");
         userSkillalias.put("技能伤害", "damage");
         userSkillalias.put("技能消耗Mp", "skillMp");
+        userSkillalias.put("技能附带buffId", "bufferMapId");
         List<UserSkill> userSkillList = ExcelUtil.excel2Pojo(userSkillfis, UserSkill.class, userSkillalias);
-        for(UserSkill userSkill:userSkillList){
-            NettyMemory.SkillMap.put(userSkill.getSkillId(),userSkill);
+        for (UserSkill userSkill : userSkillList) {
+            Map<String, Integer> map = new HashMap<>();
+            userSkill.setBuffMap(map);
+            NettyMemory.SkillMap.put(userSkill.getSkillId(), userSkill);
+            if (!userSkill.getBufferMapId().equals("0")) {
+                String temp[] = userSkill.getBufferMapId().split("-");
+                for (int i = 0; i < temp.length; i++) {
+                    Buff buffTemp = NettyMemory.buffMap.get(Integer.parseInt(temp[i]));
+                    userSkill.getBuffMap().put(buffTemp.getTypeOf(), buffTemp.getBufferId());
+                }
+            }
         }
 //        初始化技能表end
 
@@ -218,6 +227,21 @@ public class NettyServer {
         skills = new ArrayList<>();
         skills.add(monsterSkill);
         monster = new Monster("村子村霸", Monster.TYPEOFCOMMONMONSTER, "13000", skills, "1");
+
+//      怪物buff初始化
+        Map<String, Integer> map = new HashMap<>();
+        map.put(BuffConfig.MPBUFF, 1000);
+        map.put(BuffConfig.POISONINGBUFF, 2000);
+        map.put(BuffConfig.DEFENSEBUFF, 3000);
+        monster.setBufMap(map);
+//      初始化每个怪物buff的终止时间
+        Map<String, Long> mapSecond = new HashMap<>();
+        mapSecond.put(BuffConfig.MPBUFF, 1000l);
+        mapSecond.put(BuffConfig.POISONINGBUFF, 2000l);
+        mapSecond.put(BuffConfig.DEFENSEBUFF, 3000l);
+        NettyMemory.monsterBuffEndTime.put(monster,mapSecond);
+//      怪物buff初始化结束
+
         monster.setIfExist(true);
         monsters = new ArrayList<>();
         monsters.add(monster);

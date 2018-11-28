@@ -4,6 +4,7 @@ import component.Equipment;
 import component.Monster;
 import component.NPC;
 import component.parent.Good;
+import config.BuffConfig;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
@@ -86,16 +87,16 @@ public class CommonEvent {
                         user.addMp(mpMedicine.getReplyValue());
                     }
                 } else {
-                    if (user.getBufferMap().get("mpBuff") == mpMedicine.getId()) {
-                        NettyMemory.buffEndTime.get(user).put("mpBuff", (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
+                    if (user.getBufferMap().get(BuffConfig.MPBUFF) == mpMedicine.getId()) {
+                        NettyMemory.userBuffEndTime.get(user).put(BuffConfig.MPBUFF, (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
                     } else {
-                        user.getBufferMap().put("mpBuff", mpMedicine.getId());
-                        NettyMemory.buffEndTime.get(user).put("mpBuff", (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
+                        user.getBufferMap().put(BuffConfig.MPBUFF, mpMedicine.getId());
+                        NettyMemory.userBuffEndTime.get(user).put(BuffConfig.MPBUFF, (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
 //                        if (NettyMemory.mpEndTime.containsKey(user)) {
 //                            NettyMemory.mpEndTime.remove(user);
 //                        }
                     }
-                    user.getBufferMap().put("mpBuff", mpMedicine.getId());
+                    user.getBufferMap().put(BuffConfig.MPBUFF, mpMedicine.getId());
                 }
             } else {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));

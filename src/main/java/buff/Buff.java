@@ -14,6 +14,20 @@ public class Buff {
 
     private String name;
 
+    private String typeOf;
+
+    public Buff(){
+
+    }
+
+    public String getTypeOf() {
+        return typeOf;
+    }
+
+    public void setTypeOf(String typeOf) {
+        this.typeOf = typeOf;
+    }
+
     public Integer getBufferId() {
         return bufferId;
     }

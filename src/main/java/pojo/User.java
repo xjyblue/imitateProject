@@ -1,5 +1,8 @@
 package pojo;
 
+import buff.Buff;
+import config.BuffConfig;
+import memory.NettyMemory;
 import sun.misc.Unsafe;
 
 import java.math.BigInteger;
@@ -29,14 +32,6 @@ public class User {
     private Map<String,Integer> buffMap;
 
     private String money;
-
-    public Map<String, Integer> getBuffMap() {
-        return buffMap;
-    }
-
-    public void setBuffMap(Map<String, Integer> buffMap) {
-        this.buffMap = buffMap;
-    }
 
 //  保证原子性
     public synchronized void addMoney(BigInteger add){
@@ -151,6 +146,13 @@ public class User {
         BigInteger userHp = new BigInteger(this.getHp());
         BigInteger subHp = new BigInteger(changeNum);
         userHp = userHp.subtract(subHp);
+        this.setHp(userHp.toString());
+    }
+
+    public void addHp(String changeNum) {
+        BigInteger userHp = new BigInteger(this.getHp());
+        BigInteger subHp = new BigInteger(changeNum);
+        userHp = userHp.add(subHp);
         this.setHp(userHp.toString());
     }
 }

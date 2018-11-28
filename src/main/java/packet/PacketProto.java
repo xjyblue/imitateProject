@@ -38,6 +38,20 @@ public final class PacketProto {
      */
     com.google.protobuf.ByteString
         getDataBytes();
+
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    boolean hasType();
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    String getType();
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getTypeBytes();
   }
   /**
    * Protobuf type {@code Packet}
@@ -54,6 +68,7 @@ public final class PacketProto {
     private Packet() {
       packetType_ = 1;
       data_ = "";
+      type_ = "";
     }
 
     @Override
@@ -96,6 +111,12 @@ public final class PacketProto {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000002;
               data_ = bs;
+              break;
+            }
+            case 26: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000004;
+              type_ = bs;
               break;
             }
             default: {
@@ -280,6 +301,48 @@ public final class PacketProto {
       }
     }
 
+    public static final int TYPE_FIELD_NUMBER = 3;
+    private volatile Object type_;
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    public boolean hasType() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    public String getType() {
+      Object ref = type_;
+      if (ref instanceof String) {
+        return (String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          type_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTypeBytes() {
+      Object ref = type_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (String) ref);
+        type_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @Override
     public final boolean isInitialized() {
@@ -304,6 +367,9 @@ public final class PacketProto {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, data_);
       }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, type_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -319,6 +385,9 @@ public final class PacketProto {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, data_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, type_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -345,6 +414,11 @@ public final class PacketProto {
         result = result && getData()
             .equals(other.getData());
       }
+      result = result && (hasType() == other.hasType());
+      if (hasType()) {
+        result = result && getType()
+            .equals(other.getType());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -363,6 +437,10 @@ public final class PacketProto {
       if (hasData()) {
         hash = (37 * hash) + DATA_FIELD_NUMBER;
         hash = (53 * hash) + getData().hashCode();
+      }
+      if (hasType()) {
+        hash = (37 * hash) + TYPE_FIELD_NUMBER;
+        hash = (53 * hash) + getType().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -501,6 +579,8 @@ public final class PacketProto {
         bitField0_ = (bitField0_ & ~0x00000001);
         data_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
+        type_ = "";
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -537,6 +617,10 @@ public final class PacketProto {
           to_bitField0_ |= 0x00000002;
         }
         result.data_ = data_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.type_ = type_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -592,6 +676,11 @@ public final class PacketProto {
         if (other.hasData()) {
           bitField0_ |= 0x00000002;
           data_ = other.data_;
+          onChanged();
+        }
+        if (other.hasType()) {
+          bitField0_ |= 0x00000004;
+          type_ = other.type_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -739,6 +828,82 @@ public final class PacketProto {
         onChanged();
         return this;
       }
+
+      private Object type_ = "";
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public boolean hasType() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public String getType() {
+        Object ref = type_;
+        if (!(ref instanceof String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            type_ = s;
+          }
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTypeBytes() {
+        Object ref = type_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (String) ref);
+          type_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public Builder setType(
+          String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public Builder clearType() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        type_ = getDefaultInstance().getType();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public Builder setTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        type_ = value;
+        onChanged();
+        return this;
+      }
       @Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -806,10 +971,10 @@ public final class PacketProto {
       descriptor;
   static {
     String[] descriptorData = {
-      "\n\014Packet.proto\"e\n\006Packet\022&\n\npacketType\030\001" +
-      " \002(\0162\022.Packet.PacketType\022\014\n\004data\030\002 \001(\t\"%" +
-      "\n\nPacketType\022\r\n\tHEARTBEAT\020\001\022\010\n\004DATA\020\002B\rB" +
-      "\013PacketProto"
+      "\n\014Packet.proto\"s\n\006Packet\022&\n\npacketType\030\001" +
+      " \002(\0162\022.Packet.PacketType\022\014\n\004data\030\002 \001(\t\022\014" +
+      "\n\004type\030\003 \001(\t\"%\n\nPacketType\022\r\n\tHEARTBEAT\020" +
+      "\001\022\010\n\004DATA\020\002B\rB\013PacketProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -828,7 +993,7 @@ public final class PacketProto {
     internal_static_Packet_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Packet_descriptor,
-        new String[] { "PacketType", "Data", });
+        new String[] { "PacketType", "Data", "Type", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

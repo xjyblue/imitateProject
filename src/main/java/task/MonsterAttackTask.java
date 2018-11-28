@@ -1,10 +1,15 @@
 package task;
 
+import buff.Buff;
 import component.Monster;
+import config.BuffConfig;
 import config.MessageConfig;
+import event.BuffEvent;
 import event.EventStatus;
+import event.OutfitEquipmentEvent;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
+import packet.PacketType;
 import pojo.User;
 import utils.MessageUtil;
 import utils.MonsterRebornUtil;
@@ -26,10 +31,16 @@ public class MonsterAttackTask implements Runnable {
 
     private ConcurrentHashMap<String, Future> futureMap;
 
-    public MonsterAttackTask(Channel channel, String jobId, ConcurrentHashMap<String, Future> futureMap) {
+    private OutfitEquipmentEvent outfitEquipmentEvent;
+
+    private  BuffEvent buffEvent;
+
+    public MonsterAttackTask(Channel channel, String jobId, ConcurrentHashMap<String, Future> futureMap, OutfitEquipmentEvent outfitEquipmentEvent, BuffEvent buffEvent) {
         this.channel = channel;
         this.jobId = jobId;
         this.futureMap = futureMap;
+        this.outfitEquipmentEvent = outfitEquipmentEvent;
+        this.buffEvent = buffEvent;
     }
 
     public Channel getChannel() {
@@ -69,17 +80,27 @@ public class MonsterAttackTask implements Runnable {
         //TODO:解决攻击多只怪物
         if (NettyMemory.monsterMap.containsKey(user)) {
             Monster monster = NettyMemory.monsterMap.get(user).get(0);
+            if(new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger("0"))<=0){
+                monster.setValueOfLife("0");
+                monster.setStatus("0");
+            }
             if (monster != null && NettyMemory.monsterMap.get(user).get(0).getStatus().equals("0")) {
                 NettyMemory.monsterMap.remove(user);
-                channel.writeAndFlush(MessageUtil.turnToPacket("怪物已死亡"));
+                channel.writeAndFlush(MessageUtil.turnToPacket("怪物已死亡", PacketType.ATTACKMSG));
                 List<Monster> monsters =  NettyMemory.areaMap.get(user.getPos()).monsters;
                 monsters.remove(monster);
 //              重新生成新的monster
                 MonsterRebornUtil.rebornNewMonster(monsters);
                 NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
+                outfitEquipmentEvent.getGoods(channel,monster);
                 return;
             }
             BigInteger monsterDamage = new BigInteger(monster.getMonsterSkillList().get(0).getDamage());
+
+//          怪物攻击对人物造成伤害处理buff处理
+            monsterDamage = buffEvent.defendBuff(monsterDamage,user,channel);
+
+
             user.subHp(monsterDamage.toString());
             BigInteger userHp = new BigInteger(user.getHp());
             if (userHp.compareTo(new BigInteger("0")) <= 0 && user.getStatus().equals("1")) {
@@ -94,9 +115,9 @@ public class MonsterAttackTask implements Runnable {
                     + "-----你的剩余血:" + user.getHp()
                     + "-----你的蓝量" + user.getMp()
                     + "-----怪物血量:" + monster.getValueOfLife();
-            channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+            channel.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ATTACKMSG));
             if(user.getHp().equals("0")){
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY));
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY, PacketType.ATTACKMSG));
                 return;
             }
             NettyMemory.eventStatus.put(channel, EventStatus.ATTACK);

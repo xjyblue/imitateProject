@@ -43,7 +43,9 @@ public class NettyMemory {
 	/**缓存用户所攻击的怪兽*/
 	public static Map<User, List<Monster>>monsterMap = new HashMap<>();
 	/**初始化Buff的截止时间*/
-	public static Map<User,Map<String,Long>> buffEndTime = new ConcurrentHashMap<>();
+	public static Map<User,Map<String,Long>> userBuffEndTime = new ConcurrentHashMap<>();
+	/**初始化怪物Buff的截止时间*/
+	public static Map<Monster,Map<String,Long>> monsterBuffEndTime = new ConcurrentHashMap<>();
 	/**初始化药物属性*/
 	public static Map<Integer, MpMedicine> mpMedicineMap = new HashMap<>();
 	/**初始化武器*/

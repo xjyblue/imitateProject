@@ -1,5 +1,6 @@
 package event;
 
+import config.BuffConfig;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
@@ -42,17 +43,20 @@ public class LoginEvent {
 //                初始化玩家的各种buffer
                 //TODO:这里可以改成数据库初始化玩家buffer
                 Map<String,Integer> map = new HashMap<>();
-                map.put("mpBuff",1000);
-                map.put("poisoningBuff",2000);
-                map.put("defenseBuff",3000);
+                map.put(BuffConfig.MPBUFF,1000);
+                map.put(BuffConfig.POISONINGBUFF,2000);
+                map.put(BuffConfig.DEFENSEBUFF,3000);
+                map.put(BuffConfig.SLEEPBUFF,5000);
                 user.setBufferMap(map);
 //              初始化每个用户buff的终止时间
                 Map<String,Long> mapSecond = new HashMap<>();
-                mapSecond.put("mpBuff",1000l);
-                mapSecond.put("poisoningBuff",2000l);
-                mapSecond.put("defenseBuff",3000l);
-                if(!NettyMemory.buffEndTime.containsKey(user)){
-                    NettyMemory.buffEndTime.put(user,mapSecond);
+                mapSecond.put(BuffConfig.MPBUFF,1000l);
+                mapSecond.put(BuffConfig.POISONINGBUFF,2000l);
+                mapSecond.put(BuffConfig.DEFENSEBUFF,3000l);
+                mapSecond.put(BuffConfig.SLEEPBUFF,1000l);
+
+                if(!NettyMemory.userBuffEndTime.containsKey(user)){
+                    NettyMemory.userBuffEndTime.put(user,mapSecond);
                 }
 //                初始化玩家的技能end
                 NettyMemory.session2UserIds.put(channel, user);

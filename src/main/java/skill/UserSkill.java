@@ -14,7 +14,17 @@ public class UserSkill {
 
     private String skillMp;
 
+    private String bufferMapId;
+
     private Map<String,Integer>buffMap;
+
+    public String getBufferMapId() {
+        return bufferMapId;
+    }
+
+    public void setBufferMapId(String bufferMapId) {
+        this.bufferMapId = bufferMapId;
+    }
 
     public Map<String, Integer> getBuffMap() {
         return buffMap;

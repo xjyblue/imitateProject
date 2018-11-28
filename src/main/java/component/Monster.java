@@ -4,6 +4,7 @@ import skill.MonsterSkill;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 public class Monster {
     public static final String TYPEOFBOSS = "1";
@@ -25,6 +26,16 @@ public class Monster {
     private Integer probability;
 
     private boolean ifExist;
+
+    private Map<String,Integer> bufMap;
+
+    public Map<String, Integer> getBufMap() {
+        return bufMap;
+    }
+
+    public void setBufMap(Map<String, Integer> bufMap) {
+        this.bufMap = bufMap;
+    }
 
     public boolean isIfExist() {
         return ifExist;

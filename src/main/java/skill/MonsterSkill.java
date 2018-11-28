@@ -1,5 +1,7 @@
 package skill;
 
+import java.util.Map;
+
 public class MonsterSkill {
     private Integer skillId;
 
@@ -8,6 +10,26 @@ public class MonsterSkill {
     private String attackCd;
 
     private String damage;
+
+    private String bufferMapId;
+
+    private Map<String,Integer> buffMap;
+
+    public String getBufferMapId() {
+        return bufferMapId;
+    }
+
+    public void setBufferMapId(String bufferMapId) {
+        this.bufferMapId = bufferMapId;
+    }
+
+    public Map<String, Integer> getBuffMap() {
+        return buffMap;
+    }
+
+    public void setBuffMap(Map<String, Integer> buffMap) {
+        this.buffMap = buffMap;
+    }
 
     public Integer getSkillId() {
         return skillId;

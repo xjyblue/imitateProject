@@ -23,10 +23,12 @@ public class Client {
     private String host;
     private Bootstrap bootstrap;
     private Channel channel;
+    private ClientStart clientStart;
 
-    public Client(int port, String host) {
+    public Client(int port, String host,ClientStart clientStart) {
         this.host = host;
         this.port = port;
+        this.clientStart = clientStart;
         start();
     }
 
@@ -50,9 +52,9 @@ public class Client {
                         pipeline.addLast(new ProtobufEncoder());
                         pipeline.addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
 //                       读空闲心跳，写空闲心跳，读或者写空闲心跳,读空闲每隔两秒发送心跳包
-                        pipeline.addLast(new IdleStateHandler(0, 2, 0));
+                        pipeline.addLast(new IdleStateHandler(0, 1, 0));
                         socketChannel.pipeline().addLast(
-                                new ClientHandler(Client.this));
+                                new ClientHandler(Client.this,clientStart));
                     }
                 });
         // 进行连接

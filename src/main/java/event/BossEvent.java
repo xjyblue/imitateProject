@@ -5,6 +5,7 @@ import component.BossArea;
 import component.Equipment;
 import component.Monster;
 import config.MessageConfig;
+import config.StatusConfig;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,8 @@ public class BossEvent {
     private OutfitEquipmentEvent outfitEquipmentEvent;
     @Autowired
     private ChatEvent chatEvent;
-
+    @Autowired
+    private BuffEvent buffEvent;
     public void enterBossArea(Channel channel, String msg) {
         User user = getUser(channel);
         Team team = null;
@@ -67,7 +69,7 @@ public class BossEvent {
             return;
         }
         BossArea bossArea = new BossArea();
-        bossArea.setKeepTime(6l);
+        bossArea.setKeepTime(120l);
         bossArea.setName("七天连锁酒店本");
         bossArea.setTeamId(user.getTeamId());
 
@@ -105,7 +107,7 @@ public class BossEvent {
             for (Map.Entry<String, Monster> entry : getMonsterMap(user).entrySet()) {
 //             输入的怪物是否存在
                 monster = entry.getValue();
-                if (monster.getName().equals(temp[1]) && !monster.getStatus().equals("0")) {
+                if (monster.getName().equals(temp[1]) && !monster.getStatus().equals(StatusConfig.DEAD)) {
                     Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(channel).get(temp[2]);
                     UserSkill userSkill = NettyMemory.SkillMap.get(userskillrelation.getSkillid());
 //                                    判断人物MP量是否足够
@@ -117,6 +119,11 @@ public class BossEvent {
                         user.setMp(userMp.toString());
 //                                    判断技能冷却
                         if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
+
+
+//                          技能buff处理
+                            buffEvent.buffSolve(userSkill,monster,user);
+
 //                               判断攻击完怪物是否死亡，生命值计算逻辑
                             BigInteger attackDamage = new BigInteger(userSkill.getDamage());
 //                              攻击逻辑计算
@@ -152,7 +159,7 @@ public class BossEvent {
                                         + "怪物已死亡";
                                 monster.setValueOfLife("0");
 //                              修改怪物状态
-                                monster.setStatus("0");
+                                monster.setStatus(StatusConfig.DEAD);
 
                                 BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
                                 if (!checkBossAreaAllBoss(bossArea)) {

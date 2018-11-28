@@ -2,7 +2,9 @@ package event;
 
 import caculation.AttackCaculation;
 import component.Equipment;
+import config.BuffConfig;
 import config.MessageConfig;
+import config.StatusConfig;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,8 @@ public class AttackEvent {
     private ShopEvent shopEvent;
     @Autowired
     private ChatEvent chatEvent;
+    @Autowired
+    private BuffEvent buffEvent;
 
     public void attack(Channel channel, String msg) {
         if (msg.startsWith("chat")) {
@@ -53,6 +57,14 @@ public class AttackEvent {
         } else {
             if (NettyMemory.userskillrelationMap.get(channel).containsKey(msg)) {
                 User user = NettyMemory.session2UserIds.get(channel);
+
+//              怪物buff处理
+                if(user.getBufferMap().get(BuffConfig.SLEEPBUFF)!=5000){
+                    channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SLEEPMESSAGE));
+                    return;
+                }
+
+
                 Map<String, Monster> monsterMap = null;
                 if (user.getTeamId() != null && NettyMemory.bossAreaMap.containsKey(user.getTeamId())) {
                     monsterMap = getMonsterMap(user);
@@ -64,6 +76,10 @@ public class AttackEvent {
                 Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(channel).get(msg);
 //                  技能CD检查
                 if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
+
+//                 技能buff处理
+                    buffEvent.buffSolve(userSkill,monster,user);
+
 //                     人物蓝量检查
                     BigInteger userMp = new BigInteger(user.getMp());
                     BigInteger skillMp = new BigInteger(userSkill.getSkillMp());
@@ -98,12 +114,11 @@ public class AttackEvent {
                                     + "[消耗蓝量]:" + userSkill.getSkillMp()
                                     + System.getProperty("line.separator")
                                     + "[人物剩余蓝量]:" + user.getMp()
-                                    + System.getProperty("line.separator")
-                                    + "怪物已死亡";
+                                    + System.getProperty("line.separator");
                             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
 //                          修改怪物状态
                             monster.setValueOfLife("0");
-                            monster.setStatus("0");
+                            monster.setStatus(StatusConfig.DEAD);
                         } else {
                             resp +=
                                     System.getProperty("line.separator")

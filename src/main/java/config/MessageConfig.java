@@ -63,4 +63,8 @@ public class MessageConfig {
     public static final String DEADNOOPERATEINBOSSAREA = "您已在副本中死亡，请不要做无效操作";
     public static final String ALLDEADINBOSSAREA = "全队已死亡，挑战副本失败";
     public static final String REBRORNANDCONNECTBOSSAREA = "你复活后重新加入当前副本";
+    public static final String DONOTATTACKDEADMONSTER = "无法攻击死亡的怪物";
+
+
+    public static final String SLEEPMESSAGE = "你已被怪物击晕，等待时间即可攻击，也可在商城购买免击晕符";
 }

@@ -27,12 +27,31 @@ CREATE TABLE `user` (
   `pos` varchar(10) DEFAULT NULL,
   `mp` varchar(20) DEFAULT NULL,
   `hp` varchar(20) DEFAULT NULL,
+  `money` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `user` */
 
-insert  into `user`(`username`,`password`,`status`,`pos`,`mp`,`hp`) values ('a','aa','1','1','10000','100000000'),('k','kk','1','2','10000','100000000'),('p','pp','1','1','10000','100000000'),('w','ww','1','0','10000','100000000'),('z','zz','1','1','10000','100000000');
+insert  into `user`(`username`,`password`,`status`,`pos`,`mp`,`hp`,`money`) values ('k','kk','1','1','8720','100000000','100000'),('z','zz','1','1','6230','9770000','1000000');
+
+/*Table structure for table `userbag` */
+
+DROP TABLE IF EXISTS `userbag`;
+
+CREATE TABLE `userbag` (
+  `id` varchar(50) NOT NULL,
+  `name` varchar(20) DEFAULT NULL,
+  `wid` int(10) DEFAULT NULL,
+  `num` int(10) DEFAULT NULL,
+  `typeOf` varchar(10) DEFAULT NULL COMMENT '物品所属的种类',
+  `durability` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `userbag` */
+
+insert  into `userbag`(`id`,`name`,`wid`,`num`,`typeOf`,`durability`) values ('07b9f9e0-f0ce-49fd-a82a-f3a53e12766d','z',1003,5,'1',NULL),('7663daaa-7cad-48ee-a718-18f092e8285d','k',1003,5,'1',NULL),('a30f1af7-a107-423b-b9d1-e3fa55bedb47','z',1002,5,'1',NULL),('ad3d5ae2-0f83-4ce7-848c-613e9fc99c11','z',1001,10,'1',NULL),('c3b52008-6ada-4e61-921b-47757095417d','k',1001,10,'1',NULL),('eaa3da8f-183b-41b2-be1c-8544f1509eaa','z',3004,1,'3',10),('f36514b5-5601-44e1-ad21-deba2cb642e1','k',1002,5,'1',NULL);
 
 /*Table structure for table `userskillrelation` */
 
@@ -49,7 +68,24 @@ CREATE TABLE `userskillrelation` (
 
 /*Data for the table `userskillrelation` */
 
-insert  into `userskillrelation`(`id`,`username`,`skillId`,`keypos`,`skillCDS`) values (1,'a',1,'1',1541733339783),(2,'a',2,'0',1541733339783),(3,'k',1,'1',1541733339783),(4,'k',2,'0',1541733339783),(5,'z',1,'2',1541733339783),(6,'z',2,'3',1541733339783),(7,'w',1,'1',1541733339783),(8,'w',2,'0',1541733339783),(9,'p',1,'1',1541733339783),(10,'p',2,'0',NULL);
+insert  into `userskillrelation`(`id`,`username`,`skillId`,`keypos`,`skillCDS`) values (3,'k',1,'1',1541733339783),(4,'k',2,'0',1541733339783),(5,'z',1,'2',1541733339783),(6,'z',2,'3',1541733339783),(7,'z',3,'1',1541733339783),(8,'k',3,'2',1541733339783);
+
+/*Table structure for table `weaponequipmentbar` */
+
+DROP TABLE IF EXISTS `weaponequipmentbar`;
+
+CREATE TABLE `weaponequipmentbar` (
+  `id` int(11) NOT NULL,
+  `username` varchar(20) DEFAULT NULL,
+  `wid` int(11) DEFAULT NULL,
+  `durability` int(11) DEFAULT NULL,
+  `typeOf` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `weaponequipmentbar` */
+
+insert  into `weaponequipmentbar`(`id`,`username`,`wid`,`durability`,`typeOf`) values (0,'z',3004,10,'3'),(1,'k',3004,10,'3');
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

@@ -1,6 +1,8 @@
 package test;
 
+import buff.Buff;
 import component.Equipment;
+import memory.NettyMemory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,16 +16,18 @@ import java.util.UUID;
 public class TestSecond {
     public static void main(String[] argv) throws Exception {
         //指定输入文件
-        FileInputStream fis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Equipment.xls"));
-        //指定每列对应的类属性
+        FileInputStream fis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Buff.xls"));
         LinkedHashMap<String, String> alias = new LinkedHashMap<>();
-        alias.put("武器id","id");
-        alias.put("武器名称","name");
-        alias.put("武器耐久度","durability");
-        alias.put("武器增加伤害","addValue");
-
-        //转换成指定类型的对象数组
-        List<Equipment> pojoList = ExcelUtil.excel2Pojo(fis, Equipment.class, alias);
+        alias.put("buff名称", "name");
+        alias.put("每秒造成伤害","addSecondValue");
+        alias.put("buff类别", "type");
+        alias.put("buffId", "bufferId");
+        alias.put("持续时间", "keepTime");
+        alias.put("每秒减免伤害", "injurySecondValue");
+        List<Buff> buffList = ExcelUtil.excel2Pojo(fis,Buff.class, alias);
+        for(Buff buff:buffList){
+            NettyMemory.buffMap.put(buff.getBufferId(),buff);
+        }
 //        System.out.println(UUID.randomUUID().toString());
     }
 }
