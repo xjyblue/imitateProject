@@ -108,9 +108,11 @@ public class ClientHandler extends ChannelHandlerAdapter {
      */
     private void sendHeartbeatPacket(ChannelHandlerContext ctx) {
 //        System.out.println("开始发送心跳包");
-        PacketProto.Packet.Builder builder = newBuilder();
-        builder.setPacketType(PacketProto.Packet.PacketType.HEARTBEAT);
-        PacketProto.Packet packet = builder.build();
-        ctx.writeAndFlush(packet);
+        if(clientStart.flag){
+            PacketProto.Packet.Builder builder = newBuilder();
+            builder.setPacketType(PacketProto.Packet.PacketType.HEARTBEAT);
+            PacketProto.Packet packet = builder.build();
+            ctx.writeAndFlush(packet);
+        }
     }
 }

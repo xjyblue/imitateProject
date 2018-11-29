@@ -33,6 +33,8 @@ public class ClientStart extends JFrame implements KeyListener {
 
     private JScrollPane jScrollPane4;
 
+    public volatile boolean flag = true;
+
     public JTextArea getjTextArea4() {
         return jTextArea4;
     }
@@ -169,6 +171,22 @@ public class ClientStart extends JFrame implements KeyListener {
             }
         });
 
+        JButton b2 = new JButton("stop");
+        b2.setBounds(100, 100, 65, 30);
+        b2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                frm.flag=false;
+            }
+        });
+
+        JButton b3 = new JButton("continue");
+        b3.setBounds(100, 100, 65, 30);
+        b3.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                frm.flag=true;
+            }
+        });
+
 //          设置布局
         GridBagLayout gridBagLayout=new GridBagLayout(); //实例化布局对象
         frm.setLayout(gridBagLayout);                     //jf窗体对象设置为GridBagLayout布局
@@ -188,6 +206,20 @@ public class ClientStart extends JFrame implements KeyListener {
         gridBagConstraints.gridheight=1;
         gridBagLayout.setConstraints(b, gridBagConstraints);
         frm.add(b);
+
+        gridBagConstraints.gridx=15;
+        gridBagConstraints.gridy=0;
+        gridBagConstraints.gridwidth=1;
+        gridBagConstraints.gridheight=1;
+        gridBagLayout.setConstraints(b2, gridBagConstraints);
+        frm.add(b2);
+
+        gridBagConstraints.gridx=16;
+        gridBagConstraints.gridy=0;
+        gridBagConstraints.gridwidth=1;
+        gridBagConstraints.gridheight=1;
+        gridBagLayout.setConstraints(b3, gridBagConstraints);
+        frm.add(b3);
 
         gridBagConstraints.gridx=0;
         gridBagConstraints.gridy=5;

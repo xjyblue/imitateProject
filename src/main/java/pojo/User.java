@@ -149,10 +149,5 @@ public class User {
         this.setHp(userHp.toString());
     }
 
-    public void addHp(String changeNum) {
-        BigInteger userHp = new BigInteger(this.getHp());
-        BigInteger subHp = new BigInteger(changeNum);
-        userHp = userHp.add(subHp);
-        this.setHp(userHp.toString());
-    }
+
 }

@@ -59,10 +59,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
         if (NettyMemory.eventStatus.containsKey(ctx.channel())) {
             NettyMemory.eventStatus.remove(ctx.channel());
         }
-        if (NettyMemory.userToChannelMap.containsKey(user)) {
+        if (user!=null&&NettyMemory.userToChannelMap.containsKey(user)) {
             NettyMemory.userToChannelMap.remove(user);
         }
-        if (NettyMemory.userBuffEndTime.containsKey(user)) {
+        if (user!=null&&NettyMemory.userBuffEndTime.containsKey(user)) {
             NettyMemory.userBuffEndTime.remove(user);
         }
         if (NettyMemory.userskillrelationMap.containsKey(ctx.channel())) {

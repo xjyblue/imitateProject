@@ -90,7 +90,7 @@ public class BossArea {
 
         MonsterSkill monsterSkill3 = new MonsterSkill();
         monsterSkill3.setSkillName("针对眩晕");
-        monsterSkill3.setDamage("50");
+        monsterSkill3.setDamage("0");
 
         MonsterSkill monsterSkill4 = new MonsterSkill();
         monsterSkill4.setSkillName("中毒绝技");
