@@ -57,7 +57,7 @@ public class BufferTask implements Runnable {
 
                 Map<String, Integer> bufferMap = user.getBufferMap();
                 for (Map.Entry<String, Integer> entrySecond : bufferMap.entrySet()) {
-                    if (NettyMemory.eventStatus.get(channel).equals(EventStatus.ATTACK)) {
+                    if (NettyMemory.eventStatus.get(channel).equals(EventStatus.ATTACK)||NettyMemory.eventStatus.get(channel).equals(EventStatus.BOSSAREA)) {
 //                  更新用户防御buff
                         if (entrySecond.getKey().equals(BuffConfig.DEFENSEBUFF) && entrySecond.getValue() != 3000) {
                             endTime = NettyMemory.userBuffEndTime.get(user).get(BuffConfig.DEFENSEBUFF);

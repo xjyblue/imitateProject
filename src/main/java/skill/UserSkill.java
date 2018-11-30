@@ -18,6 +18,16 @@ public class UserSkill {
 
     private Map<String,Integer>buffMap;
 
+    private Integer roleSkill;
+
+    public Integer getRoleSkill() {
+        return roleSkill;
+    }
+
+    public void setRoleSkill(Integer roleSkill) {
+        this.roleSkill = roleSkill;
+    }
+
     public String getBufferMapId() {
         return bufferMapId;
     }

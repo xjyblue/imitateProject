@@ -33,11 +33,21 @@ public class User {
 
     private String money;
 
-//  保证原子性
+    private Integer roleId;
+
+    //  保证原子性
     public synchronized void addMoney(BigInteger add){
         BigInteger userMoney = new BigInteger(this.getMoney());
         userMoney = userMoney.add(add);
         this.money = userMoney.toString();
+    }
+
+    public Integer getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
     }
 
     public String getMoney() {

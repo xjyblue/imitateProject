@@ -1,5 +1,6 @@
 package xiaojianyu.controller;
 
+import Role.Role;
 import buff.Buff;
 import component.*;
 import component.parent.Good;
@@ -183,6 +184,7 @@ public class NettyServer {
         userSkillalias.put("技能伤害", "damage");
         userSkillalias.put("技能消耗Mp", "skillMp");
         userSkillalias.put("技能附带buffId", "bufferMapId");
+        userSkillalias.put("技能所属种族","roleSkill");
         List<UserSkill> userSkillList = ExcelUtil.excel2Pojo(userSkillfis, UserSkill.class, userSkillalias);
         for (UserSkill userSkill : userSkillList) {
             Map<String, Integer> map = new HashMap<>();
@@ -197,6 +199,21 @@ public class NettyServer {
             }
         }
 //        初始化技能表end
+
+
+
+//      初始化职业
+        //TODO:改为职业
+        Role role = new Role(1,"战士");
+        NettyMemory.roleMap.put(role.getRoleId(),role);
+        role = new Role(2,"法师");
+        NettyMemory.roleMap.put(role.getRoleId(),role);
+        role = new Role(3,"牧师");
+        NettyMemory.roleMap.put(role.getRoleId(),role);
+        role = new Role(4,"召唤师");
+        NettyMemory.roleMap.put(role.getRoleId(),role);
+
+
 
 
 //		起始之地

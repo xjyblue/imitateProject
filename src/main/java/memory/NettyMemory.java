@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
+import Role.Role;
 import buff.Buff;
 import component.*;
 import email.Mail;
@@ -69,4 +70,6 @@ public class NettyMemory {
 	public static Map<String,ConcurrentHashMap<String, Mail>> userEmailMap = new HashMap<String,  ConcurrentHashMap<String, Mail>>();
 	/** 初始化怪物技能*/
 	public static Map<Integer,MonsterSkill> monsterSkillMap = new HashMap<>();
+	/** 职业的构建 */
+	public static Map<Integer, Role> roleMap = new HashMap();
 }
