@@ -45,6 +45,10 @@ public class BuffEvent {
     public BigInteger defendBuff(BigInteger monsterDamage, User user, Channel channel){
         if(NettyMemory.buffMap.containsKey(user.getBufferMap().get(BuffConfig.DEFENSEBUFF))){
             Buff buff = NettyMemory.buffMap.get(user.getBufferMap().get(BuffConfig.DEFENSEBUFF));
+            if(monsterDamage.compareTo(new BigInteger(buff.getInjurySecondValue()))<=0){
+//              相当于没有攻击
+                return new BigInteger("0");
+            }
             BigInteger buffDefence = new BigInteger(buff.getInjurySecondValue());
             monsterDamage = monsterDamage.subtract(buffDefence);
             return monsterDamage;

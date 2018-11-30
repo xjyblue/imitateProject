@@ -14,6 +14,7 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import pojo.User;
 import pojo.Userskillrelation;
+import skill.MonsterSkill;
 import skill.UserSkill;
 import team.Team;
 
@@ -66,4 +67,6 @@ public class NettyMemory {
 	public static ConcurrentHashMap<String, Future> futureMap = new ConcurrentHashMap<String, Future>();
 	/** 缓存邮件信息 */
 	public static Map<String,ConcurrentHashMap<String, Mail>> userEmailMap = new HashMap<String,  ConcurrentHashMap<String, Mail>>();
+	/** 初始化怪物技能*/
+	public static Map<Integer,MonsterSkill> monsterSkillMap = new HashMap<>();
 }

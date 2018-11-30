@@ -11,6 +11,7 @@ import io.netty.channel.Channel;
 import memory.NettyMemory;
 import packet.PacketType;
 import pojo.User;
+import skill.MonsterSkill;
 import utils.MessageUtil;
 import utils.MonsterRebornUtil;
 
@@ -72,7 +73,7 @@ public class MonsterAttackTask implements Runnable {
 //          推送战斗消息
         try {
             User user = NettyMemory.session2UserIds.get(channel);
-            if (NettyMemory.eventStatus.get(channel).equals(EventStatus.STOPAREA)) {
+            if ((!NettyMemory.eventStatus.containsKey(channel))||NettyMemory.eventStatus.get(channel).equals(EventStatus.STOPAREA)) {
                 Future future = futureMap.remove(jobId);
                 NettyMemory.monsterMap.remove(user);
                 future.cancel(true);
@@ -100,7 +101,10 @@ public class MonsterAttackTask implements Runnable {
 
 //          怪物攻击对人物造成伤害处理buff处理
                 monsterDamage = buffEvent.defendBuff(monsterDamage,user,channel);
-
+                Buff buff = NettyMemory.buffMap.get(user.getBufferMap().get(BuffConfig.DEFENSEBUFF));
+                if(user.getBufferMap().get(BuffConfig.DEFENSEBUFF)!=3000){
+                    channel.writeAndFlush(MessageUtil.turnToPacket("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp(), PacketType.USERBUFMSG));
+                }
 
                 user.subHp(monsterDamage.toString());
                 BigInteger userHp = new BigInteger(user.getHp());
@@ -127,4 +131,5 @@ public class MonsterAttackTask implements Runnable {
             e.printStackTrace();
         }
     }
+
 }

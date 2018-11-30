@@ -30,7 +30,9 @@ public class LoginEvent {
             if (user == null) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORPASSWORD));
             } else {
- //             初始化玩家的技能start
+//              解决玩家断线重连
+
+//             初始化玩家的技能start
                 UserskillrelationExample userskillrelationExample = new UserskillrelationExample();
                 UserskillrelationExample.Criteria criteria = userskillrelationExample.createCriteria();
                 criteria.andUsernameEqualTo(user.getUsername());

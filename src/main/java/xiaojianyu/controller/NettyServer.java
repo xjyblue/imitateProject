@@ -5,6 +5,8 @@ import component.*;
 import component.parent.Good;
 import config.BuffConfig;
 import email.Mail;
+import event.TeamEvent;
+import factory.MonsterFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -44,7 +46,8 @@ public class NettyServer {
 
     @Autowired
     private NettyServerHandler nettyServerHandler;
-
+    @Autowired
+    private MonsterFactory monsterFactory;
     // 程序初始方法入口注解，提示spring这个程序先执行这里
     public void serverStart() throws InterruptedException, IOException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -85,6 +88,7 @@ public class NettyServer {
 //        模拟从数据库初始化所有用户的邮件系统
         NettyMemory.userEmailMap.put("z", new ConcurrentHashMap<String, Mail>());
         NettyMemory.userEmailMap.put("k", new ConcurrentHashMap<String, Mail>());
+        NettyMemory.userEmailMap.put("w", new ConcurrentHashMap<String, Mail>());
 
 //        初始化定时任务 start
 //         回蓝定时任务
@@ -145,6 +149,31 @@ public class NettyServer {
 //      初始化全图buff
 
 
+//      初始化怪物技能start
+//      初始化怪物所有技能以及技能所带的buff
+        FileInputStream monsterBuffis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\MonsterSkill.xls"));
+        LinkedHashMap<String, String> monsterBufalias = new LinkedHashMap<>();
+        monsterBufalias.put("技能id", "skillId");
+        monsterBufalias.put("技能名称", "skillName");
+        monsterBufalias.put("技能攻击时间", "attackCd");
+        monsterBufalias.put("技能伤害", "damage");
+        monsterBufalias.put("技能附带buff","bufferMapId");
+        List<MonsterSkill> skillList = ExcelUtil.excel2Pojo(monsterBuffis, MonsterSkill.class, monsterBufalias);
+        for(MonsterSkill monsterSkillTemp:skillList){
+            if(!monsterSkillTemp.getBufferMapId().equals("0")){
+                Map<String,Integer> map = new HashMap<>();
+                String temp[] = monsterSkillTemp.getBufferMapId().split("-");
+                for(int i=0;i<temp.length;i++){
+                    Buff buffTemp = NettyMemory.buffMap.get(Integer.parseInt(temp[i]));
+                    map.put(buffTemp.getTypeOf(),buffTemp.getBufferId());
+                }
+                monsterSkillTemp.setBuffMap(map);
+            }
+            NettyMemory.monsterSkillMap.put(monsterSkillTemp.getSkillId(),monsterSkillTemp);
+        }
+//      初始化怪物技能end
+
+
 //        初始化技能表start
         FileInputStream userSkillfis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\UserSkill.xls"));
         LinkedHashMap<String, String> userSkillalias = new LinkedHashMap<>();
@@ -184,15 +213,7 @@ public class NettyServer {
         List<NPC> npcs = new ArrayList<NPC>();
         npcs.add(npc);
         area.setNpcs(npcs);
-//      初始化怪物
-        MonsterSkill monsterSkill = new MonsterSkill();
-        monsterSkill.setAttackCd("5");
-        monsterSkill.setDamage("10");
-        monsterSkill.setSkillName("闪电");
-        monsterSkill.setSkillId(1);
-        List<MonsterSkill> skills = new ArrayList<>();
-        skills.add(monsterSkill);
-        Monster monster = new Monster("起始之地哥伦布", Monster.TYPEOFCOMMONMONSTER, "6000", skills, "1");
+        Monster monster = monsterFactory.getMonster(3);
         List<Monster> monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);
@@ -217,45 +238,8 @@ public class NettyServer {
         npcs = new ArrayList<NPC>();
         npcs.add(npc);
         area.setNpcs(npcs);
-
-//      初始化怪物
-        monsterSkill = new MonsterSkill();
-        monsterSkill.setAttackCd("20");
-        monsterSkill.setDamage("100");
-        monsterSkill.setSkillName("锄头攻击");
-        monsterSkill.setSkillId(2);
-        skills = new ArrayList<>();
-        skills.add(monsterSkill);
-        monster = new Monster("村子村霸", Monster.TYPEOFCOMMONMONSTER, "13000", skills, "1");
-
-//      怪物buff初始化
-        Map<String, Integer> map = new HashMap<>();
-        map.put(BuffConfig.MPBUFF, 1000);
-        map.put(BuffConfig.POISONINGBUFF, 2000);
-        map.put(BuffConfig.DEFENSEBUFF, 3000);
-        monster.setBufMap(map);
-//      初始化每个怪物buff的终止时间
-        Map<String, Long> mapSecond = new HashMap<>();
-        mapSecond.put(BuffConfig.MPBUFF, 1000l);
-        mapSecond.put(BuffConfig.POISONINGBUFF, 2000l);
-        mapSecond.put(BuffConfig.DEFENSEBUFF, 3000l);
-        NettyMemory.monsterBuffEndTime.put(monster,mapSecond);
-//      怪物buff初始化结束
-
-        monster.setIfExist(true);
         monsters = new ArrayList<>();
-        monsters.add(monster);
-        area.setMonsters(monsters);
-
-        monsterSkill = new MonsterSkill();
-        monsterSkill.setAttackCd("20");
-        monsterSkill.setDamage("1000");
-        monsterSkill.setSkillName("黄金锄头攻击");
-        monsterSkill.setSkillId(2);
-        skills = new ArrayList<>();
-        skills.add(monsterSkill);
-        monster = new Monster("稀有黄金村子村霸", Monster.TYPEOFCOMMONMONSTER, "130000", skills, "1");
-        monster.setIfExist(false);
+        monster = monsterFactory.getMonster(4);
         monsters.add(monster);
         area.setMonsters(monsters);
 
@@ -279,14 +263,7 @@ public class NettyServer {
         area.setNpcs(npcs);
 
 //      初始化怪物
-        monsterSkill = new MonsterSkill();
-        monsterSkill.setAttackCd("40");
-        monsterSkill.setDamage("200");
-        monsterSkill.setSkillName("藤蔓攻击");
-        monsterSkill.setSkillId(3);
-        skills = new ArrayList<>();
-        skills.add(monsterSkill);
-        monster = new Monster("野兽", Monster.TYPEOFCOMMONMONSTER, "15000", skills, "1");
+        monster = monsterFactory.getMonster(5);
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);
@@ -310,14 +287,7 @@ public class NettyServer {
         area.setNpcs(npcs);
 
 //      初始化怪物
-        monsterSkill = new MonsterSkill();
-        monsterSkill.setAttackCd("40");
-        monsterSkill.setDamage("330");
-        monsterSkill.setSkillName("锄头攻击");
-        monsterSkill.setSkillId(4);
-        skills = new ArrayList<>();
-        skills.add(monsterSkill);
-        monster = new Monster("帝国势力", Monster.TYPEOFCOMMONMONSTER, "10000", skills, "1");
+        monster = monsterFactory.getMonster(6);
         monsters = new ArrayList<>();
         monsters.add(monster);
         area.setMonsters(monsters);

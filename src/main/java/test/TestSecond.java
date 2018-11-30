@@ -2,7 +2,9 @@ package test;
 
 import buff.Buff;
 import component.Equipment;
+import component.Monster;
 import memory.NettyMemory;
+import skill.MonsterSkill;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,19 +18,17 @@ import java.util.UUID;
 public class TestSecond {
     public static void main(String[] argv) throws Exception {
         //指定输入文件
-        FileInputStream fis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Buff.xls"));
+        FileInputStream fis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Monster.xls"));
         LinkedHashMap<String, String> alias = new LinkedHashMap<>();
-        alias.put("buff名称", "name");
-        alias.put("每秒造成伤害","addSecondValue");
-        alias.put("buff类别", "type");
-        alias.put("buffId", "bufferId");
-        alias.put("持续时间", "keepTime");
-        alias.put("每秒减免伤害", "injurySecondValue");
-        List<Buff> buffList = ExcelUtil.excel2Pojo(fis,Buff.class, alias);
-        for(Buff buff:buffList){
-            NettyMemory.buffMap.put(buff.getBufferId(),buff);
-        }
-//        System.out.println(UUID.randomUUID().toString());
+        alias.put("怪物id","id");
+        alias.put("怪物名称","name");
+        alias.put("怪物类别","type");
+        alias.put("怪物生命值","valueOfLife");
+        alias.put("怪物状态","status");
+        alias.put("怪物技能","skillIds");
+        List<Monster> monsterList = ExcelUtil.excel2Pojo(fis, Monster.class, alias);
+
+        System.out.println(UUID.randomUUID().toString());
     }
 }
 

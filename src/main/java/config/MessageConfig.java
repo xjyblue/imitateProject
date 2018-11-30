@@ -43,6 +43,7 @@ public class MessageConfig {
     public static final String DISSOLUTIONTEAM = "你已经解散当前队伍";
     public static final String SIGNOUTTEAM = "你已退出当前队伍";
     public static final String NOFOUNDTEAM = "你所要加入的玩家队伍不存在";
+    public static final String YOUARENINTEAM = "你已在队伍中，请退出队伍再加入";
 
     public static final String EMPTYEMAIL = "您当前的邮箱为空";
     public static final String NOEMAILUSER = "系统无此用户，无法发送邮件";
@@ -67,4 +68,5 @@ public class MessageConfig {
 
 
     public static final String SLEEPMESSAGE = "你已被怪物击晕，等待时间即可攻击，也可在商城购买免击晕符";
+    public static final String ONLEAVEFORREMOVE = "只有一个玩家，自动解散队伍";
 }

@@ -25,9 +25,19 @@ public class Monster {
 
     private Integer probability;
 
+    private String skillIds;
+
     private boolean ifExist;
 
     private Map<String,Integer> bufMap;
+
+    public String getSkillIds() {
+        return skillIds;
+    }
+
+    public void setSkillIds(String skillIds) {
+        this.skillIds = skillIds;
+    }
 
     public Map<String, Integer> getBufMap() {
         return bufMap;
@@ -61,12 +71,17 @@ public class Monster {
         this.status = status;
     }
 
-    public Monster(String name, String type, String valueOfLife, List<MonsterSkill> monsterSkillList,String status) {
+    public Monster(Integer id,String name, String type, String valueOfLife, List<MonsterSkill> monsterSkillList,String status) {
+        this.id = id;
         this.name = name;
         this.type = type;
         this.valueOfLife = valueOfLife;
         this.monsterSkillList = monsterSkillList;
         this.status = status;
+    }
+
+    public Monster(){
+
     }
 
     public Integer getId() {

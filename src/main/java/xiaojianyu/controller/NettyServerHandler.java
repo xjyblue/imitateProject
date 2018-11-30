@@ -1,6 +1,8 @@
 package xiaojianyu.controller;
 
 import event.EventStatus;
+import event.TeamEvent;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ import packet.PacketProto;
 import packet.PacketType;
 import pojo.User;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,6 +40,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
     @Autowired
     private EventDistributor eventDistributor;
 
+    @Autowired
+    private TeamEvent teamEvent;
+
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
         group.add(channel);
@@ -48,26 +55,38 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
         super.channelRegistered(ctx);
     }
 
+
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        logger.info("客户端与服务端连接断开");
+        logger.info("客户端与服务端连接断开----inactive");
         User user = NettyMemory.session2UserIds.get(ctx.channel());
+        if (user.getTeamId() != null) {
+//          处理一下用户的team对用户的处理
+            teamEvent.handleUserOffline(user);
+        }
+
+//          移除玩家的所有buff终止时间
+        if (user != null && NettyMemory.userBuffEndTime.containsKey(user)) {
+            NettyMemory.userBuffEndTime.remove(user);
+        }
+//          移除怪物的buff终止时间
+        if (user != null && NettyMemory.monsterMap.containsKey(user)) {
+            NettyMemory.monsterMap.remove(user);
+        }
         if (NettyMemory.session2UserIds.containsKey(ctx.channel())) {
             NettyMemory.session2UserIds.remove(ctx.channel());
         }
-
         if (NettyMemory.eventStatus.containsKey(ctx.channel())) {
             NettyMemory.eventStatus.remove(ctx.channel());
         }
-        if (user!=null&&NettyMemory.userToChannelMap.containsKey(user)) {
+        if (user != null && NettyMemory.userToChannelMap.containsKey(user)) {
             NettyMemory.userToChannelMap.remove(user);
-        }
-        if (user!=null&&NettyMemory.userBuffEndTime.containsKey(user)) {
-            NettyMemory.userBuffEndTime.remove(user);
         }
         if (NettyMemory.userskillrelationMap.containsKey(ctx.channel())) {
             NettyMemory.userskillrelationMap.remove(ctx.channel());
         }
+
+
     }
 
     @Override

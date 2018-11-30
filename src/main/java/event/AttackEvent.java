@@ -119,6 +119,10 @@ public class AttackEvent {
 //                          修改怪物状态
                             monster.setValueOfLife("0");
                             monster.setStatus(StatusConfig.DEAD);
+//                          移除死掉的怪物
+                            NettyMemory.areaMap.get(user.getPos()).getMonsters().remove(monster);
+//                          生成新的怪物
+
                         } else {
                             resp +=
                                     System.getProperty("line.separator")

@@ -222,11 +222,9 @@ public class CommonEvent {
                 allStatus += "NPC:" + npc.getName() + " 状态[" + npc.getStatus() + "]" + System.getProperty("line.separator");
             }
             for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
-                if (monster.isIfExist()) {
                     allStatus += "怪物有" + monster.getName() + " 生命值[" + monster.getValueOfLife()
                             + "] 攻击技能为[" + monster.getMonsterSkillList().get(0).getSkillName()
                             + "] 伤害为：[" + monster.getMonsterSkillList().get(0).getDamage() + "]" + System.getProperty("line.separator");
-                }
             }
             channel.writeAndFlush(MessageUtil.turnToPacket(allStatus));
         }

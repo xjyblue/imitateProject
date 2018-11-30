@@ -178,6 +178,10 @@ public class StopAreaEvent {
                                     monster.setStatus(StatusConfig.DEAD);
 //                                  爆装备
                                     outfitEquipmentEvent.getGoods(channel,monster);
+
+//                                  移除死掉的怪物
+                                    NettyMemory.areaMap.get(user.getPos()).getMonsters().remove(monster);
+//                                  生成新的怪物
                                 } else {
                                     Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(channel);
 //                                    切换到攻击模式
@@ -206,6 +210,7 @@ public class StopAreaEvent {
                                     String jobId = UUID.randomUUID().toString();
                                     MonsterAttackTask monsterAttackTask = new MonsterAttackTask(channel, jobId, NettyMemory.futureMap,outfitEquipmentEvent,buffEvent);
                                     Future future = NettyMemory.monsterThreadPool.scheduleAtFixedRate(monsterAttackTask, 0, 1, TimeUnit.SECONDS);
+                                    NettyMemory.futureMap.put(jobId,future);
                                     channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFIGHT));
                                 }
                             }
