@@ -42,10 +42,7 @@ public class OutfitEquipmentEvent {
             } else {
                 BigInteger addMoney = new BigInteger("20000000");
                 user.addMoney(addMoney);
-                for(Map.Entry<String,User>entry:NettyMemory.teamMap.get(user.getTeamId()).getUserMap().entrySet()){
-                    Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
-                    channelTemp.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + addMoney.toString() + "金币,当前人物金币为[" + user.getMoney() + "]"));
-                }
+                channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + addMoney.toString() + "金币,当前人物金币为[" + user.getMoney() + "]"));
             }
         }
     }

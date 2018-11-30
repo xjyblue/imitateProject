@@ -97,30 +97,31 @@ public class BossArea {
             alias.put("出生地点", "pos");
             List<Monster> monsterList = ExcelUtil.excel2Pojo(fis, Monster.class, alias);
             for (Monster monster : monsterList) {
-
-//      怪物buff初始化
-                Map<String, Integer> map = new HashMap<>();
-                map.put(BuffConfig.MPBUFF, 1000);
-                map.put(BuffConfig.POISONINGBUFF, 2000);
-                map.put(BuffConfig.DEFENSEBUFF, 3000);
-                monster.setBufMap(map);
+                if(monster.getPos().equals("A1")){
+                    //      怪物buff初始化
+                    Map<String, Integer> map = new HashMap<>();
+                    map.put(BuffConfig.MPBUFF, 1000);
+                    map.put(BuffConfig.POISONINGBUFF, 2000);
+                    map.put(BuffConfig.DEFENSEBUFF, 3000);
+                    monster.setBufMap(map);
 //      初始化每个怪物buff的终止时间
-                Map<String, Long> mapSecond = new HashMap<>();
-                mapSecond.put(BuffConfig.MPBUFF, 1000l);
-                mapSecond.put(BuffConfig.POISONINGBUFF, 2000l);
-                mapSecond.put(BuffConfig.DEFENSEBUFF, 3000l);
-                NettyMemory.monsterBuffEndTime.put(monster, mapSecond);
+                    Map<String, Long> mapSecond = new HashMap<>();
+                    mapSecond.put(BuffConfig.MPBUFF, 1000l);
+                    mapSecond.put(BuffConfig.POISONINGBUFF, 2000l);
+                    mapSecond.put(BuffConfig.DEFENSEBUFF, 3000l);
+                    NettyMemory.monsterBuffEndTime.put(monster, mapSecond);
 //      怪物buff初始化结束
 
-                String s[] = monster.getSkillIds().split("-");
-                List<MonsterSkill> list = new ArrayList<>();
-                for(int i=0;i<s.length;i++){
-                    list.add(NettyMemory.monsterSkillMap.get(Integer.parseInt(s[i])));
-                }
-                monster.setMonsterSkillList(list);
-                monsterMap.put(monster.getName(),monster);
-                if(monster.getName().equals("七天连锁酒店王")){
-                    firstMonster = monster;
+                    String s[] = monster.getSkillIds().split("-");
+                    List<MonsterSkill> list = new ArrayList<>();
+                    for(int i=0;i<s.length;i++){
+                        list.add(NettyMemory.monsterSkillMap.get(Integer.parseInt(s[i])));
+                    }
+                    monster.setMonsterSkillList(list);
+                    monsterMap.put(monster.getName(),monster);
+                    if(monster.getName().equals("七天连锁酒店王")){
+                        firstMonster = monster;
+                    }
                 }
             }
         } catch (Exception e) {

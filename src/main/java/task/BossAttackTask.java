@@ -211,8 +211,8 @@ public class BossAttackTask implements Runnable {
             if (NettyMemory.monsterMap.containsKey(entry.getValue())) {
                 NettyMemory.monsterMap.remove(entry.getValue());
             }
+            outfitEquipmentEvent.getGoods(channelTemp, monster);
         }
-        outfitEquipmentEvent.getGoods(channel, monster);
         NettyMemory.bossAreaMap.remove(team.getTeamId());
     }
 
@@ -400,16 +400,4 @@ public class BossAttackTask implements Runnable {
         return userTarget;
     }
 
-    private void changeEventStatus(User user, String stoparea) {
-        Team team = NettyMemory.teamMap.get(user.getTeamId());
-        for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
-            Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
-            NettyMemory.eventStatus.put(channelTemp, stoparea);
-            if (NettyMemory.monsterMap.containsKey(entry.getValue())) {
-                NettyMemory.monsterMap.remove(entry.getValue());
-            }
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.BOSSAREATIMEOUT));
-        }
-        NettyMemory.bossAreaMap.remove(team.getTeamId());
-    }
 }

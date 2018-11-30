@@ -119,11 +119,13 @@ public class AttackEvent {
                                     + System.getProperty("line.separator");
                             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
                             monster.setStatus(StatusConfig.DEAD);
-//                          移除死掉的怪物
-                            NettyMemory.areaMap.get(user.getPos()).getMonsters().remove(monster);
+                            if(monster.getType().equals(Monster.TYPEOFCOMMONMONSTER)){
+ //                          移除死掉的怪物
+                                NettyMemory.areaMap.get(user.getPos()).getMonsters().remove(monster);
 //                          生成新的怪物
-                            Area area = NettyMemory.areaMap.get(user.getPos());
-                            area.getMonsters().add(monsterFactory.getMonsterByArea(user.getPos()));
+                                Area area = NettyMemory.areaMap.get(user.getPos());
+                                area.getMonsters().add(monsterFactory.getMonsterByArea(user.getPos()));
+                            }
                         } else {
                             resp +=
                                     System.getProperty("line.separator")

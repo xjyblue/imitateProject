@@ -69,7 +69,7 @@ public class BossEvent {
             return;
         }
         BossArea bossArea = new BossArea();
-        bossArea.setKeepTime(120l);
+        bossArea.setKeepTime(1200l);
         bossArea.setName("七天连锁酒店本");
         bossArea.setTeamId(user.getTeamId());
 
