@@ -31,6 +31,16 @@ public class Monster {
 
     private Map<String,Integer> bufMap;
 
+    private String pos;
+
+    public String getPos() {
+        return pos;
+    }
+
+    public void setPos(String pos) {
+        this.pos = pos;
+    }
+
     public String getSkillIds() {
         return skillIds;
     }

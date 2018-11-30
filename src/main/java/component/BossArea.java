@@ -94,6 +94,7 @@ public class BossArea {
             alias.put("怪物生命值", "valueOfLife");
             alias.put("怪物状态", "status");
             alias.put("怪物技能", "skillIds");
+            alias.put("出生地点", "pos");
             List<Monster> monsterList = ExcelUtil.excel2Pojo(fis, Monster.class, alias);
             for (Monster monster : monsterList) {
 

@@ -128,7 +128,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
         }
     }
 
-    private void handleData(ChannelHandlerContext ctx, PacketProto.Packet packet) {
+    private void handleData(ChannelHandlerContext ctx, PacketProto.Packet packet) throws IOException {
         for (Channel ch : group) {
             if (ch == ctx.channel()) {
                 heartCounts.put(ch, 0);

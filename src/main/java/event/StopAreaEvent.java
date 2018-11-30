@@ -1,11 +1,13 @@
 package event;
 
 import caculation.AttackCaculation;
+import component.Area;
 import component.Equipment;
 import component.Monster;
 import component.NPC;
 import config.MessageConfig;
 import config.StatusConfig;
+import factory.MonsterFactory;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import memory.NettyMemory;
@@ -18,6 +20,7 @@ import skill.UserSkill;
 import task.MonsterAttackTask;
 import utils.MessageUtil;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.Future;
@@ -47,7 +50,9 @@ public class StopAreaEvent {
     private PKEvent pkEvent;
     @Autowired
     private BuffEvent buffEvent;
-    public void stopArea(Channel channel, String msg) {
+    @Autowired
+    private MonsterFactory monsterFactory;
+    public void stopArea(Channel channel, String msg) throws IOException {
         if(msg.startsWith("pk")){
             pkEvent.pkOthers(channel,msg);
             return;
@@ -172,16 +177,18 @@ public class StopAreaEvent {
                                             + "[人物剩余蓝量]:" + user.getMp()
                                             + System.getProperty("line.separator")
                                             + "怪物已死亡";
-                                    monster.setValueOfLife("0");
                                     channel.writeAndFlush(MessageUtil.turnToPacket(resp));
 //                                                修改怪物状态
                                     monster.setStatus(StatusConfig.DEAD);
 //                                  爆装备
                                     outfitEquipmentEvent.getGoods(channel,monster);
 
-//                                  移除死掉的怪物
+//                          移除死掉的怪物
                                     NettyMemory.areaMap.get(user.getPos()).getMonsters().remove(monster);
-//                                  生成新的怪物
+//                          生成新的怪物
+                                    Area area = NettyMemory.areaMap.get(user.getPos());
+                                    area.getMonsters().add(monsterFactory.getMonsterByArea(user.getPos()));
+
                                 } else {
                                     Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(channel);
 //                                    切换到攻击模式

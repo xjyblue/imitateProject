@@ -1,10 +1,12 @@
 package event;
 
 import caculation.AttackCaculation;
+import component.Area;
 import component.Equipment;
 import config.BuffConfig;
 import config.MessageConfig;
 import config.StatusConfig;
+import factory.MonsterFactory;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import team.Team;
 import utils.MessageUtil;
 import component.Monster;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -36,8 +39,9 @@ public class AttackEvent {
     private ChatEvent chatEvent;
     @Autowired
     private BuffEvent buffEvent;
-
-    public void attack(Channel channel, String msg) {
+    @Autowired
+    private MonsterFactory monsterFactory;
+    public void attack(Channel channel, String msg) throws IOException {
         if (msg.startsWith("chat")) {
             chatEvent.chat(channel, msg);
             return;
@@ -80,7 +84,7 @@ public class AttackEvent {
 //                 技能buff处理
                     buffEvent.buffSolve(userSkill,monster,user);
 
-//                     人物蓝量检查
+//                  人物蓝量检查
                     BigInteger userMp = new BigInteger(user.getMp());
                     BigInteger skillMp = new BigInteger(userSkill.getSkillMp());
                     if (userMp.compareTo(skillMp) > 0) {
@@ -91,15 +95,13 @@ public class AttackEvent {
 //                          攻击逻辑
                         BigInteger monsterLife = monster.subLife(attackDamage);
 //                         蓝量计算
-                        userMp = userMp.subtract(skillMp);
-                        user.setMp(userMp.toString());
+                        user.setMp(userMp.subtract(skillMp).toString());
                         String resp = out(user);
                         BigInteger minValueOfLife = new BigInteger("0");
 //                         检查怪物血量
                         if (monsterLife.compareTo(minValueOfLife) <= 0) {
 //                              蓝量计算逻辑
                             monster.setValueOfLife(minValueOfLife.toString());
-                            user.subMp(skillMp.toString());
                             if(user.getMp().equals("0")){
                                 user.setMp("0");
                             }
@@ -116,13 +118,12 @@ public class AttackEvent {
                                     + "[人物剩余蓝量]:" + user.getMp()
                                     + System.getProperty("line.separator");
                             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
-//                          修改怪物状态
-                            monster.setValueOfLife("0");
                             monster.setStatus(StatusConfig.DEAD);
 //                          移除死掉的怪物
                             NettyMemory.areaMap.get(user.getPos()).getMonsters().remove(monster);
 //                          生成新的怪物
-
+                            Area area = NettyMemory.areaMap.get(user.getPos());
+                            area.getMonsters().add(monsterFactory.getMonsterByArea(user.getPos()));
                         } else {
                             resp +=
                                     System.getProperty("line.separator")

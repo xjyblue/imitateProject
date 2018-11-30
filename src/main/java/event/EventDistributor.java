@@ -10,6 +10,8 @@ import io.netty.channel.ChannelHandlerContext;
 import memory.NettyMemory;
 import utils.MessageUtil;
 
+import java.io.IOException;
+
 /**
  * 具体事件分发器
  *
@@ -35,7 +37,7 @@ public class EventDistributor {
     private ConnectEvent connectEvent;
     @Autowired
     private DeadEvent deadEvent;
-    public void distributeEvent(ChannelHandlerContext ctx, String msg) {
+    public void distributeEvent(ChannelHandlerContext ctx, String msg) throws IOException {
         Channel ch = ctx.channel();
         String status = NettyMemory.eventStatus.get(ch);
         switch (status) {

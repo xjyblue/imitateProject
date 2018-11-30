@@ -89,7 +89,7 @@ public class BossAttackTask implements Runnable {
     public void run() {
         try {
 //          处理最后一名玩家退出,停掉线程
-            if(!NettyMemory.bossAreaMap.containsKey(teamId)){
+            if (!NettyMemory.bossAreaMap.containsKey(teamId)) {
                 Future future = futureMap.remove(jobId);
                 future.cancel(true);
                 return;
@@ -270,7 +270,7 @@ public class BossAttackTask implements Runnable {
                     }
                     if (entryBuf.getKey().equals(BuffConfig.SLEEPBUFF) && userTarget.getBufferMap().get(BuffConfig.SLEEPBUFF) != 5001) {
 //                      减伤buff处理
-                        BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTarget);
+                        BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTarget,entry.getValue());
 
 
 //                      改变用户buff状态，设置用户buff时间
@@ -283,7 +283,7 @@ public class BossAttackTask implements Runnable {
                     }
                     if (entryBuf.getKey().equals(BuffConfig.POISONINGBUFF) && userTarget.getBufferMap().get(BuffConfig.POISONINGBUFF) != 2001) {
 //                     减伤buff处理
-                        BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTarget);
+                        BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTarget,entry.getValue());
 
 //                      改变用户buff状态，设置用户buff时间
                         Buff buff = NettyMemory.buffMap.get(entryBuf.getValue());
@@ -296,8 +296,8 @@ public class BossAttackTask implements Runnable {
                 }
             }
 
-//                  减伤buff处理
-            BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTarget);
+//          减伤buff处理
+            BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTarget, entry.getValue());
 
             if (entry.getValue().getUsername().equals(userTarget.getUsername())) {
                 BigInteger userHp = new BigInteger(userTarget.getHp());
@@ -350,8 +350,8 @@ public class BossAttackTask implements Runnable {
         return selectMonsterSkill(monster, userTarget);
     }
 
-    private BigInteger dealDefenseBuff(MonsterSkill monsterSkill, User user) {
-        if (user.getBufferMap().get(BuffConfig.DEFENSEBUFF) != 3000) {
+    private BigInteger dealDefenseBuff(MonsterSkill monsterSkill, User user, User target) {
+        if (user.getBufferMap().get(BuffConfig.DEFENSEBUFF) != 3000 && user == target) {
             Buff buff = NettyMemory.buffMap.get(user.getBufferMap().get(BuffConfig.DEFENSEBUFF));
             BigInteger mosterSkillDamage = new BigInteger(monsterSkill.getDamage());
             BigInteger buffDefenceDamage = new BigInteger(buff.getInjurySecondValue());
@@ -367,7 +367,7 @@ public class BossAttackTask implements Runnable {
         Team team = NettyMemory.teamMap.get(teamId);
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             User userTemp = entry.getValue();
-            BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTemp);
+            BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTemp,entry.getValue());
             Channel channelTemp = NettyMemory.userToChannelMap.get(userTemp);
             userTemp.subHp(monsterSkillDamage.toString());
             String resp = "怪物使用了全体攻击技能,对所有人造成攻击:"
