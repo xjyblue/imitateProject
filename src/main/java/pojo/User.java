@@ -25,6 +25,8 @@ public class User {
 
     private String teamId;
 
+    private String traceId;
+
     private List<Userbag> userBag;
 
     private List<Weaponequipmentbar> weaponequipmentbars;
@@ -34,6 +36,24 @@ public class User {
     private String money;
 
     private Integer roleId;
+
+    private volatile boolean ifTrade;
+
+    public boolean isIfTrade() {
+        return ifTrade;
+    }
+
+    public void setIfTrade(boolean ifTrade) {
+        this.ifTrade = ifTrade;
+    }
+
+    public String getTraceId() {
+        return traceId;
+    }
+
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
+    }
 
     //  保证原子性
     public synchronized void addMoney(BigInteger add){
@@ -160,4 +180,9 @@ public class User {
     }
 
 
+    public void subMoney(BigInteger sendMoney) {
+        BigInteger userMoney = new BigInteger(this.getMoney());
+        userMoney = userMoney.subtract(sendMoney);
+        this.setMoney(userMoney.toString());
+    }
 }

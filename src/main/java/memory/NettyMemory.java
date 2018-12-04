@@ -18,6 +18,7 @@ import pojo.Userskillrelation;
 import skill.MonsterSkill;
 import skill.UserSkill;
 import team.Team;
+import trade.Trade;
 
 /**
  * @author xiaojianyu
@@ -72,4 +73,6 @@ public class NettyMemory {
 	public static Map<Integer,MonsterSkill> monsterSkillMap = new HashMap<>();
 	/** 职业的构建 */
 	public static Map<Integer, Role> roleMap = new HashMap();
+	/** 交易单的建立*/
+	public static Map<String, Trade> tradeMap = new ConcurrentHashMap<>();
 }

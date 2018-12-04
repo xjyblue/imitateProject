@@ -33,7 +33,47 @@ public class ClientStart extends JFrame implements KeyListener {
 
     private JScrollPane jScrollPane4;
 
+    private JTextArea jTextArea5;
+
+    private JScrollPane jScrollPane5;
+
+    private JTextArea jTextArea6;
+
+    private JScrollPane jScrollPane6;
+
+    public JTextArea getjTextArea6() {
+        return jTextArea6;
+    }
+
+    public void setjTextArea6(JTextArea jTextArea6) {
+        this.jTextArea6 = jTextArea6;
+    }
+
+    public JScrollPane getjScrollPane6() {
+        return jScrollPane6;
+    }
+
+    public void setjScrollPane6(JScrollPane jScrollPane6) {
+        this.jScrollPane6 = jScrollPane6;
+    }
+
     public volatile boolean flag = true;
+
+    public JTextArea getjTextArea5() {
+        return jTextArea5;
+    }
+
+    public void setjTextArea5(JTextArea jTextArea5) {
+        this.jTextArea5 = jTextArea5;
+    }
+
+    public JScrollPane getjScrollPane5() {
+        return jScrollPane5;
+    }
+
+    public void setjScrollPane5(JScrollPane jScrollPane5) {
+        this.jScrollPane5 = jScrollPane5;
+    }
 
     public JTextArea getjTextArea4() {
         return jTextArea4;
@@ -124,42 +164,57 @@ public class ClientStart extends JFrame implements KeyListener {
     public static void main(String[] args) {
         ClientStart frm = new ClientStart();
         frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frm.setSize(1200,800);
+        frm.setSize(1200, 1000);
         frm.setLocationRelativeTo(null);
         frm.setDefaultCloseOperation(3);
         frm.setResizable(false);
 
+
+
 //      初始化控件
         frm.txt = new JTextField(12);
 
-        frm.jTextArea1 = new JTextArea( 10,100);
+        frm.jTextArea1 = new JTextArea(10, 100);
         frm.jTextArea1.setEditable(false);
         frm.jScrollPane1 = new JScrollPane();
         frm.jScrollPane1.setBounds(new Rectangle(76, 35, 257, 193));
         frm.jScrollPane1.setViewportView(frm.jTextArea1);
 
-        frm.jTextArea2 = new JTextArea(10,5);
+        frm.jTextArea2 = new JTextArea(10, 5);
         frm.jTextArea2.setEditable(false);
         frm.jScrollPane2 = new JScrollPane();
         frm.jScrollPane2.setBounds(new Rectangle(76, 35, 257, 193));
         frm.jScrollPane2.setViewportView(frm.jTextArea2);
 
-        frm.jTextArea3 = new JTextArea(10,5);
+        frm.jTextArea3 = new JTextArea(10, 5);
         frm.jTextArea3.setEditable(false);
         frm.jScrollPane3 = new JScrollPane();
         frm.jScrollPane3.setBounds(new Rectangle(76, 35, 257, 193));
         frm.jScrollPane3.setViewportView(frm.jTextArea3);
 
-        frm.jTextArea4 = new JTextArea(10,5);
+        frm.jTextArea4 = new JTextArea(10, 5);
         frm.jTextArea4.setEditable(false);
         frm.jScrollPane4 = new JScrollPane();
         frm.jScrollPane4.setBounds(new Rectangle(76, 35, 257, 193));
         frm.jScrollPane4.setViewportView(frm.jTextArea4);
 
+        frm.jTextArea5 = new JTextArea(10, 5);
+        frm.jTextArea5.setEditable(false);
+        frm.jScrollPane5 = new JScrollPane();
+        frm.jScrollPane5.setBounds(new Rectangle(76, 35, 257, 193));
+        frm.jScrollPane5.setViewportView(frm.jTextArea5);
+
+        frm.jTextArea6 = new JTextArea(10, 5);
+        frm.jTextArea6.setEditable(false);
+        frm.jScrollPane6 = new JScrollPane();
+        frm.jScrollPane6.setBounds(new Rectangle(76, 35, 257, 193));
+        frm.jScrollPane6.setViewportView(frm.jTextArea6);
+
         JLabel jLabel1 = new JLabel("命令提示信息");
         JLabel jLabel2 = new JLabel("人物所受buff提示信息");
         JLabel jLabel3 = new JLabel("怪物所受buff提示信息");
         JLabel jLabel4 = new JLabel("怪物攻击提示信息");
+        JLabel jLabel5 = new JLabel("交易提示信息");
 
         JButton b = new JButton("清屏");
         b.setBounds(100, 100, 65, 30);
@@ -175,7 +230,7 @@ public class ClientStart extends JFrame implements KeyListener {
         b2.setBounds(100, 100, 65, 30);
         b2.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                frm.flag=false;
+                frm.flag = false;
             }
         });
 
@@ -183,99 +238,113 @@ public class ClientStart extends JFrame implements KeyListener {
         b3.setBounds(100, 100, 65, 30);
         b3.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                frm.flag=true;
+                frm.flag = true;
             }
         });
 
 //          设置布局
-        GridBagLayout gridBagLayout=new GridBagLayout(); //实例化布局对象
+        GridBagLayout gridBagLayout = new GridBagLayout(); //实例化布局对象
         frm.setLayout(gridBagLayout);                     //jf窗体对象设置为GridBagLayout布局
-        GridBagConstraints gridBagConstraints=new GridBagConstraints();//实例化这个对象用来对组件进行管理
-        gridBagConstraints.fill=GridBagConstraints.BOTH;
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();//实例化这个对象用来对组件进行管理
+        gridBagConstraints.fill = GridBagConstraints.BOTH;
 
-        gridBagConstraints.gridx=0;
-        gridBagConstraints.gridy=0;
-        gridBagConstraints.gridwidth=1;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.txt, gridBagConstraints);
         frm.add(frm.txt);
 
-        gridBagConstraints.gridx=10;
-        gridBagConstraints.gridy=0;
-        gridBagConstraints.gridwidth=1;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(b, gridBagConstraints);
         frm.add(b);
 
-        gridBagConstraints.gridx=15;
-        gridBagConstraints.gridy=0;
-        gridBagConstraints.gridwidth=1;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 15;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(b2, gridBagConstraints);
         frm.add(b2);
 
-        gridBagConstraints.gridx=16;
-        gridBagConstraints.gridy=0;
-        gridBagConstraints.gridwidth=1;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 16;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(b3, gridBagConstraints);
         frm.add(b3);
 
-        gridBagConstraints.gridx=0;
-        gridBagConstraints.gridy=5;
-        gridBagConstraints.gridwidth=20;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(jLabel1, gridBagConstraints);
         frm.add(jLabel1);
 
-        gridBagConstraints.gridx=0;
-        gridBagConstraints.gridy=13;
-        gridBagConstraints.gridwidth=20;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane1, gridBagConstraints);
         frm.add(frm.jScrollPane1);
 
-        gridBagConstraints.gridx=0;
-        gridBagConstraints.gridy=15;
-        gridBagConstraints.gridwidth=20;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(jLabel2, gridBagConstraints);
         frm.add(jLabel2);
 
-        gridBagConstraints.gridx=0;
-        gridBagConstraints.gridy=20;
-        gridBagConstraints.gridwidth=20;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 20;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane2, gridBagConstraints);
         frm.add(frm.jScrollPane2);
 
-        gridBagConstraints.gridx=0;
-        gridBagConstraints.gridy=25;
-        gridBagConstraints.gridwidth=20;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 25;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(jLabel3, gridBagConstraints);
         frm.add(jLabel3);
 
-        gridBagConstraints.gridx=0;
-        gridBagConstraints.gridy=30;
-        gridBagConstraints.gridwidth=20;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 30;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane3, gridBagConstraints);
         frm.add(frm.jScrollPane3);
 
-        gridBagConstraints.gridx=0;
-        gridBagConstraints.gridy=35;
-        gridBagConstraints.gridwidth=20;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 35;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(jLabel4, gridBagConstraints);
         frm.add(jLabel4);
 
-        gridBagConstraints.gridx=0;
-        gridBagConstraints.gridy=40;
-        gridBagConstraints.gridwidth=20;
-        gridBagConstraints.gridheight=1;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 40;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane4, gridBagConstraints);
         frm.add(frm.jScrollPane4);
+
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 45;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
+        gridBagLayout.setConstraints(jLabel5, gridBagConstraints);
+        frm.add(jLabel5);
+
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 50;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
+        gridBagLayout.setConstraints(frm.jScrollPane5, gridBagConstraints);
+        frm.add(frm.jScrollPane5);
 
 //      设置监听
         frm.txt.addKeyListener(frm);

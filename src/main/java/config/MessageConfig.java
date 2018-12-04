@@ -69,4 +69,18 @@ public class MessageConfig {
 
     public static final String SLEEPMESSAGE = "你已被怪物击晕，等待时间即可攻击，也可在商城购买免击晕符";
     public static final String ONLEAVEFORREMOVE = "只有一个玩家，自动解散队伍";
+    public static final String NOTRACEUSER = "无此交易用户";
+    public static final String NOTRADERECORD = "无此交易记录";
+    public static final String TRADEING = "玩家正在交易中无法进行交易";
+    public static final String SUCCESSCREATETRADE = "成功建立交易";
+    public static final String NOGOODINTRADE = "交易单号上无此物品";
+    public static final String SUCCESSTRADEEND = "交易结束，双方完成交易";
+    public static final String FAILTRADEEND = "一方终止了交易，交易失败";
+    public static final String TRADENOENOUGHMONEY = "你的个人金额少于交易金额，请重新修改你的交易金额";
+    public static final String NOENOUGHMONEYTORESET = "你撤回的金额不能超过放在交易单上的金额";
+    public static final String TRADETARGETHASMAN = "所交易的用户已和他人在交易中";
+
+    public static final String MESSAGESTART = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
+    public static final String MESSAGEEND = "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
+    public static final String MESSAGEMID = "===========================================================================================================";
 }

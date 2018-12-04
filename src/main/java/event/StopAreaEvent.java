@@ -52,7 +52,13 @@ public class StopAreaEvent {
     private BuffEvent buffEvent;
     @Autowired
     private MonsterFactory monsterFactory;
+    @Autowired
+    private TransactionEvent transactionEvent;
     public void stopArea(Channel channel, String msg) throws IOException {
+        if(msg.startsWith("iftrade")||msg.startsWith("ytrade")){
+            transactionEvent.trade(channel,msg);
+            return;
+        }
         if(msg.startsWith("pk")){
             pkEvent.pkOthers(channel,msg);
             return;

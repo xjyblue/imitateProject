@@ -9,4 +9,5 @@ public class PacketType {
     public static final String USERBUFMSG = "1";
     public static final String MONSTERBUFMSG = "2";
     public static final String ATTACKMSG = "3";
+    public static final String TRADEMSG = "4";
 }

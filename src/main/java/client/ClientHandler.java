@@ -60,6 +60,10 @@ public class ClientHandler extends ChannelHandlerAdapter {
         if(packet.getType().equals(PacketType.ATTACKMSG)){
             jTextArea = clientStart.getjTextArea4();
         }
+        if(packet.getType().equals(PacketType.TRADEMSG)){
+            jTextArea = clientStart.getjTextArea5();
+            jTextArea.setText("");
+        }
         String resp = jTextArea.getText();
         resp += "客户端收到：" + packet.getData()+System.getProperty("line.separator");
         jTextArea.setText(resp);

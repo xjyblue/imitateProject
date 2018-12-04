@@ -37,6 +37,8 @@ public class EventDistributor {
     private ConnectEvent connectEvent;
     @Autowired
     private DeadEvent deadEvent;
+    @Autowired
+    private TransactionEvent transactionEvent;
     public void distributeEvent(ChannelHandlerContext ctx, String msg) throws IOException {
         Channel ch = ctx.channel();
         String status = NettyMemory.eventStatus.get(ch);
@@ -64,6 +66,9 @@ public class EventDistributor {
                 break;
             case EventStatus.SHOPAREA:
                 shopEvent.shop(ctx.channel(), msg);
+                break;
+            case EventStatus.TRADE:
+                transactionEvent.tradeing(ctx.channel(),msg);
                 break;
             case EventStatus.DEADAREA:
                 deadEvent.dead(ctx.channel(),msg);
