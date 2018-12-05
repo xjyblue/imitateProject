@@ -79,8 +79,13 @@ public class MessageConfig {
     public static final String TRADENOENOUGHMONEY = "你的个人金额少于交易金额，请重新修改你的交易金额";
     public static final String NOENOUGHMONEYTORESET = "你撤回的金额不能超过放在交易单上的金额";
     public static final String TRADETARGETHASMAN = "所交易的用户已和他人在交易中";
+    public static final String MANISINGTRADING = "你当前还有未处理完成的交易记录，请使用ntrade取消你当前的交易记录再进行交易";
+    public static final String NOCREATETRADE = "你还没有建立交易，无法取消";
+    public static final String CANCELTRADE = "你已取消交易申请";
+
 
     public static final String MESSAGESTART = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
     public static final String MESSAGEEND = "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
     public static final String MESSAGEMID = "===========================================================================================================";
+
 }

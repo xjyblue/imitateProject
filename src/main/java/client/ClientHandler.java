@@ -48,24 +48,28 @@ public class ClientHandler extends ChannelHandlerAdapter {
     private void handleData(ChannelHandlerContext ctx, Object msg) {
         PacketProto.Packet packet = (PacketProto.Packet) msg;
         JTextArea jTextArea = null;
-        if(packet.getType().equals(PacketType.NORMALMSG)){
-           jTextArea = clientStart.getjTextArea1();
+        if (packet.getType().equals(PacketType.NORMALMSG)) {
+            jTextArea = clientStart.getjTextArea1();
         }
-        if(packet.getType().equals(PacketType.USERBUFMSG)){
+        if (packet.getType().equals(PacketType.USERBUFMSG)) {
             jTextArea = clientStart.getjTextArea2();
         }
-        if(packet.getType().equals(PacketType.MONSTERBUFMSG)){
+        if (packet.getType().equals(PacketType.MONSTERBUFMSG)) {
             jTextArea = clientStart.getjTextArea3();
         }
-        if(packet.getType().equals(PacketType.ATTACKMSG)){
+        if (packet.getType().equals(PacketType.ATTACKMSG)) {
             jTextArea = clientStart.getjTextArea4();
         }
-        if(packet.getType().equals(PacketType.TRADEMSG)){
+        if (packet.getType().equals(PacketType.TRADEMSG)) {
             jTextArea = clientStart.getjTextArea5();
             jTextArea.setText("");
         }
+        if (packet.getType().equals(PacketType.USERINFO)) {
+            clientStart.setTitle("用户[" + packet.getData() + "]客户端");
+            return;
+        }
         String resp = jTextArea.getText();
-        resp += "客户端收到：" + packet.getData()+System.getProperty("line.separator");
+        resp += "客户端收到：" + packet.getData() + System.getProperty("line.separator");
         jTextArea.setText(resp);
 
         jTextArea.setCaretPosition(jTextArea.getDocument().getLength());
@@ -112,7 +116,7 @@ public class ClientHandler extends ChannelHandlerAdapter {
      */
     private void sendHeartbeatPacket(ChannelHandlerContext ctx) {
 //        System.out.println("开始发送心跳包");
-        if(clientStart.flag){
+        if (clientStart.flag) {
             PacketProto.Packet.Builder builder = newBuilder();
             builder.setPacketType(PacketProto.Packet.PacketType.HEARTBEAT);
             PacketProto.Packet packet = builder.build();

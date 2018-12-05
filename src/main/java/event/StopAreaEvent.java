@@ -55,7 +55,7 @@ public class StopAreaEvent {
     @Autowired
     private TransactionEvent transactionEvent;
     public void stopArea(Channel channel, String msg) throws IOException {
-        if(msg.startsWith("iftrade")||msg.startsWith("ytrade")){
+        if(msg.startsWith("iftrade")||msg.startsWith("ytrade")||msg.equals("ntrade")){
             transactionEvent.trade(channel,msg);
             return;
         }

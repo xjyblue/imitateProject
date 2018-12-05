@@ -38,6 +38,11 @@ public class TransactionEvent {
     private CommonEvent commonEvent;
 
     public void trade(Channel channel, String msg) {
+        if(msg.equals("ntrade")){
+            cancelTrade(channel,msg);
+            return;
+        }
+
         if (msg.startsWith("iftrade")) {
             createTrade(channel, msg);
             return;
@@ -45,6 +50,30 @@ public class TransactionEvent {
         if (msg.startsWith("ytrade")) {
             agreeTrade(channel, msg);
             return;
+        }
+    }
+
+    private void cancelTrade(Channel channel, String msg) {
+        User user = NettyMemory.session2UserIds.get(channel);
+        if(user.getTraceId()==null||!NettyMemory.tradeMap.containsKey(user.getTraceId())){
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOCREATETRADE));
+            return;
+        }
+        Trade trade = NettyMemory.tradeMap.get(user.getTraceId());
+
+//      加锁处理
+        lock.lock();
+        try{
+            if(trade.isIfexe()){
+                return;
+            }else {
+                NettyMemory.tradeMap.remove(user.getTraceId());
+                user.setTraceId(null);
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.CANCELTRADE));
+                return;
+            }
+        }finally {
+            lock.unlock();
         }
     }
 
@@ -61,6 +90,7 @@ public class TransactionEvent {
         }
 //      建立起交易，把两者的转态弄到交易状态中去，多个线程抢锁
         User userStart = NettyMemory.tradeMap.get(temp[1]).getUserStart();
+        Trade trade = NettyMemory.tradeMap.get(temp[1]);
         lock.lock();
         try {
             if (userStart.isIfTrade() || user.isIfTrade()) {
@@ -69,6 +99,7 @@ public class TransactionEvent {
             }
             userStart.setIfTrade(true);
             user.setIfTrade(true);
+            trade.setIfexe(true);
         } finally {
             lock.unlock();
         }
@@ -78,7 +109,6 @@ public class TransactionEvent {
         NettyMemory.eventStatus.put(channel, EventStatus.TRADE);
         Channel channelStart = NettyMemory.userToChannelMap.get(userStart);
         NettyMemory.eventStatus.put(channelStart, EventStatus.TRADE);
-        Trade trade = NettyMemory.tradeMap.get(userStart.getTraceId());
         trade.setUserTo(user);
         trade.setEndTime(System.currentTimeMillis() + 500000);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSCREATETRADE));
@@ -101,6 +131,10 @@ public class TransactionEvent {
             return;
         }
         User userTarget = NettyMemory.session2UserIds.get(channelTarget);
+        if(user.getTraceId()!=null&&NettyMemory.tradeMap.containsKey(user.getTraceId())){
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.MANISINGTRADING));
+            return;
+        }
         try{
             lock.lock();
             if(userTarget.isIfTrade()){
@@ -122,6 +156,7 @@ public class TransactionEvent {
         trade.setStartMoney(new BigInteger("0"));
         trade.setToMoney(new BigInteger("0"));
         trade.setStartUserAgree(false);
+        trade.setIfexe(false);
         trade.setStartUserBag(new HashMap<String, Userbag>());
         trade.setToUserBag(new HashMap<String, Userbag>());
         trade.setUserStart(user);

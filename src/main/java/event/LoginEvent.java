@@ -8,6 +8,7 @@ import mapper.UserskillrelationMapper;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import packet.PacketType;
 import pojo.*;
 import utils.MessageUtil;
 
@@ -64,6 +65,7 @@ public class LoginEvent {
                 NettyMemory.session2UserIds.put(channel, user);
                 NettyMemory.userToChannelMap.put(user,channel);
                 channel.writeAndFlush(MessageUtil.turnToPacket("登录成功，你已进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
+                channel.writeAndFlush(MessageUtil.turnToPacket(user.getUsername(), PacketType.USERINFO));
                 NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
             }
         }

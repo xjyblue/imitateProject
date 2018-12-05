@@ -26,6 +26,8 @@ public class Trade {
 
     private BigInteger toMoney;
 
+    private boolean ifexe;
+
     private Map<String,Userbag> startUserBag;
 
     private Map<String,Userbag> toUserBag;
@@ -35,6 +37,14 @@ public class Trade {
     private volatile Boolean toUserAgree;
 
     private volatile Boolean ifAllAgree;
+
+    public boolean isIfexe() {
+        return ifexe;
+    }
+
+    public void setIfexe(boolean ifexe) {
+        this.ifexe = ifexe;
+    }
 
     public BigInteger getStartMoney() {
         return startMoney;
