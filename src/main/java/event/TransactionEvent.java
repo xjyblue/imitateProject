@@ -38,8 +38,8 @@ public class TransactionEvent {
     private CommonEvent commonEvent;
 
     public void trade(Channel channel, String msg) {
-        if(msg.equals("ntrade")){
-            cancelTrade(channel,msg);
+        if (msg.equals("ntrade")) {
+            cancelTrade(channel, msg);
             return;
         }
 
@@ -55,7 +55,7 @@ public class TransactionEvent {
 
     private void cancelTrade(Channel channel, String msg) {
         User user = NettyMemory.session2UserIds.get(channel);
-        if(user.getTraceId()==null||!NettyMemory.tradeMap.containsKey(user.getTraceId())){
+        if (user.getTraceId() == null || !NettyMemory.tradeMap.containsKey(user.getTraceId())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOCREATETRADE));
             return;
         }
@@ -63,16 +63,18 @@ public class TransactionEvent {
 
 //      加锁处理
         lock.lock();
-        try{
-            if(trade.isIfexe()){
+        try {
+//          解决同意线程先抢到锁
+            if (trade.isIfexe()) {
                 return;
-            }else {
+            } else {
+//              解决取消线程先抢到锁
                 NettyMemory.tradeMap.remove(user.getTraceId());
                 user.setTraceId(null);
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.CANCELTRADE));
                 return;
             }
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
@@ -93,6 +95,13 @@ public class TransactionEvent {
         Trade trade = NettyMemory.tradeMap.get(temp[1]);
         lock.lock();
         try {
+//          解决取消线程先抢到锁
+            if(!NettyMemory.tradeMap.containsKey(trade.getTradeId())){
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.CANCELTRADE));
+                return;
+            }
+//          解决同意线程先抢到锁
+//          解决针对同一用户的同意交易和被同意的抢锁问题
             if (userStart.isIfTrade() || user.isIfTrade()) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.TRADEING));
                 return;
@@ -131,17 +140,18 @@ public class TransactionEvent {
             return;
         }
         User userTarget = NettyMemory.session2UserIds.get(channelTarget);
-        if(user.getTraceId()!=null&&NettyMemory.tradeMap.containsKey(user.getTraceId())){
+        if (user.getTraceId() != null && NettyMemory.tradeMap.containsKey(user.getTraceId())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.MANISINGTRADING));
             return;
         }
-        try{
+        try {
             lock.lock();
-            if(userTarget.isIfTrade()){
+//          解决同意交易和另外创建用户交易请求的锁问题
+            if (userTarget.isIfTrade()) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.TRADETARGETHASMAN));
                 return;
             }
-        }finally {
+        } finally {
             lock.unlock();
         }
         channel.writeAndFlush(MessageUtil.turnToPacket("你向" + temp[1] + "发起了交易请求等待交易准许"));
@@ -151,7 +161,6 @@ public class TransactionEvent {
         Trade trade = new Trade();
         trade.setEndTime(System.currentTimeMillis() + 500000);
         trade.setTradeId(uuid);
-        trade.setIfAllAgree(false);
         trade.setToUserAgree(false);
         trade.setStartMoney(new BigInteger("0"));
         trade.setToMoney(new BigInteger("0"));
@@ -187,6 +196,12 @@ public class TransactionEvent {
         Channel channelEnd = NettyMemory.userToChannelMap.get(trade.getUserTo());
 //      交易终止
         if (msg.equals("jy=q")) {
+            agreelock.lock();
+            try {
+                trade.setIfexe(false);
+            } finally {
+                agreelock.unlock();
+            }
 //          交易单物品还原
             for (Map.Entry<String, Userbag> entry : trade.getToUserBag().entrySet()) {
                 trade.getUserTo().getUserBag().add(entry.getValue());
@@ -197,7 +212,6 @@ public class TransactionEvent {
 //          交易失败金币还原
             trade.getUserStart().addMoney(trade.getStartMoney());
             trade.getUserTo().addMoney(trade.getToMoney());
-
 
             channelStart.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FAILTRADEEND));
             channelEnd.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FAILTRADEEND));
@@ -220,26 +234,30 @@ public class TransactionEvent {
         if (msg.equals("jy=y")) {
             try {
                 agreelock.lock();
-                if (user == trade.getUserStart() && !trade.getStartUserAgree()) {
-                    trade.setStartUserAgree(true);
-                    if (trade.getToUserAgree() && trade.getStartUserAgree()) {
-                        trade.setIfAllAgree(true);
-                    }
-                } else if (user == trade.getUserTo() && !trade.getToUserAgree()) {
-                    trade.setToUserAgree(true);
-                    if (trade.getToUserAgree() && trade.getStartUserAgree()) {
-                        trade.setIfAllAgree(true);
-                    }
-                } else {
-                    channel.writeAndFlush(MessageUtil.turnToPacket("您已同意了此次交易"));
+                if(!trade.isIfexe()){
+                    channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FAILTRADEEND));
                     return;
                 }
-                if (!trade.getIfAllAgree()) {
+                if (user == trade.getUserStart() && trade.getStartUserAgree()) {
+                    channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REPEATYESTRADE));
+                    return;
+                }
+                if (user == trade.getUserTo() && trade.getToUserAgree()) {
+                    channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REPEATYESTRADE));
+                    return;
+                }
+                if (user == trade.getUserStart() && !trade.getStartUserAgree()) {
+                    trade.setStartUserAgree(true);
+                }
+                if (user == trade.getUserTo() && !trade.getToUserAgree()) {
+                    trade.setToUserAgree(true);
+                }
+                if ((trade.getStartUserAgree() && !trade.getToUserAgree()) || (trade.getToUserAgree() && !trade.getStartUserAgree())) {
                     if (user == trade.getUserStart()) {
-                        channelStart.writeAndFlush(MessageUtil.turnToPacket("您同意了此次交易"));
+                        channelStart.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.YOUCOMFIRMTRADE));
                         channelEnd.writeAndFlush(MessageUtil.turnToPacket(trade.getUserStart().getUsername() + "同意了此次交易，请您尽快做出抉择"));
                     } else {
-                        channelEnd.writeAndFlush(MessageUtil.turnToPacket("您同意了此次交易"));
+                        channelEnd.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.YOUCOMFIRMTRADE));
                         channelStart.writeAndFlush(MessageUtil.turnToPacket(trade.getUserTo().getUsername() + "同意了此次交易，请您尽快做出抉择"));
                     }
                     return;
@@ -339,6 +357,10 @@ public class TransactionEvent {
 //      放置交易物品，打印出来
         if (msg.startsWith("jy=")) {
             String[] temp = msg.split("=");
+            if (temp.length != 2) {
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+                return;
+            }
 //          移除背包给子物品到交易单
             Userbag userbag = getUserBagById(user, temp[1]);
             if (userbag == null) {

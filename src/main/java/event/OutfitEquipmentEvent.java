@@ -12,6 +12,7 @@ import utils.MessageUtil;
 
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Description ：nettySpringServer
@@ -49,6 +50,7 @@ public class OutfitEquipmentEvent {
 
     private void equipMentToUser(Equipment equipment, User user, Channel channel) {
         Userbag userbag = new Userbag();
+        userbag.setId(UUID.randomUUID().toString());
         userbag.setName(equipment.getName());
         userbag.setNum(1);
         userbag.setTypeof(Good.EQUIPMENT);

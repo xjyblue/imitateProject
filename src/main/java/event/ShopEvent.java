@@ -26,7 +26,7 @@ public class ShopEvent {
         User user = NettyMemory.session2UserIds.get(channel);
         if (msg.equals("s")) {
             String resp = System.getProperty("line.separator")
-                    + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+                    + MessageConfig.MESSAGESTART
                     + System.getProperty("line.separator")
                     + "您好，欢迎来到不充钱就不能玩的商店领域";
 //          回显可购买的武器
@@ -53,7 +53,7 @@ public class ShopEvent {
                         + System.getProperty("line.separator");
             }
             resp += "[购买武器请输入s-物品编号-数量 即可购买]" + System.getProperty("line.separator");
-            resp += "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
+            resp += MessageConfig.MESSAGEEND;
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
         }
 

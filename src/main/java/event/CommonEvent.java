@@ -87,16 +87,16 @@ public class CommonEvent {
                         user.addMp(mpMedicine.getReplyValue());
                     }
                 } else {
-                    if (user.getBufferMap().get(BuffConfig.MPBUFF) == mpMedicine.getId()) {
+                    if (user.getBuffMap().get(BuffConfig.MPBUFF) == mpMedicine.getId()) {
                         NettyMemory.userBuffEndTime.get(user).put(BuffConfig.MPBUFF, (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
                     } else {
-                        user.getBufferMap().put(BuffConfig.MPBUFF, mpMedicine.getId());
+                        user.getBuffMap().put(BuffConfig.MPBUFF, mpMedicine.getId());
                         NettyMemory.userBuffEndTime.get(user).put(BuffConfig.MPBUFF, (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
 //                        if (NettyMemory.mpEndTime.containsKey(user)) {
 //                            NettyMemory.mpEndTime.remove(user);
 //                        }
                     }
-                    user.getBufferMap().put(BuffConfig.MPBUFF, mpMedicine.getId());
+                    user.getBuffMap().put(BuffConfig.MPBUFF, mpMedicine.getId());
                 }
             } else {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
@@ -206,13 +206,13 @@ public class CommonEvent {
         if (msg.equals("aoi")) {
             User user = NettyMemory.session2UserIds.get(channel);
             String allStatus = System.getProperty("line.separator")
-                    + "玩家" + user.getUsername()
-                    + "--------玩家的状态" + user.getStatus()
-                    + "--------处于" + NettyMemory.areaMap.get(user.getPos()).getName()
-                    + "--------玩家的HP量：" + user.getHp()
-                    + "--------玩家的MP量：" + user.getMp()
-                    + "--------玩家的金币：" + user.getMoney()
-                    + System.getProperty("line.separator");
+                    + "玩家[" + user.getUsername()
+                    + "] 玩家的状态[" + user.getStatus()
+                    + "] 处于[" + NettyMemory.areaMap.get(user.getPos()).getName()
+                    + "] 玩家的HP量：[" + user.getHp()
+                    + "] 玩家的MP量：[" + user.getMp()
+                    + "] 玩家的金币：[" + user.getMoney()
+                    + "]"+System.getProperty("line.separator");
             for (Map.Entry<Channel, User> entry : NettyMemory.session2UserIds.entrySet()) {
                 if (!user.getUsername().equals(entry.getValue().getUsername()) && user.getPos().equals(entry.getValue().getPos())) {
                     allStatus += "其他玩家" + entry.getValue().getUsername() + "---" + entry.getValue().getStatus() + System.getProperty("line.separator");

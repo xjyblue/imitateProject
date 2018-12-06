@@ -16,4 +16,8 @@ public class BuffConfig {
 
     public static final String SLEEPBUFF = "sleepBuff";
 
+    public static final String TREATMENTBUFF = "treatMentBuff";
+
+    public static final String BABYBUF = "babyBuff";
+
 }

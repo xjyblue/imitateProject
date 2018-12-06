@@ -36,6 +36,27 @@ public class BossArea {
 
     private Monster firstMonster;
 
+    private List<String> sequence;
+
+    private Map<String, Map<String, Monster>> monsters;
+
+
+    public List<String> getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(List<String> sequence) {
+        this.sequence = sequence;
+    }
+
+    public Map<String, Map<String, Monster>> getMonsters() {
+        return monsters;
+    }
+
+    public void setMonsters(Map<String, Map<String, Monster>> monsters) {
+        this.monsters = monsters;
+    }
+
     public boolean isFight() {
         return isFight;
     }
@@ -83,6 +104,10 @@ public class BossArea {
     }
 
     public void init() {
+        sequence = new ArrayList<>();
+        sequence.add("A1");
+        sequence.add("A2");
+        monsters = new HashMap<>();
 
         Map<String, Monster> monsterMap = new HashMap<>();
         try {
@@ -96,9 +121,10 @@ public class BossArea {
             alias.put("怪物技能", "skillIds");
             alias.put("出生地点", "pos");
             List<Monster> monsterList = ExcelUtil.excel2Pojo(fis, Monster.class, alias);
+
             for (Monster monster : monsterList) {
-                if(monster.getPos().equals("A1")){
-                    //      怪物buff初始化
+                if(monster.getPos().equals("A1")||monster.getPos().equals("A2")){
+//      怪物buff初始化
                     Map<String, Integer> map = new HashMap<>();
                     map.put(BuffConfig.MPBUFF, 1000);
                     map.put(BuffConfig.POISONINGBUFF, 2000);
@@ -114,21 +140,27 @@ public class BossArea {
 
                     String s[] = monster.getSkillIds().split("-");
                     List<MonsterSkill> list = new ArrayList<>();
-                    for(int i=0;i<s.length;i++){
+                    for (int i = 0; i < s.length; i++) {
                         list.add(NettyMemory.monsterSkillMap.get(Integer.parseInt(s[i])));
                     }
                     monster.setMonsterSkillList(list);
-                    monsterMap.put(monster.getName(),monster);
-                    if(monster.getName().equals("七天连锁酒店王")){
-                        firstMonster = monster;
+//                    monsterMap.put(monster.getName(), monster);
+
+
+                    if (!monsters.containsKey(monster.getPos())) {
+                        monsters.put(monster.getPos(), new HashMap<>());
+                        monsters.get(monster.getPos()).put(monster.getName(), monster);
+                    } else {
+                        monsters.get(monster.getPos()).put(monster.getName(), monster);
                     }
+//              if (monster.getName().equals("七天连锁酒店王")) {
+//                    firstMonster = monster;
+//               }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        setMap(monsterMap);
         this.bossName = "酒店怪兽副本";
         this.isEnd = false;
         this.isFight = false;

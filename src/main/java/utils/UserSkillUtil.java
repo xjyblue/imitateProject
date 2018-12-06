@@ -1,7 +1,12 @@
-package skill;
+package utils;
 
 import io.netty.channel.Channel;
 import memory.NettyMemory;
+import skill.UserSkill;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Description ：nettySpringServer
@@ -13,5 +18,15 @@ public class UserSkillUtil {
             return null;
         }
         return NettyMemory.SkillMap.get(NettyMemory.userskillrelationMap.get(channel).get(key).getSkillid());
+    }
+
+    public static List<UserSkill> getUserSkillByUserRole(int roleid){
+        List<UserSkill> list = new ArrayList<>();
+        for(Map.Entry<Integer,UserSkill>entry: NettyMemory.SkillMap.entrySet()){
+            if(roleid==entry.getValue().getRoleSkill()){
+                list.add(entry.getValue());
+            }
+        }
+        return list;
     }
 }

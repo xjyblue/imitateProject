@@ -6,11 +6,12 @@ package config;
  */
 public class MessageConfig {
     public static final String LOGINMESSAGE = "请输入：用户名-密码";
-    public static final String REGISTERMESSAGE = "请输入：用户名-密码-确认密码";
+    public static final String REGISTERMESSAGE = "请输入：用户名-密码-确认密码-种族编号[1:战士 2:牧师 3:法师 4:召唤师]进行注册";
     public static final String ERRORPASSWORD = "账户密码出错";
     public static final String DOUBLEPASSWORDERROR = "两次密码不一致";
     public static final String REGISTERSUCCESS = "注册成功请输入：用户名-密码进行登录";
     public static final String REPEATUSER = "你的账号已在其他地方登陆，无法重复登陆";
+    public static final String NOROLE = "请输入有效的种族";
 
     public static final String UNMOVELOCAL = "原地无需移动";
     public static final String NOTARGETTOMOVE = "移动地点不存在";
@@ -82,6 +83,8 @@ public class MessageConfig {
     public static final String MANISINGTRADING = "你当前还有未处理完成的交易记录，请使用ntrade取消你当前的交易记录再进行交易";
     public static final String NOCREATETRADE = "你还没有建立交易，无法取消";
     public static final String CANCELTRADE = "你已取消交易申请";
+    public static final String REPEATYESTRADE = "您已确认了此次交易,请不要瞎操作";
+    public static final String YOUCOMFIRMTRADE = "你确认了此次交易";
 
 
     public static final String MESSAGESTART = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";

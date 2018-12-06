@@ -1,14 +1,10 @@
 package pojo;
 
-import buff.Buff;
-import config.BuffConfig;
 import memory.NettyMemory;
-import sun.misc.Unsafe;
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class User {
     private String username;
@@ -23,28 +19,30 @@ public class User {
 
     private volatile String hp;
 
+    private String money;
+
     private String teamId;
 
     private String traceId;
+
+    private Integer roleid;
+
+    private Integer experience;
 
     private List<Userbag> userBag;
 
     private List<Weaponequipmentbar> weaponequipmentbars;
 
-    private Map<String,Integer> buffMap;
-
-    private String money;
-
-    private Integer roleId;
+    private Map<String, Integer> buffMap;
 
     private volatile boolean ifTrade;
 
-    public boolean isIfTrade() {
-        return ifTrade;
+    public String getTeamId() {
+        return teamId;
     }
 
-    public void setIfTrade(boolean ifTrade) {
-        this.ifTrade = ifTrade;
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
 
     public String getTraceId() {
@@ -55,43 +53,12 @@ public class User {
         this.traceId = traceId;
     }
 
-    //  保证原子性
-    public synchronized void addMoney(BigInteger add){
-        BigInteger userMoney = new BigInteger(this.getMoney());
-        userMoney = userMoney.add(add);
-        this.money = userMoney.toString();
+    public List<Userbag> getUserBag() {
+        return userBag;
     }
 
-    public Integer getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(Integer roleId) {
-        this.roleId = roleId;
-    }
-
-    public String getMoney() {
-        return money;
-    }
-
-    public void setMoney(String money) {
-        this.money = money;
-    }
-
-    public String getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(String teamId) {
-        this.teamId = teamId;
-    }
-
-    public Map<String, Integer> getBufferMap() {
-        return buffMap;
-    }
-
-    public void setBufferMap(Map<String, Integer> bufferMap) {
-        this.buffMap = bufferMap;
+    public void setUserBag(List<Userbag> userBag) {
+        this.userBag = userBag;
     }
 
     public List<Weaponequipmentbar> getWeaponequipmentbars() {
@@ -102,12 +69,12 @@ public class User {
         this.weaponequipmentbars = weaponequipmentbars;
     }
 
-    public List<Userbag> getUserBag() {
-        return userBag;
+    public boolean isIfTrade() {
+        return ifTrade;
     }
 
-    public void setUserBag(List<Userbag> userBag) {
-        this.userBag = userBag;
+    public void setIfTrade(boolean ifTrade) {
+        this.ifTrade = ifTrade;
     }
 
     public String getUsername() {
@@ -138,7 +105,7 @@ public class User {
         return pos;
     }
 
-    public  void setPos(String pos) {
+    public void setPos(String pos) {
         this.pos = pos == null ? null : pos.trim();
     }
 
@@ -146,11 +113,11 @@ public class User {
         return mp;
     }
 
-    public synchronized void setMp(String mp) {
+    public void setMp(String mp) {
         this.mp = mp == null ? null : mp.trim();
     }
 
-    public synchronized String getHp() {
+    public String getHp() {
         return hp;
     }
 
@@ -158,14 +125,45 @@ public class User {
         this.hp = hp == null ? null : hp.trim();
     }
 
-    public synchronized void addMp(String changeNum){
+    public String getMoney() {
+        return money;
+    }
+
+    public void setMoney(String money) {
+        this.money = money == null ? null : money.trim();
+    }
+
+    public Integer getRoleid() {
+        return roleid;
+    }
+
+    public void setRoleid(Integer roleid) {
+        this.roleid = roleid;
+    }
+
+    public Integer getExperience() {
+        return experience;
+    }
+
+    public void setExperience(Integer experience) {
+        this.experience = experience;
+    }
+
+    //  保证原子性
+    public synchronized void addMoney(BigInteger add) {
+        BigInteger userMoney = new BigInteger(this.getMoney());
+        userMoney = userMoney.add(add);
+        this.money = userMoney.toString();
+    }
+
+    public synchronized void addMp(String changeNum) {
         BigInteger userMp = new BigInteger(this.getMp());
         BigInteger addMp = new BigInteger(changeNum);
         userMp = userMp.add(addMp);
         this.setMp(userMp.toString());
     }
 
-    public synchronized void subMp(String changeNum){
+    public synchronized void subMp(String changeNum) {
         BigInteger userMp = new BigInteger(this.getMp());
         BigInteger subMp = new BigInteger(changeNum);
         userMp = userMp.subtract(subMp);
@@ -176,7 +174,11 @@ public class User {
         BigInteger userHp = new BigInteger(this.getHp());
         BigInteger subHp = new BigInteger(changeNum);
         userHp = userHp.subtract(subHp);
-        this.setHp(userHp.toString());
+        if(userHp.compareTo(new BigInteger("0"))<0){
+            this.setHp("0");
+        }else {
+            this.setHp(userHp.toString());
+        }
     }
 
 
@@ -184,5 +186,20 @@ public class User {
         BigInteger userMoney = new BigInteger(this.getMoney());
         userMoney = userMoney.subtract(sendMoney);
         this.setMoney(userMoney.toString());
+    }
+
+    public Map<String, Integer> getBuffMap() {
+        return buffMap;
+    }
+
+    public void setBuffMap(Map<String, Integer> buffMap) {
+        this.buffMap = buffMap;
+    }
+
+    public synchronized void addHp(String recoverValue) {
+        BigInteger addHp = new BigInteger(recoverValue);
+        BigInteger userHp = new BigInteger(this.hp);
+        userHp = userHp.add(addHp);
+        this.hp = userHp.toString();
     }
 }

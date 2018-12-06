@@ -164,7 +164,7 @@ public class ClientStart extends JFrame implements KeyListener {
     public static void main(String[] args) {
         ClientStart frm = new ClientStart();
         frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frm.setSize(1200, 1000);
+        frm.setSize(1400, 1000);
         frm.setLocationRelativeTo(null);
         frm.setDefaultCloseOperation(3);
         frm.setResizable(false);
@@ -172,42 +172,43 @@ public class ClientStart extends JFrame implements KeyListener {
 
 
 //      初始化控件
-        frm.txt = new JTextField(12);
+        frm.txt = new JTextField(100);
 
-        frm.jTextArea1 = new JTextArea(10, 100);
+        frm.jTextArea1 = new JTextArea(8,1);
         frm.jTextArea1.setEditable(false);
+        frm.jTextArea1.setFont(new Font("宋体",Font.BOLD,15));
         frm.jScrollPane1 = new JScrollPane();
-        frm.jScrollPane1.setBounds(new Rectangle(76, 35, 257, 193));
         frm.jScrollPane1.setViewportView(frm.jTextArea1);
 
-        frm.jTextArea2 = new JTextArea(10, 5);
+        frm.jTextArea2 = new JTextArea(8, 1);
         frm.jTextArea2.setEditable(false);
+        frm.jTextArea2.setFont(new Font("宋体",Font.BOLD,14));
         frm.jScrollPane2 = new JScrollPane();
-        frm.jScrollPane2.setBounds(new Rectangle(76, 35, 257, 193));
         frm.jScrollPane2.setViewportView(frm.jTextArea2);
 
-        frm.jTextArea3 = new JTextArea(10, 5);
+        frm.jTextArea3 = new JTextArea(8, 1);
         frm.jTextArea3.setEditable(false);
+        frm.jTextArea3.setFont(new Font("宋体",Font.BOLD,14));
         frm.jScrollPane3 = new JScrollPane();
-        frm.jScrollPane3.setBounds(new Rectangle(76, 35, 257, 193));
         frm.jScrollPane3.setViewportView(frm.jTextArea3);
 
-        frm.jTextArea4 = new JTextArea(10, 5);
+        frm.jTextArea4 = new JTextArea(8,1);
         frm.jTextArea4.setEditable(false);
         frm.jScrollPane4 = new JScrollPane();
-        frm.jScrollPane4.setBounds(new Rectangle(76, 35, 257, 193));
+        frm.jTextArea4.setFont(new Font("宋体",Font.BOLD,14));
         frm.jScrollPane4.setViewportView(frm.jTextArea4);
 
-        frm.jTextArea5 = new JTextArea(10, 5);
+        frm.jTextArea5 = new JTextArea(8, 5);
         frm.jTextArea5.setEditable(false);
         frm.jScrollPane5 = new JScrollPane();
         frm.jScrollPane5.setBounds(new Rectangle(76, 35, 257, 193));
+        frm.jTextArea5.setFont(new Font("宋体",Font.BOLD,14));
         frm.jScrollPane5.setViewportView(frm.jTextArea5);
 
-        frm.jTextArea6 = new JTextArea(10, 5);
+        frm.jTextArea6 = new JTextArea(8, 5);
         frm.jTextArea6.setEditable(false);
         frm.jScrollPane6 = new JScrollPane();
-        frm.jScrollPane6.setBounds(new Rectangle(76, 35, 257, 193));
+        frm.jTextArea6.setFont(new Font("宋体",Font.BOLD,14));
         frm.jScrollPane6.setViewportView(frm.jTextArea6);
 
         JLabel jLabel1 = new JLabel("命令提示信息");
@@ -235,14 +236,14 @@ public class ClientStart extends JFrame implements KeyListener {
         });
 
         JButton b3 = new JButton("continue");
-        b3.setBounds(100, 100, 65, 30);
+//        b3.setBounds(100, 100, 65, 30);
         b3.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 frm.flag = true;
             }
         });
 
-//          设置布局
+//      设置布局
         GridBagLayout gridBagLayout = new GridBagLayout(); //实例化布局对象
         frm.setLayout(gridBagLayout);                     //jf窗体对象设置为GridBagLayout布局
         GridBagConstraints gridBagConstraints = new GridBagConstraints();//实例化这个对象用来对组件进行管理
@@ -262,14 +263,14 @@ public class ClientStart extends JFrame implements KeyListener {
         gridBagLayout.setConstraints(b, gridBagConstraints);
         frm.add(b);
 
-        gridBagConstraints.gridx = 15;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 1;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(b2, gridBagConstraints);
         frm.add(b2);
 
-        gridBagConstraints.gridx = 16;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 1;
         gridBagConstraints.gridheight = 1;
@@ -277,70 +278,70 @@ public class ClientStart extends JFrame implements KeyListener {
         frm.add(b3);
 
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 1;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(jLabel1, gridBagConstraints);
         frm.add(jLabel1);
 
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
-        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 6;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane1, gridBagConstraints);
         frm.add(frm.jScrollPane1);
 
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 20;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(jLabel2, gridBagConstraints);
         frm.add(jLabel2);
 
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 20;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 20;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane2, gridBagConstraints);
         frm.add(frm.jScrollPane2);
 
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 25;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 20;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(jLabel3, gridBagConstraints);
         frm.add(jLabel3);
 
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 30;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.gridwidth = 20;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane3, gridBagConstraints);
         frm.add(frm.jScrollPane3);
 
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 35;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 20;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(jLabel4, gridBagConstraints);
         frm.add(jLabel4);
 
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 40;
+        gridBagConstraints.gridy = 8;
         gridBagConstraints.gridwidth = 20;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane4, gridBagConstraints);
         frm.add(frm.jScrollPane4);
 
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 45;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.gridwidth = 20;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(jLabel5, gridBagConstraints);
         frm.add(jLabel5);
 
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 50;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.gridwidth = 20;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane5, gridBagConstraints);

@@ -101,8 +101,8 @@ public class MonsterAttackTask implements Runnable {
 
 //          怪物攻击对人物造成伤害处理buff处理
                 monsterDamage = buffEvent.defendBuff(monsterDamage,user,channel);
-                Buff buff = NettyMemory.buffMap.get(user.getBufferMap().get(BuffConfig.DEFENSEBUFF));
-                if(user.getBufferMap().get(BuffConfig.DEFENSEBUFF)!=3000){
+                Buff buff = NettyMemory.buffMap.get(user.getBuffMap().get(BuffConfig.DEFENSEBUFF));
+                if(user.getBuffMap().get(BuffConfig.DEFENSEBUFF)!=3000){
                     channel.writeAndFlush(MessageUtil.turnToPacket("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp(), PacketType.USERBUFMSG));
                 }
 

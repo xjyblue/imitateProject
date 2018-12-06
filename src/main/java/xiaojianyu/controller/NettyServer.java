@@ -1,12 +1,12 @@
 package xiaojianyu.controller;
 
-import Role.Role;
+import caculation.RecoverHpCaculation;
+import level.Level;
+import role.Role;
 import buff.Buff;
 import component.*;
 import component.parent.Good;
-import config.BuffConfig;
 import email.Mail;
-import event.TeamEvent;
 import factory.MonsterFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -49,6 +49,8 @@ public class NettyServer {
     private NettyServerHandler nettyServerHandler;
     @Autowired
     private MonsterFactory monsterFactory;
+    @Autowired
+    private RecoverHpCaculation recoverHpCaculation;
     // 程序初始方法入口注解，提示spring这个程序先执行这里
     public void serverStart() throws InterruptedException, IOException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -92,10 +94,22 @@ public class NettyServer {
         NettyMemory.userEmailMap.put("w", new ConcurrentHashMap<String, Mail>());
 
 //        初始化定时任务 start
-//         回蓝定时任务
-        NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new BufferTask(), 0, 1, TimeUnit.SECONDS);
+        NettyMemory.scheduledThreadPool.scheduleAtFixedRate(new BufferTask(recoverHpCaculation), 0, 1, TimeUnit.SECONDS);
 //        初始化定时任务 end
 
+//      初始化人物经验表start
+        FileInputStream levelfis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Level.xls"));
+        LinkedHashMap<String, String> levelalias = new LinkedHashMap<>();
+        levelalias.put("等级","level");
+        levelalias.put("经验上限","experienceUp");
+        levelalias.put("经验下限","experienceDown");
+        levelalias.put("血量上限","maxHp");
+        levelalias.put("蓝量上限","maxMp");
+        List<Level> levelList = ExcelUtil.excel2Pojo(levelfis, Level.class, levelalias);
+        for(Level level:levelList){
+            NettyMemory.levelMap.put(level.getLevel(),level);
+        }
+//      初始化人物经验表end
 
 //      初始化武器start
         FileInputStream equipFis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Equipment.xls"));
@@ -143,11 +157,25 @@ public class NettyServer {
         alias.put("持续时间", "keepTime");
         alias.put("每秒减免伤害", "injurySecondValue");
         alias.put("buff类型", "typeOf");
+        alias.put("每秒回复生命值","recoverValue");
         List<Buff> buffList = ExcelUtil.excel2Pojo(fis, Buff.class, alias);
         for (Buff buff : buffList) {
             NettyMemory.buffMap.put(buff.getBufferId(), buff);
         }
 //      初始化全图buff
+
+//      初始化角色start
+        FileInputStream rolefis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Role.xls"));
+        LinkedHashMap<String, String> rolealias = new LinkedHashMap<>();
+        rolealias.put("角色id", "roleId");
+        rolealias.put("角色名称", "name");
+        rolealias.put("角色技能", "skills");
+        rolealias.put("角色防御力", "defense");
+        List<Role> roleList = ExcelUtil.excel2Pojo(rolefis, Role.class, rolealias);
+        for (Role role : roleList) {
+            NettyMemory.roleMap.put(role.getRoleId(), role);
+        }
+//      初始化角色end
 
 
 //      初始化怪物技能start
@@ -158,19 +186,19 @@ public class NettyServer {
         monsterBufalias.put("技能名称", "skillName");
         monsterBufalias.put("技能攻击时间", "attackCd");
         monsterBufalias.put("技能伤害", "damage");
-        monsterBufalias.put("技能附带buff","bufferMapId");
+        monsterBufalias.put("技能附带buff", "bufferMapId");
         List<MonsterSkill> skillList = ExcelUtil.excel2Pojo(monsterBuffis, MonsterSkill.class, monsterBufalias);
-        for(MonsterSkill monsterSkillTemp:skillList){
-            if(!monsterSkillTemp.getBufferMapId().equals("0")){
-                Map<String,Integer> map = new HashMap<>();
+        for (MonsterSkill monsterSkillTemp : skillList) {
+            if (!monsterSkillTemp.getBufferMapId().equals("0")) {
+                Map<String, Integer> map = new HashMap<>();
                 String temp[] = monsterSkillTemp.getBufferMapId().split("-");
-                for(int i=0;i<temp.length;i++){
+                for (int i = 0; i < temp.length; i++) {
                     Buff buffTemp = NettyMemory.buffMap.get(Integer.parseInt(temp[i]));
-                    map.put(buffTemp.getTypeOf(),buffTemp.getBufferId());
+                    map.put(buffTemp.getTypeOf(), buffTemp.getBufferId());
                 }
                 monsterSkillTemp.setBuffMap(map);
             }
-            NettyMemory.monsterSkillMap.put(monsterSkillTemp.getSkillId(),monsterSkillTemp);
+            NettyMemory.monsterSkillMap.put(monsterSkillTemp.getSkillId(), monsterSkillTemp);
         }
 //      初始化怪物技能end
 
@@ -184,7 +212,7 @@ public class NettyServer {
         userSkillalias.put("技能伤害", "damage");
         userSkillalias.put("技能消耗Mp", "skillMp");
         userSkillalias.put("技能附带buffId", "bufferMapId");
-        userSkillalias.put("技能所属种族","roleSkill");
+        userSkillalias.put("技能所属种族", "roleSkill");
         List<UserSkill> userSkillList = ExcelUtil.excel2Pojo(userSkillfis, UserSkill.class, userSkillalias);
         for (UserSkill userSkill : userSkillList) {
             Map<String, Integer> map = new HashMap<>();
@@ -199,21 +227,6 @@ public class NettyServer {
             }
         }
 //        初始化技能表end
-
-
-
-//      初始化职业
-        //TODO:改为职业
-        Role role = new Role(1,"战士");
-        NettyMemory.roleMap.put(role.getRoleId(),role);
-        role = new Role(2,"法师");
-        NettyMemory.roleMap.put(role.getRoleId(),role);
-        role = new Role(3,"牧师");
-        NettyMemory.roleMap.put(role.getRoleId(),role);
-        role = new Role(4,"召唤师");
-        NettyMemory.roleMap.put(role.getRoleId(),role);
-
-
 
 
 //		起始之地

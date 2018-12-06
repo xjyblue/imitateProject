@@ -2,7 +2,7 @@ package event;
 
 import caculation.AttackCaculation;
 import config.MessageConfig;
-import config.StatusConfig;
+import config.DeadOrAliveConfig;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userskillrelation;
 import skill.UserSkill;
-import skill.UserSkillUtil;
+import utils.UserSkillUtil;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
@@ -77,7 +77,7 @@ public class PKEvent {
 //      人物死亡处理
         if (new BigInteger(userTarget.getHp()).compareTo(minHp)<=0){
             userTarget.setHp("0");
-            userTarget.setStatus(StatusConfig.DEAD);
+            userTarget.setStatus(DeadOrAliveConfig.DEAD);
             String resp = "你受到来自：" + user.getUsername() + "的" + userSkill.getSkillName() + "的攻击，伤害为["
                     + attackDamage.toString() + "]你的剩余血量为：" + userTarget.getHp() + ",你已死亡";
             channelTarget.writeAndFlush(MessageUtil.turnToPacket(resp));

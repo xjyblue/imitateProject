@@ -4,9 +4,7 @@ import pojo.User;
 import pojo.Userbag;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Description ：nettySpringServer
@@ -26,7 +24,7 @@ public class Trade {
 
     private BigInteger toMoney;
 
-    private boolean ifexe;
+    private volatile boolean ifexe;
 
     private Map<String,Userbag> startUserBag;
 
@@ -35,8 +33,6 @@ public class Trade {
     private volatile Boolean startUserAgree;
 
     private volatile Boolean toUserAgree;
-
-    private volatile Boolean ifAllAgree;
 
     public boolean isIfexe() {
         return ifexe;
@@ -60,14 +56,6 @@ public class Trade {
 
     public void setToMoney(BigInteger toMoney) {
         this.toMoney = toMoney;
-    }
-
-    public Boolean getIfAllAgree() {
-        return ifAllAgree;
-    }
-
-    public void setIfAllAgree(Boolean ifAllAgree) {
-        this.ifAllAgree = ifAllAgree;
     }
 
     public Map<String, Userbag> getStartUserBag() {

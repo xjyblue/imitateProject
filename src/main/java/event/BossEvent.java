@@ -5,7 +5,7 @@ import component.BossArea;
 import component.Equipment;
 import component.Monster;
 import config.MessageConfig;
-import config.StatusConfig;
+import config.DeadOrAliveConfig;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +70,7 @@ public class BossEvent {
         }
         BossArea bossArea = new BossArea();
         bossArea.setKeepTime(1200l);
-        bossArea.setName("七天连锁酒店本");
+        bossArea.setName("灵魔地狱");
         bossArea.setTeamId(user.getTeamId());
 
 
@@ -83,7 +83,12 @@ public class BossEvent {
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channel = NettyMemory.userToChannelMap.get(entry.getValue());
             NettyMemory.eventStatus.put(channel, EventStatus.BOSSAREA);
-            channel.writeAndFlush(MessageUtil.turnToPacket("进入" + bossArea.getBossName() + "副本,出现boss" + bossArea.getFirstMonster().getName() + ""));
+            String resp = "进入" + bossArea.getBossName() + "副本,出现boss有：";
+            for(Map.Entry<String,Monster> entryMonster :bossArea.getMonsters().get(bossArea.getSequence().get(0)).entrySet()){
+                resp +=  entryMonster.getValue().getName() + " ";
+            }
+            channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+
         }
     }
 
@@ -107,7 +112,7 @@ public class BossEvent {
             for (Map.Entry<String, Monster> entry : getMonsterMap(user).entrySet()) {
 //             输入的怪物是否存在
                 monster = entry.getValue();
-                if (monster.getName().equals(temp[1]) && !monster.getStatus().equals(StatusConfig.DEAD)) {
+                if (monster.getName().equals(temp[1]) && !monster.getStatus().equals(DeadOrAliveConfig.DEAD)) {
                     Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(channel).get(temp[2]);
                     UserSkill userSkill = NettyMemory.SkillMap.get(userskillrelation.getSkillid());
 //                                    判断人物MP量是否足够
@@ -159,7 +164,7 @@ public class BossEvent {
                                         + "怪物已死亡";
                                 monster.setValueOfLife("0");
 //                              修改怪物状态
-                                monster.setStatus(StatusConfig.DEAD);
+                                monster.setStatus(DeadOrAliveConfig.DEAD);
 
                                 BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
                                 if (!checkBossAreaAllBoss(bossArea)) {
@@ -168,7 +173,7 @@ public class BossEvent {
                                     }else {
                                         bossArea.setFight(true);
                                         String jobId = UUID.randomUUID().toString();
-                                        BossAttackTask bossAttackTask = new BossAttackTask(monster, user.getTeamId(), channel, jobId, NettyMemory.futureMap, outfitEquipmentEvent);
+                                        BossAttackTask bossAttackTask = new BossAttackTask(bossArea.getMonsters().get(bossArea.getSequence().get(0)), user.getTeamId(), channel, jobId, NettyMemory.futureMap, outfitEquipmentEvent);
                                         Future future = NettyMemory.bossAreaThreadPool.scheduleAtFixedRate(bossAttackTask, 0, 1, TimeUnit.SECONDS);
                                         bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
                                         NettyMemory.endBossAreaTime.put(user.getTeamId(), (System.currentTimeMillis() + bossArea.getKeepTime() * 1000));
@@ -204,14 +209,14 @@ public class BossEvent {
                                 monsters.add(monster);
                                 NettyMemory.monsterMap.put(user, monsters);
                                 NettyMemory.eventStatus.put(channel, EventStatus.ATTACK);
+                                BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
 //                                    提醒用户你已进入战斗模式
                                 if (!NettyMemory.bossAreaMap.get(user.getTeamId()).isFight()) {
                                     NettyMemory.bossAreaMap.get(user.getTeamId()).setFight(true);
                                     channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFIGHT));
                                     String jobId = UUID.randomUUID().toString();
-                                    BossAttackTask bossAttackTask = new BossAttackTask(null, user.getTeamId(), channel, jobId, NettyMemory.futureMap, outfitEquipmentEvent);
+                                    BossAttackTask bossAttackTask = new BossAttackTask(bossArea.getMonsters().get(bossArea.getSequence().get(0)), user.getTeamId(), channel, jobId, NettyMemory.futureMap, outfitEquipmentEvent);
                                     Future future = NettyMemory.bossAreaThreadPool.scheduleAtFixedRate(bossAttackTask, 0, 1, TimeUnit.SECONDS);
-                                    BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
                                     NettyMemory.endBossAreaTime.put(user.getTeamId(), (System.currentTimeMillis() + bossArea.getKeepTime() * 1000));
                                     NettyMemory.futureMap.put(bossAttackTask.getJobId(), future);
                                 }
@@ -241,7 +246,7 @@ public class BossEvent {
     }
 
     private boolean checkBossAreaAllBoss(BossArea bossArea) {
-        for (Map.Entry<String, Monster> entry : bossArea.getMap().entrySet()) {
+        for (Map.Entry<String, Monster> entry : bossArea.getMonsters().get(bossArea.getSequence().get(0)).entrySet()) {
             if (entry.getValue().getStatus().equals("1")) {
                 return false;
             }
@@ -290,7 +295,8 @@ public class BossEvent {
     }
 
     private Map<String, Monster> getMonsterMap(User user) {
-        return NettyMemory.bossAreaMap.get(getTeam(user).getTeamId()).getMap();
+        BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
+        return bossArea.getMonsters().get(bossArea.getSequence().get(0));
     }
 
     private Team getTeam(User user) {

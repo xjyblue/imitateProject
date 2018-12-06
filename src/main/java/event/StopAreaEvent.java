@@ -6,7 +6,7 @@ import component.Equipment;
 import component.Monster;
 import component.NPC;
 import config.MessageConfig;
-import config.StatusConfig;
+import config.DeadOrAliveConfig;
 import factory.MonsterFactory;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
@@ -71,7 +71,7 @@ public class StopAreaEvent {
             chatEvent.chat(channel,msg);
             return;
         }
-        if (msg.startsWith("s")) {
+        if (msg.startsWith("s")&&!msg.equals("skillCheckout")) {
             shopEvent.shop(channel, msg);
             return;
         }
@@ -141,13 +141,13 @@ public class StopAreaEvent {
                 for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
 //                 输入的怪物是否存在
                     if (monster.getName().equals(temp[1])) {
-                        if(monster.getStatus().equals(StatusConfig.DEAD)){
+                        if(monster.getStatus().equals(DeadOrAliveConfig.DEAD)){
                            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DONOTATTACKDEADMONSTER));
                            return;
                         }
                         Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(channel).get(temp[2]);
                         UserSkill userSkill = NettyMemory.SkillMap.get(userskillrelation.getSkillid());
-//                                    判断人物MP量是否足够
+//                      判断人物MP量是否足够
                         BigInteger userMp = new BigInteger(user.getMp());
                         BigInteger skillMp = new BigInteger(userSkill.getSkillMp());
                         if (userMp.compareTo(skillMp) > 0) {
@@ -185,7 +185,7 @@ public class StopAreaEvent {
                                             + "怪物已死亡";
                                     channel.writeAndFlush(MessageUtil.turnToPacket(resp));
 //                                                修改怪物状态
-                                    monster.setStatus(StatusConfig.DEAD);
+                                    monster.setStatus(DeadOrAliveConfig.DEAD);
 //                                  爆装备
                                     outfitEquipmentEvent.getGoods(channel,monster);
 

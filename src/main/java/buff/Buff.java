@@ -10,6 +10,8 @@ public class Buff {
 
     private String addSecondValue;
 
+    private String recoverValue;
+
     private Integer keepTime;
 
     private String name;
@@ -18,6 +20,14 @@ public class Buff {
 
     public Buff(){
 
+    }
+
+    public String getRecoverValue() {
+        return recoverValue;
+    }
+
+    public void setRecoverValue(String recoverValue) {
+        this.recoverValue = recoverValue;
     }
 
     public String getTypeOf() {
