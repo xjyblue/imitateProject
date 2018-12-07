@@ -15,6 +15,8 @@ import java.awt.event.KeyListener;
 public class ClientStart extends JFrame implements KeyListener {
     private JTextField txt;
 
+    private JTextField txt2;
+
     private Client bootstrap;
 
     private JTextArea jTextArea1;
@@ -164,7 +166,7 @@ public class ClientStart extends JFrame implements KeyListener {
     public static void main(String[] args) {
         ClientStart frm = new ClientStart();
         frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frm.setSize(1400, 1000);
+        frm.setSize(1600, 1000);
         frm.setLocationRelativeTo(null);
         frm.setDefaultCloseOperation(3);
         frm.setResizable(false);
@@ -172,7 +174,9 @@ public class ClientStart extends JFrame implements KeyListener {
 
 
 //      初始化控件
-        frm.txt = new JTextField(100);
+        frm.txt = new JTextField(85);
+        frm.txt2 = new JTextField(35);
+        frm.txt2.setEditable(false);
 
         frm.jTextArea1 = new JTextArea(8,1);
         frm.jTextArea1.setEditable(false);
@@ -216,6 +220,7 @@ public class ClientStart extends JFrame implements KeyListener {
         JLabel jLabel3 = new JLabel("怪物所受buff提示信息");
         JLabel jLabel4 = new JLabel("怪物攻击提示信息");
         JLabel jLabel5 = new JLabel("交易提示信息");
+        JLabel jLabel6 = new JLabel("工会提示信息");
 
         JButton b = new JButton("清屏");
         b.setBounds(100, 100, 65, 30);
@@ -260,17 +265,24 @@ public class ClientStart extends JFrame implements KeyListener {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 1;
         gridBagConstraints.gridheight = 1;
+        gridBagLayout.setConstraints(frm.txt2, gridBagConstraints);
+        frm.add(frm.txt2);
+
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(b, gridBagConstraints);
         frm.add(b);
 
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 1;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(b2, gridBagConstraints);
         frm.add(b2);
 
-        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 1;
         gridBagConstraints.gridheight = 1;
@@ -346,6 +358,20 @@ public class ClientStart extends JFrame implements KeyListener {
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane5, gridBagConstraints);
         frm.add(frm.jScrollPane5);
+
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
+        gridBagLayout.setConstraints(jLabel6, gridBagConstraints);
+        frm.add(jLabel6);
+
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.gridheight = 1;
+        gridBagLayout.setConstraints(frm.jScrollPane6, gridBagConstraints);
+        frm.add(frm.jScrollPane6);
 
 //      设置监听
         frm.txt.addKeyListener(frm);

@@ -1,14 +1,12 @@
 package event;
 
 
-import config.MessageConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import memory.NettyMemory;
-import utils.MessageUtil;
 
 import java.io.IOException;
 
@@ -39,6 +37,8 @@ public class EventDistributor {
     private DeadEvent deadEvent;
     @Autowired
     private TransactionEvent transactionEvent;
+    @Autowired
+    private LabourUnionEvent labourUnionEvent;
     public void distributeEvent(ChannelHandlerContext ctx, String msg) throws IOException {
         Channel ch = ctx.channel();
         String status = NettyMemory.eventStatus.get(ch);
@@ -72,6 +72,9 @@ public class EventDistributor {
                 break;
             case EventStatus.DEADAREA:
                 deadEvent.dead(ctx.channel(),msg);
+                break;
+            case EventStatus.LABOURUNION:
+                labourUnionEvent.slove(ctx.channel(),msg);
                 break;
         }
     }

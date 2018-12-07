@@ -54,6 +54,8 @@ public class StopAreaEvent {
     private MonsterFactory monsterFactory;
     @Autowired
     private TransactionEvent transactionEvent;
+    @Autowired
+    private LabourUnionEvent labourUnionEvent;
     public void stopArea(Channel channel, String msg) throws IOException {
         if(msg.startsWith("iftrade")||msg.startsWith("ytrade")||msg.equals("ntrade")){
             transactionEvent.trade(channel,msg);
@@ -81,6 +83,10 @@ public class StopAreaEvent {
         }
         if (msg.startsWith("t")&&!msg.startsWith("talk")) {
             teamEvent.team(channel, msg);
+            return;
+        }
+        if(msg.equals("g")){
+            labourUnionEvent.slove(channel,msg);
             return;
         }
         if(msg.equals("aoi")){

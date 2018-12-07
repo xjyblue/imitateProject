@@ -68,6 +68,10 @@ public class ClientHandler extends ChannelHandlerAdapter {
             clientStart.setTitle("用户[" + packet.getData() + "]客户端");
             return;
         }
+        if(packet.getType().equals(PacketType.UNIONINFO)){
+            jTextArea = clientStart.getjTextArea6();
+            jTextArea.setText("");
+        }
         String resp = jTextArea.getText();
         resp += "客户端收到：" + packet.getData() + System.getProperty("line.separator");
         jTextArea.setText(resp);

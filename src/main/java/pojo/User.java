@@ -1,7 +1,5 @@
 package pojo;
 
-import memory.NettyMemory;
-
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -15,13 +13,13 @@ public class User {
 
     private String pos;
 
-    private volatile String mp;
+    private String mp;
 
-    private volatile String hp;
+    private String hp;
 
     private String money;
-
-    private String teamId;
+	
+	private String teamId;
 
     private String traceId;
 
@@ -29,13 +27,17 @@ public class User {
 
     private Integer experience;
 
-    private List<Userbag> userBag;
+    private String unionid;
+
+    private Integer unionlevel;
+	
+	private List<Userbag> userBag;
 
     private List<Weaponequipmentbar> weaponequipmentbars;
 
     private Map<String, Integer> buffMap;
 
-    private volatile boolean ifTrade;
+    private boolean ifTrade;
 
     public String getTeamId() {
         return teamId;
@@ -67,6 +69,14 @@ public class User {
 
     public void setWeaponequipmentbars(List<Weaponequipmentbar> weaponequipmentbars) {
         this.weaponequipmentbars = weaponequipmentbars;
+    }
+
+    public Map<String, Integer> getBuffMap() {
+        return buffMap;
+    }
+
+    public void setBuffMap(Map<String, Integer> buffMap) {
+        this.buffMap = buffMap;
     }
 
     public boolean isIfTrade() {
@@ -149,7 +159,23 @@ public class User {
         this.experience = experience;
     }
 
-    //  保证原子性
+    public String getUnionid() {
+        return unionid;
+    }
+
+    public void setUnionid(String unionid) {
+        this.unionid = unionid == null ? null : unionid.trim();
+    }
+
+    public Integer getUnionlevel() {
+        return unionlevel;
+    }
+
+    public void setUnionlevel(Integer unionlevel) {
+        this.unionlevel = unionlevel;
+    }
+	
+	 //  保证原子性
     public synchronized void addMoney(BigInteger add) {
         BigInteger userMoney = new BigInteger(this.getMoney());
         userMoney = userMoney.add(add);
@@ -187,14 +213,7 @@ public class User {
         userMoney = userMoney.subtract(sendMoney);
         this.setMoney(userMoney.toString());
     }
-
-    public Map<String, Integer> getBuffMap() {
-        return buffMap;
-    }
-
-    public void setBuffMap(Map<String, Integer> buffMap) {
-        this.buffMap = buffMap;
-    }
+    
 
     public synchronized void addHp(String recoverValue) {
         BigInteger addHp = new BigInteger(recoverValue);

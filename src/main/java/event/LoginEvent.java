@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import packet.PacketType;
 import pojo.*;
 import role.Role;
+import skill.UserSkill;
 import utils.MessageUtil;
 
 import java.util.*;
@@ -41,11 +42,15 @@ public class LoginEvent {
                 criteria.andUsernameEqualTo(user.getUsername());
                 List<Userskillrelation> userskillrelations = userskillrelationMapper.selectByExample(userskillrelationExample);
                 Map<String, Userskillrelation> userskillrelationMap = new HashMap<>();
+                String skillLook = "";
                 for (Userskillrelation userskillrelation : userskillrelations) {
+                    UserSkill userSkill = NettyMemory.SkillMap.get(userskillrelation.getSkillid());
                     userskillrelationMap.put(userskillrelation.getKeypos(), userskillrelation);
+                    skillLook += "[键位-"+ userskillrelation.getKeypos()+"-技能名称-"+userSkill.getSkillName()+"-技能伤害-"+userSkill.getDamage()+"技能cd"+userSkill.getAttackCd()+"] ";
                 }
                 NettyMemory.userskillrelationMap.put(channel, userskillrelationMap);
 
+//                channel.writeAndFlush(MessageUtil.turnToPacket(skillLook,PacketType.USERINFO));
 
 //                初始化玩家的各种buffer
                 Map<String,Integer> map = new HashMap<>();
@@ -75,7 +80,7 @@ public class LoginEvent {
                 NettyMemory.userToChannelMap.put(user,channel);
                 channel.writeAndFlush(MessageUtil.turnToPacket("登录成功，你已进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
                 Role role = NettyMemory.roleMap.get(user.getRoleid());
-                channel.writeAndFlush(MessageUtil.turnToPacket("   "+user.getUsername()+"    职业为:"+role.getName(), PacketType.USERINFO));
+                channel.writeAndFlush(MessageUtil.turnToPacket("   "+user.getUsername()+"    职业为:"+role.getName()+"] "+skillLook, PacketType.USERINFO));
                 NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
             }
         }

@@ -11,4 +11,5 @@ public class PacketType {
     public static final String ATTACKMSG = "3";
     public static final String TRADEMSG = "4";
     public static final String USERINFO = "6";
+    public static final String UNIONINFO = "7";
 }

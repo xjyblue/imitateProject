@@ -1,6 +1,7 @@
 package test;
 
 import level.Level;
+import mapper.ApplyunioninfoMapper;
 import memory.NettyMemory;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,8 @@ import xiaojianyu.controller.NettyServer;
 public class Test {
 	@Autowired
 	private UserMapper userMapper;
-
+	@Autowired
+	private ApplyunioninfoMapper applyunioninfoMapper;
 	@org.junit.Test
 
 	public void test1() {
@@ -31,9 +33,10 @@ public class Test {
 //		user.setStatus("0");
 //		userMapper.updateByPrimaryKey(user);
 
-		User user1 = userMapper.getUser("z","zz");
-		System.out.println(user1.getPos());
+//		User user1 = userMapper.getUser("z","zz");
+//		System.out.println(user1.getPos());
 
-
+		int count = applyunioninfoMapper.selectByUserIdAndUnionId("1","1");
+		System.out.println(count);
 	}
 }

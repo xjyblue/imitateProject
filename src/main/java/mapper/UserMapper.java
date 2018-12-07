@@ -29,4 +29,6 @@ public interface UserMapper {
     int updateByPrimaryKey(User record);
 	
 	User getUser(@Param("username") String username, @Param("password") String password);
+
+    List<User> selectByUnionId(@Param("unionid") String unionid);
 }

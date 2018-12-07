@@ -91,4 +91,18 @@ public class MessageConfig {
     public static final String MESSAGEEND = "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
     public static final String MESSAGEMID = "===========================================================================================================";
 
+    public static final String ENTERLABOURVIEW = "你已进入工会管理界面";
+    public static final String OUTLABOURVIEW = "你已退出工会管理界面";
+    public static final String YOUARENOUNON = "你还没有工会";
+    public static final String UNIONMSG = "[ls 查看入会申请] [ls=y=申请id 同意入会申请] [ls=n=申请id 否决入会申请]"
+            + System.getProperty("line.separator") + "[lu查看已有的工会] [sq=工会编号 申请加入工会] [cu-工会名称 创建自己的工会] [zsry 展示工会所有成员信息] [zsck 展示工会仓库]" + System.getProperty("line.separator")
+            + "[jx=格子编号=数量 捐献工会物品] [tc 退出工会] [sj=工会成员id=等级 提升工会会员等级] [hq=格子编号=数量 取得工会仓库物品]" + System.getProperty("line.separator");
+    public static final String NOCREATEUNION = "无法创建工会，你目前已有工会";
+    public static final String NOOUTUNION = "创始人无法退出工会，你可将工会移交他人再退出";
+    public static final String NOAPPLYUNION = "无法加入工会，你已有工会";
+    public static final String SUCCESSUNIONAPPLY = "成功创建加入工会申请";
+    public static final String NOEXISTUNIONID = "不存在该id的工会";
+    public static final String NOREPEATUNIONAPPLY = "请不要重复的提交加入同一个工会申请记录";
+    public static final String FOURZEROTHREE = "工会权限不足";
+    public static final String NOAPPLYINFO = "不存在该申请记录";
 }

@@ -593,6 +593,256 @@ public class UserExample {
             addCriterion("money not between", value1, value2, "money");
             return (Criteria) this;
         }
+
+        public Criteria andRoleidIsNull() {
+            addCriterion("roleId is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleidIsNotNull() {
+            addCriterion("roleId is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleidEqualTo(Integer value) {
+            addCriterion("roleId =", value, "roleid");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleidNotEqualTo(Integer value) {
+            addCriterion("roleId <>", value, "roleid");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleidGreaterThan(Integer value) {
+            addCriterion("roleId >", value, "roleid");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleidGreaterThanOrEqualTo(Integer value) {
+            addCriterion("roleId >=", value, "roleid");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleidLessThan(Integer value) {
+            addCriterion("roleId <", value, "roleid");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleidLessThanOrEqualTo(Integer value) {
+            addCriterion("roleId <=", value, "roleid");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleidIn(List<Integer> values) {
+            addCriterion("roleId in", values, "roleid");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleidNotIn(List<Integer> values) {
+            addCriterion("roleId not in", values, "roleid");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleidBetween(Integer value1, Integer value2) {
+            addCriterion("roleId between", value1, value2, "roleid");
+            return (Criteria) this;
+        }
+
+        public Criteria andRoleidNotBetween(Integer value1, Integer value2) {
+            addCriterion("roleId not between", value1, value2, "roleid");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceIsNull() {
+            addCriterion("experience is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceIsNotNull() {
+            addCriterion("experience is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceEqualTo(Integer value) {
+            addCriterion("experience =", value, "experience");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceNotEqualTo(Integer value) {
+            addCriterion("experience <>", value, "experience");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceGreaterThan(Integer value) {
+            addCriterion("experience >", value, "experience");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceGreaterThanOrEqualTo(Integer value) {
+            addCriterion("experience >=", value, "experience");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceLessThan(Integer value) {
+            addCriterion("experience <", value, "experience");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceLessThanOrEqualTo(Integer value) {
+            addCriterion("experience <=", value, "experience");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceIn(List<Integer> values) {
+            addCriterion("experience in", values, "experience");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceNotIn(List<Integer> values) {
+            addCriterion("experience not in", values, "experience");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceBetween(Integer value1, Integer value2) {
+            addCriterion("experience between", value1, value2, "experience");
+            return (Criteria) this;
+        }
+
+        public Criteria andExperienceNotBetween(Integer value1, Integer value2) {
+            addCriterion("experience not between", value1, value2, "experience");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidIsNull() {
+            addCriterion("unionId is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidIsNotNull() {
+            addCriterion("unionId is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidEqualTo(String value) {
+            addCriterion("unionId =", value, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidNotEqualTo(String value) {
+            addCriterion("unionId <>", value, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidGreaterThan(String value) {
+            addCriterion("unionId >", value, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidGreaterThanOrEqualTo(String value) {
+            addCriterion("unionId >=", value, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidLessThan(String value) {
+            addCriterion("unionId <", value, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidLessThanOrEqualTo(String value) {
+            addCriterion("unionId <=", value, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidLike(String value) {
+            addCriterion("unionId like", value, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidNotLike(String value) {
+            addCriterion("unionId not like", value, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidIn(List<String> values) {
+            addCriterion("unionId in", values, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidNotIn(List<String> values) {
+            addCriterion("unionId not in", values, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidBetween(String value1, String value2) {
+            addCriterion("unionId between", value1, value2, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionidNotBetween(String value1, String value2) {
+            addCriterion("unionId not between", value1, value2, "unionid");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelIsNull() {
+            addCriterion("unionLevel is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelIsNotNull() {
+            addCriterion("unionLevel is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelEqualTo(Integer value) {
+            addCriterion("unionLevel =", value, "unionlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelNotEqualTo(Integer value) {
+            addCriterion("unionLevel <>", value, "unionlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelGreaterThan(Integer value) {
+            addCriterion("unionLevel >", value, "unionlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelGreaterThanOrEqualTo(Integer value) {
+            addCriterion("unionLevel >=", value, "unionlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelLessThan(Integer value) {
+            addCriterion("unionLevel <", value, "unionlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelLessThanOrEqualTo(Integer value) {
+            addCriterion("unionLevel <=", value, "unionlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelIn(List<Integer> values) {
+            addCriterion("unionLevel in", values, "unionlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelNotIn(List<Integer> values) {
+            addCriterion("unionLevel not in", values, "unionlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelBetween(Integer value1, Integer value2) {
+            addCriterion("unionLevel between", value1, value2, "unionlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionlevelNotBetween(Integer value1, Integer value2) {
+            addCriterion("unionLevel not between", value1, value2, "unionlevel");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {
