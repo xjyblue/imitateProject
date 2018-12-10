@@ -27,4 +27,6 @@ public interface UserbagMapper {
     int updateByPrimaryKeySelective(Userbag record);
 
     int updateByPrimaryKey(Userbag record);
+
+    List<Userbag> selectUserbagByWarehourseId(@Param("unionwarehourseid")String unionwarehourseid);
 }

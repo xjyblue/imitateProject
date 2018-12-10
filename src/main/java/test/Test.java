@@ -23,7 +23,6 @@ public class Test {
 	@Autowired
 	private ApplyunioninfoMapper applyunioninfoMapper;
 	@org.junit.Test
-
 	public void test1() {
 //		多打一句话
 //		User user = new User();

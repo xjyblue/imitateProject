@@ -16,15 +16,24 @@ public class Userbag {
 
     private Integer durability;
 
-    public static String getGoodNameByUserBag(Userbag userbag) {
-        switch (userbag.getTypeof()){
-            case Good.EQUIPMENT:
-                return NettyMemory.equipmentMap.get(userbag.getWid()).getName();
-            case Good.MPMEDICINE:
-                return NettyMemory.mpMedicineMap.get(userbag.getWid()).getName();
+    public static Userbag getUserbagByUserbagId(User user,String userbagId) {
+        for(Userbag userbag:user.getUserBag()){
+            if(userbag.getId().equals(userbagId)){
+                return userbag;
+            }
         }
         return null;
     }
+
+    public static Userbag getUserbagByWid(User user,Integer wid){
+        for(Userbag userbag:user.getUserBag()){
+            if(userbag.getWid().equals(wid)){
+                return userbag;
+            }
+        }
+        return null;
+    }
+
 
     public String getId() {
         return id;

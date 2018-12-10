@@ -11,16 +11,13 @@ import org.springframework.stereotype.Component;
 import packet.PacketType;
 import pojo.User;
 import pojo.Userbag;
-import sun.nio.ch.Net;
 import trade.Trade;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -96,7 +93,7 @@ public class TransactionEvent {
         lock.lock();
         try {
 //          解决取消线程先抢到锁
-            if(!NettyMemory.tradeMap.containsKey(trade.getTradeId())){
+            if (!NettyMemory.tradeMap.containsKey(trade.getTradeId())) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.CANCELTRADE));
                 return;
             }
@@ -204,10 +201,12 @@ public class TransactionEvent {
             }
 //          交易单物品还原
             for (Map.Entry<String, Userbag> entry : trade.getToUserBag().entrySet()) {
-                trade.getUserTo().getUserBag().add(entry.getValue());
+                moveToUserBag(entry.getValue(),trade.getUserTo(),trade.getToUserBag(),entry.getValue().getNum()+"");
+//                trade.getUserTo().getUserBag().add(entry.getValue());
             }
             for (Map.Entry<String, Userbag> entry : trade.getStartUserBag().entrySet()) {
-                trade.getUserStart().getUserBag().add(entry.getValue());
+                moveToUserBag(entry.getValue(),trade.getUserStart(),trade.getStartUserBag(),entry.getValue().getNum()+"");
+//                trade.getUserStart().getUserBag().add(entry.getValue());
             }
 //          交易失败金币还原
             trade.getUserStart().addMoney(trade.getStartMoney());
@@ -234,7 +233,7 @@ public class TransactionEvent {
         if (msg.equals("jy=y")) {
             try {
                 agreelock.lock();
-                if(!trade.isIfexe()){
+                if (!trade.isIfexe()) {
                     channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FAILTRADEEND));
                     return;
                 }
@@ -271,10 +270,18 @@ public class TransactionEvent {
             trade.getUserTo().addMoney(trade.getStartMoney());
 
             for (Map.Entry<String, Userbag> entry : trade.getToUserBag().entrySet()) {
-                trade.getUserStart().getUserBag().add(entry.getValue());
+                if (!entry.getValue().getTypeof().equals(Good.EQUIPMENT)) {
+                    addUserBagForUser(trade.getUserStart(), entry.getValue());
+                } else {
+                    trade.getUserStart().getUserBag().add(entry.getValue());
+                }
             }
             for (Map.Entry<String, Userbag> entry : trade.getStartUserBag().entrySet()) {
-                trade.getUserTo().getUserBag().add(entry.getValue());
+                if (!entry.getValue().getTypeof().equals(Good.EQUIPMENT)) {
+                    addUserBagForUser(trade.getUserTo(), entry.getValue());
+                } else {
+                    trade.getUserTo().getUserBag().add(entry.getValue());
+                }
             }
             channelStart.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSTRADEEND));
             channelEnd.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSTRADEEND));
@@ -357,7 +364,7 @@ public class TransactionEvent {
 //      放置交易物品，打印出来
         if (msg.startsWith("jy=")) {
             String[] temp = msg.split("=");
-            if (temp.length != 2) {
+            if (temp.length != 3) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
                 return;
             }
@@ -368,11 +375,14 @@ public class TransactionEvent {
                 return;
             }
 //          移除背包格子,放到交易单中
-            user.getUserBag().remove(userbag);
             if (trade.getUserStart() == user) {
-                trade.getStartUserBag().put(userbag.getId(), userbag);
+                if (userbag.getNum() < Integer.parseInt(temp[2])) {
+                    channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHGOODFORTRADE));
+                    return;
+                }
+                moveToUserTrade(trade.getUserStart(), trade.getStartUserBag(), userbag, temp[2]);
             } else {
-                trade.getToUserBag().put(userbag.getId(), userbag);
+                moveToUserTrade(trade.getUserTo(), trade.getToUserBag(), userbag, temp[2]);
             }
 //          输出双方物品信息
             String resp = outTradeMessage(trade);
@@ -383,14 +393,15 @@ public class TransactionEvent {
         if (msg.startsWith("jyx=")) {
             String[] temp = msg.split("=");
 //          移除交易单号武平到背包格子
-            if (temp.length != 2) {
+            if (temp.length != 3) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
                 return;
             }
             if (user == trade.getUserStart() && trade.getStartUserBag().containsKey(temp[1])) {
                 Userbag userbag = trade.getStartUserBag().get(temp[1]);
-                trade.getStartUserBag().remove(temp[1]);
-                trade.getUserStart().getUserBag().add(userbag);
+//                trade.getStartUserBag().remove(temp[1]);
+//                trade.getUserStart().getUserBag().add(userbag);
+                moveToUserBag(userbag, trade.getUserStart(), trade.getStartUserBag(), temp[2]);
 
                 String resp = outTradeMessage(trade);
                 channelStart.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
@@ -399,8 +410,9 @@ public class TransactionEvent {
             }
             if (user == trade.getUserTo() && trade.getToUserBag().containsKey(temp[1])) {
                 Userbag userbag = trade.getToUserBag().get(temp[1]);
-                trade.getToUserBag().remove(temp[1]);
-                trade.getUserTo().getUserBag().add(userbag);
+//                trade.getToUserBag().remove(temp[1]);
+//                trade.getUserTo().getUserBag().add(userbag);
+                moveToUserBag(userbag,trade.getUserTo(),trade.getToUserBag(),temp[2]);
 
                 String resp = outTradeMessage(trade);
                 channelStart.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
@@ -411,9 +423,71 @@ public class TransactionEvent {
         }
     }
 
+    private void moveToUserBag(Userbag userbag, User user, Map<String, Userbag> userBag, String num) {
+        if (userbag.getTypeof().equals(Good.EQUIPMENT) && Integer.parseInt(num) == 1) {
+            userBag.remove(userbag.getId());
+            user.getUserBag().add(userbag);
+            return;
+        }
+        if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
+            if (userbag.getNum() == Integer.parseInt(num)) {
+                userBag.remove(userbag.getId());
+            } else {
+                userbag.setNum(userbag.getNum() - Integer.parseInt(num));
+            }
+            for (Userbag userbagTemp : user.getUserBag()) {
+                if (userbagTemp.getWid().equals(userbag.getWid())) {
+                    userbagTemp.setNum(userbagTemp.getNum() + Integer.parseInt(num));
+                    return;
+                }
+            }
+            Userbag userbagNew = new Userbag();
+            userbagNew.setId(UUID.randomUUID().toString());
+            userbagNew.setNum(Integer.parseInt(num));
+            userbagNew.setWid(userbag.getWid());
+            userbagNew.setTypeof(userbag.getTypeof());
+            userbagNew.setName(userbag.getName());
+            user.getUserBag().add(userbagNew);
+            return;
+        }
+    }
+
+    private void moveToUserTrade(User user, Map<String, Userbag> startUserBag, Userbag userbag, String num) {
+        if (userbag.getTypeof().equals(Good.EQUIPMENT) && Integer.parseInt(num) == 1) {
+            user.getUserBag().remove(userbag);
+            startUserBag.put(userbag.getId(), userbag);
+            return;
+        }
+        if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
+            if (Integer.parseInt(num) == userbag.getNum()) {
+                user.getUserBag().remove(userbag);
+                startUserBag.put(userbag.getId(), userbag);
+                return;
+            } else {
+                userbag.setNum(userbag.getNum() - Integer.parseInt(num));
+                Userbag userbagNew = new Userbag();
+                userbagNew.setTypeof(userbag.getTypeof());
+                userbagNew.setWid(userbag.getWid());
+                userbagNew.setNum(Integer.parseInt(num));
+                userbagNew.setName(userbag.getName());
+                userbagNew.setId(UUID.randomUUID().toString());
+                startUserBag.put(userbagNew.getId(), userbagNew);
+            }
+        }
+    }
+
+    private void addUserBagForUser(User user, Userbag value) {
+        for (Userbag userbag : user.getUserBag()) {
+            if (userbag.getWid().equals(value.getWid())) {
+                userbag.setNum(userbag.getNum() + value.getNum());
+                return;
+            }
+        }
+        user.getUserBag().add(value);
+    }
+
     private String outTradeMessage(Trade trade) {
         String resp = "欢迎来到交易界面,jbjy=金币数额 可以增加所要交易的金币,jbjyx=金币数额 可以减少所要交易的金币,jy=交易格子号可以把交易物品填充到交易栏,jyx=交易格子号可以把物品从交易格子取下来，jy=y确认交易物品，双方都确认后交易完成";
-
         resp += System.getProperty("line.separator") +
                 MessageConfig.MESSAGESTART + System.getProperty("line.separator");
         resp += trade.getUserStart().getUsername() + "放到交易单上的物品" + System.getProperty("line.separator");

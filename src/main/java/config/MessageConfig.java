@@ -85,6 +85,7 @@ public class MessageConfig {
     public static final String CANCELTRADE = "你已取消交易申请";
     public static final String REPEATYESTRADE = "您已确认了此次交易,请不要瞎操作";
     public static final String YOUCOMFIRMTRADE = "你确认了此次交易";
+    public static final String NOENOUGHGOODFORTRADE = "请输入正确的交易物品数量";
 
 
     public static final String MESSAGESTART = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
@@ -94,7 +95,7 @@ public class MessageConfig {
     public static final String ENTERLABOURVIEW = "你已进入工会管理界面";
     public static final String OUTLABOURVIEW = "你已退出工会管理界面";
     public static final String YOUARENOUNON = "你还没有工会";
-    public static final String UNIONMSG = "[ls 查看入会申请] [ls=y=申请id 同意入会申请] [ls=n=申请id 否决入会申请]"
+    public static final String UNIONMSG = "[t=用户id 踢出某个成员][ls 查看入会申请] [ls=y=申请id 同意入会申请] [ls=n=申请id 否决入会申请]"
             + System.getProperty("line.separator") + "[lu查看已有的工会] [sq=工会编号 申请加入工会] [cu-工会名称 创建自己的工会] [zsry 展示工会所有成员信息] [zsck 展示工会仓库]" + System.getProperty("line.separator")
             + "[jx=格子编号=数量 捐献工会物品] [tc 退出工会] [sj=工会成员id=等级 提升工会会员等级] [hq=格子编号=数量 取得工会仓库物品]" + System.getProperty("line.separator");
     public static final String NOCREATEUNION = "无法创建工会，你目前已有工会";
@@ -105,4 +106,9 @@ public class MessageConfig {
     public static final String NOREPEATUNIONAPPLY = "请不要重复的提交加入同一个工会申请记录";
     public static final String FOURZEROTHREE = "工会权限不足";
     public static final String NOAPPLYINFO = "不存在该申请记录";
+    public static final String DISAGREEUSEAPPLY = "你拒绝了用户的申请";
+    public static final String NOUSER = "无此用户";
+    public static final String ERRORUSERBAGNUM = "请输入正确的物品数量";
+    public static final String SUCCESSGIVEGOODTOUNION = "捐献成功";
+    public static final String SUCCESSGETUNIONGOOD = "获取物品成功";
 }

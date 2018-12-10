@@ -225,4 +225,14 @@
       durability = #{durability,jdbcType=INTEGER}
     where id = #{id,jdbcType=VARCHAR}
   </update>
+
+  <select id="selectUserbagByWarehourseId" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM userbag
+    WHERE userbag.id IN
+      (SELECT unionwarehouse.userbagId
+        FROM unionwarehouse
+        WHERE unionwarehouse.unionWarehouseId = #{unionwarehourseid})
+  </select>
 </mapper>

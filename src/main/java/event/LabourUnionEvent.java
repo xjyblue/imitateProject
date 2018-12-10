@@ -1,13 +1,10 @@
 package event;
 
-import com.sun.org.apache.regexp.internal.RE;
+import component.parent.Good;
 import config.MessageConfig;
 import io.netty.channel.Channel;
-import mapper.ApplyunioninfoMapper;
-import mapper.UnioninfoMapper;
-import mapper.UserMapper;
+import mapper.*;
 import memory.NettyMemory;
-import netscape.security.UserTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketProto;
@@ -16,7 +13,10 @@ import pojo.*;
 import utils.MessageUtil;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Description ：nettySpringServer
@@ -30,8 +30,20 @@ public class LabourUnionEvent {
     private UserMapper userMapper;
     @Autowired
     private ApplyunioninfoMapper applyunioninfoMapper;
+    @Autowired
+    private UserbagMapper userbagMapper;
+    @Autowired
+    private CommonEvent commonEvent;
+    @Autowired
+    private UnionwarehouseMapper unionwarehouseMapper;
+
+    private Lock lock = new ReentrantLock();
 
     public void slove(Channel channel, String msg) {
+        if (msg.startsWith("b") || msg.startsWith("w") || msg.startsWith("fix-")) {
+            commonEvent.common(channel, msg);
+            return;
+        }
         if (msg.equals("q")) {
             outUnionView(channel, msg);
         }
@@ -53,50 +65,316 @@ public class LabourUnionEvent {
         if (msg.startsWith("ls=y")) {
             agreeApplyInfo(channel, msg);
         }
+        if (msg.startsWith("ls=n")) {
+            disagreeApplyInfo(channel, msg);
+        }
         if (msg.equals("ls")) {
             queryApplyInfo(channel, msg);
         }
         if (msg.equals("zsry")) {
             queryUnionMemberInfo(channel, msg);
         }
-        if(msg.startsWith("sj")){
-            memberLevelChange(channel,msg);
+        if (msg.startsWith("sj")) {
+            memberLevelChange(channel, msg);
         }
+        if (msg.startsWith("t=")) {
+            removeMember(channel, msg);
+        }
+        if (msg.equals("zsck")) {
+            showWarehouse(channel, msg);
+        }
+        if (msg.startsWith("jx")) {
+            giveUserbagToUnion(channel, msg);
+        }
+        if (msg.startsWith("hq")) {
+            getUserbagFromUnion(channel, msg);
+        }
+    }
+
+    private void getUserbagFromUnion(Channel channel, String msg) {
+        User user = NettyMemory.session2UserIds.get(channel);
+        String temp[] = msg.split("=");
+        if (temp.length != 3) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            return;
+        }
+        if (user.getUnionid() == null) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            return;
+        }
+        if(user.getUnionlevel()>3){
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
+            return;
+        }
+
+        try {
+            lock.lock();
+//      拿到工会格子
+            Userbag userbag = userbagMapper.selectByPrimaryKey(temp[1]);
+            if (userbag.getNum() < Integer.parseInt(temp[2])) {
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORUSERBAGNUM));
+                return;
+            }
+
+
+            if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
+                userbag.setName(user.getUsername());
+                user.getUserBag().add(userbag);
+                userbagMapper.updateByPrimaryKey(userbag);
+
+                UnionwarehouseExample unionwarehouseExample = new UnionwarehouseExample();
+                UnionwarehouseExample.Criteria criteria = unionwarehouseExample.createCriteria();
+                criteria.andUserbagidEqualTo(temp[1]);
+                unionwarehouseMapper.deleteByExample(unionwarehouseExample);
+
+                String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + Good.getGoodNameByUserbag(userbag);
+                messageToAllInUnion(user.getUnionid(), resp);
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD, PacketType.UNIONINFO));
+                return;
+            }
+
+            if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
+//          工会格子处理
+                userbag.setNum(userbag.getNum() - Integer.parseInt(temp[2]));
+                if (userbag.getNum() == 0) {
+                    UnionwarehouseExample unionwarehouseExample = new UnionwarehouseExample();
+                    UnionwarehouseExample.Criteria criteria = unionwarehouseExample.createCriteria();
+                    criteria.andUserbagidEqualTo(userbag.getId());
+//              为0移除关联和背包格子
+                    unionwarehouseMapper.deleteByExample(unionwarehouseExample);
+                    userbagMapper.deleteByPrimaryKey(userbag.getId());
+                } else {
+                    userbagMapper.updateByPrimaryKey(userbag);
+                }
+
+//          用户格子处理
+                Userbag userbagTemp = Userbag.getUserbagByWid(user, userbag.getWid());
+                Userbag userbagNew = new Userbag();
+                userbagNew.setWid(userbag.getWid());
+                userbagNew.setNum(Integer.parseInt(temp[2]));
+                userbagNew.setTypeof(userbag.getTypeof());
+                String resp = null;
+                if (userbagTemp == null) {
+//              为用户新增格子
+                    userbagNew.setId(UUID.randomUUID().toString());
+                    userbagNew.setWid(userbag.getWid());
+                    userbagNew.setName(user.getUsername());
+
+                    user.getUserBag().add(userbagNew);
+                    userbagMapper.insertSelective(userbagNew);
+                } else {
+                    userbagTemp.setNum(userbagTemp.getNum() + Integer.parseInt(temp[2]));
+                    userbagMapper.updateByPrimaryKey(userbagTemp);
+                }
+                resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + Good.getGoodNameByUserbag(userbagNew);
+                messageToAllInUnion(user.getUnionid(), resp);
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD, PacketType.UNIONINFO));
+                return;
+            }
+        } finally {
+            lock.unlock();
+        }
+
+
+    }
+
+    private void giveUserbagToUnion(Channel channel, String msg) {
+        User user = NettyMemory.session2UserIds.get(channel);
+        String temp[] = msg.split("=");
+        if (temp.length != 3) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            return;
+        }
+        if (user.getUnionid() == null) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            return;
+        }
+        Userbag userbag = Userbag.getUserbagByUserbagId(user, temp[1]);
+        if (userbag == null) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
+            return;
+        }
+        if (Integer.parseInt(temp[2]) > userbag.getNum()) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORUSERBAGNUM));
+            return;
+        }
+
+//      处理捐赠逻辑
+//      先处理用户背包的这一块
+        if (!userbag.getTypeof().equals(Good.EQUIPMENT)) {
+            userbag.setNum(userbag.getNum() - Integer.parseInt(temp[2]));
+            if (userbag.getNum() == 0) {
+                user.getUserBag().remove(userbag);
+                userbag.setName(null);
+                userbagMapper.deleteByPrimaryKey(userbag.getId());
+            }
+        } else {
+            user.getUserBag().remove(userbag);
+        }
+//      同步数据库
+        userbagMapper.updateByPrimaryKey(userbag);
+
+//      处理工会仓库这一块
+        Unioninfo unioninfo = unioninfoMapper.selectByPrimaryKey(user.getUnionid());
+        List<Userbag> list = userbagMapper.selectUserbagByWarehourseId(unioninfo.getUnionwarehourseid());
+        if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
+            userbag.setName(null);
+            Unionwarehouse unionwarehouse = new Unionwarehouse();
+            unionwarehouse.setUserbagid(userbag.getId());
+            unionwarehouse.setUnionwarehouseid(unioninfo.getUnionwarehourseid());
+            unionwarehouseMapper.insert(unionwarehouse);
+            userbagMapper.updateByPrimaryKey(userbag);
+
+            String resp = "用户：" + user.getUsername() + "向工会捐献了" + Good.getGoodNameByUserbag(userbag);
+            messageToAllInUnion(user.getUnionid(), resp);
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION, PacketType.UNIONINFO));
+            return;
+        }
+
+        Userbag userbagNew = new Userbag();
+        userbagNew.setWid(userbag.getWid());
+        userbagNew.setNum(Integer.parseInt(temp[2]));
+        userbagNew.setTypeof(userbag.getTypeof());
+        if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
+
+            boolean flag = false;
+            for (Userbag userbagTemp : list) {
+                if (userbagTemp.getWid().equals(userbag.getWid())) {
+                    userbagTemp.setNum(userbagTemp.getNum() + Integer.parseInt(temp[2]));
+                    userbagMapper.updateByPrimaryKeySelective(userbagTemp);
+                    userbagNew.setId(userbagTemp.getId());
+                    flag = true;
+                    break;
+                }
+            }
+            if (!flag) {
+                userbagNew.setId(UUID.randomUUID().toString());
+                Unionwarehouse unionwarehouse = new Unionwarehouse();
+                unionwarehouse.setUserbagid(userbagNew.getId());
+                unionwarehouse.setUnionwarehouseid(unioninfo.getUnionwarehourseid());
+                unionwarehouseMapper.insert(unionwarehouse);
+                userbagMapper.insertSelective(userbagNew);
+            }
+        }
+
+
+//      广播
+        String resp = "用户：" + user.getUsername() + "向工会捐献了" + Good.getGoodNameByUserbag(userbagNew);
+        messageToAllInUnion(user.getUnionid(), resp);
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION, PacketType.UNIONINFO));
+        return;
+    }
+
+    private void showWarehouse(Channel channel, String msg) {
+        User user = NettyMemory.session2UserIds.get(channel);
+        if (user.getUnionid() == null) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            return;
+        }
+        Unioninfo unioninfo = unioninfoMapper.selectByPrimaryKey(user.getUnionid());
+        List<Userbag> list = userbagMapper.selectUserbagByWarehourseId(unioninfo.getUnionwarehourseid());
+        String resp = "";
+        for (Userbag userbag : list) {
+            resp += Good.getGoodNameByUserbag(userbag) + System.getProperty("line.separator");
+        }
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + resp, PacketType.UNIONINFO));
+        return;
+    }
+
+    private void removeMember(Channel channel, String msg) {
+        User user = NettyMemory.session2UserIds.get(channel);
+        String temp[] = msg.split("=");
+        if (temp.length != 2) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            return;
+        }
+        User userTarget = userMapper.selectByPrimaryKey(temp[1]);
+        if (userTarget == null) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.NOUSER, PacketType.UNIONINFO));
+            return;
+        }
+        if (user.getUnionlevel() >= userTarget.getUnionlevel()) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
+            return;
+        }
+        userTarget.setUnionlevel(null);
+        userTarget.setUnionid(null);
+        userMapper.updateByPrimaryKey(userTarget);
+
+//      同步用户会话信息
+        User userSession = getUserFromSessionById(userTarget.getUsername());
+        if (userSession != null) {
+            userSession.setUnionid(null);
+            userSession.setUnionlevel(null);
+            Channel channelTemp = NettyMemory.userToChannelMap.get(userSession);
+            channelTemp.writeAndFlush(MessageUtil.turnToPacket("你被" + user.getUsername() + "T出了工会"));
+        }
+
+        String resp = user.getUsername() + "已踢出了工会中的" + userTarget.getUsername() + "玩家";
+        messageToAllInUnion(user.getUnionid(), resp);
+        return;
+    }
+
+    private void disagreeApplyInfo(Channel channel, String msg) {
+        String temp[] = msg.split("=");
+        if (temp.length != 3) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            return;
+        }
+        Applyunioninfo applyunioninfo = applyunioninfoMapper.selectByPrimaryKey(temp[2]);
+        if (applyunioninfo == null) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOAPPLYINFO));
+            return;
+        }
+//      不同意
+        applyunioninfoMapper.deleteByPrimaryKey(applyunioninfo.getApplyid());
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DISAGREEUSEAPPLY));
+        return;
     }
 
     private void memberLevelChange(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = NettyMemory.session2UserIds.get(channel);
-        if(temp.length!=3){
+        if (temp.length != 3) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        if(user.getUnionlevel()>2){
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG+MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
+        if (user.getUnionlevel() > 2) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
             return;
         }
-        if(user.getUnionlevel()>=Integer.parseInt(temp[2])){
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG+MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
+        if (user.getUnionlevel() >= Integer.parseInt(temp[2])) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
             return;
         }
         User userTarget = userMapper.selectByPrimaryKey(temp[1]);
         userTarget.setUnionlevel(Integer.parseInt(temp[2]));
         userMapper.updateByPrimaryKeySelective(userTarget);
+
+//      同步用户会话信息
+        User userSession = getUserFromSessionById(userTarget.getUsername());
+        if (userSession != null) {
+            userSession.setUnionlevel(Integer.parseInt(temp[2]));
+        }
 //      广播升级信息
         String msgToAll = "恭喜玩家" + userTarget.getUsername() + "被" + user.getUsername() + "升为[ " + temp[2] + " ]级";
-        messageToAllInUnion(user.getUnionid(),msgToAll);
+        messageToAllInUnion(user.getUnionid(), msgToAll);
         return;
     }
 
     private void queryUnionMemberInfo(Channel channel, String msg) {
         User user = NettyMemory.session2UserIds.get(channel);
+        if (user.getUnionid() == null) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            return;
+        }
         Unioninfo unioninfo = unioninfoMapper.selectByPrimaryKey(user.getUnionid());
         List<User> users = userMapper.selectByUnionId(unioninfo.getUnionid());
         String resp = "";
         for (User userTemp : users) {
-            resp += "用户名 [ " + userTemp.getUsername() + " ] 用户工会等级 [ " +userTemp.getUnionlevel() + " ] " + System.getProperty("line.separator");
+            resp += "用户名 [ " + userTemp.getUsername() + " ] 用户工会等级 [ " + userTemp.getUnionlevel() + " ] " + System.getProperty("line.separator");
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + resp,PacketType.UNIONINFO));
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + resp, PacketType.UNIONINFO));
         return;
     }
 
@@ -117,24 +395,22 @@ public class LabourUnionEvent {
         userTarget.setUnionid(applyunioninfo.getUnionid());
         userTarget.setUnionlevel(4);
         userMapper.updateByPrimaryKeySelective(userTarget);
+
+//      同步用户会话信息
+        User userSession = getUserFromSessionById(userTarget.getUsername());
+        if (userSession != null) {
+            userSession.setUnionid(applyunioninfo.getUnionid());
+            userSession.setUnionlevel(4);
+        }
+
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + "您同意了" + userTarget.getUsername() + "加入本工会", PacketType.UNIONINFO));
 
         String msgToAll = "欢迎" + userTarget.getUsername() + "加入了本公会";
-        messageToAllInUnion(applyunioninfo.getUnionid(),msgToAll);
-        
+        messageToAllInUnion(applyunioninfo.getUnionid(), msgToAll);
+
 //      移除申请记录
         applyunioninfoMapper.deleteByPrimaryKey(applyunioninfo.getApplyid());
         return;
-    }
-
-//  对在线的工会玩家广播一次内容
-    private void messageToAllInUnion(String unionId,String msg) {
-        for (Channel channelTemp : NettyMemory.group) {
-            User userTemp = NettyMemory.session2UserIds.get(channelTemp);
-            if (userTemp.getUnionid().equals(unionId)) {
-                channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
-            }
-        }
     }
 
     private void queryApplyInfo(Channel channel, String msg) {
@@ -144,7 +420,7 @@ public class LabourUnionEvent {
             return;
         }
         if (user.getUnionlevel() > 2) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG+MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
             return;
         }
         List<Applyunioninfo> list = applyunioninfoMapper.selectByApplyinfoByUnionId(user.getUnionid());
@@ -255,7 +531,26 @@ public class LabourUnionEvent {
     private void outUnionView(Channel channel, String msg) {
         NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTLABOURVIEW));
-        channel.writeAndFlush(MessageUtil.turnToPacket("",PacketType.UNIONINFO));
+        channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.UNIONINFO));
         return;
+    }
+
+    private User getUserFromSessionById(String username) {
+        for (Map.Entry<Channel, User> entry : NettyMemory.session2UserIds.entrySet()) {
+            if (entry.getValue().getUsername().equals(username)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    //  对在线的工会玩家广播一次内容
+    private void messageToAllInUnion(String unionId, String msg) {
+        for (Channel channelTemp : NettyMemory.group) {
+            User userTemp = NettyMemory.session2UserIds.get(channelTemp);
+            if (userTemp.getUnionid() != null && userTemp.getUnionid().equals(unionId)) {
+                channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
+            }
+        }
     }
 }

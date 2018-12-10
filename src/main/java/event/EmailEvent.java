@@ -1,5 +1,6 @@
 package event;
 
+import component.parent.Good;
 import config.MessageConfig;
 import email.Mail;
 import io.netty.channel.Channel;
@@ -32,7 +33,7 @@ public class EmailEvent {
                 Mail mailTemp = entry.getValue();
                 if (mailTemp.isIfUserBag()) {
                     channel.writeAndFlush(MessageUtil.turnToPacket("您有一封来自" + mailTemp.getFromUser() + "的邮件,邮件编号为" + mailTemp.getEmailId()
-                            + ",邮件附件为" + Userbag.getGoodNameByUserBag(mailTemp.getUserbag()) + "，数量为" + mailTemp.getUserbag().getNum()
+                            + ",邮件附件为" + Good.getGoodNameByUserbag(mailTemp.getUserbag())
                             + ",邮件内容为[" + mailTemp.getEmailText() + "]"));
                 } else {
                     channel.writeAndFlush(MessageUtil.turnToPacket("您有一封来自" + mailTemp.getFromUser() + "的邮件,邮件编号为" + mailTemp.getEmailId() + ",邮件内容为[" + mailTemp.getEmailText() + "]"));

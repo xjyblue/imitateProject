@@ -27,29 +27,29 @@ public class CommonEvent {
             User user = NettyMemory.session2UserIds.get(channel);
             String bagResp = System.getProperty("line.separator")
                     + "按b-物品编号使用蓝药"
-                    + "-------按ww=物品编号装备武器";
+                    + "  按ww=物品编号装备武器";
             for (Userbag userbag : user.getUserBag()) {
                 if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
                     MpMedicine mpMedicine = NettyMemory.mpMedicineMap.get(userbag.getWid());
                     bagResp += System.getProperty("line.separator")
-                            + "背包格子id:" + userbag.getId()
-                            + "----物品id:" + mpMedicine.getId()
-                            + "----药品恢复蓝量:" + mpMedicine.getReplyValue();
+                            + "[背包格子id:" + userbag.getId()
+                            + "] [物品id:" + mpMedicine.getId()
+                            + "] [药品恢复蓝量:" + mpMedicine.getReplyValue();
                     if (!mpMedicine.isImmediate()) {
-                        bagResp += "----每秒恢复" + mpMedicine.getSecondValue() + "----持续" + mpMedicine.getKeepTime() + "秒";
+                        bagResp += "] [每秒恢复" + mpMedicine.getSecondValue() + "] [持续" + mpMedicine.getKeepTime() + "秒]";
                     } else {
-                        bagResp += "----即时回复";
+                        bagResp += "] [即时回复]";
                     }
-                    bagResp += "----数量:" + userbag.getNum();
+                    bagResp += " [数量:" + userbag.getNum()+"]";
                 } else if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
                     Equipment equipment = NettyMemory.equipmentMap.get(userbag.getWid());
                     bagResp += System.getProperty("line.separator")
-                            + "背包格子id:" + userbag.getId()
-                            + "----物品id:" + equipment.getId()
-                            + "----武器当前耐久度:" + userbag.getDurability()
-                            + "----武器名称:" + equipment.getName()
-                            + "----武器攻击力加成" + equipment.getAddValue()
-                            + "----武器数量:" + userbag.getNum();
+                            + "[背包格子id:" + userbag.getId()
+                            + "] [物品id:" + equipment.getId()
+                            + "] [武器当前耐久度:" + userbag.getDurability()
+                            + "] [武器名称:" + equipment.getName()
+                            + "] [武器攻击力加成" + equipment.getAddValue()
+                            + "] [武器数量:" + userbag.getNum()+ "]";
                 }
             }
             channel.writeAndFlush(MessageUtil.turnToPacket(bagResp));
@@ -111,11 +111,11 @@ public class CommonEvent {
                     + System.getProperty("line.separator");
             for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
                 Equipment equipment = NettyMemory.equipmentMap.get(weaponequipmentbar.getWid());
-                wresp += "----装备id:" + weaponequipmentbar.getWid()
-                        + "----装备名称" + equipment.getName()
-                        + "----装备攻击力" + equipment.getAddValue()
-                        + "----装备总耐久" + equipment.getDurability()
-                        + "----当前耐久" + weaponequipmentbar.getDurability()
+                wresp += "[装备id:" + weaponequipmentbar.getWid()
+                        + "] [装备名称" + equipment.getName()
+                        + "] [装备攻击力" + equipment.getAddValue()
+                        + "] [装备总耐久" + equipment.getDurability()
+                        + "] [当前耐久" + weaponequipmentbar.getDurability() + "]"
                         + System.getProperty("line.separator");
             }
             channel.writeAndFlush(MessageUtil.turnToPacket(wresp));

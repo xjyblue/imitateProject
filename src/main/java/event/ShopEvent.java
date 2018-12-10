@@ -5,7 +5,9 @@ import component.MpMedicine;
 import component.parent.Good;
 import config.MessageConfig;
 import io.netty.channel.Channel;
+import mapper.UserbagMapper;
 import memory.NettyMemory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userbag;
@@ -21,6 +23,8 @@ import java.util.UUID;
  */
 @Component("shopEvent")
 public class ShopEvent {
+    @Autowired
+    private UserbagMapper userbagMapper;
 
     public void shop(Channel channel, String msg) {
         User user = NettyMemory.session2UserIds.get(channel);
@@ -80,17 +84,21 @@ public class ShopEvent {
                     for(Userbag userbag:user.getUserBag()){
                         if(userbag.getWid().equals(mpMedicine.getId())){
                             userbag.setNum(userbag.getNum()+ Integer.parseInt(temp[2]));
+//                          更新数据库
+                            userbagMapper.updateByPrimaryKey(userbag);
                             break;
                         }
                     }
                 }else {
                     Userbag userbag = new Userbag();
                     userbag.setWid(mpMedicine.getId());
-                    userbag.setName(mpMedicine.getName());
+                    userbag.setName(user.getUsername());
                     userbag.setNum(Integer.parseInt(temp[2]));
                     userbag.setId(UUID.randomUUID().toString());
                     userbag.setTypeof(Good.MPMEDICINE);
                     user.getUserBag().add(userbag);
+//                  更新数据库
+                    userbagMapper.insertSelective(userbag);
                 }
                 String goodAllMoney = changeUserMoney(mpMedicine.getBuyMoney(),temp[2],user);
                 channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了"+mpMedicine.getName()+temp[2]+"件"+"[花费:"+goodAllMoney+"]"+"[用户剩余金币:"+user.getMoney()+"]"));
@@ -105,11 +113,13 @@ public class ShopEvent {
                     userbag.setName(equipment.getName());
                     userbag.setNum(1);
                     userbag.setTypeof(Good.EQUIPMENT);
-                    userbag.setName(equipment.getName());
+                    userbag.setName(user.getUsername());
                     userbag.setId(UUID.randomUUID().toString());
                     userbag.setWid(equipment.getId());
                     userbag.setDurability(equipment.getDurability());
                     user.getUserBag().add(userbag);
+//                  更新数据库
+                    userbagMapper.insertSelective(userbag);
                     count--;
                 }
                 String goodAllMoney = changeUserMoney(equipment.getBuyMoney(),temp[2],user);
