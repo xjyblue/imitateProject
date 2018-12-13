@@ -34,7 +34,6 @@ public class Userbag {
         return null;
     }
 
-
     public String getId() {
         return id;
     }

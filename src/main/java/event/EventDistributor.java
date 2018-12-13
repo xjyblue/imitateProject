@@ -39,6 +39,8 @@ public class EventDistributor {
     private TransactionEvent transactionEvent;
     @Autowired
     private LabourUnionEvent labourUnionEvent;
+    @Autowired
+    private FriendEvent friendEvent;
     public void distributeEvent(ChannelHandlerContext ctx, String msg) throws IOException {
         Channel ch = ctx.channel();
         String status = NettyMemory.eventStatus.get(ch);
@@ -74,7 +76,10 @@ public class EventDistributor {
                 deadEvent.dead(ctx.channel(),msg);
                 break;
             case EventStatus.LABOURUNION:
-                labourUnionEvent.slove(ctx.channel(),msg);
+                labourUnionEvent.solve(ctx.channel(),msg);
+                break;
+            case EventStatus.FRIEND:
+                friendEvent.solve(ctx.channel(),msg);
                 break;
         }
     }

@@ -37,7 +37,17 @@ public class User {
 
     private Map<String, Integer> buffMap;
 
+    private List<Achievementprocess> achievementprocesses;
+
     private boolean ifTrade;
+
+    public List<Achievementprocess> getAchievementprocesses() {
+        return achievementprocesses;
+    }
+
+    public void setAchievementprocesses(List<Achievementprocess> achievementprocesses) {
+        this.achievementprocesses = achievementprocesses;
+    }
 
     public String getTeamId() {
         return teamId;

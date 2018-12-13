@@ -1,5 +1,8 @@
 package event;
 
+import achievement.Achievement;
+import achievement.AchievementManager;
+import caculation.UserbagCaculation;
 import component.Equipment;
 import component.MpMedicine;
 import component.parent.Good;
@@ -9,11 +12,14 @@ import mapper.UserbagMapper;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import pojo.Achievementprocess;
 import pojo.User;
 import pojo.Userbag;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,6 +31,10 @@ import java.util.UUID;
 public class ShopEvent {
     @Autowired
     private UserbagMapper userbagMapper;
+    @Autowired
+    private AchievementManager achievementManager;
+    @Autowired
+    private UserbagCaculation userbagCaculation;
 
     public void shop(Channel channel, String msg) {
         User user = NettyMemory.session2UserIds.get(channel);
@@ -73,42 +83,29 @@ public class ShopEvent {
                 return;
             }
 //          校验用户的金钱是否足够
-            if (!checkUserMoneyEnough(temp[2],temp[1], channel)) {
+            if (!checkUserMoneyEnough(temp[2], temp[1], channel)) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNENOUGHMONEY));
                 return;
             }
 //           处理蓝药购买逻辑
             if (NettyMemory.mpMedicineMap.containsKey(Integer.parseInt(temp[1]))) {
                 MpMedicine mpMedicine = NettyMemory.mpMedicineMap.get(Integer.parseInt(temp[1]));
-                if(checkUserBagContainsGood(user,mpMedicine.getId())){
-                    for(Userbag userbag:user.getUserBag()){
-                        if(userbag.getWid().equals(mpMedicine.getId())){
-                            userbag.setNum(userbag.getNum()+ Integer.parseInt(temp[2]));
-//                          更新数据库
-                            userbagMapper.updateByPrimaryKey(userbag);
-                            break;
-                        }
-                    }
-                }else {
-                    Userbag userbag = new Userbag();
-                    userbag.setWid(mpMedicine.getId());
-                    userbag.setName(user.getUsername());
-                    userbag.setNum(Integer.parseInt(temp[2]));
-                    userbag.setId(UUID.randomUUID().toString());
-                    userbag.setTypeof(Good.MPMEDICINE);
-                    user.getUserBag().add(userbag);
-//                  更新数据库
-                    userbagMapper.insertSelective(userbag);
-                }
-                String goodAllMoney = changeUserMoney(mpMedicine.getBuyMoney(),temp[2],user);
-                channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了"+mpMedicine.getName()+temp[2]+"件"+"[花费:"+goodAllMoney+"]"+"[用户剩余金币:"+user.getMoney()+"]"));
+                Userbag userbag = new Userbag();
+                userbag.setWid(mpMedicine.getId());
+                userbag.setName(user.getUsername());
+                userbag.setNum(Integer.parseInt(temp[2]));
+                userbag.setId(UUID.randomUUID().toString());
+                userbag.setTypeof(Good.MPMEDICINE);
+                userbagCaculation.addUserBagForUser(user, userbag);
+                String goodAllMoney = changeUserMoney(mpMedicine.getBuyMoney(), temp[2], user);
+                channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + mpMedicine.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));
             }
 //            处理装备购买逻辑
             if (NettyMemory.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
                 Equipment equipment = NettyMemory.equipmentMap.get(Integer.parseInt(temp[1]));
 //              装备不支持叠加，一个格子一个装备
                 int count = Integer.parseInt(temp[2]);
-                while(count>0){
+                while (count > 0) {
                     Userbag userbag = new Userbag();
                     userbag.setName(equipment.getName());
                     userbag.setNum(1);
@@ -117,18 +114,16 @@ public class ShopEvent {
                     userbag.setId(UUID.randomUUID().toString());
                     userbag.setWid(equipment.getId());
                     userbag.setDurability(equipment.getDurability());
-                    user.getUserBag().add(userbag);
-//                  更新数据库
-                    userbagMapper.insertSelective(userbag);
+                    userbagCaculation.addUserBagForUser(user,userbag);
                     count--;
                 }
-                String goodAllMoney = changeUserMoney(equipment.getBuyMoney(),temp[2],user);
-                channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了"+equipment.getName()+temp[2]+"件"+"[花费:"+goodAllMoney+"]"+"[用户剩余金币:"+user.getMoney()+"]"));
+                String goodAllMoney = changeUserMoney(equipment.getBuyMoney(), temp[2], user);
+                channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + equipment.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));
             }
         }
     }
 
-    private String changeUserMoney(String goodMoney, String num,User user) {
+    private String changeUserMoney(String goodMoney, String num, User user) {
         BigInteger userMoney = new BigInteger(user.getMoney());
         BigInteger goodAllMoney = new BigInteger(goodMoney).multiply(new BigInteger(num));
         userMoney = userMoney.subtract(goodAllMoney);
@@ -136,16 +131,8 @@ public class ShopEvent {
         return goodAllMoney.toString();
     }
 
-    private boolean checkUserBagContainsGood(User user,Integer wid) {
-        for(Userbag userbag:user.getUserBag()){
-            if(userbag.getWid().equals(wid)){
-                return true;
-            }
-        }
-        return false;
-    }
 
-    private boolean checkUserMoneyEnough(String num,String s, Channel channel) {
+    private boolean checkUserMoneyEnough(String num, String s, Channel channel) {
         User user = NettyMemory.session2UserIds.get(channel);
         BigInteger userMoney = new BigInteger(user.getMoney());
         BigInteger goodMoney = new BigInteger("0");

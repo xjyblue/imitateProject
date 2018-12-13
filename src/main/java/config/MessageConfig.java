@@ -86,6 +86,8 @@ public class MessageConfig {
     public static final String REPEATYESTRADE = "您已确认了此次交易,请不要瞎操作";
     public static final String YOUCOMFIRMTRADE = "你确认了此次交易";
     public static final String NOENOUGHGOODFORTRADE = "请输入正确的交易物品数量";
+    public static final String TRADEMSG = "欢迎来到交易界面,jbjy=金币数额 可以增加所要交易的金币,jbjyx=金币数额 可以减少所要交易的金币,jy=交易格子号可以把交易物品填充到交易栏," +
+            System.getProperty("line.separator") + "jyx=交易格子号可以把物品从交易格子取下来，jy=y确认交易物品，双方都确认后交易完成";
 
 
     public static final String MESSAGESTART = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
@@ -111,4 +113,12 @@ public class MessageConfig {
     public static final String ERRORUSERBAGNUM = "请输入正确的物品数量";
     public static final String SUCCESSGIVEGOODTOUNION = "捐献成功";
     public static final String SUCCESSGETUNIONGOOD = "获取物品成功";
+
+    public static final String FRIENDMSG = "欢迎来到好友管理界面，sq-用户名申请新的好友，ls 查看好友申请" + System.getProperty("line.separator")
+            + "lu 查看已有好友 ty=申请编号同意好友申请 tn=否决好友申请" + System.getProperty("line.separator");
+    public static final String ENTERFRIENDVIEW = "已进入好友管理界面";
+    public static final String OUTFRIENDVIEW = "已退出好友管理界面";
+    public static final String NOFOUNDMAN = "系统无此玩家";
+    public static final String NOFRIEND = "您目前还没有好友";
+    public static final String NOFRIENDRECORD = "无此好友申请记录";
 }

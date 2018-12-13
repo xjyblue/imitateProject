@@ -12,4 +12,5 @@ public class EventStatus {
     public static final String DEADAREA = "deadArea";
 	public static final String TRADE = "trade";
 	public static final String LABOURUNION = "LabourUnion";
+	public static final String FRIEND = "friend";
 }

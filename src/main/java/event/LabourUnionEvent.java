@@ -1,5 +1,6 @@
 package event;
 
+import caculation.UserbagCaculation;
 import component.parent.Good;
 import config.MessageConfig;
 import io.netty.channel.Channel;
@@ -36,10 +37,12 @@ public class LabourUnionEvent {
     private CommonEvent commonEvent;
     @Autowired
     private UnionwarehouseMapper unionwarehouseMapper;
+    @Autowired
+    private UserbagCaculation userbagCaculation;
 
     private Lock lock = new ReentrantLock();
 
-    public void slove(Channel channel, String msg) {
+    public void solve(Channel channel, String msg) {
         if (msg.startsWith("b") || msg.startsWith("w") || msg.startsWith("fix-")) {
             commonEvent.common(channel, msg);
             return;
@@ -118,14 +121,13 @@ public class LabourUnionEvent {
 
 
             if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
-                userbag.setName(user.getUsername());
-                user.getUserBag().add(userbag);
-                userbagMapper.updateByPrimaryKey(userbag);
-
+//              关联处理
                 UnionwarehouseExample unionwarehouseExample = new UnionwarehouseExample();
                 UnionwarehouseExample.Criteria criteria = unionwarehouseExample.createCriteria();
                 criteria.andUserbagidEqualTo(temp[1]);
                 unionwarehouseMapper.deleteByExample(unionwarehouseExample);
+
+                userbagCaculation.addUserBagForUser(user,userbag);
 
                 String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + Good.getGoodNameByUserbag(userbag);
                 messageToAllInUnion(user.getUnionid(), resp);
@@ -134,39 +136,30 @@ public class LabourUnionEvent {
             }
 
             if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
-//          工会格子处理
+//          工会格子处理，与用户格子处理有区别
                 userbag.setNum(userbag.getNum() - Integer.parseInt(temp[2]));
                 if (userbag.getNum() == 0) {
                     UnionwarehouseExample unionwarehouseExample = new UnionwarehouseExample();
                     UnionwarehouseExample.Criteria criteria = unionwarehouseExample.createCriteria();
                     criteria.andUserbagidEqualTo(userbag.getId());
-//              为0移除关联和背包格子
+//                  为0移除关联和背包格子
                     unionwarehouseMapper.deleteByExample(unionwarehouseExample);
                     userbagMapper.deleteByPrimaryKey(userbag.getId());
                 } else {
                     userbagMapper.updateByPrimaryKey(userbag);
                 }
 
-//          用户格子处理
-                Userbag userbagTemp = Userbag.getUserbagByWid(user, userbag.getWid());
-                Userbag userbagNew = new Userbag();
-                userbagNew.setWid(userbag.getWid());
-                userbagNew.setNum(Integer.parseInt(temp[2]));
+//              新增格子，具体处理细节到里面去实现
+                Userbag userbagNew =new Userbag();
+                userbagNew.setName(user.getUsername());
                 userbagNew.setTypeof(userbag.getTypeof());
-                String resp = null;
-                if (userbagTemp == null) {
-//              为用户新增格子
-                    userbagNew.setId(UUID.randomUUID().toString());
-                    userbagNew.setWid(userbag.getWid());
-                    userbagNew.setName(user.getUsername());
+                userbagNew.setNum(Integer.parseInt(temp[2]));
+                userbagNew.setWid(userbag.getWid());
+                userbagNew.setDurability(userbag.getDurability());
+                userbagNew.setId(UUID.randomUUID().toString());
+                userbagCaculation.addUserBagForUser(user,userbagNew);
 
-                    user.getUserBag().add(userbagNew);
-                    userbagMapper.insertSelective(userbagNew);
-                } else {
-                    userbagTemp.setNum(userbagTemp.getNum() + Integer.parseInt(temp[2]));
-                    userbagMapper.updateByPrimaryKey(userbagTemp);
-                }
-                resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + Good.getGoodNameByUserbag(userbagNew);
+                String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + Good.getGoodNameByUserbag(userbagNew);
                 messageToAllInUnion(user.getUnionid(), resp);
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD, PacketType.UNIONINFO));
                 return;

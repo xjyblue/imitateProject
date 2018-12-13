@@ -31,6 +31,7 @@ public class MonsterFactory {
         alias.put("怪物状态", "status");
         alias.put("怪物技能", "skillIds");
         alias.put("出生地点", "pos");
+        alias.put("怪物经验值", "experience");
         List<Monster> monsterList = ExcelUtil.excel2Pojo(fis, Monster.class, alias);
 
 
@@ -73,6 +74,7 @@ public class MonsterFactory {
         alias.put("怪物状态", "status");
         alias.put("怪物技能", "skillIds");
         alias.put("出生地点", "pos");
+        alias.put("怪物经验值", "experience");
         List<Monster> monsterList = ExcelUtil.excel2Pojo(fis, Monster.class, alias);
 
         List<Monster> newMonsterList = new ArrayList<>();

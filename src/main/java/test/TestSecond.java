@@ -1,8 +1,10 @@
 package test;
 
+import achievement.Achievement;
 import buff.Buff;
 import component.Equipment;
 import component.Monster;
+import component.NPC;
 import level.Level;
 import memory.NettyMemory;
 import role.Role;
@@ -20,11 +22,14 @@ import java.util.UUID;
 public class TestSecond {
     public static void main(String[] argv) throws Exception {
         //指定输入文件
-        FileInputStream levelfis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Level.xls"));
-        LinkedHashMap<String, String> levelalias = new LinkedHashMap<>();
-        levelalias.put("等级","level");
-        levelalias.put("等级所需要的经验","experience");
-        List<Level> levelList = ExcelUtil.excel2Pojo(levelfis, Level.class, levelalias);
+        FileInputStream npcfis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\NPC.xls"));
+        LinkedHashMap<String, String> npcalias = new LinkedHashMap<>();
+        npcalias.put("NPC的id","id");
+        npcalias.put("NPC的状态","status");
+        npcalias.put("NPC的名字","name");
+        npcalias.put("NPC的话","talk");
+        npcalias.put("NPC所在的地点","areaId");
+        List<NPC> levelList = ExcelUtil.excel2Pojo(npcfis,NPC.class, npcalias);
 
         System.out.println(UUID.randomUUID().toString());
     }

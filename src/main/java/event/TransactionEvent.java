@@ -1,5 +1,6 @@
 package event;
 
+import caculation.UserbagCaculation;
 import component.Equipment;
 import component.MpMedicine;
 import component.parent.Good;
@@ -13,6 +14,7 @@ import pojo.User;
 import pojo.Userbag;
 import trade.Trade;
 import utils.MessageUtil;
+import utils.UserbagUtil;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -33,6 +35,8 @@ public class TransactionEvent {
 
     @Autowired
     private CommonEvent commonEvent;
+    @Autowired
+    private UserbagCaculation userbagCaculation;
 
     public void trade(Channel channel, String msg) {
         if (msg.equals("ntrade")) {
@@ -201,12 +205,10 @@ public class TransactionEvent {
             }
 //          交易单物品还原
             for (Map.Entry<String, Userbag> entry : trade.getToUserBag().entrySet()) {
-                moveToUserBag(entry.getValue(),trade.getUserTo(),trade.getToUserBag(),entry.getValue().getNum()+"");
-//                trade.getUserTo().getUserBag().add(entry.getValue());
+                userbagCaculation.addUserBagForUser(trade.getUserTo(),entry.getValue());
             }
             for (Map.Entry<String, Userbag> entry : trade.getStartUserBag().entrySet()) {
-                moveToUserBag(entry.getValue(),trade.getUserStart(),trade.getStartUserBag(),entry.getValue().getNum()+"");
-//                trade.getUserStart().getUserBag().add(entry.getValue());
+                userbagCaculation.addUserBagForUser(trade.getUserStart(),entry.getValue());
             }
 //          交易失败金币还原
             trade.getUserStart().addMoney(trade.getStartMoney());
@@ -270,18 +272,10 @@ public class TransactionEvent {
             trade.getUserTo().addMoney(trade.getStartMoney());
 
             for (Map.Entry<String, Userbag> entry : trade.getToUserBag().entrySet()) {
-                if (!entry.getValue().getTypeof().equals(Good.EQUIPMENT)) {
-                    addUserBagForUser(trade.getUserStart(), entry.getValue());
-                } else {
-                    trade.getUserStart().getUserBag().add(entry.getValue());
-                }
+                userbagCaculation.addUserBagForUser(trade.getUserStart(), entry.getValue());
             }
             for (Map.Entry<String, Userbag> entry : trade.getStartUserBag().entrySet()) {
-                if (!entry.getValue().getTypeof().equals(Good.EQUIPMENT)) {
-                    addUserBagForUser(trade.getUserTo(), entry.getValue());
-                } else {
-                    trade.getUserTo().getUserBag().add(entry.getValue());
-                }
+                userbagCaculation.addUserBagForUser(trade.getUserTo(), entry.getValue());
             }
             channelStart.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSTRADEEND));
             channelEnd.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSTRADEEND));
@@ -298,6 +292,8 @@ public class TransactionEvent {
 //          人物交易状态改为false
             trade.getUserTo().setIfTrade(false);
             trade.getUserStart().setIfTrade(false);
+            UserbagUtil.refreshUserbag(NettyMemory.userToChannelMap.get(trade.getUserTo()));
+            UserbagUtil.refreshUserbag(NettyMemory.userToChannelMap.get(trade.getUserStart()));
             return;
         }
 
@@ -399,8 +395,6 @@ public class TransactionEvent {
             }
             if (user == trade.getUserStart() && trade.getStartUserBag().containsKey(temp[1])) {
                 Userbag userbag = trade.getStartUserBag().get(temp[1]);
-//                trade.getStartUserBag().remove(temp[1]);
-//                trade.getUserStart().getUserBag().add(userbag);
                 moveToUserBag(userbag, trade.getUserStart(), trade.getStartUserBag(), temp[2]);
 
                 String resp = outTradeMessage(trade);
@@ -410,9 +404,7 @@ public class TransactionEvent {
             }
             if (user == trade.getUserTo() && trade.getToUserBag().containsKey(temp[1])) {
                 Userbag userbag = trade.getToUserBag().get(temp[1]);
-//                trade.getToUserBag().remove(temp[1]);
-//                trade.getUserTo().getUserBag().add(userbag);
-                moveToUserBag(userbag,trade.getUserTo(),trade.getToUserBag(),temp[2]);
+                moveToUserBag(userbag, trade.getUserTo(), trade.getToUserBag(), temp[2]);
 
                 String resp = outTradeMessage(trade);
                 channelStart.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
@@ -453,41 +445,23 @@ public class TransactionEvent {
     }
 
     private void moveToUserTrade(User user, Map<String, Userbag> startUserBag, Userbag userbag, String num) {
-        if (userbag.getTypeof().equals(Good.EQUIPMENT) && Integer.parseInt(num) == 1) {
-            user.getUserBag().remove(userbag);
+        if (Integer.parseInt(num) == userbag.getNum()) {
             startUserBag.put(userbag.getId(), userbag);
-            return;
+        } else {
+            Userbag userbagNew = new Userbag();
+            userbagNew.setTypeof(userbag.getTypeof());
+            userbagNew.setWid(userbag.getWid());
+            userbagNew.setNum(Integer.parseInt(num));
+            userbagNew.setName(userbag.getName());
+            userbagNew.setId(UUID.randomUUID().toString());
+            startUserBag.put(userbagNew.getId(), userbagNew);
         }
-        if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
-            if (Integer.parseInt(num) == userbag.getNum()) {
-                user.getUserBag().remove(userbag);
-                startUserBag.put(userbag.getId(), userbag);
-                return;
-            } else {
-                userbag.setNum(userbag.getNum() - Integer.parseInt(num));
-                Userbag userbagNew = new Userbag();
-                userbagNew.setTypeof(userbag.getTypeof());
-                userbagNew.setWid(userbag.getWid());
-                userbagNew.setNum(Integer.parseInt(num));
-                userbagNew.setName(userbag.getName());
-                userbagNew.setId(UUID.randomUUID().toString());
-                startUserBag.put(userbagNew.getId(), userbagNew);
-            }
-        }
+        userbagCaculation.removeUserbagFromUser(user, userbag, Integer.parseInt(num));
     }
 
-    private void addUserBagForUser(User user, Userbag value) {
-        for (Userbag userbag : user.getUserBag()) {
-            if (userbag.getWid().equals(value.getWid())) {
-                userbag.setNum(userbag.getNum() + value.getNum());
-                return;
-            }
-        }
-        user.getUserBag().add(value);
-    }
 
     private String outTradeMessage(Trade trade) {
-        String resp = "欢迎来到交易界面,jbjy=金币数额 可以增加所要交易的金币,jbjyx=金币数额 可以减少所要交易的金币,jy=交易格子号可以把交易物品填充到交易栏,jyx=交易格子号可以把物品从交易格子取下来，jy=y确认交易物品，双方都确认后交易完成";
+        String resp = MessageConfig.TRADEMSG;
         resp += System.getProperty("line.separator") +
                 MessageConfig.MESSAGESTART + System.getProperty("line.separator");
         resp += trade.getUserStart().getUsername() + "放到交易单上的物品" + System.getProperty("line.separator");

@@ -5,7 +5,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
+import achievement.Achievement;
 import level.Level;
+import pojo.Achievementprocess;
 import role.Role;
 import buff.Buff;
 import component.*;
@@ -78,4 +80,8 @@ public class NettyMemory {
 	public static Map<String, Trade> tradeMap = new ConcurrentHashMap<>();
 	/** 人物经验表的建立*/
 	public static Map<Integer, Level> levelMap = new HashMap<>();
+	/** 成就表的建立 */
+	public static Map<Integer, Achievement>achievementMap = new HashMap<>();
+	/** npc */
+	public static Map<Integer,NPC> npcMap = new HashMap<>();
 }

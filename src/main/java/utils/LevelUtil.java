@@ -18,7 +18,7 @@ public class LevelUtil {
                 return entry.getKey();
             }
         }
-        return 0;
+        return 7;
     }
 
     public static String getMaxHp(User user){

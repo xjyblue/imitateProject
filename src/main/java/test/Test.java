@@ -32,10 +32,10 @@ public class Test {
 //		user.setStatus("0");
 //		userMapper.updateByPrimaryKey(user);
 
-//		User user1 = userMapper.getUser("z","zz");
-//		System.out.println(user1.getPos());
+		User user1 = userMapper.getUser("z","zz");
+		System.out.println(user1.getPos());
 
-		int count = applyunioninfoMapper.selectByUserIdAndUnionId("1","1");
-		System.out.println(count);
+//		int count = applyunioninfoMapper.selectByUserIdAndUnionId("1","1");
+//		System.out.println(count);
 	}
 }

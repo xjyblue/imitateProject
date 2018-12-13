@@ -33,6 +33,16 @@ public class Monster {
 
     private String pos;
 
+    private Integer experience;
+
+    public Integer getExperience() {
+        return experience;
+    }
+
+    public void setExperience(Integer experience) {
+        this.experience = experience;
+    }
+
     public String getPos() {
         return pos;
     }

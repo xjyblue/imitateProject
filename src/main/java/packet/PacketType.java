@@ -12,4 +12,7 @@ public class PacketType {
     public static final String TRADEMSG = "4";
     public static final String USERINFO = "6";
     public static final String UNIONINFO = "7";
+    public static final String ACHIEVEMENT = "8";
+    public static final String USERBAGMSG = "9";
+    public static final String FRIENDMSG = "10";
 }

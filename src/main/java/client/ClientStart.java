@@ -43,6 +43,66 @@ public class ClientStart extends JFrame implements KeyListener {
 
     private JScrollPane jScrollPane6;
 
+    private JTextArea jTextArea7;
+
+    private JScrollPane jScrollPane7;
+
+    private JTextArea jTextArea8;
+
+    private JScrollPane jScrollPane8;
+
+    private JTextArea jTextArea9;
+
+    private JScrollPane jScrollPane9;
+
+    public JTextArea getjTextArea9() {
+        return jTextArea9;
+    }
+
+    public void setjTextArea9(JTextArea jTextArea9) {
+        this.jTextArea9 = jTextArea9;
+    }
+
+    public JScrollPane getjScrollPane9() {
+        return jScrollPane9;
+    }
+
+    public void setjScrollPane9(JScrollPane jScrollPane9) {
+        this.jScrollPane9 = jScrollPane9;
+    }
+
+    public JTextArea getjTextArea8() {
+        return jTextArea8;
+    }
+
+    public void setjTextArea8(JTextArea jTextArea8) {
+        this.jTextArea8 = jTextArea8;
+    }
+
+    public JScrollPane getjScrollPane8() {
+        return jScrollPane8;
+    }
+
+    public void setjScrollPane8(JScrollPane jScrollPane8) {
+        this.jScrollPane8 = jScrollPane8;
+    }
+
+    public JTextArea getjTextArea7() {
+        return jTextArea7;
+    }
+
+    public void setjTextArea7(JTextArea jTextArea7) {
+        this.jTextArea7 = jTextArea7;
+    }
+
+    public JScrollPane getjScrollPane7() {
+        return jScrollPane7;
+    }
+
+    public void setjScrollPane7(JScrollPane jScrollPane7) {
+        this.jScrollPane7 = jScrollPane7;
+    }
+
     public JTextArea getjTextArea6() {
         return jTextArea6;
     }
@@ -166,7 +226,7 @@ public class ClientStart extends JFrame implements KeyListener {
     public static void main(String[] args) {
         ClientStart frm = new ClientStart();
         frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frm.setSize(1600, 1000);
+        frm.setSize(1800, 1000);
         frm.setLocationRelativeTo(null);
         frm.setDefaultCloseOperation(3);
         frm.setResizable(false);
@@ -175,7 +235,7 @@ public class ClientStart extends JFrame implements KeyListener {
 
 //      初始化控件
         frm.txt = new JTextField(85);
-        frm.txt2 = new JTextField(35);
+        frm.txt2 = new JTextField(58);
         frm.txt2.setEditable(false);
 
         frm.jTextArea1 = new JTextArea(8,1);
@@ -215,12 +275,33 @@ public class ClientStart extends JFrame implements KeyListener {
         frm.jTextArea6.setFont(new Font("宋体",Font.BOLD,14));
         frm.jScrollPane6.setViewportView(frm.jTextArea6);
 
+        frm.jTextArea7 = new JTextArea(8, 5);
+        frm.jTextArea7.setEditable(false);
+        frm.jScrollPane7 = new JScrollPane();
+        frm.jTextArea7.setFont(new Font("宋体",Font.BOLD,14));
+        frm.jScrollPane7.setViewportView(frm.jTextArea7);
+
+        frm.jTextArea8 = new JTextArea(8, 5);
+        frm.jTextArea8.setEditable(false);
+        frm.jScrollPane8 = new JScrollPane();
+        frm.jTextArea8.setFont(new Font("宋体",Font.BOLD,14));
+        frm.jScrollPane8.setViewportView(frm.jTextArea8);
+
+        frm.jTextArea9 = new JTextArea(8, 5);
+        frm.jTextArea9.setEditable(false);
+        frm.jScrollPane9 = new JScrollPane();
+        frm.jTextArea9.setFont(new Font("宋体",Font.BOLD,14));
+        frm.jScrollPane9.setViewportView(frm.jTextArea9);
+
         JLabel jLabel1 = new JLabel("命令提示信息");
         JLabel jLabel2 = new JLabel("人物所受buff提示信息");
         JLabel jLabel3 = new JLabel("怪物所受buff提示信息");
         JLabel jLabel4 = new JLabel("怪物攻击提示信息");
         JLabel jLabel5 = new JLabel("交易提示信息");
         JLabel jLabel6 = new JLabel("工会提示信息");
+        JLabel jLabel7 = new JLabel("任务成就提示信息");
+        JLabel jLabel8 = new JLabel("人物背包信息");
+        JLabel jLabel9 = new JLabel("好友系统信息");
 
         JButton b = new JButton("清屏");
         b.setBounds(100, 100, 65, 30);
@@ -305,17 +386,31 @@ public class ClientStart extends JFrame implements KeyListener {
 
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridwidth = 1;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(jLabel2, gridBagConstraints);
         frm.add(jLabel2);
 
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.gridheight = 1;
+        gridBagLayout.setConstraints(jLabel9, gridBagConstraints);
+        frm.add(jLabel9);
+
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
-        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridwidth = 1;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane2, gridBagConstraints);
         frm.add(frm.jScrollPane2);
+
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.gridheight = 1;
+        gridBagLayout.setConstraints(frm.jScrollPane9, gridBagConstraints);
+        frm.add(frm.jScrollPane9);
 
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
@@ -352,12 +447,26 @@ public class ClientStart extends JFrame implements KeyListener {
         gridBagLayout.setConstraints(jLabel5, gridBagConstraints);
         frm.add(jLabel5);
 
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
+        gridBagLayout.setConstraints(jLabel8, gridBagConstraints);
+        frm.add(jLabel8);
+
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 10;
-        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridwidth = 1;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane5, gridBagConstraints);
         frm.add(frm.jScrollPane5);
+
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.gridheight = 1;
+        gridBagLayout.setConstraints(frm.jScrollPane8, gridBagConstraints);
+        frm.add(frm.jScrollPane8);
 
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 11;
@@ -366,12 +475,26 @@ public class ClientStart extends JFrame implements KeyListener {
         gridBagLayout.setConstraints(jLabel6, gridBagConstraints);
         frm.add(jLabel6);
 
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridwidth = 20;
+        gridBagConstraints.gridheight = 1;
+        gridBagLayout.setConstraints(jLabel7, gridBagConstraints);
+        frm.add(jLabel7);
+
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 12;
         gridBagConstraints.gridwidth = 1;
         gridBagConstraints.gridheight = 1;
         gridBagLayout.setConstraints(frm.jScrollPane6, gridBagConstraints);
         frm.add(frm.jScrollPane6);
+
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.gridheight = 1;
+        gridBagLayout.setConstraints(frm.jScrollPane7, gridBagConstraints);
+        frm.add(frm.jScrollPane7);
 
 //      设置监听
         frm.txt.addKeyListener(frm);

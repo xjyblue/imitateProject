@@ -331,6 +331,14 @@
             <result column="wtype" property="typeof"/>
             <result column="wdurability" property="durability"/>
         </collection>
+        <collection property="achievementprocesses" ofType="pojo.Achievementprocess" column="sid">
+            <id column="aid" property="id"/><!-- 这里的column对应的是下面查询的别名，而不是表字段名 -->
+            <result column="ausername" property="username"/><!-- property对应JavaBean中的属性名 -->
+            <result column="aiffinish" property="iffinish"/>
+            <result column="aachievementId" property="achievementid"/>
+            <result column="aprocess" property="processs"/>
+            <result column="atype" property="type"/>
+        </collection>
     </resultMap>
 
 
@@ -356,11 +364,18 @@
 		 w.durability AS wdurability,
 		 w.username AS wname,
 		 w.wid AS wwid,
-		 w.typeOf AS wtype
+		 w.typeOf AS wtype,
+		 a.id AS aid,
+		 a.ifFinish AS aiffinish,
+		 a.username AS ausername,
+		 a.achievementId AS aachievementId,
+		 a.processs AS aprocess,
+		 a.type AS atype
 		FROM
 		USER u
 		LEFT JOIN userbag s ON u.username = s.name
 		LEFT JOIN weaponequipmentbar w ON u.username = w.username
+		LEFT JOIN achievementprocess a on u.username = a.username
 		where u.username = #{username}
 		and u.password = #{password};
 	</select>

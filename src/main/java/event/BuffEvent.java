@@ -4,6 +4,7 @@ import buff.Buff;
 import component.BossArea;
 import component.Monster;
 import config.BuffConfig;
+import config.DeadOrAliveConfig;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import org.springframework.stereotype.Component;
@@ -52,11 +53,17 @@ public class BuffEvent {
             if (entry.getKey().equals(BuffConfig.ALLPERSON)) {
                 Buff buff = NettyMemory.buffMap.get(entry.getValue());
                 Channel channelTemp = NettyMemory.userToChannelMap.get(user);
-                if (NettyMemory.bossAreaMap.containsKey(user.getTeamId())) {
+                if (user.getTeamId() != null && NettyMemory.bossAreaMap.containsKey(user.getTeamId())) {
                     channelTemp.writeAndFlush(MessageUtil.turnToPacket("你使用了" + userSkill.getSkillName() + "对怪物造成了集体伤害" + userSkill.getDamage()));
                     BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
                     for (Map.Entry<String, Monster> monsterEntry : bossArea.getMonsters().get(bossArea.getSequence().get(0)).entrySet()) {
                         monsterEntry.getValue().subLife(new BigInteger(userSkill.getDamage()));
+                    }
+                } else {
+                    for (Monster monsterTemp : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
+                        if(monsterTemp.getStatus().equals(DeadOrAliveConfig.ALIVE)){
+                            monsterTemp.subLife(new BigInteger(userSkill.getDamage()));
+                        }
                     }
                 }
                 return allAttackFlag;

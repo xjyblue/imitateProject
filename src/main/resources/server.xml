@@ -19,7 +19,11 @@
 			base-package="caculation" />
 	<context:component-scan
 			base-package="factory" />
-		
+	<context:component-scan
+			base-package="achievement" />
+
+
+
 	<context:property-placeholder
 		location="classpath*:config.properties" ignore-unresolvable="true" />
 	<!-- 配置数据源 -->

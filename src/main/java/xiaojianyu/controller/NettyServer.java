@@ -1,5 +1,6 @@
 package xiaojianyu.controller;
 
+import achievement.Achievement;
 import caculation.RecoverHpCaculation;
 import level.Level;
 import role.Role;
@@ -87,8 +88,21 @@ public class NettyServer {
 
 
     public void initServer() throws IOException {
+//      初始化任务系统
+        FileInputStream achievementfis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Achievement.xls"));
+        LinkedHashMap<String, String> achievementalias = new LinkedHashMap<>();
+        achievementalias.put("任务id","achievementId");
+        achievementalias.put("任务名称","name");
+        achievementalias.put("任务类别","type");
+        achievementalias.put("任务目标","target");
+        achievementalias.put("开始阶段","begin");
+        List<Achievement> achievementList = ExcelUtil.excel2Pojo(achievementfis, Achievement.class, achievementalias);
+        for(Achievement achievement:achievementList) {
+            NettyMemory.achievementMap.put(achievement.getAchievementId(), achievement);
+        }
 
-//        模拟从数据库初始化所有用户的邮件系统
+
+//      模拟从数据库初始化所有用户的邮件系统
         NettyMemory.userEmailMap.put("z", new ConcurrentHashMap<String, Mail>());
         NettyMemory.userEmailMap.put("k", new ConcurrentHashMap<String, Mail>());
         NettyMemory.userEmailMap.put("w", new ConcurrentHashMap<String, Mail>());
@@ -229,17 +243,29 @@ public class NettyServer {
 //        初始化技能表end
 
 
+//      初始化npc start
+        FileInputStream npcfis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\NPC.xls"));
+        LinkedHashMap<String, String> npcalias = new LinkedHashMap<>();
+        npcalias.put("NPC的id","id");
+        npcalias.put("NPC的状态","status");
+        npcalias.put("NPC的名字","name");
+        npcalias.put("NPC的话","talk");
+        npcalias.put("NPC所在的地点","areaId");
+        List<NPC> npcList = ExcelUtil.excel2Pojo(npcfis,NPC.class, npcalias);
+        for(NPC npc:npcList){
+            NettyMemory.npcMap.put(npc.getId(),npc);
+        }
+//      初始化npc end
+
 //		起始之地
         Area area = new Area();
         area.setName("起始之地");
+        area.setId(0);
         Set<String> areaSet = new HashSet<String>();
         areaSet.add("村子");
         area.setAreaSet(areaSet);
 //        初始化NPC和会话
-        NPC npc = new NPC("1", "赛利亚");
-        List<String> talkList = new ArrayList<String>();
-        talkList.add("我是塞里亚，欢迎来到起始之地");
-        npc.setTalks(talkList);
+        NPC npc = NettyMemory.npcMap.get(1);
         List<NPC> npcs = new ArrayList<NPC>();
         npcs.add(npc);
         area.setNpcs(npcs);
@@ -255,16 +281,14 @@ public class NettyServer {
 //		村子
         area = new Area();
         area.setName("村子");
+        area.setId(1);
         areaSet = new HashSet<String>();
         areaSet.add("起始之地");
         areaSet.add("城堡");
         areaSet.add("森林");
         area.setAreaSet(areaSet);
 //        初始化NPC和会话
-        npc = new NPC("1", "村民");
-        talkList = new ArrayList<String>();
-        talkList.add("我是村民，欢迎来到村子");
-        npc.setTalks(talkList);
+        npc = NettyMemory.npcMap.get(2);
         npcs = new ArrayList<NPC>();
         npcs.add(npc);
         area.setNpcs(npcs);
@@ -280,14 +304,12 @@ public class NettyServer {
 //      森林
         area = new Area();
         area.setName("森林");
+        area.setId(2);
         areaSet = new HashSet<String>();
         areaSet.add("村子");
         area.setAreaSet(areaSet);
 //        初始化NPC和会话
-        npc = new NPC("1", "植物精灵");
-        talkList = new ArrayList<String>();
-        talkList.add("我是植物精灵，欢迎来到森林");
-        npc.setTalks(talkList);
+        npc = NettyMemory.npcMap.get(3);
         npcs = new ArrayList<NPC>();
         npcs.add(npc);
         area.setNpcs(npcs);
@@ -306,12 +328,10 @@ public class NettyServer {
         area.setName("城堡");
         areaSet = new HashSet<String>();
         areaSet.add("村子");
+        area.setId(3);
         area.setAreaSet(areaSet);
 //        初始化NPC和会话
-        npc = new NPC("1", "骑士");
-        talkList = new ArrayList<String>();
-        talkList.add("我是骑士，欢迎来到城堡");
-        npc.setTalks(talkList);
+        npc = NettyMemory.npcMap.get(4);
         npcs = new ArrayList<NPC>();
         npcs.add(npc);
         area.setNpcs(npcs);

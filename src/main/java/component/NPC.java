@@ -1,15 +1,36 @@
 package component;
 
-import java.util.List;
-
 public class NPC {
+
 	private Integer id;
 
 	private String status;
 
 	private String name;
 
-	private List<String> talks ;
+	private String talk;
+
+	private Integer areaId;
+
+	public NPC(){
+
+	}
+
+	public Integer getAreaId() {
+		return areaId;
+	}
+
+	public void setAreaId(Integer areaId) {
+		this.areaId = areaId;
+	}
+
+	public String getTalk() {
+		return talk;
+	}
+
+	public void setTalk(String talk) {
+		this.talk = talk;
+	}
 
 	public Integer getId() {
 		return id;
@@ -17,14 +38,6 @@ public class NPC {
 
 	public void setId(Integer id) {
 		this.id = id;
-	}
-
-	public List<String> getTalks() {
-		return talks;
-	}
-
-	public void setTalks(List<String> talks) {
-		this.talks = talks;
 	}
 
 	public NPC(String status, String name) {
