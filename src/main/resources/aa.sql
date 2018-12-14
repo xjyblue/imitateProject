@@ -28,11 +28,11 @@ CREATE TABLE `achievementprocess` (
   `processs` varchar(255) DEFAULT NULL,
   `type` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8;
 
 /*Data for the table `achievementprocess` */
 
-insert  into `achievementprocess`(`id`,`username`,`ifFinish`,`achievementId`,`processs`,`type`) values (1,'z',1,1,'4:5',1),(2,'z',1,2,'7',2),(3,'z',1,3,'4',3),(4,'z',0,4,'3006',4),(5,'k',0,1,'4:0',1),(6,'k',0,2,'1',2),(7,'k',0,3,'0',3),(8,'k',0,4,'3006',4);
+insert  into `achievementprocess`(`id`,`username`,`ifFinish`,`achievementId`,`processs`,`type`) values (77,'z',0,1,'4:0',1),(78,'z',1,2,'7',2),(79,'z',0,3,'0',3),(80,'z',0,4,'0',4),(81,'z',0,5,'0',5),(82,'z',0,6,'0',6),(83,'z',0,7,'0',7),(84,'z',1,8,'1',8),(85,'k',0,1,'4:0',1),(86,'k',0,2,'1',2),(87,'k',0,3,'0',3),(88,'k',0,4,'0',4),(89,'k',0,5,'0',5),(90,'k',0,6,'0',6),(91,'k',0,7,'0',7),(92,'k',1,8,'1',8);
 
 /*Table structure for table `applyunioninfo` */
 
@@ -61,7 +61,7 @@ CREATE TABLE `friendapplyinfo` (
 
 /*Data for the table `friendapplyinfo` */
 
-insert  into `friendapplyinfo`(`id`,`fromUser`,`applyStatus`,`toUser`) values ('b8a7d99d-fbcf-48f4-a8a7-a71764ce8833','z',0,'k');
+insert  into `friendapplyinfo`(`id`,`fromUser`,`applyStatus`,`toUser`) values ('2035a0c2-974a-4929-919f-996d9ed1056e','z',1,'k');
 
 /*Table structure for table `friendinfo` */
 
@@ -72,9 +72,11 @@ CREATE TABLE `friendinfo` (
   `username` varchar(50) DEFAULT NULL,
   `friendname` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 /*Data for the table `friendinfo` */
+
+insert  into `friendinfo`(`id`,`username`,`friendname`) values (9,'z','k'),(10,'k','z');
 
 /*Table structure for table `unioninfo` */
 
@@ -125,7 +127,7 @@ CREATE TABLE `user` (
 
 /*Data for the table `user` */
 
-insert  into `user`(`username`,`password`,`status`,`pos`,`mp`,`hp`,`money`,`roleId`,`experience`,`unionId`,`unionLevel`) values ('e','ee','1','1','9160','10000','1000000',3,1,'388f708e-dfe0-445d-8af3-64a053783248',4),('f','ff','1','0','10000','10000','10000',2,1,NULL,NULL),('k','kk','1','1','8890','10000','100000',1,9,'388f708e-dfe0-445d-8af3-64a053783248',2),('q','qq','1','0','10000','10000','1000000',4,1,'388f708e-dfe0-445d-8af3-64a053783248',3),('w','ww','1','1','450','54500','3210000',1,101,NULL,NULL),('z','zz','1','1','1930','548000','7200000',1,2461,'388f708e-dfe0-445d-8af3-64a053783248',1);
+insert  into `user`(`username`,`password`,`status`,`pos`,`mp`,`hp`,`money`,`roleId`,`experience`,`unionId`,`unionLevel`) values ('e','ee','1','1','10000','0','141000000',3,301,NULL,NULL),('f','ff','1','0','10000','10000','10000',2,1,NULL,NULL),('k','kk','1','1','8890','10000','100000',1,9,'388f708e-dfe0-445d-8af3-64a053783248',2),('q','qq','1','0','10000','10000','1000000',4,1,'388f708e-dfe0-445d-8af3-64a053783248',3),('w','ww','1','1','450','54500','3210000',1,101,NULL,NULL),('z','zz','1','1','3260','547771900','147200000',1,4561,'388f708e-dfe0-445d-8af3-64a053783248',1);
 
 /*Table structure for table `userbag` */
 
@@ -143,7 +145,7 @@ CREATE TABLE `userbag` (
 
 /*Data for the table `userbag` */
 
-insert  into `userbag`(`id`,`name`,`wid`,`num`,`typeOf`,`durability`) values ('07b9f9e0-f0ce-49fd-a82a-f3a53e12766d','z',1003,4,'1',NULL),('46f79697-a0b6-499e-a0b8-e0cbf1a552ea',NULL,3005,1,'3',10),('7663daaa-7cad-48ee-a718-18f092e8285d','k',1003,4,'1',NULL),('8075baeb-0420-42e7-9667-f7481a180364',NULL,3005,1,'3',10),('9098a09b-6c16-4246-96d7-6de222a8de55','z',3006,1,'3',20),('a30f1af7-a107-423b-b9d1-e3fa55bedb47','z',1002,15,'1',NULL),('ad3d5ae2-0f83-4ce7-848c-613e9fc99c11','z',1001,14,'1',NULL),('b7937a6b-02a2-47cd-82fb-591fc97b154e',NULL,1003,5,'1',NULL),('c3b52008-6ada-4e61-921b-47757095417d','k',1001,6,'1',NULL),('e158e742-f636-4553-8c0d-0dbaf54462c0','k',3006,1,'3',20),('eaa3da8f-183b-41b2-be1c-8544f1509eaa',NULL,3004,1,'3',10),('f36514b5-5601-44e1-ad21-deba2cb642e1','k',1002,2,'1',NULL),('f36514b5-5601-44e1-ad21-deba2cb642e2','w',1002,10,'1',NULL),('f36514b5-5601-44e1-ad21-deba2cb642e3','w',1001,10,'1',NULL),('f36514b5-5601-44e1-ad21-deba2cb642e5','w',1003,10,'1',NULL),('f36514b5-5601-44e1-ad21-deba2cb642e6',NULL,1001,96,'1',NULL),('f36514b5-5601-44e1-ad21-deba2cb642e7',NULL,1002,101,'1',NULL);
+insert  into `userbag`(`id`,`name`,`wid`,`num`,`typeOf`,`durability`) values ('07b9f9e0-f0ce-49fd-a82a-f3a53e12766d',NULL,1003,4,'1',NULL),('46f79697-a0b6-499e-a0b8-e0cbf1a552ea',NULL,3005,1,'3',10),('7663daaa-7cad-48ee-a718-18f092e8285d','k',1003,8,'1',NULL),('8075baeb-0420-42e7-9667-f7481a180364',NULL,3005,1,'3',10),('9098a09b-6c16-4246-96d7-6de222a8de55','z',3006,1,'3',20),('a30f1af7-a107-423b-b9d1-e3fa55bedb47','z',1002,17,'1',NULL),('ad3d5ae2-0f83-4ce7-848c-613e9fc99c11',NULL,1001,12,'1',NULL),('b7937a6b-02a2-47cd-82fb-591fc97b154e',NULL,1003,5,'1',NULL),('c3b52008-6ada-4e61-921b-47757095417d','k',1001,16,'1',NULL),('e158e742-f636-4553-8c0d-0dbaf54462c0','k',3006,1,'3',20),('eaa3da8f-183b-41b2-be1c-8544f1509eaa',NULL,3004,1,'3',10),('f36514b5-5601-44e1-ad21-deba2cb642e1',NULL,1002,2,'1',NULL),('f36514b5-5601-44e1-ad21-deba2cb642e2','w',1002,10,'1',NULL),('f36514b5-5601-44e1-ad21-deba2cb642e3','w',1001,10,'1',NULL),('f36514b5-5601-44e1-ad21-deba2cb642e5','w',1003,10,'1',NULL),('f36514b5-5601-44e1-ad21-deba2cb642e6',NULL,1001,96,'1',NULL),('f36514b5-5601-44e1-ad21-deba2cb642e7',NULL,1002,101,'1',NULL),('fca80ddb-840a-4167-b8ad-b194df39815f','z',1001,4,'1',NULL);
 
 /*Table structure for table `userskillrelation` */
 

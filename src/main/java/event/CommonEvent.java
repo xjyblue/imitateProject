@@ -25,7 +25,7 @@ public class CommonEvent {
 
     public void common(Channel channel, String msg) {
         if (msg.equals("b")) {
-            UserbagUtil.refreshUserbag(channel);
+            UserbagUtil.refreshUserbagInfo(channel);
         }
         if (msg.startsWith("b-")) {
             String temp[] = msg.split("-");

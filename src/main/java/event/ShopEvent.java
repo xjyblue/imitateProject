@@ -1,7 +1,6 @@
 package event;
 
-import achievement.Achievement;
-import achievement.AchievementManager;
+import achievement.AchievementExecutor;
 import caculation.UserbagCaculation;
 import component.Equipment;
 import component.MpMedicine;
@@ -12,14 +11,11 @@ import mapper.UserbagMapper;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pojo.Achievementprocess;
 import pojo.User;
 import pojo.Userbag;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,7 +28,7 @@ public class ShopEvent {
     @Autowired
     private UserbagMapper userbagMapper;
     @Autowired
-    private AchievementManager achievementManager;
+    private AchievementExecutor achievementExecutor;
     @Autowired
     private UserbagCaculation userbagCaculation;
 

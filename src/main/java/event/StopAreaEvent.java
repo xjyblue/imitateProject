@@ -1,7 +1,7 @@
 package event;
 
 import achievement.Achievement;
-import achievement.AchievementManager;
+import achievement.AchievementExecutor;
 import caculation.AttackCaculation;
 import component.Area;
 import component.Equipment;
@@ -60,7 +60,7 @@ public class StopAreaEvent {
     @Autowired
     private LabourUnionEvent labourUnionEvent;
     @Autowired
-    private AchievementManager achievementManager;
+    private AchievementExecutor achievementExecutor;
     @Autowired
     private FriendEvent friendEvent;
     public void stopArea(Channel channel, String msg) throws IOException {
@@ -147,7 +147,7 @@ public class StopAreaEvent {
                         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
                             Achievement achievement = NettyMemory.achievementMap.get(achievementprocess.getAchievementid());
                             if (achievementprocess.getType().equals(Achievement.TALKTONPC)) {
-                                achievementManager.executeTalkNPC(achievementprocess,user,achievement,npc);
+                                achievementExecutor.executeTalkNPC(achievementprocess,user,achievement,npc);
                             }
                         }
                         return;

@@ -1,13 +1,9 @@
 package event;
 
 import achievement.Achievement;
-import achievement.AchievementManager;
-import component.Equipment;
-import component.parent.Good;
 import config.BuffConfig;
 import config.MessageConfig;
 import io.netty.channel.Channel;
-import level.Level;
 import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
@@ -23,6 +19,8 @@ import utils.LevelUtil;
 import utils.MessageUtil;
 
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Component("loginEvent")
 public class LoginEvent {
@@ -34,6 +32,8 @@ public class LoginEvent {
     @Autowired
     private AchievementprocessMapper achievementprocessMapper;
 
+    private Lock lock = new ReentrantLock();
+
     public void login(Channel channel, String msg) {
         String temp[] = msg.split("-");
         if (temp.length != 2) {
@@ -43,7 +43,11 @@ public class LoginEvent {
             if (user == null) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORPASSWORD));
             } else {
-//             解决玩家断线重连
+//             解决玩家顶号问题
+
+//             根据用户id拿出user对象从会话中
+                replaceUserChannel(user.getUsername());
+
 
 //             初始化玩家的技能start
                 UserskillrelationExample userskillrelationExample = new UserskillrelationExample();
@@ -59,7 +63,7 @@ public class LoginEvent {
                 }
                 NettyMemory.userskillrelationMap.put(channel, userskillrelationMap);
 
-//                初始化玩家的各种buffer
+//              初始化玩家的各种buffer
                 Map<String, Integer> map = new HashMap<>();
                 map.put(BuffConfig.MPBUFF, 1000);
                 map.put(BuffConfig.POISONINGBUFF, 2000);
@@ -95,6 +99,24 @@ public class LoginEvent {
                 NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
 
             }
+        }
+    }
+
+    private void replaceUserChannel(String username) {
+        try{
+            lock.lock();
+            for (Map.Entry<Channel, User> entry : NettyMemory.session2UserIds.entrySet()) {
+                Channel channel = entry.getKey();
+                if (entry.getValue().getUsername().equals(username)) {
+//              进行顶号处理,之前的channel先挂掉
+                    channel.writeAndFlush(MessageUtil.turnToPacket("不好意思,有人在别处登录你的游戏号，请选择重新登录或者修改密码"));
+                    channel.close();
+//              清除该channel和user的所有信息
+
+                }
+            }
+        }finally {
+            lock.unlock();
         }
     }
 

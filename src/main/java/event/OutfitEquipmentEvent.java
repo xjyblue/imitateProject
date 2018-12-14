@@ -1,13 +1,12 @@
 package event;
 
 import achievement.Achievement;
-import achievement.AchievementManager;
+import achievement.AchievementExecutor;
 import caculation.UserbagCaculation;
 import component.Equipment;
 import component.Monster;
 import component.parent.Good;
 import io.netty.channel.Channel;
-import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import utils.LevelUtil;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -31,7 +29,7 @@ public class OutfitEquipmentEvent {
     @Autowired
     private UserMapper userMapper;
     @Autowired
-    private AchievementManager achievementManager;
+    private AchievementExecutor achievementExecutor;
     @Autowired
     private UserbagCaculation userbagCaculation;
 
@@ -74,10 +72,13 @@ public class OutfitEquipmentEvent {
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
             Achievement achievement = NettyMemory.achievementMap.get(achievementprocess.getAchievementid());
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.ATTACKMONSTER)) {
-                achievementManager.executeKillMonster(user, achievementprocess, monster.getId());
+                achievementExecutor.executeKillMonster(user, achievementprocess, monster.getId());
             }
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.UPLEVEL)) {
-                achievementManager.executeLevelUp(achievementprocess,user,achievement);
+                achievementExecutor.executeLevelUp(achievementprocess, user, achievement);
+            }
+            if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.FINISHBOSSAREA) && monster.getType().equals(Monster.TYPEOFBOSS)) {
+                achievementExecutor.executeBossAttack(achievementprocess, user, achievement,monster);
             }
         }
 
@@ -94,7 +95,7 @@ public class OutfitEquipmentEvent {
         userbag.setName(equipment.getName());
         userbag.setWid(equipment.getId());
         userbag.setDurability(equipment.getDurability());
-        userbagCaculation.addUserBagForUser(user,userbag);
+        userbagCaculation.addUserBagForUser(user, userbag);
         channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + equipment.getName() + "增加攻击力为" + equipment.getAddValue()));
     }
 

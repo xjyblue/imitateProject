@@ -1,7 +1,7 @@
 package caculation;
 
 import achievement.Achievement;
-import achievement.AchievementManager;
+import achievement.AchievementExecutor;
 import component.Equipment;
 import component.parent.Good;
 import io.netty.channel.Channel;
@@ -25,7 +25,7 @@ public class UserbagCaculation {
     @Autowired
     private UserbagMapper userbagMapper;
     @Autowired
-    private AchievementManager achievementManager;
+    private AchievementExecutor achievementExecutor;
 
     public void addUserBagForUser(User user, Userbag value) {
         value.setName(user.getUsername());
@@ -61,12 +61,12 @@ public class UserbagCaculation {
             for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
                 Achievement achievement = NettyMemory.achievementMap.get(achievementprocess.getAchievementid());
                 if (achievementprocess.getType().equals(Achievement.COLLECT)) {
-                    achievementManager.executeCollect(achievementprocess, equipment, user, achievement);
+                    achievementExecutor.executeCollect(achievementprocess, equipment, user, achievement);
                 }
             }
         }
         Channel channel = NettyMemory.userToChannelMap.get(user);
-        UserbagUtil.refreshUserbag(channel);
+        UserbagUtil.refreshUserbagInfo(channel);
     }
 
     public void removeUserbagFromUser(User user, Userbag userbag, Integer num) {
@@ -79,7 +79,7 @@ public class UserbagCaculation {
             userbagMapper.updateByPrimaryKey(userbag);
         }
         Channel channel = NettyMemory.userToChannelMap.get(user);
-        UserbagUtil.refreshUserbag(channel);
+        UserbagUtil.refreshUserbagInfo(channel);
     }
 
 }

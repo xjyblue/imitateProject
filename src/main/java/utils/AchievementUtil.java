@@ -1,14 +1,12 @@
 package utils;
 
 import achievement.Achievement;
-import config.MessageConfig;
 import io.netty.channel.Channel;
 import memory.NettyMemory;
 import packet.PacketType;
 import pojo.Achievementprocess;
 import pojo.User;
 
-import java.util.Map;
 
 /**
  * Description ：nettySpringServer
@@ -56,6 +54,41 @@ public class AchievementUtil {
                     resp += "[任务名:" + taskName + " ]" + " [进度: 已收集(" + goodName + ")件装备，任务进行中]" + System.getProperty("line.separator");
                 }
             }
+            if (achievementprocess.getType() == Achievement.FINISHBOSSAREA) {
+                String taskName = NettyMemory.achievementMap.get(achievementprocess.getAchievementid()).getName();
+                if (achievementprocess.getIffinish()) {
+                    resp += "[任务名:" + taskName + " ]" + " [进度: 已通关天灵魔殿副本，完成任务****]" + System.getProperty("line.separator");
+                } else {
+                    resp += "[任务名:" + taskName + " ]" + " [进度: 未通关天灵魔殿副本，任务进行中]" + System.getProperty("line.separator");
+                }
+            }
+
+            if (achievementprocess.getType() == Achievement.FRIEND) {
+                String taskName = NettyMemory.achievementMap.get(achievementprocess.getAchievementid()).getName();
+                if (achievementprocess.getIffinish()) {
+                    resp += "[任务名:" + taskName + " ]" + " [进度: 已添加了第一个好友，完成任务****]" + System.getProperty("line.separator");
+                } else {
+                    resp += "[任务名:" + taskName + " ]" + " [进度: 未添加第一个好友，任务进行中]" + System.getProperty("line.separator");
+                }
+            }
+
+            if(achievement.getType() == Achievement.UNIONFIRST){
+                String taskName = NettyMemory.achievementMap.get(achievementprocess.getAchievementid()).getName();
+                if (achievementprocess.getIffinish()) {
+                    resp += "[任务名:" + taskName + " ]" + " [进度: 已加入了工会,完成任务****]" + System.getProperty("line.separator");
+                } else {
+                    resp += "[任务名:" + taskName + " ]" + " [进度: 未加入工会，任务进行中]" + System.getProperty("line.separator");
+                }
+            }
+
+            if(achievement.getType() == Achievement.TRADEFIRST){
+                String taskName = NettyMemory.achievementMap.get(achievementprocess.getAchievementid()).getName();
+                if (achievementprocess.getIffinish()) {
+                    resp += "[任务名:" + taskName + " ]" + " [进度: 和其他玩家进行了第一次交易，完成任务****]" + System.getProperty("line.separator");
+                } else {
+                    resp += "[任务名:" + taskName + " ]" + " [进度: 未和其他玩家进行了第一次交易，任务进行中]" + System.getProperty("line.separator");
+                }
+            }
         }
         Channel channel = NettyMemory.userToChannelMap.get(user);
         channel.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ACHIEVEMENT));
@@ -69,7 +102,7 @@ public class AchievementUtil {
         String resp = "";
         for (int i = 0; i < goodId.length; i++) {
             resp += NettyMemory.equipmentMap.get(Integer.parseInt(goodId[i])).getName();
-            if(i!=goodId.length-1){
+            if (i != goodId.length - 1) {
                 resp += "-";
             }
         }

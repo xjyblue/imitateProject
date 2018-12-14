@@ -52,14 +52,6 @@ public class BossAttackTask implements Runnable {
         this.outfitEquipmentEvent = outfitEquipmentEvent;
     }
 
-//    public Monster getMonster() {
-//        return monster;
-//    }
-//
-//    public void setMonster(Monster monster) {
-//        this.monster = monster;
-//    }
-
     public Channel getChannel() {
         return channel;
     }
@@ -96,9 +88,7 @@ public class BossAttackTask implements Runnable {
                     return;
                 }
                 BossArea bossArea = NettyMemory.bossAreaMap.get(teamId);
-//
                 User userTarget = getMaxDamageUser(bossArea);
-
 
 //              重新锁定boss
 //              判断某个场景的boss是否都死光
@@ -111,13 +101,11 @@ public class BossAttackTask implements Runnable {
                             if (entry.getValue().getStatus().equals("1")) {
                                 if (monster != null) {
                                     sendMessageToAll(teamId, "出现第二boss" + entry.getValue().getName());
-//                          移除所有小组成员
+//                                  移除所有小组成员
                                     removeMonster(teamId);
                                     addMonster(teamId, entry.getValue());
                                 }
-//                        NettyMemory.monsterBuffEndTime.remove(monster);
                                 monster = entry.getValue();
-//                        NettyMemory.monsterBuffEndTime.put(monster);
                                 break;
                             }
                         }
@@ -135,7 +123,7 @@ public class BossAttackTask implements Runnable {
                 if (userHp.compareTo(new BigInteger("0")) <= 0) {
                     userTarget.setHp("0");
                     userTarget.setStatus(DeadOrAliveConfig.DEAD);
-//            NettyMemory.monsterMap.remove(userTarget);
+//                  NettyMemory.monsterMap.remove(userTarget);
 
 //          人物战斗中死亡
                     NettyMemory.eventStatus.put(channelTarget, EventStatus.DEADAREA);
@@ -154,7 +142,7 @@ public class BossAttackTask implements Runnable {
                     userTarget = getMaxDamageUser(bossArea);
                 }
 
-//        时间截止 战斗结束
+//          时间截止 战斗结束
                 if (System.currentTimeMillis() > NettyMemory.endBossAreaTime.get(teamId)) {
                     if (bossArea.isEnd()) {
                         return;

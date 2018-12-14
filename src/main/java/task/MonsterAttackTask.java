@@ -11,9 +11,7 @@ import io.netty.channel.Channel;
 import memory.NettyMemory;
 import packet.PacketType;
 import pojo.User;
-import skill.MonsterSkill;
 import utils.MessageUtil;
-import utils.MonsterRebornUtil;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -91,8 +89,6 @@ public class MonsterAttackTask implements Runnable {
                     channel.writeAndFlush(MessageUtil.turnToPacket("怪物已死亡", PacketType.ATTACKMSG));
                     List<Monster> monsters =  NettyMemory.areaMap.get(user.getPos()).monsters;
                     monsters.remove(monster);
-//              重新生成新的monster
-                    MonsterRebornUtil.rebornNewMonster(monsters);
                     NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
                     outfitEquipmentEvent.getGoods(channel,monster);
                     return;

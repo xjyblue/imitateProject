@@ -1,5 +1,7 @@
 package event;
 
+import achievement.Achievement;
+import achievement.AchievementExecutor;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.FriendapplyinfoMapper;
@@ -10,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketType;
 import pojo.*;
-import sun.plugin2.message.Message;
 import utils.MessageUtil;
 
 import java.util.List;
@@ -29,6 +30,8 @@ public class FriendEvent {
     private UserMapper userMapper;
     @Autowired
     private FriendinfoMapper friendinfoMapper;
+    @Autowired
+    private AchievementExecutor achievementExecutor;
 
     public void solve(Channel channel, String msg) {
         if (msg.equals("p")) {
@@ -92,6 +95,13 @@ public class FriendEvent {
             Channel channelTarget = NettyMemory.userToChannelMap.get(userTarget);
             channelTarget.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "同意了你的好友申请，你们现在是好友啦"));
         }
+
+//      触发好友成就
+        for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
+            if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.FRIEND)) {
+                achievementExecutor.executeAddFirstFriend(achievementprocess,user,userTarget,friendapplyinfo.getFromuser());
+            }
+        }
         return;
     }
 
@@ -107,8 +117,9 @@ public class FriendEvent {
             return;
         }
         for (Friendinfo friendinfo : list) {
-            resp += "[" + friendinfo.getFriendname() + "] ";
+            resp += "[" + friendinfo.getFriendname() + "] " + System.getProperty("line.separator");
         }
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG + resp, PacketType.FRIENDMSG));
     }
 
     private void applyFriendToOther(Channel channel, String msg) {

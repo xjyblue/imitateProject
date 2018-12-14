@@ -1,5 +1,6 @@
 package event;
 
+import achievement.AchievementExecutor;
 import caculation.AttackCaculation;
 import config.MessageConfig;
 import config.DeadOrAliveConfig;
@@ -24,6 +25,8 @@ import java.util.Map;
 public class PKEvent {
     @Autowired
     private AttackCaculation attackCaculation;
+    @Autowired
+    private AchievementExecutor achievementExecutor;
 
     public void pkOthers(Channel channel, String msg) {
         String temp[] = msg.split("-");
@@ -86,6 +89,11 @@ public class PKEvent {
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
             channelTarget.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY));
 //          死亡后处理
+
+//          pk触发pk成就
+            //todo:pk
+//          achievementExecutor
+
             NettyMemory.eventStatus.put(channelTarget,EventStatus.DEADAREA);
             return;
         }

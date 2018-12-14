@@ -102,7 +102,7 @@ public class AttackEvent {
             Monster monster = NettyMemory.monsterMap.get(user).get(0);
             UserSkill userSkill = NettyMemory.SkillMap.get(NettyMemory.userskillrelationMap.get(channel).get(msg).getSkillid());
             Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(channel).get(msg);
-//                  技能CD检查
+//          技能CD检查
             if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
 
 //              技能buff处理
@@ -146,7 +146,7 @@ public class AttackEvent {
                         channel.writeAndFlush(MessageUtil.turnToPacket(resp));
                         monster.setStatus(DeadOrAliveConfig.DEAD);
 
-//                          boss战斗场景
+//                      boss战斗场景
                         if (monster.getType().equals(Monster.TYPEOFBOSS)) {
                             BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
                             bossArea.getMonsters().get(bossArea.getSequence().get(0)).get(monster.getName()).setStatus(DeadOrAliveConfig.DEAD);

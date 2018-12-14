@@ -120,6 +120,7 @@ public class BossArea {
             alias.put("怪物状态", "status");
             alias.put("怪物技能", "skillIds");
             alias.put("出生地点", "pos");
+            alias.put("怪物经验值", "experience");
             List<Monster> monsterList = ExcelUtil.excel2Pojo(fis, Monster.class, alias);
 
             for (Monster monster : monsterList) {
@@ -153,15 +154,12 @@ public class BossArea {
                     } else {
                         monsters.get(monster.getPos()).put(monster.getName(), monster);
                     }
-//              if (monster.getName().equals("七天连锁酒店王")) {
-//                    firstMonster = monster;
-//               }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        this.bossName = "酒店怪兽副本";
+        this.bossName = "天灵魔殿";
         this.isEnd = false;
         this.isFight = false;
         this.damageAll = new HashMap<User, String>();

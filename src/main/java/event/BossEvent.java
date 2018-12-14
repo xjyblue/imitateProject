@@ -16,6 +16,7 @@ import pojo.Weaponequipmentbar;
 import skill.UserSkill;
 import task.BossAttackTask;
 import team.Team;
+import utils.AttackUtil;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
@@ -70,7 +71,6 @@ public class BossEvent {
         }
         BossArea bossArea = new BossArea();
         bossArea.setKeepTime(1200l);
-        bossArea.setName("灵魔地狱");
         bossArea.setTeamId(user.getTeamId());
 
 
@@ -115,25 +115,27 @@ public class BossEvent {
                 if (monster.getName().equals(temp[1]) && !monster.getStatus().equals(DeadOrAliveConfig.DEAD)) {
                     Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(channel).get(temp[2]);
                     UserSkill userSkill = NettyMemory.SkillMap.get(userskillrelation.getSkillid());
-//                                    判断人物MP量是否足够
+//                  判断人物MP量是否足够
                     BigInteger userMp = new BigInteger(user.getMp());
                     BigInteger skillMp = new BigInteger(userSkill.getSkillMp());
                     if (userMp.compareTo(skillMp) > 0) {
 //                      蓝量计算
                         userMp = userMp.subtract(skillMp);
                         user.setMp(userMp.toString());
-//                                    判断技能冷却
+//                      判断技能冷却
                         if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
 
 
 //                          技能buff处理
                             buffEvent.buffSolve(userSkill,monster,user);
 
-//                               判断攻击完怪物是否死亡，生命值计算逻辑
+                            AttackUtil.addMonsterToUserMonsterList(user,monster);
+
+//                          判断攻击完怪物是否死亡，生命值计算逻辑
                             BigInteger attackDamage = new BigInteger(userSkill.getDamage());
-//                              攻击逻辑计算
+//                          攻击逻辑计算
                             attackDamage = attackCaculation.caculate(user, attackDamage);
-//                              怪物掉血，生命值计算逻辑
+//                          怪物掉血，生命值计算逻辑
                             BigInteger monsterLife = monster.subLife(attackDamage);
                             String resp = out(user);
                             BigInteger minValueOfLife = new BigInteger("0");
@@ -165,6 +167,14 @@ public class BossEvent {
                                 monster.setValueOfLife("0");
 //                              修改怪物状态
                                 monster.setStatus(DeadOrAliveConfig.DEAD);
+
+//                              更改用户攻击的boss
+                                if (monster.getType().equals(Monster.TYPEOFBOSS)) {
+                                    BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
+                                    bossArea.getMonsters().get(bossArea.getSequence().get(0)).get(monster.getName()).setStatus(DeadOrAliveConfig.DEAD);
+                                    AttackUtil.changeUserAttackMonster(user,bossArea);
+                                    AttackUtil.killBossMessageToAll(user,monster);
+                                }
 
                                 BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
                                 if (!checkBossAreaAllBoss(bossArea)) {
@@ -201,13 +211,12 @@ public class BossEvent {
                                         + "[人物剩余蓝量]:" + user.getMp()
                                         + System.getProperty("line.separator");
                                 channel.writeAndFlush(MessageUtil.turnToPacket(resp));
-                                //TODO:更新数据库人物技能蓝量
-//                                    刷新技能时间
+
+//                             刷新技能时间
                                 userskillrelation.setSkillcds(System.currentTimeMillis());
-//                                  记录任务当前攻击的怪物
-                                List<Monster> monsters = new ArrayList<Monster>();
-                                monsters.add(monster);
-                                NettyMemory.monsterMap.put(user, monsters);
+//                             记录任务当前攻击的怪物
+                               AttackUtil.addMonsterToUserMonsterList(user,monster);
+
                                 NettyMemory.eventStatus.put(channel, EventStatus.ATTACK);
                                 BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
 //                                    提醒用户你已进入战斗模式

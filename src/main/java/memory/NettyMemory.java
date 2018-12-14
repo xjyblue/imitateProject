@@ -75,7 +75,7 @@ public class NettyMemory {
 	/** 初始化怪物技能*/
 	public static Map<Integer,MonsterSkill> monsterSkillMap = new HashMap<>();
 	/** 职业的构建 */
-	public static Map<Integer, Role> roleMap = new HashMap();
+	public static Map<Integer, Role> roleMap = new HashMap<>();
 	/** 交易单的建立*/
 	public static Map<String, Trade> tradeMap = new ConcurrentHashMap<>();
 	/** 人物经验表的建立*/

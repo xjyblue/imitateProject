@@ -13,6 +13,14 @@ public class Achievement {
     public static final int TALKTONPC = 3;
     //  收集任务
     public static final int COLLECT = 4;
+    //  通关副本任务
+    public static final int FINISHBOSSAREA = 5;
+    //  第一次好友任务
+    public static final int FRIEND = 6;
+    //  第一次工会任务
+    public static final int UNIONFIRST = 7;
+    //  第一次和玩家交易
+    public static final int TRADEFIRST = 8;
 
     private Integer achievementId;
 

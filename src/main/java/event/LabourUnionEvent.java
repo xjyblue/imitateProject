@@ -1,5 +1,6 @@
 package event;
 
+import achievement.AchievementExecutor;
 import caculation.UserbagCaculation;
 import component.parent.Good;
 import config.MessageConfig;
@@ -8,7 +9,6 @@ import mapper.*;
 import memory.NettyMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import packet.PacketProto;
 import packet.PacketType;
 import pojo.*;
 import utils.MessageUtil;
@@ -39,6 +39,8 @@ public class LabourUnionEvent {
     private UnionwarehouseMapper unionwarehouseMapper;
     @Autowired
     private UserbagCaculation userbagCaculation;
+    @Autowired
+    private AchievementExecutor achievementExecutor;
 
     private Lock lock = new ReentrantLock();
 
@@ -398,9 +400,11 @@ public class LabourUnionEvent {
 
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + "您同意了" + userTarget.getUsername() + "加入本工会", PacketType.UNIONINFO));
 
+//      处理第一次加入工会的事件
+        achievementExecutor.executeAddUnionFirst(userSession, userTarget.getUsername());
+
         String msgToAll = "欢迎" + userTarget.getUsername() + "加入了本公会";
         messageToAllInUnion(applyunioninfo.getUnionid(), msgToAll);
-
 //      移除申请记录
         applyunioninfoMapper.deleteByPrimaryKey(applyunioninfo.getApplyid());
         return;

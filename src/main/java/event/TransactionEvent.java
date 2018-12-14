@@ -1,5 +1,6 @@
 package event;
 
+import achievement.AchievementExecutor;
 import caculation.UserbagCaculation;
 import component.Equipment;
 import component.MpMedicine;
@@ -37,7 +38,8 @@ public class TransactionEvent {
     private CommonEvent commonEvent;
     @Autowired
     private UserbagCaculation userbagCaculation;
-
+    @Autowired
+    private AchievementExecutor achievementExecutor;
     public void trade(Channel channel, String msg) {
         if (msg.equals("ntrade")) {
             cancelTrade(channel, msg);
@@ -292,8 +294,11 @@ public class TransactionEvent {
 //          人物交易状态改为false
             trade.getUserTo().setIfTrade(false);
             trade.getUserStart().setIfTrade(false);
-            UserbagUtil.refreshUserbag(NettyMemory.userToChannelMap.get(trade.getUserTo()));
-            UserbagUtil.refreshUserbag(NettyMemory.userToChannelMap.get(trade.getUserStart()));
+            UserbagUtil.refreshUserbagInfo(NettyMemory.userToChannelMap.get(trade.getUserTo()));
+            UserbagUtil.refreshUserbagInfo(NettyMemory.userToChannelMap.get(trade.getUserStart()));
+
+//          第一次成功交易触发任务
+            achievementExecutor.executeFirstTrade(trade.getUserStart(),trade.getUserTo());
             return;
         }
 

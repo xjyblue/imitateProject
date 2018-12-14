@@ -225,4 +225,11 @@
       type = #{type,jdbcType=INTEGER}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="selectprocessByUsernameAndAchievementId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from achievementprocess
+    WHERE achievementId = #{fromUser} AND username = #{achievementId}
+  </select>
 </mapper>

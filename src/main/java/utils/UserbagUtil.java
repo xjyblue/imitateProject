@@ -16,7 +16,7 @@ import pojo.Userbag;
  */
 public class UserbagUtil {
 
-    public static void refreshUserbag(Channel channel) {
+    public static void refreshUserbagInfo(Channel channel) {
         User user = NettyMemory.session2UserIds.get(channel);
         String bagResp = System.getProperty("line.separator")
                 + "按b-物品编号使用蓝药"

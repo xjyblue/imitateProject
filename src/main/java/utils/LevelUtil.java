@@ -12,16 +12,18 @@ import java.util.Map;
  */
 public class LevelUtil {
 
+    //  根据经验拿到等级
     public static int getLevelByExperience(int experience) {
         for (Map.Entry<Integer, Level> entry : NettyMemory.levelMap.entrySet()) {
-            if(entry.getValue().getExperienceDown()<=experience&&entry.getValue().getExperienceUp()>=experience){
+            if (entry.getValue().getExperienceDown() <= experience && entry.getValue().getExperienceUp() >= experience) {
                 return entry.getKey();
             }
         }
         return 7;
     }
 
-    public static String getMaxHp(User user){
+    //  根据角色拿到血量上限
+    public static String getMaxHp(User user) {
         Level level = NettyMemory.levelMap.get(getLevelByExperience(user.getExperience()));
 //      这里可以附加装备属性
         return level.getMaxHp();
