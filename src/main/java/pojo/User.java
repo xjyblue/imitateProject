@@ -1,8 +1,16 @@
 package pojo;
 
+import event.EventDistributor;
+import io.netty.channel.Channel;
+import context.ProjectContext;
+import packet.PacketProto;
+import buff.BuffTask;
+
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class User {
     private String username;
@@ -18,8 +26,8 @@ public class User {
     private String hp;
 
     private String money;
-	
-	private String teamId;
+
+    private String teamId;
 
     private String traceId;
 
@@ -30,8 +38,8 @@ public class User {
     private String unionid;
 
     private Integer unionlevel;
-	
-	private List<Userbag> userBag;
+
+    private List<Userbag> userBag;
 
     private List<Weaponequipmentbar> weaponequipmentbars;
 
@@ -40,6 +48,57 @@ public class User {
     private List<Achievementprocess> achievementprocesses;
 
     private boolean ifTrade;
+
+    private EventDistributor eventDistributor;
+
+    private BuffTask buffTask;
+
+    private Long buffRefreshTime;
+
+    private boolean ifOnline;
+
+    //玩家的命令消费队列
+    private ConcurrentLinkedQueue<PacketProto.Packet> packetsQueue = new ConcurrentLinkedQueue<>();
+
+    public boolean isIfOnline() {
+        return ifOnline;
+    }
+
+    public void setIfOnline(boolean ifOnline) {
+        this.ifOnline = ifOnline;
+    }
+
+    public Long getBuffRefreshTime() {
+        return buffRefreshTime;
+    }
+
+    public void setBuffRefreshTime(Long buffRefreshTime) {
+        this.buffRefreshTime = buffRefreshTime;
+    }
+
+    public BuffTask getBuffTask() {
+        return buffTask;
+    }
+
+    public void setBuffTask(BuffTask buffTask) {
+        this.buffTask = buffTask;
+    }
+
+    public EventDistributor getEventDistributor() {
+        return eventDistributor;
+    }
+
+    public void setEventDistributor(EventDistributor eventDistributor) {
+        this.eventDistributor = eventDistributor;
+    }
+
+    public ConcurrentLinkedQueue<PacketProto.Packet> getPacketsQueue() {
+        return packetsQueue;
+    }
+
+    public void setPacketsQueue(ConcurrentLinkedQueue<PacketProto.Packet> packetsQueue) {
+        this.packetsQueue = packetsQueue;
+    }
 
     public List<Achievementprocess> getAchievementprocesses() {
         return achievementprocesses;
@@ -184,13 +243,7 @@ public class User {
     public void setUnionlevel(Integer unionlevel) {
         this.unionlevel = unionlevel;
     }
-	
-	 //  保证原子性
-    public synchronized void addMoney(BigInteger add) {
-        BigInteger userMoney = new BigInteger(this.getMoney());
-        userMoney = userMoney.add(add);
-        this.money = userMoney.toString();
-    }
+
 
     public synchronized void addMp(String changeNum) {
         BigInteger userMp = new BigInteger(this.getMp());
@@ -210,9 +263,9 @@ public class User {
         BigInteger userHp = new BigInteger(this.getHp());
         BigInteger subHp = new BigInteger(changeNum);
         userHp = userHp.subtract(subHp);
-        if(userHp.compareTo(new BigInteger("0"))<0){
+        if (userHp.compareTo(new BigInteger("0")) < 0) {
             this.setHp("0");
-        }else {
+        } else {
             this.setHp(userHp.toString());
         }
     }
@@ -223,12 +276,40 @@ public class User {
         userMoney = userMoney.subtract(sendMoney);
         this.setMoney(userMoney.toString());
     }
-    
+
 
     public synchronized void addHp(String recoverValue) {
         BigInteger addHp = new BigInteger(recoverValue);
         BigInteger userHp = new BigInteger(this.hp);
         userHp = userHp.add(addHp);
         this.hp = userHp.toString();
+    }
+
+    public void keepCall() {
+        if (this.isIfOnline()) {
+//      消费命令
+            consumePacket();
+//      buff更新
+            buffRefresh();
+        }
+    }
+
+    private void buffRefresh() {
+        if (buffRefreshTime < System.currentTimeMillis()) {
+            buffTask.refresh(this);
+            buffRefreshTime = System.currentTimeMillis() + 1000;
+        }
+    }
+
+    private void consumePacket() {
+        while (packetsQueue.peek() != null) {
+            PacketProto.Packet packet = packetsQueue.poll();
+            Channel channel = ProjectContext.userToChannelMap.get(this);
+            try {
+                eventDistributor.distributeEvent(channel, packet.getData());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

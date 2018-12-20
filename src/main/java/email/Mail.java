@@ -4,7 +4,7 @@ import pojo.Userbag;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/23 10:29
+ * Created by server on 2018/11/23 10:29
  */
 public class Mail {
     private boolean ifUserBag;

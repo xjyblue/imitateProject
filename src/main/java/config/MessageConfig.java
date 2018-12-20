@@ -2,7 +2,7 @@ package config;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/21 15:14
+ * Created by server on 2018/11/21 15:14
  */
 public class MessageConfig {
     public static final String LOGINMESSAGE = "请输入：用户名-密码";
@@ -22,6 +22,9 @@ public class MessageConfig {
     public static final String FAILGOODID = "请输入有效的物品ID";
     public static final String UNENOUGHMONEY = "您的金钱不足，请充值";
     public static final String NOUSERBAGID = "背包ID不存在";
+    public static final String NOTOUPSTARTLEVEL = "此物品无法升星";
+    public static final String HASHATEQUIP = "请卸下你穿戴的帽子再进行穿戴";
+    public static final String HASCOREEQUIP = "请卸下你的主武器再进行装备";
 
     public static final String RETREATFIGHT = "您已退出战斗";
     public static final String UNENOUGHMP = "您当前蓝量(MP)不足";
@@ -39,12 +42,16 @@ public class MessageConfig {
 
     public static final String NOTEAMMESSAGE = "你还没有队伍，可以输入t-create创建队伍或者t-add-（已有队伍的玩家名）加入队伍";
     public static final String INTEAMNOCREATETEAM = "你已在队伍中无法创建队伍";
+    public static final String NOFOUNDTEAM = "你查找的队伍不存在";
     public static final String CREATETEAMSUCCESSMESSAGE = "你成功创建队伍";
     public static final String NOINTEAMERRORMESSAGE = "你不在队伍中请不要做无效操作";
     public static final String DISSOLUTIONTEAM = "你已经解散当前队伍";
     public static final String SIGNOUTTEAM = "你已退出当前队伍";
-    public static final String NOFOUNDTEAM = "你所要加入的玩家队伍不存在";
+    public static final String SUCCESSTOAPPLY = "你成功申请加入该队伍";
+    public static final String SUCCESSENTERTEAM = "你成功加入当前队伍";
     public static final String YOUARENINTEAM = "你已在队伍中，请退出队伍再加入";
+    public static final String NOFOUNDTEAMAPPLYINFO = "请输入正确的队伍申请单记录";
+    public static final String USERNOONLINETOADDTEAM = "玩家掉线，无法加入队伍";
 
     public static final String EMPTYEMAIL = "您当前的邮箱为空";
     public static final String NOEMAILUSER = "系统无此用户，无法发送邮件";

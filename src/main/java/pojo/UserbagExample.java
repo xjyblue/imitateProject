@@ -493,6 +493,66 @@ public class UserbagExample {
             addCriterion("durability not between", value1, value2, "durability");
             return (Criteria) this;
         }
+
+        public Criteria andStartlevelIsNull() {
+            addCriterion("startLevel is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelIsNotNull() {
+            addCriterion("startLevel is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelEqualTo(Integer value) {
+            addCriterion("startLevel =", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelNotEqualTo(Integer value) {
+            addCriterion("startLevel <>", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelGreaterThan(Integer value) {
+            addCriterion("startLevel >", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelGreaterThanOrEqualTo(Integer value) {
+            addCriterion("startLevel >=", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelLessThan(Integer value) {
+            addCriterion("startLevel <", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelLessThanOrEqualTo(Integer value) {
+            addCriterion("startLevel <=", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelIn(List<Integer> values) {
+            addCriterion("startLevel in", values, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelNotIn(List<Integer> values) {
+            addCriterion("startLevel not in", values, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelBetween(Integer value1, Integer value2) {
+            addCriterion("startLevel between", value1, value2, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelNotBetween(Integer value1, Integer value2) {
+            addCriterion("startLevel not between", value1, value2, "startlevel");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

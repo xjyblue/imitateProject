@@ -1,15 +1,15 @@
 package event;
 
 import caculation.AttackCaculation;
-import component.Area;
-import component.BossArea;
+import component.Scene;
+import component.BossScene;
 import component.Equipment;
 import config.BuffConfig;
 import config.MessageConfig;
 import config.DeadOrAliveConfig;
 import factory.MonsterFactory;
 import io.netty.channel.Channel;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -61,18 +61,23 @@ public class AttackEvent {
 
 //      转移攻击目标
         if(msg.startsWith("attack")){
-            User user = NettyMemory.session2UserIds.get(channel);
+            User user = ProjectContext.session2UserIds.get(channel);
             String temp[]=msg.split("-");
             if(temp.length!=3){
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
                 return;
             }
 //          在副本中打
-            if(NettyMemory.bossAreaMap.containsKey(user.getTeamId())){
-                BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
-                Map<String,Monster> monsterMap = bossArea.getMonsters().get(bossArea.getSequence().get(0));
-                NettyMemory.monsterMap.get(user).remove(0);
-                NettyMemory.monsterMap.get(user).add(monsterMap.get(temp[1]));
+            if(ProjectContext.bossAreaMap.containsKey(user.getTeamId())){
+                BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+                Map<String,Monster> monsterMap = bossScene.getMonsters().get(bossScene.getSequence().get(0));
+                Monster monster = null;
+                for(Map.Entry<Integer,Monster> entry : ProjectContext.userToMonsterMap.get(user).entrySet()){
+                    monster = entry.getValue();
+                }
+                ProjectContext.userToMonsterMap.get(user).remove(monster.getId());
+                monster = monsterMap.get(temp[1]);
+                ProjectContext.userToMonsterMap.get(user).put(monster.getId(),monster);
                 attackKeySolve(channel,temp[2]);
                 return;
             }
@@ -81,9 +86,9 @@ public class AttackEvent {
 
 
         if (msg.equals("q")) {
-            NettyMemory.monsterMap.remove(NettyMemory.session2UserIds.get(channel));
+            ProjectContext.userToMonsterMap.remove(ProjectContext.session2UserIds.get(channel));
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RETREATFIGHT));
-            NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
+            ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
         } else {
             attackKeySolve(channel,msg);
         }
@@ -91,22 +96,24 @@ public class AttackEvent {
     }
 
     private void attackKeySolve(Channel channel,String msg) throws IOException {
-        if (NettyMemory.userskillrelationMap.get(channel).containsKey(msg)) {
-            User user = NettyMemory.session2UserIds.get(channel);
+        if (ProjectContext.userskillrelationMap.get(channel).containsKey(msg)) {
+            User user = ProjectContext.session2UserIds.get(channel);
 //          怪物buff处理
             if (user.getBuffMap().get(BuffConfig.SLEEPBUFF) != 5000) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SLEEPMESSAGE));
                 return;
             }
-
-            Monster monster = NettyMemory.monsterMap.get(user).get(0);
-            UserSkill userSkill = NettyMemory.SkillMap.get(NettyMemory.userskillrelationMap.get(channel).get(msg).getSkillid());
-            Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(channel).get(msg);
+            Monster monster = null;
+            for(Map.Entry<Integer,Monster> entry : ProjectContext.userToMonsterMap.get(user).entrySet()){
+                monster = entry.getValue();
+            }
+            UserSkill userSkill = ProjectContext.skillMap.get(ProjectContext.userskillrelationMap.get(channel).get(msg).getSkillid());
+            Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(channel).get(msg);
 //          技能CD检查
             if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
 
 //              技能buff处理
-                if(buffEvent.buffSolve(userSkill, monster, user)==1){
+                if(buffEvent.buffSolve(userskillrelation,userSkill, monster, user)==1){
                     return;
                 }
 
@@ -141,27 +148,26 @@ public class AttackEvent {
                                 + System.getProperty("line.separator")
                                 + "[消耗蓝量]:" + userSkill.getSkillMp()
                                 + System.getProperty("line.separator")
-                                + "[人物剩余蓝量]:" + user.getMp()
-                                + System.getProperty("line.separator");
+                                + "[人物剩余蓝量]:" + user.getMp();
                         channel.writeAndFlush(MessageUtil.turnToPacket(resp));
                         monster.setStatus(DeadOrAliveConfig.DEAD);
 
 //                      boss战斗场景
                         if (monster.getType().equals(Monster.TYPEOFBOSS)) {
-                            BossArea bossArea = NettyMemory.bossAreaMap.get(user.getTeamId());
-                            bossArea.getMonsters().get(bossArea.getSequence().get(0)).get(monster.getName()).setStatus(DeadOrAliveConfig.DEAD);
+                            BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+                            bossScene.getMonsters().get(bossScene.getSequence().get(0)).get(monster.getName()).setStatus(DeadOrAliveConfig.DEAD);
 //                          更改用户攻击的boss
-                            AttackUtil.changeUserAttackMonster(user,bossArea);
+                            AttackUtil.changeUserAttackMonster(user, bossScene);
                             AttackUtil.killBossMessageToAll(user,monster);
                         }
 
 //                          普通战斗场景
                         if (monster.getType().equals(Monster.TYPEOFCOMMONMONSTER)) {
 //                         移除死掉的怪物
-                            NettyMemory.areaMap.get(user.getPos()).getMonsters().remove(monster);
+                            ProjectContext.sceneMap.get(user.getPos()).getMonsters().remove(monster);
 //                          生成新的怪物
-                            Area area = NettyMemory.areaMap.get(user.getPos());
-                            area.getMonsters().add(monsterFactory.getMonsterByArea(user.getPos()));
+                            Scene scene = ProjectContext.sceneMap.get(user.getPos());
+                            scene.getMonsters().add(monsterFactory.getMonsterByArea(user.getPos()));
                         }
                     } else {
                         resp +=
@@ -177,13 +183,13 @@ public class AttackEvent {
                                         + "怪物剩余血量:" + monster.getValueOfLife();
                         userskillrelation.setSkillcds(System.currentTimeMillis());
 //                  更新用户总战斗伤害的值
-                        if (user.getTeamId() != null && NettyMemory.bossAreaMap.get(user.getTeamId()) != null) {
-                            if (!NettyMemory.bossAreaMap.get(user.getTeamId()).getDamageAll().containsKey(user)) {
-                                NettyMemory.bossAreaMap.get(user.getTeamId()).getDamageAll().put(user, attackDamage.toString());
+                        if (user.getTeamId() != null && ProjectContext.bossAreaMap.get(user.getTeamId()) != null) {
+                            if (!ProjectContext.bossAreaMap.get(user.getTeamId()).getDamageAll().containsKey(user)) {
+                                ProjectContext.bossAreaMap.get(user.getTeamId()).getDamageAll().put(user, attackDamage.toString());
                             } else {
-                                String newDamageValue = NettyMemory.bossAreaMap.get(user.getTeamId()).getDamageAll().get(user);
+                                String newDamageValue = ProjectContext.bossAreaMap.get(user.getTeamId()).getDamageAll().get(user);
                                 BigInteger newDamageValueI = new BigInteger(newDamageValue).add(attackDamage);
-                                NettyMemory.bossAreaMap.get(user.getTeamId()).getDamageAll().put(user, newDamageValueI.toString());
+                                ProjectContext.bossAreaMap.get(user.getTeamId()).getDamageAll().put(user, newDamageValueI.toString());
                             }
                         }
                         channel.writeAndFlush(MessageUtil.turnToPacket(resp));
@@ -198,7 +204,7 @@ public class AttackEvent {
     }
 
     private Map<String, Monster> changeToMap(User user) {
-        List<Monster> monsterList = NettyMemory.areaMap.get(user.getPos()).getMonsters();
+        List<Monster> monsterList = ProjectContext.sceneMap.get(user.getPos()).getMonsters();
         Map<String, Monster> map = new HashMap<>();
         for (Monster monster : monsterList) {
             map.put(monster.getId() + "", monster);
@@ -209,20 +215,19 @@ public class AttackEvent {
     private String out(User user) {
         String resp = "";
         for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
-            Equipment equipment = NettyMemory.equipmentMap.get(weaponequipmentbar.getWid());
+            Equipment equipment = ProjectContext.equipmentMap.get(weaponequipmentbar.getWid());
             resp += System.getProperty("line.separator")
-                    + equipment.getName() + "剩余耐久为:" + weaponequipmentbar.getDurability()
-            ;
+                    + equipment.getName() + "剩余耐久为:" + weaponequipmentbar.getDurability();
         }
         return resp;
     }
 
     private Map<String, Monster> getMonsterMap(User user) {
-        return NettyMemory.bossAreaMap.get(getTeam(user).getTeamId()).getMap();
+        return ProjectContext.bossAreaMap.get(getTeam(user).getTeamId()).getMap();
     }
 
     private Team getTeam(User user) {
-        if (!NettyMemory.teamMap.containsKey(user.getTeamId())) return null;
-        return NettyMemory.teamMap.get(user.getTeamId());
+        if (!ProjectContext.teamMap.containsKey(user.getTeamId())) return null;
+        return ProjectContext.teamMap.get(user.getTeamId());
     }
 }

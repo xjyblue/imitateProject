@@ -11,6 +11,8 @@ public class Weaponequipmentbar {
 
     private String typeof;
 
+    private Integer startlevel;
+
     public Integer getId() {
         return id;
     }
@@ -49,5 +51,13 @@ public class Weaponequipmentbar {
 
     public void setTypeof(String typeof) {
         this.typeof = typeof == null ? null : typeof.trim();
+    }
+
+    public Integer getStartlevel() {
+        return startlevel;
+    }
+
+    public void setStartlevel(Integer startlevel) {
+        this.startlevel = startlevel;
     }
 }

@@ -6,7 +6,7 @@ import component.Equipment;
 import component.parent.Good;
 import io.netty.channel.Channel;
 import mapper.UserbagMapper;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
@@ -18,7 +18,7 @@ import utils.UserbagUtil;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/12/13 12:11
+ * Created by server on 2018/12/13 12:11
  */
 @Component
 public class UserbagCaculation {
@@ -36,7 +36,7 @@ public class UserbagCaculation {
             } else {
                 userbagMapper.insertSelective(value);
             }
-        } else if (value.getTypeof().equals(Good.MPMEDICINE)) {
+        } else if (value.getTypeof().equals(Good.MPMEDICINE)||value.getTypeof().equals(Good.HPMEDICINE)) {
             boolean flag = true;
             for (Userbag userbag : user.getUserBag()) {
                 if (userbag.getWid().equals(value.getWid())) {
@@ -56,16 +56,17 @@ public class UserbagCaculation {
             }
         }
 
+//      触发成就
         if(value.getTypeof().equals(Good.EQUIPMENT)){
-            Equipment equipment = NettyMemory.equipmentMap.get(value.getWid());
+            Equipment equipment = ProjectContext.equipmentMap.get(value.getWid());
             for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
-                Achievement achievement = NettyMemory.achievementMap.get(achievementprocess.getAchievementid());
+                Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
                 if (achievementprocess.getType().equals(Achievement.COLLECT)) {
                     achievementExecutor.executeCollect(achievementprocess, equipment, user, achievement);
                 }
             }
         }
-        Channel channel = NettyMemory.userToChannelMap.get(user);
+        Channel channel = ProjectContext.userToChannelMap.get(user);
         UserbagUtil.refreshUserbagInfo(channel);
     }
 
@@ -78,7 +79,7 @@ public class UserbagCaculation {
             userbag.setNum(userbag.getNum() - num);
             userbagMapper.updateByPrimaryKey(userbag);
         }
-        Channel channel = NettyMemory.userToChannelMap.get(user);
+        Channel channel = ProjectContext.userToChannelMap.get(user);
         UserbagUtil.refreshUserbagInfo(channel);
     }
 

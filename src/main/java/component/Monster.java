@@ -34,6 +34,27 @@ public class Monster {
     private String pos;
 
     private Integer experience;
+//  时间
+    private Long attackEndTime;
+//  buff时间
+    private Long buffRefreshTime;
+
+
+    public Long getBuffRefreshTime() {
+        return buffRefreshTime;
+    }
+
+    public void setBuffRefreshTime(Long buffRefreshTime) {
+        this.buffRefreshTime = buffRefreshTime;
+    }
+
+    public Long getAttackEndTime() {
+        return attackEndTime;
+    }
+
+    public void setAttackEndTime(Long attackEndTime) {
+        this.attackEndTime = attackEndTime;
+    }
 
     public Integer getExperience() {
         return experience;

@@ -2,28 +2,28 @@ package event;
 
 import config.MessageConfig;
 import io.netty.channel.Channel;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import utils.MessageUtil;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/23 9:30
+ * Created by server on 2018/11/23 9:30
  */
 @Component("chatEvent")
 public class ChatEvent {
 
     public void chat(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if(msg.startsWith("chatAll")){
             String temp[] = msg.split("-");
             if(temp.length!=2){
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
                 return;
             }
-            for(Channel channelTemp : NettyMemory.group){
-                if(NettyMemory.session2UserIds.get(channelTemp)==user){
+            for(Channel channelTemp : ProjectContext.group){
+                if(ProjectContext.session2UserIds.get(channelTemp)==user){
                     channelTemp.writeAndFlush(MessageUtil.turnToPacket("你发送了全服喇叭，消息为>>>>>"+temp[1]+"<<<<<"));
                 }else {
                     channelTemp.writeAndFlush(MessageUtil.turnToPacket("您收到来自"+user.getUsername()+"的全服大喇叭:"+temp[1]));
@@ -36,8 +36,8 @@ public class ChatEvent {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
                 return;
             }
-            for(Channel channelTemp : NettyMemory.group){
-                User userTemp = NettyMemory.session2UserIds.get(channelTemp);
+            for(Channel channelTemp : ProjectContext.group){
+                User userTemp = ProjectContext.session2UserIds.get(channelTemp);
                 if(userTemp.getUsername().equals(temp[1])){
                     channelTemp.writeAndFlush(MessageUtil.turnToPacket("您收到来自"+user.getUsername()+"的私聊大喇叭:"+temp[2]));
                     return;

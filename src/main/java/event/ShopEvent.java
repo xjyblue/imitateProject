@@ -3,12 +3,13 @@ package event;
 import achievement.AchievementExecutor;
 import caculation.UserbagCaculation;
 import component.Equipment;
+import component.HpMedicine;
 import component.MpMedicine;
 import component.parent.Good;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.UserbagMapper;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -21,7 +22,7 @@ import java.util.UUID;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/20 17:46
+ * Created by server on 2018/11/20 17:46
  */
 @Component("shopEvent")
 public class ShopEvent {
@@ -33,7 +34,7 @@ public class ShopEvent {
     private UserbagCaculation userbagCaculation;
 
     public void shop(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (msg.equals("s")) {
             String resp = System.getProperty("line.separator")
                     + MessageConfig.MESSAGESTART
@@ -41,7 +42,7 @@ public class ShopEvent {
                     + "您好，欢迎来到不充钱就不能玩的商店领域";
 //          回显可购买的武器
             resp += System.getProperty("line.separator") + "可购买的武器有:" + System.getProperty("line.separator");
-            for (Map.Entry<Integer, Equipment> equipmentEntry : NettyMemory.equipmentMap.entrySet()) {
+            for (Map.Entry<Integer, Equipment> equipmentEntry : ProjectContext.equipmentMap.entrySet()) {
                 resp += "----物品id:" + equipmentEntry.getValue().getId()
                         + "----武器名称:" + equipmentEntry.getValue().getName()
                         + "----武器增加的伤害值:" + equipmentEntry.getValue().getAddValue()
@@ -50,7 +51,7 @@ public class ShopEvent {
             }
 //          回显可购买的蓝药
             resp += System.getProperty("line.separator") + "可购买的蓝药有:" + System.getProperty("line.separator");
-            for (Map.Entry<Integer, MpMedicine> mpMedicineEntry : NettyMemory.mpMedicineMap.entrySet()) {
+            for (Map.Entry<Integer, MpMedicine> mpMedicineEntry : ProjectContext.mpMedicineMap.entrySet()) {
                 resp += "----物品id:" + mpMedicineEntry.getValue().getId()
                         + "----蓝药名称:" + mpMedicineEntry.getValue().getName();
                 if (!mpMedicineEntry.getValue().isImmediate()) {
@@ -60,6 +61,16 @@ public class ShopEvent {
                     resp += "----蓝药回复总蓝量:" + mpMedicineEntry.getValue().getReplyValue();
                 }
                 resp += "----蓝药价值:" + mpMedicineEntry.getValue().getBuyMoney()
+                        + System.getProperty("line.separator");
+            }
+            resp += System.getProperty("line.separator") + "可购买的红药有:" + System.getProperty("line.separator");
+            for (Map.Entry<Integer, HpMedicine> hpMedicineEntry : ProjectContext.hpMedicineMap.entrySet()) {
+                HpMedicine hpMedicine = hpMedicineEntry.getValue();
+                resp += "----物品id:" + hpMedicine.getId()
+                        + "----物品名称" + hpMedicine.getName()
+                        + "----物品回复血量" + hpMedicine.getReplyValue()
+                        + "----物品cd" + hpMedicine.getCd()
+                        + "----物品价值" + hpMedicine.getReplyValue()
                         + System.getProperty("line.separator");
             }
             resp += "[购买武器请输入s-物品编号-数量 即可购买]" + System.getProperty("line.separator");
@@ -84,8 +95,8 @@ public class ShopEvent {
                 return;
             }
 //           处理蓝药购买逻辑
-            if (NettyMemory.mpMedicineMap.containsKey(Integer.parseInt(temp[1]))) {
-                MpMedicine mpMedicine = NettyMemory.mpMedicineMap.get(Integer.parseInt(temp[1]));
+            if (ProjectContext.mpMedicineMap.containsKey(Integer.parseInt(temp[1]))) {
+                MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(Integer.parseInt(temp[1]));
                 Userbag userbag = new Userbag();
                 userbag.setWid(mpMedicine.getId());
                 userbag.setName(user.getUsername());
@@ -97,24 +108,39 @@ public class ShopEvent {
                 channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + mpMedicine.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));
             }
 //            处理装备购买逻辑
-            if (NettyMemory.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
-                Equipment equipment = NettyMemory.equipmentMap.get(Integer.parseInt(temp[1]));
+            if (ProjectContext.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
+                Equipment equipment = ProjectContext.equipmentMap.get(Integer.parseInt(temp[1]));
 //              装备不支持叠加，一个格子一个装备
                 int count = Integer.parseInt(temp[2]);
                 while (count > 0) {
                     Userbag userbag = new Userbag();
                     userbag.setName(equipment.getName());
                     userbag.setNum(1);
+                    userbag.setStartlevel(equipment.getStartLevel());
                     userbag.setTypeof(Good.EQUIPMENT);
                     userbag.setName(user.getUsername());
+                    userbag.setStartlevel(equipment.getStartLevel());
                     userbag.setId(UUID.randomUUID().toString());
                     userbag.setWid(equipment.getId());
                     userbag.setDurability(equipment.getDurability());
-                    userbagCaculation.addUserBagForUser(user,userbag);
+                    userbagCaculation.addUserBagForUser(user, userbag);
                     count--;
                 }
                 String goodAllMoney = changeUserMoney(equipment.getBuyMoney(), temp[2], user);
                 channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + equipment.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));
+            }
+            //处理红药购买逻辑
+            if(ProjectContext.hpMedicineMap.containsKey(Integer.parseInt(temp[1]))){
+                HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(Integer.parseInt(temp[1]));
+                Userbag userbag = new Userbag();
+                userbag.setWid(hpMedicine.getId());
+                userbag.setName(user.getUsername());
+                userbag.setNum(Integer.parseInt(temp[2]));
+                userbag.setId(UUID.randomUUID().toString());
+                userbag.setTypeof(Good.HPMEDICINE);
+                userbagCaculation.addUserBagForUser(user, userbag);
+                String goodAllMoney = changeUserMoney(hpMedicine.getBuyMoney(), temp[2], user);
+                channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + hpMedicine.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));
             }
         }
     }
@@ -129,13 +155,13 @@ public class ShopEvent {
 
 
     private boolean checkUserMoneyEnough(String num, String s, Channel channel) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         BigInteger userMoney = new BigInteger(user.getMoney());
         BigInteger goodMoney = new BigInteger("0");
-        if (NettyMemory.equipmentMap.containsKey(Integer.parseInt(s))) {
-            goodMoney = new BigInteger(NettyMemory.equipmentMap.get(Integer.parseInt(s)).getBuyMoney()).multiply(new BigInteger(num));
-        } else if (NettyMemory.mpMedicineMap.containsKey(Integer.parseInt(s))) {
-            goodMoney = new BigInteger(NettyMemory.mpMedicineMap.get(Integer.parseInt(s)).getBuyMoney()).multiply(new BigInteger(num));
+        if (ProjectContext.equipmentMap.containsKey(Integer.parseInt(s))) {
+            goodMoney = new BigInteger(ProjectContext.equipmentMap.get(Integer.parseInt(s)).getBuyMoney()).multiply(new BigInteger(num));
+        } else if (ProjectContext.mpMedicineMap.containsKey(Integer.parseInt(s))) {
+            goodMoney = new BigInteger(ProjectContext.mpMedicineMap.get(Integer.parseInt(s)).getBuyMoney()).multiply(new BigInteger(num));
         }
         if (userMoney.compareTo(goodMoney) >= 0) {
             return true;
@@ -144,10 +170,13 @@ public class ShopEvent {
     }
 
     private boolean checkIfGoodId(String s) {
-        if (NettyMemory.mpMedicineMap.containsKey(Integer.parseInt(s))) {
+        if (ProjectContext.mpMedicineMap.containsKey(Integer.parseInt(s))) {
             return true;
         }
-        if (NettyMemory.equipmentMap.containsKey(Integer.parseInt(s))) {
+        if (ProjectContext.equipmentMap.containsKey(Integer.parseInt(s))) {
+            return true;
+        }
+        if(ProjectContext.hpMedicineMap.containsKey(Integer.parseInt(s))){
             return true;
         }
         return false;

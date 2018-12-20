@@ -12,14 +12,14 @@ import javax.swing.*;
 import static packet.PacketProto.Packet.newBuilder;
 
 /**
- * @author xiaojianyu
+ * @author server
  */
 public class ClientHandler extends ChannelHandlerAdapter {
-    private Client client;
+    private ClientConfig clientConfig;
     private ClientStart clientStart;
 
-    ClientHandler(Client client, ClientStart clientStart) {
-        this.client = client;
+    ClientHandler(ClientConfig clientConfig, ClientStart clientStart) {
+        this.clientConfig = clientConfig;
         this.clientStart = clientStart;
     }
 
@@ -107,9 +107,9 @@ public class ClientHandler extends ChannelHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 //      玩家网络掉线的时候触发---------客户端
-        System.out.println("--- Server is inactive ---");
+        System.out.println("--- ServerConfig is inactive ---");
         super.channelInactive(ctx);
-        client.doConnect();
+        clientConfig.doConnect();
     }
 
 

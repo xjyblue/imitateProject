@@ -9,23 +9,22 @@ import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import packet.PacketProto;
-import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.concurrent.TimeUnit;
 
 import static packet.PacketProto.Packet.newBuilder;
 
 /**
- * @author xiaojianyu
+ * @author server
  */
-public class Client {
+public class ClientConfig {
     private int port;
     private String host;
     private Bootstrap bootstrap;
     private Channel channel;
     private ClientStart clientStart;
 
-    public Client(int port, String host,ClientStart clientStart) {
+    public ClientConfig(int port, String host, ClientStart clientStart) {
         this.host = host;
         this.port = port;
         this.clientStart = clientStart;
@@ -52,9 +51,9 @@ public class Client {
                         pipeline.addLast(new ProtobufEncoder());
                         pipeline.addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
 //                       读空闲心跳，写空闲心跳，读或者写空闲心跳,读空闲每隔两秒发送心跳包
-                        pipeline.addLast(new IdleStateHandler(0, 1, 0));
+//                        pipeline.addLast(new IdleStateHandler(0, 1, 0));
                         socketChannel.pipeline().addLast(
-                                new ClientHandler(Client.this,clientStart));
+                                new ClientHandler(ClientConfig.this,clientStart));
                     }
                 });
         // 进行连接

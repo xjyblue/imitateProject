@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/19 14:13
+ * Created by server on 2018/11/19 14:13
  */
 public class Team {
     private String teamId;

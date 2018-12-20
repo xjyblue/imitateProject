@@ -6,12 +6,13 @@ import component.parent.Good;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.*;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketType;
 import pojo.*;
 import utils.MessageUtil;
+import utils.UserbagUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/12/6 16:30
+ * Created by server on 2018/12/6 16:30
  */
 @Component("labourUnionEvents")
 public class LabourUnionEvent {
@@ -97,7 +98,7 @@ public class LabourUnionEvent {
     }
 
     private void getUserbagFromUnion(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("=");
         if (temp.length != 3) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -174,7 +175,7 @@ public class LabourUnionEvent {
     }
 
     private void giveUserbagToUnion(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("=");
         if (temp.length != 3) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -184,7 +185,7 @@ public class LabourUnionEvent {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
             return;
         }
-        Userbag userbag = Userbag.getUserbagByUserbagId(user, temp[1]);
+        Userbag userbag = UserbagUtil.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
             return;
@@ -261,7 +262,7 @@ public class LabourUnionEvent {
     }
 
     private void showWarehouse(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
             return;
@@ -277,7 +278,7 @@ public class LabourUnionEvent {
     }
 
     private void removeMember(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("=");
         if (temp.length != 2) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -301,7 +302,7 @@ public class LabourUnionEvent {
         if (userSession != null) {
             userSession.setUnionid(null);
             userSession.setUnionlevel(null);
-            Channel channelTemp = NettyMemory.userToChannelMap.get(userSession);
+            Channel channelTemp = ProjectContext.userToChannelMap.get(userSession);
             channelTemp.writeAndFlush(MessageUtil.turnToPacket("你被" + user.getUsername() + "T出了工会"));
         }
 
@@ -329,7 +330,7 @@ public class LabourUnionEvent {
 
     private void memberLevelChange(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (temp.length != 3) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -358,7 +359,7 @@ public class LabourUnionEvent {
     }
 
     private void queryUnionMemberInfo(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
             return;
@@ -411,7 +412,7 @@ public class LabourUnionEvent {
     }
 
     private void queryApplyInfo(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
             return;
@@ -430,7 +431,7 @@ public class LabourUnionEvent {
     }
 
     private void applyUnion(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("=");
         if (temp.length != 2) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -464,7 +465,7 @@ public class LabourUnionEvent {
     }
 
     private void outUnion(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (user.getUnionlevel() == 1) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOOUTUNION));
             return;
@@ -481,7 +482,7 @@ public class LabourUnionEvent {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (user.getUnionid() != null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOCREATEUNION));
             return;
@@ -491,7 +492,7 @@ public class LabourUnionEvent {
         unioninfo.setUnionid(unioninfoId);
         unioninfo.setUnionname(temp[1]);
         unioninfo.setUnionwarehourseid(UUID.randomUUID().toString());
-        User userTemp = NettyMemory.session2UserIds.get(channel);
+        User userTemp = ProjectContext.session2UserIds.get(channel);
         userTemp.setUnionid(unioninfoId);
 
 
@@ -514,9 +515,9 @@ public class LabourUnionEvent {
     }
 
     private void enterUnionView(Channel channel, String msg) {
-        NettyMemory.eventStatus.put(channel, EventStatus.LABOURUNION);
+        ProjectContext.eventStatus.put(channel, EventStatus.LABOURUNION);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERLABOURVIEW));
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
         } else {
@@ -526,14 +527,14 @@ public class LabourUnionEvent {
     }
 
     private void outUnionView(Channel channel, String msg) {
-        NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
+        ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTLABOURVIEW));
         channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.UNIONINFO));
         return;
     }
 
     private User getUserFromSessionById(String username) {
-        for (Map.Entry<Channel, User> entry : NettyMemory.session2UserIds.entrySet()) {
+        for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
             if (entry.getValue().getUsername().equals(username)) {
                 return entry.getValue();
             }
@@ -543,8 +544,8 @@ public class LabourUnionEvent {
 
     //  对在线的工会玩家广播一次内容
     private void messageToAllInUnion(String unionId, String msg) {
-        for (Channel channelTemp : NettyMemory.group) {
-            User userTemp = NettyMemory.session2UserIds.get(channelTemp);
+        for (Channel channelTemp : ProjectContext.group) {
+            User userTemp = ProjectContext.session2UserIds.get(channelTemp);
             if (userTemp.getUnionid() != null && userTemp.getUnionid().equals(unionId)) {
                 channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
             }

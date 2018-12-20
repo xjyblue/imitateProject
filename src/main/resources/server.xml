@@ -12,17 +12,7 @@
 	<context:annotation-config />
 	<!-- 扫包 -->
 	<context:component-scan
-		base-package="xiaojianyu.controller" />
-	<context:component-scan
-		base-package="event" />
-	<context:component-scan
-			base-package="caculation" />
-	<context:component-scan
-			base-package="factory" />
-	<context:component-scan
-			base-package="achievement" />
-
-
+		base-package="server event caculation factory achievement buff" />
 
 	<context:property-placeholder
 		location="classpath*:config.properties" ignore-unresolvable="true" />

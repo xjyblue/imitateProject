@@ -2,13 +2,14 @@ package event;
 
 import achievement.Achievement;
 import achievement.AchievementExecutor;
+import caculation.MoneyCaculation;
 import caculation.UserbagCaculation;
 import component.Equipment;
 import component.Monster;
 import component.parent.Good;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
@@ -17,12 +18,11 @@ import pojo.Userbag;
 import utils.LevelUtil;
 import utils.MessageUtil;
 
-import java.math.BigInteger;
 import java.util.UUID;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/22 10:27
+ * Created by server on 2018/11/22 10:27
  */
 @Component("qutfitEquipmentEvent")
 public class OutfitEquipmentEvent {
@@ -32,6 +32,8 @@ public class OutfitEquipmentEvent {
     private AchievementExecutor achievementExecutor;
     @Autowired
     private UserbagCaculation userbagCaculation;
+    @Autowired
+    private MoneyCaculation moneyCaculation;
 
     public void getGoods(Channel channel, Monster monster) {
         User user = getUser(channel);
@@ -40,22 +42,22 @@ public class OutfitEquipmentEvent {
 //       这里可以引入装备爆率表
             if (num < 10) {
 //             多一把武器
-                Equipment equipment = NettyMemory.equipmentMap.get(3006);
+                Equipment equipment = ProjectContext.equipmentMap.get(3006);
                 equipMentToUser(equipment, user, channel);
             } else {
-                BigInteger addMoney = new BigInteger("200000");
-                user.addMoney(addMoney);
-                channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + addMoney.toString() + "金币,当前人物金币为[" + user.getMoney() + "]"));
+                String money = "20000";
+                moneyCaculation.addMoneyToUser(user, money);
+                channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + money + "金币,当前人物金币为[" + user.getMoney() + "]"));
             }
         } else if (monster.getType().equals(Monster.TYPEOFBOSS)) {
             if (num < 10) {
 //             多一把武器
-                Equipment equipment = NettyMemory.equipmentMap.get(3007);
+                Equipment equipment = ProjectContext.equipmentMap.get(3007);
                 equipMentToUser(equipment, user, channel);
             } else {
-                BigInteger addMoney = new BigInteger("20000000");
-                user.addMoney(addMoney);
-                channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + addMoney.toString() + "金币,当前人物金币为[" + user.getMoney() + "]"));
+                String money = "20000000";
+                moneyCaculation.addMoneyToUser(user, money);
+                channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + money + "金币,当前人物金币为[" + user.getMoney() + "]"));
             }
 
         }
@@ -70,7 +72,7 @@ public class OutfitEquipmentEvent {
 
 //      触发任务事件
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
-            Achievement achievement = NettyMemory.achievementMap.get(achievementprocess.getAchievementid());
+            Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.ATTACKMONSTER)) {
                 achievementExecutor.executeKillMonster(user, achievementprocess, monster.getId());
             }
@@ -78,7 +80,7 @@ public class OutfitEquipmentEvent {
                 achievementExecutor.executeLevelUp(achievementprocess, user, achievement);
             }
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.FINISHBOSSAREA) && monster.getType().equals(Monster.TYPEOFBOSS)) {
-                achievementExecutor.executeBossAttack(achievementprocess, user, achievement,monster);
+                achievementExecutor.executeBossAttack(achievementprocess, user, achievement, monster);
             }
         }
 
@@ -93,6 +95,7 @@ public class OutfitEquipmentEvent {
         userbag.setNum(1);
         userbag.setTypeof(Good.EQUIPMENT);
         userbag.setName(equipment.getName());
+        userbag.setStartlevel(equipment.getStartLevel());
         userbag.setWid(equipment.getId());
         userbag.setDurability(equipment.getDurability());
         userbagCaculation.addUserBagForUser(user, userbag);
@@ -100,6 +103,6 @@ public class OutfitEquipmentEvent {
     }
 
     private User getUser(Channel channel) {
-        return NettyMemory.session2UserIds.get(channel);
+        return ProjectContext.session2UserIds.get(channel);
     }
 }

@@ -1,19 +1,21 @@
 package event;
 
 import achievement.Achievement;
+import component.Scene;
 import config.BuffConfig;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketType;
 import pojo.*;
 import role.Role;
 import skill.UserSkill;
+import buff.BuffTask;
 import utils.AchievementUtil;
 import utils.LevelUtil;
 import utils.MessageUtil;
@@ -31,6 +33,10 @@ public class LoginEvent {
     private UserskillrelationMapper userskillrelationMapper;
     @Autowired
     private AchievementprocessMapper achievementprocessMapper;
+    @Autowired
+    private EventDistributor eventDistributor;
+    @Autowired
+    private BuffTask buffTask;
 
     private Lock lock = new ReentrantLock();
 
@@ -57,11 +63,11 @@ public class LoginEvent {
                 Map<String, Userskillrelation> userskillrelationMap = new HashMap<>();
                 String skillLook = "";
                 for (Userskillrelation userskillrelation : userskillrelations) {
-                    UserSkill userSkill = NettyMemory.SkillMap.get(userskillrelation.getSkillid());
+                    UserSkill userSkill = ProjectContext.skillMap.get(userskillrelation.getSkillid());
                     userskillrelationMap.put(userskillrelation.getKeypos(), userskillrelation);
                     skillLook += "[键位-" + userskillrelation.getKeypos() + "-技能名称-" + userSkill.getSkillName() + "-技能伤害-" + userSkill.getDamage() + "技能cd" + userSkill.getAttackCd() + "] ";
                 }
-                NettyMemory.userskillrelationMap.put(channel, userskillrelationMap);
+                ProjectContext.userskillrelationMap.put(channel, userskillrelationMap);
 
 //              初始化玩家的各种buffer
                 Map<String, Integer> map = new HashMap<>();
@@ -83,20 +89,32 @@ public class LoginEvent {
                 mapSecond.put(BuffConfig.ALLPERSON, 1000l);
                 mapSecond.put(BuffConfig.BABYBUF, 1000l);
 
-                if (!NettyMemory.userBuffEndTime.containsKey(user)) {
-                    NettyMemory.userBuffEndTime.put(user, mapSecond);
+                if (!ProjectContext.userBuffEndTime.containsKey(user)) {
+                    ProjectContext.userBuffEndTime.put(user, mapSecond);
                 }
-//                初始化玩家的技能end
+//              初始化玩家的技能end
 
-                NettyMemory.session2UserIds.put(channel, user);
-                NettyMemory.userToChannelMap.put(user, channel);
+//              这里注入事件处理器是为了让玩家自己心跳去消费命令，执行任务
+                user.setEventDistributor(eventDistributor);
+//              注入buff处理器，让用户去刷新自己的buff
+                user.setBuffTask(buffTask);
+                user.setBuffRefreshTime(0l);
+                user.setIfOnline(true);
+
+//              将玩家放入场景队列中
+                Scene scene = ProjectContext.sceneMap.get(user.getPos());
+                scene.getUserMap().put(user.getUsername(),user);
+
+
+                ProjectContext.session2UserIds.put(channel, user);
+                ProjectContext.userToChannelMap.put(user, channel);
 
                 initUserProcess(channel);
 
-                channel.writeAndFlush(MessageUtil.turnToPacket("登录成功，你已进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
-                Role role = NettyMemory.roleMap.get(user.getRoleid());
+                channel.writeAndFlush(MessageUtil.turnToPacket("登录成功，你已进入" + ProjectContext.sceneMap.get(user.getPos()).getName()));
+                Role role = ProjectContext.roleMap.get(user.getRoleid());
                 channel.writeAndFlush(MessageUtil.turnToPacket("   " + user.getUsername() + "    职业为:" + role.getName() + "] " + skillLook, PacketType.USERINFO));
-                NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
+                ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
 
             }
         }
@@ -105,14 +123,14 @@ public class LoginEvent {
     private void replaceUserChannel(String username) {
         try{
             lock.lock();
-            for (Map.Entry<Channel, User> entry : NettyMemory.session2UserIds.entrySet()) {
+            for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
                 Channel channel = entry.getKey();
                 if (entry.getValue().getUsername().equals(username)) {
 //              进行顶号处理,之前的channel先挂掉
                     channel.writeAndFlush(MessageUtil.turnToPacket("不好意思,有人在别处登录你的游戏号，请选择重新登录或者修改密码"));
                     channel.close();
 //              清除该channel和user的所有信息
-
+                //todo: 处理。。。
                 }
             }
         }finally {
@@ -123,9 +141,9 @@ public class LoginEvent {
     private void initUserProcess(Channel channel) {
         //初始化玩家任务进度,如果玩家还没有进度
         //todo：后面改成注册弄入
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (user.getAchievementprocesses().size() == 0) {
-            for (Map.Entry<Integer, Achievement> entry : NettyMemory.achievementMap.entrySet()) {
+            for (Map.Entry<Integer, Achievement> entry : ProjectContext.achievementMap.entrySet()) {
                 Achievementprocess achievementprocess = new Achievementprocess();
                 achievementprocess.setIffinish(false);
                 achievementprocess.setType(entry.getValue().getType());

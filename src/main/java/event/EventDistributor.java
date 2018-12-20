@@ -1,19 +1,18 @@
 package event;
 
 
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import memory.NettyMemory;
 
 import java.io.IOException;
 
 /**
  * 具体事件分发器
  *
- * @author xiaojianyu
+ * @author server
  */
 @Component("eventDistributor")
 public class EventDistributor {
@@ -41,45 +40,44 @@ public class EventDistributor {
     private LabourUnionEvent labourUnionEvent;
     @Autowired
     private FriendEvent friendEvent;
-    public void distributeEvent(ChannelHandlerContext ctx, String msg) throws IOException {
-        Channel ch = ctx.channel();
-        String status = NettyMemory.eventStatus.get(ch);
+    public void distributeEvent(Channel ch, String msg) throws IOException {
+        String status = ProjectContext.eventStatus.get(ch);
         switch (status) {
             case EventStatus.COMING:
-                connectEvent.connect(ctx.channel(),msg);
+                connectEvent.connect(ch,msg);
                 break;
             case EventStatus.LOGIN:
-                loginEvent.login(ctx.channel(), msg);
+                loginEvent.login(ch, msg);
                 break;
             case EventStatus.REGISTER:
-                registerEvent.register(ctx.channel(), msg);
+                registerEvent.register(ch, msg);
                 break;
             case EventStatus.STOPAREA:
-                stopAreaEvent.stopArea(ctx.channel(), msg);
+                stopAreaEvent.stopArea(ch, msg);
                 break;
             case EventStatus.SKILLMANAGER:
-                skillEvent.skill(ctx.channel(), msg);
+                skillEvent.skill(ch, msg);
                 break;
             case EventStatus.ATTACK:
-                attackEvent.attack(ctx.channel(), msg);
+                attackEvent.attack(ch, msg);
                 break;
             case EventStatus.BOSSAREA:
-                bossEvent.attack(ctx.channel(), msg);
+                bossEvent.attack(ch, msg);
                 break;
             case EventStatus.SHOPAREA:
-                shopEvent.shop(ctx.channel(), msg);
+                shopEvent.shop(ch, msg);
                 break;
             case EventStatus.TRADE:
-                transactionEvent.tradeing(ctx.channel(),msg);
+                transactionEvent.tradeing(ch,msg);
                 break;
             case EventStatus.DEADAREA:
-                deadEvent.dead(ctx.channel(),msg);
+                deadEvent.dead(ch,msg);
                 break;
             case EventStatus.LABOURUNION:
-                labourUnionEvent.solve(ctx.channel(),msg);
+                labourUnionEvent.solve(ch,msg);
                 break;
             case EventStatus.FRIEND:
-                friendEvent.solve(ctx.channel(),msg);
+                friendEvent.solve(ch,msg);
                 break;
         }
     }

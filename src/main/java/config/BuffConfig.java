@@ -2,7 +2,7 @@ package config;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/27 16:05
+ * Created by server on 2018/11/27 16:05
  */
 public class BuffConfig {
 

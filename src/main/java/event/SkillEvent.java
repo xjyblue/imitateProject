@@ -3,7 +3,7 @@ package event;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.UserskillrelationMapper;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -25,9 +25,9 @@ public class SkillEvent {
         if (msg.equals("lookSkill")) {
             String skillLook = "";
             channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
-            Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(channel);
+            Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(channel);
             for (Map.Entry<String, Userskillrelation> entry : map.entrySet()) {
-                UserSkill userSkill = NettyMemory.SkillMap.get(entry.getValue().getSkillid());
+                UserSkill userSkill = ProjectContext.skillMap.get(entry.getValue().getSkillid());
                 skillLook += "键位:" + entry.getKey()
                         + "----技能名称:" + userSkill.getSkillName()
                         + "----技能伤害:" + userSkill.getDamage()
@@ -39,16 +39,16 @@ public class SkillEvent {
             temp = msg.split("-");
             if (temp.length == 3) {
                 boolean flag = false;
-                Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(channel);
+                Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(channel);
                 for (Map.Entry<String, Userskillrelation> entry : map.entrySet()) {
-                    UserSkill userSkill = NettyMemory.SkillMap.get(entry.getValue().getSkillid());
+                    UserSkill userSkill = ProjectContext.skillMap.get(entry.getValue().getSkillid());
                     if (userSkill.getSkillName().equals(temp[1])) {
                         flag = true;
                         Userskillrelation userskillrelation = entry.getValue();
                         map.remove(entry.getKey());
                         map.put(temp[2], userskillrelation);
 //                                    更新session
-                        User user = NettyMemory.session2UserIds.get(channel);
+                        User user = ProjectContext.session2UserIds.get(channel);
 //                                    更新数据库
                         UserskillrelationExample userskillrelationExample = new UserskillrelationExample();
                         UserskillrelationExample.Criteria criteria = userskillrelationExample.createCriteria();
@@ -65,9 +65,9 @@ public class SkillEvent {
                 }
             }
         } else if (msg.equals("quitSkill")) {
-            User user = NettyMemory.session2UserIds.get(channel);
-            channel.writeAndFlush(MessageUtil.turnToPacket("您已退出技能管理模块，进入" + NettyMemory.areaMap.get(user.getPos()).getName()));
-            NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
+            User user = ProjectContext.session2UserIds.get(channel);
+            channel.writeAndFlush(MessageUtil.turnToPacket("您已退出技能管理模块，进入" + ProjectContext.sceneMap.get(user.getPos()).getName()));
+            ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
         } else {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
         }

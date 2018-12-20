@@ -2,12 +2,12 @@ package component.parent;
 
 import component.Equipment;
 import component.MpMedicine;
-import memory.NettyMemory;
+import context.ProjectContext;
 import pojo.Userbag;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/21 9:46
+ * Created by server on 2018/11/21 9:46
  */
 //存储所有物品的共有属性
 public class Good {
@@ -50,11 +50,11 @@ public class Good {
 
     public static String getGoodNameByUserbag(Userbag userbag) {
         if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
-            MpMedicine mpMedicine = NettyMemory.mpMedicineMap.get(userbag.getWid());
+            MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
             return "[蓝药--》] [物品id:"+userbag.getId()+"] [药品名称：" + mpMedicine.getName() + "]" + " [药品数量: " + userbag.getNum() + "]";
         }
         if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
-            Equipment equipment = NettyMemory.equipmentMap.get(userbag.getWid());
+            Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
             return "[武器--》] [物品id:"+userbag.getId()+"] [武器名称：" + equipment.getName() + "]" + " [武器耐久度：" + userbag.getDurability() + "]" + " [武器数量： " + userbag.getNum() + "]";
         }
         return null;

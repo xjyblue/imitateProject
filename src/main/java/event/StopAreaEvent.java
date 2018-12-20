@@ -3,7 +3,7 @@ package event;
 import achievement.Achievement;
 import achievement.AchievementExecutor;
 import caculation.AttackCaculation;
-import component.Area;
+import component.Scene;
 import component.Equipment;
 import component.Monster;
 import component.NPC;
@@ -12,22 +12,19 @@ import config.DeadOrAliveConfig;
 import factory.MonsterFactory;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
-import memory.NettyMemory;
+import mapper.UserbagMapper;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pojo.Achievementprocess;
-import pojo.User;
-import pojo.Userskillrelation;
-import pojo.Weaponequipmentbar;
+import pojo.*;
 import skill.UserSkill;
-import task.MonsterAttackTask;
 import utils.MessageUtil;
+import utils.SceneUtil;
+import utils.UserbagUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 @Component("stopAreaEvent")
 public class StopAreaEvent {
@@ -63,6 +60,8 @@ public class StopAreaEvent {
     private AchievementExecutor achievementExecutor;
     @Autowired
     private FriendEvent friendEvent;
+    @Autowired
+    private UserbagMapper userbagMapper;
     public void stopArea(Channel channel, String msg) throws IOException {
         if (msg.startsWith("iftrade") || msg.startsWith("ytrade") || msg.equals("ntrade")) {
             transactionEvent.trade(channel, msg);
@@ -96,8 +95,8 @@ public class StopAreaEvent {
             labourUnionEvent.solve(channel, msg);
             return;
         }
-        if(msg.equals("p")){
-            friendEvent.solve(channel,msg);
+        if (msg.equals("p")) {
+            friendEvent.solve(channel, msg);
             return;
         }
         if (msg.equals("aoi")) {
@@ -108,6 +107,10 @@ public class StopAreaEvent {
             commonEvent.common(channel, msg);
             return;
         }
+        if (msg.startsWith("i")) {
+            upEquipmentStartlevel(channel, msg);
+            return;
+        }
         String temp[] = null;
         if (msg.startsWith("move")) {
             temp = msg.split("-");
@@ -115,17 +118,26 @@ public class StopAreaEvent {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
                 return;
             }
-            User user = NettyMemory.session2UserIds.get(channel);
-            if (temp[1].equals(NettyMemory.areaMap.get(user.getPos()).getName())) {
+            User user = ProjectContext.session2UserIds.get(channel);
+            if (temp[1].equals(ProjectContext.sceneMap.get(user.getPos()).getName())) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNMOVELOCAL));
             } else {
-                if (!NettyMemory.areaSet.contains(temp[1])) {
+//              场景的移动切换用户到不同的场景线程
+                if (!ProjectContext.areaSet.contains(temp[1])) {
                     channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTARGETTOMOVE));
                 } else {
-                    if (NettyMemory.areaMap.get(user.getPos()).getAreaSet().contains(temp[1])) {
-                        user.setPos(NettyMemory.areaToNum.get(temp[1]));
+                    if (ProjectContext.sceneMap.get(user.getPos()).getSceneSet().contains(temp[1])) {
+//                      场景切换
+                        Scene scene = ProjectContext.sceneMap.get(user.getPos());
+                        scene.getUserMap().remove(user.getUsername());
+
+                        Scene sceneTarget = ProjectContext.sceneMap.get(SceneUtil.getSceneByName(temp[1]).getId());
+                        sceneTarget.getUserMap().put(user.getUsername(), user);
+
+                        user.setPos(sceneTarget.getId());
                         userMapper.updateByPrimaryKeySelective(user);
-                        NettyMemory.session2UserIds.put(channel, user);
+
+                        ProjectContext.session2UserIds.put(channel, user);
                         channel.writeAndFlush(MessageUtil.turnToPacket("已移动到" + temp[1]));
                     } else {
                         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REMOTEMOVEMESSAGE));
@@ -134,20 +146,20 @@ public class StopAreaEvent {
             }
         } else if (msg.startsWith("talk")) {
             temp = msg.split("-");
-            User user = NettyMemory.session2UserIds.get(channel);
+            User user = ProjectContext.session2UserIds.get(channel);
             if (temp.length != 2) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             } else {
-                List<NPC> npcs = NettyMemory.areaMap.get(NettyMemory.session2UserIds.get(channel).getPos())
+                List<NPC> npcs = ProjectContext.sceneMap.get(ProjectContext.session2UserIds.get(channel).getPos())
                         .getNpcs();
                 for (NPC npc : npcs) {
                     if (npc.getName().equals(temp[1])) {
                         channel.writeAndFlush(MessageUtil.turnToPacket(npc.getTalk()));
 //                      人物任务触发
                         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
-                            Achievement achievement = NettyMemory.achievementMap.get(achievementprocess.getAchievementid());
+                            Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
                             if (achievementprocess.getType().equals(Achievement.TALKTONPC)) {
-                                achievementExecutor.executeTalkNPC(achievementprocess,user,achievement,npc);
+                                achievementExecutor.executeTalkNPC(achievementprocess, user, achievement, npc);
                             }
                         }
                         return;
@@ -156,22 +168,22 @@ public class StopAreaEvent {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDNPC));
             }
         } else if (msg.equals("skillCheckout")) {
-            NettyMemory.eventStatus.put(channel, EventStatus.SKILLMANAGER);
+            ProjectContext.eventStatus.put(channel, EventStatus.SKILLMANAGER);
             channel.writeAndFlush(MessageUtil.turnToPacket("请输入lookSkill查看技能，请输入change-技能名-键位配置技能,请输入quitSkill退出技能管理界面"));
         } else if (msg.startsWith("attack")) {
             temp = msg.split("-");
 //          输入的键位是否存在
-            if (temp.length == 3 && NettyMemory.userskillrelationMap.get(channel).containsKey(temp[2])) {
-                User user = NettyMemory.session2UserIds.get(channel);
-                for (Monster monster : NettyMemory.areaMap.get(user.getPos()).getMonsters()) {
+            if (temp.length == 3 && ProjectContext.userskillrelationMap.get(channel).containsKey(temp[2])) {
+                User user = ProjectContext.session2UserIds.get(channel);
+                for (Monster monster : ProjectContext.sceneMap.get(user.getPos()).getMonsters()) {
 //                 输入的怪物是否存在
                     if (monster.getName().equals(temp[1])) {
                         if (monster.getStatus().equals(DeadOrAliveConfig.DEAD)) {
                             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DONOTATTACKDEADMONSTER));
                             return;
                         }
-                        Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(channel).get(temp[2]);
-                        UserSkill userSkill = NettyMemory.SkillMap.get(userskillrelation.getSkillid());
+                        Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(channel).get(temp[2]);
+                        UserSkill userSkill = ProjectContext.skillMap.get(userskillrelation.getSkillid());
 //                      判断人物MP量是否足够
                         BigInteger userMp = new BigInteger(user.getMp());
                         BigInteger skillMp = new BigInteger(userSkill.getSkillMp());
@@ -183,7 +195,7 @@ public class StopAreaEvent {
                             if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
 
 //                               处理用户攻击产生的一系列buff
-                                buffEvent.buffSolve(userSkill, monster, user);
+                                buffEvent.buffSolve(userskillrelation, userSkill, monster, user);
 
 //                               判断攻击完怪物是否死亡，生命值计算逻辑
                                 BigInteger attackDamage = new BigInteger(userSkill.getDamage());
@@ -215,15 +227,15 @@ public class StopAreaEvent {
                                     outfitEquipmentEvent.getGoods(channel, monster);
 
 //                          移除死掉的怪物
-                                    NettyMemory.areaMap.get(user.getPos()).getMonsters().remove(monster);
+                                    ProjectContext.sceneMap.get(user.getPos()).getMonsters().remove(monster);
 //                          生成新的怪物
-                                    Area area = NettyMemory.areaMap.get(user.getPos());
-                                    area.getMonsters().add(monsterFactory.getMonsterByArea(user.getPos()));
+                                    Scene scene = ProjectContext.sceneMap.get(user.getPos());
+                                    scene.getMonsters().add(monsterFactory.getMonsterByArea(user.getPos()));
 
                                 } else {
-                                    Map<String, Userskillrelation> map = NettyMemory.userskillrelationMap.get(channel);
+                                    Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(channel);
 //                                    切换到攻击模式
-                                    NettyMemory.eventStatus.put(channel, EventStatus.ATTACK);
+                                    ProjectContext.eventStatus.put(channel, EventStatus.ATTACK);
                                     resp += System.getProperty("line.separator")
                                             + "[技能]:" + userSkill.getSkillName()
                                             + System.getProperty("line.separator")
@@ -241,14 +253,16 @@ public class StopAreaEvent {
 //                                    刷新技能时间
                                     userskillrelation.setSkillcds(System.currentTimeMillis());
 //                                  记录任务当前攻击的怪物
-                                    List<Monster> monsters = new ArrayList<Monster>();
-                                    monsters.add(monster);
-                                    NettyMemory.monsterMap.put(user, monsters);
+                                    Map<Integer, Monster> monsterMap = new HashMap<>();
+                                    monsterMap.put(monster.getId(), monster);
+//                                  初始化怪物攻击时间
+                                    monster.setAttackEndTime(0l);
+                                    ProjectContext.userToMonsterMap.put(user, monsterMap);
 //                                    提醒用户你已进入战斗模式
-                                    String jobId = UUID.randomUUID().toString();
-                                    MonsterAttackTask monsterAttackTask = new MonsterAttackTask(channel, jobId, NettyMemory.futureMap, outfitEquipmentEvent, buffEvent);
-                                    Future future = NettyMemory.monsterThreadPool.scheduleAtFixedRate(monsterAttackTask, 0, 1, TimeUnit.SECONDS);
-                                    NettyMemory.futureMap.put(jobId, future);
+//                                    String jobId = UUID.randomUUID().toString();
+//                                    MonsterAttackTask monsterAttackTask = new MonsterAttackTask(channel, jobId, ProjectContext.futureMap, outfitEquipmentEvent, buffEvent);
+//                                    Future future = ProjectContext.monsterThreadPool.scheduleAtFixedRate(monsterAttackTask, 0, 1, TimeUnit.SECONDS);
+//                                    ProjectContext.futureMap.put(jobId, future);
                                     channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFIGHT));
                                 }
                             }
@@ -266,10 +280,36 @@ public class StopAreaEvent {
         }
     }
 
+    //  装备升星，先不注入后期注入
+    private void upEquipmentStartlevel(Channel channel, String msg) {
+        String[] temp = msg.split("=");
+        if (temp.length != 2) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            return;
+        }
+        User user = ProjectContext.session2UserIds.get(channel);
+        Userbag userbag = UserbagUtil.getUserbagByUserbagId(user, temp[1]);
+        if (userbag == null) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXISTBAG));
+            return;
+        }
+//      开始升星
+        if (userbag.getStartlevel() == null) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTOUPSTARTLEVEL));
+            return;
+        }
+
+        user.subMoney(new BigInteger("100000"));
+        userbag.setStartlevel(userbag.getStartlevel()+1);
+        userbagMapper.updateByPrimaryKeySelective(userbag);
+        channel.writeAndFlush(MessageUtil.turnToPacket("升星成功，升星花费100000金币,当前装备星级" + userbag.getStartlevel()));
+        UserbagUtil.refreshUserbagInfo(channel);
+    }
+
     private String out(User user) {
         String resp = "";
         for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
-            Equipment equipment = NettyMemory.equipmentMap.get(weaponequipmentbar.getWid());
+            Equipment equipment = ProjectContext.equipmentMap.get(weaponequipmentbar.getWid());
             resp += System.getProperty("line.separator")
                     + equipment.getName() + "剩余耐久为:" + weaponequipmentbar.getDurability();
         }

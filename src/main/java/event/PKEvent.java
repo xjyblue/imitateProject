@@ -5,7 +5,7 @@ import caculation.AttackCaculation;
 import config.MessageConfig;
 import config.DeadOrAliveConfig;
 import io.netty.channel.Channel;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -13,13 +13,13 @@ import pojo.Userskillrelation;
 import skill.UserSkill;
 import utils.UserSkillUtil;
 import utils.MessageUtil;
+import utils.UserUtil;
 
 import java.math.BigInteger;
-import java.util.Map;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/23 16:22
+ * Created by server on 2018/11/23 16:22
  */
 @Component("pkEvent")
 public class PKEvent {
@@ -30,13 +30,13 @@ public class PKEvent {
 
     public void pkOthers(Channel channel, String msg) {
         String temp[] = msg.split("-");
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (temp.length != 3) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User userTarget = getUserByUsername(temp[1]);
-        Channel channelTarget = NettyMemory.userToChannelMap.get(userTarget);
+        User userTarget = UserUtil.getUserByName(temp[1]);
+        Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
 //       解决夸场景pk禁止
         if(!user.getPos().equals(userTarget.getPos())){
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOSUPPORTREMOTEPK));
@@ -70,7 +70,7 @@ public class PKEvent {
             return;
         }
 //      人物cd校验
-        Userskillrelation userskillrelation = NettyMemory.userskillrelationMap.get(channel).get(temp[2]);
+        Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(channel).get(temp[2]);
         if (System.currentTimeMillis() < userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNSKILLCD));
             return;
@@ -90,11 +90,10 @@ public class PKEvent {
             channelTarget.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY));
 //          死亡后处理
 
-//          pk触发pk成就
-            //todo:pk
-//          achievementExecutor
+//          pk触发pk胜利成就
+            achievementExecutor.executeFirstPKWin(user);
 
-            NettyMemory.eventStatus.put(channelTarget,EventStatus.DEADAREA);
+            ProjectContext.eventStatus.put(channelTarget,EventStatus.DEADAREA);
             return;
         }
         String resp = "你受到来自：" + user.getUsername() + "的" + userSkill.getSkillName() + "的攻击，伤害为["
@@ -105,12 +104,4 @@ public class PKEvent {
         channel.writeAndFlush(MessageUtil.turnToPacket(resp));
     }
 
-    private User getUserByUsername(String s) {
-        for (Map.Entry<Channel, User> entry : NettyMemory.session2UserIds.entrySet()) {
-            if (entry.getValue().getUsername().equals(s)) {
-                return entry.getValue();
-            }
-        }
-        return null;
-    }
 }

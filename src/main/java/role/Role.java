@@ -2,7 +2,7 @@ package role;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/30 15:02
+ * Created by server on 2018/11/30 15:02
  */
 //职业类
 public class Role {

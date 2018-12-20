@@ -4,7 +4,7 @@ import pojo.User;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/12/3 16:00
+ * Created by server on 2018/12/3 16:00
  */
 public class TestThird implements Runnable{
 

@@ -2,7 +2,7 @@ package factory;
 
 import component.Monster;
 import config.BuffConfig;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.stereotype.Component;
 import skill.MonsterSkill;
 import test.ExcelUtil;
@@ -14,7 +14,7 @@ import java.util.*;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/29 12:11
+ * Created by server on 2018/11/29 12:11
  */
 //怪物工厂类
 @Component("monsterFactory")
@@ -22,7 +22,7 @@ public class MonsterFactory {
 
     //使用 怪物id来获取怪物
     public Monster getMonster(Integer monsterId) throws IOException {
-        FileInputStream fis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Monster.xls"));
+        FileInputStream fis = new FileInputStream(new File("src/main/resources/Monster.xls"));
         LinkedHashMap<String, String> alias = new LinkedHashMap<>();
         alias.put("怪物id", "id");
         alias.put("怪物名称", "name");
@@ -48,13 +48,13 @@ public class MonsterFactory {
                 mapSecond.put(BuffConfig.MPBUFF, 1000l);
                 mapSecond.put(BuffConfig.POISONINGBUFF, 2000l);
                 mapSecond.put(BuffConfig.DEFENSEBUFF, 3000l);
-                NettyMemory.monsterBuffEndTime.put(monster, mapSecond);
+                ProjectContext.monsterBuffEndTime.put(monster, mapSecond);
 //      怪物buff初始化结束
 
                 String s[] = monster.getSkillIds().split("-");
                 List<MonsterSkill> list = new ArrayList<>();
                 for (int i = 0; i < s.length; i++) {
-                    list.add(NettyMemory.monsterSkillMap.get(Integer.parseInt(s[i])));
+                    list.add(ProjectContext.monsterSkillMap.get(Integer.parseInt(s[i])));
                 }
                 monster.setMonsterSkillList(list);
                 return monster;
@@ -65,7 +65,7 @@ public class MonsterFactory {
 
 //  根据用户地点随机生成新的怪物
     public Monster getMonsterByArea(String area) throws IOException {
-        FileInputStream fis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\Monster.xls"));
+        FileInputStream fis = new FileInputStream(new File("src/main/resources/Monster.xls"));
         LinkedHashMap<String, String> alias = new LinkedHashMap<>();
         alias.put("怪物id", "id");
         alias.put("怪物名称", "name");
@@ -91,13 +91,13 @@ public class MonsterFactory {
                 mapSecond.put(BuffConfig.MPBUFF, 1000l);
                 mapSecond.put(BuffConfig.POISONINGBUFF, 2000l);
                 mapSecond.put(BuffConfig.DEFENSEBUFF, 3000l);
-                NettyMemory.monsterBuffEndTime.put(monster, mapSecond);
+                ProjectContext.monsterBuffEndTime.put(monster, mapSecond);
 //      怪物buff初始化结束
 
                 String s[] = monster.getSkillIds().split("-");
                 List<MonsterSkill> list = new ArrayList<>();
                 for (int i = 0; i < s.length; i++) {
-                    list.add(NettyMemory.monsterSkillMap.get(Integer.parseInt(s[i])));
+                    list.add(ProjectContext.monsterSkillMap.get(Integer.parseInt(s[i])));
                 }
                 monster.setMonsterSkillList(list);
                 newMonsterList.add(monster);

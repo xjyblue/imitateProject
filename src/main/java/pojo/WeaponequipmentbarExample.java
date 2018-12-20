@@ -423,6 +423,66 @@ public class WeaponequipmentbarExample {
             addCriterion("typeOf not between", value1, value2, "typeof");
             return (Criteria) this;
         }
+
+        public Criteria andStartlevelIsNull() {
+            addCriterion("startlevel is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelIsNotNull() {
+            addCriterion("startlevel is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelEqualTo(Integer value) {
+            addCriterion("startlevel =", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelNotEqualTo(Integer value) {
+            addCriterion("startlevel <>", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelGreaterThan(Integer value) {
+            addCriterion("startlevel >", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelGreaterThanOrEqualTo(Integer value) {
+            addCriterion("startlevel >=", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelLessThan(Integer value) {
+            addCriterion("startlevel <", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelLessThanOrEqualTo(Integer value) {
+            addCriterion("startlevel <=", value, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelIn(List<Integer> values) {
+            addCriterion("startlevel in", values, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelNotIn(List<Integer> values) {
+            addCriterion("startlevel not in", values, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelBetween(Integer value1, Integer value2) {
+            addCriterion("startlevel between", value1, value2, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andStartlevelNotBetween(Integer value1, Integer value2) {
+            addCriterion("startlevel not between", value1, value2, "startlevel");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

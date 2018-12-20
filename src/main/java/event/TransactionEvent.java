@@ -1,13 +1,14 @@
 package event;
 
 import achievement.AchievementExecutor;
+import caculation.MoneyCaculation;
 import caculation.UserbagCaculation;
 import component.Equipment;
 import component.MpMedicine;
 import component.parent.Good;
 import config.MessageConfig;
 import io.netty.channel.Channel;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketType;
@@ -26,7 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/12/3 10:14
+ * Created by server on 2018/12/3 10:14
  */
 @Component("transactionEvent")
 public class TransactionEvent {
@@ -40,6 +41,8 @@ public class TransactionEvent {
     private UserbagCaculation userbagCaculation;
     @Autowired
     private AchievementExecutor achievementExecutor;
+    @Autowired
+    private MoneyCaculation moneyCaculation;
     public void trade(Channel channel, String msg) {
         if (msg.equals("ntrade")) {
             cancelTrade(channel, msg);
@@ -57,12 +60,12 @@ public class TransactionEvent {
     }
 
     private void cancelTrade(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
-        if (user.getTraceId() == null || !NettyMemory.tradeMap.containsKey(user.getTraceId())) {
+        User user = ProjectContext.session2UserIds.get(channel);
+        if (user.getTraceId() == null || !ProjectContext.tradeMap.containsKey(user.getTraceId())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOCREATETRADE));
             return;
         }
-        Trade trade = NettyMemory.tradeMap.get(user.getTraceId());
+        Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
 
 //      加锁处理
         lock.lock();
@@ -72,7 +75,7 @@ public class TransactionEvent {
                 return;
             } else {
 //              解决取消线程先抢到锁
-                NettyMemory.tradeMap.remove(user.getTraceId());
+                ProjectContext.tradeMap.remove(user.getTraceId());
                 user.setTraceId(null);
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.CANCELTRADE));
                 return;
@@ -84,22 +87,22 @@ public class TransactionEvent {
 
     private void agreeTrade(Channel channel, String msg) {
         String temp[] = msg.split("=");
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (temp.length != 2) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        if (!NettyMemory.tradeMap.containsKey(temp[1])) {
+        if (!ProjectContext.tradeMap.containsKey(temp[1])) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTRADERECORD));
             return;
         }
 //      建立起交易，把两者的转态弄到交易状态中去，多个线程抢锁
-        User userStart = NettyMemory.tradeMap.get(temp[1]).getUserStart();
-        Trade trade = NettyMemory.tradeMap.get(temp[1]);
+        User userStart = ProjectContext.tradeMap.get(temp[1]).getUserStart();
+        Trade trade = ProjectContext.tradeMap.get(temp[1]);
         lock.lock();
         try {
 //          解决取消线程先抢到锁
-            if (!NettyMemory.tradeMap.containsKey(trade.getTradeId())) {
+            if (!ProjectContext.tradeMap.containsKey(trade.getTradeId())) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.CANCELTRADE));
                 return;
             }
@@ -118,9 +121,9 @@ public class TransactionEvent {
 //      把用户和另外一个用户设置成交易状态
 //      处理建立交易的逻辑
         user.setTraceId(userStart.getTraceId());
-        NettyMemory.eventStatus.put(channel, EventStatus.TRADE);
-        Channel channelStart = NettyMemory.userToChannelMap.get(userStart);
-        NettyMemory.eventStatus.put(channelStart, EventStatus.TRADE);
+        ProjectContext.eventStatus.put(channel, EventStatus.TRADE);
+        Channel channelStart = ProjectContext.userToChannelMap.get(userStart);
+        ProjectContext.eventStatus.put(channelStart, EventStatus.TRADE);
         trade.setUserTo(user);
         trade.setEndTime(System.currentTimeMillis() + 500000);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSCREATETRADE));
@@ -132,7 +135,7 @@ public class TransactionEvent {
 
     private void createTrade(Channel channel, String msg) {
         String temp[] = msg.split("-");
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (temp.length != 2) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -142,8 +145,8 @@ public class TransactionEvent {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTRACEUSER));
             return;
         }
-        User userTarget = NettyMemory.session2UserIds.get(channelTarget);
-        if (user.getTraceId() != null && NettyMemory.tradeMap.containsKey(user.getTraceId())) {
+        User userTarget = ProjectContext.session2UserIds.get(channelTarget);
+        if (user.getTraceId() != null && ProjectContext.tradeMap.containsKey(user.getTraceId())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.MANISINGTRADING));
             return;
         }
@@ -173,14 +176,14 @@ public class TransactionEvent {
         trade.setToUserBag(new HashMap<String, Userbag>());
         trade.setUserStart(user);
 
-        NettyMemory.tradeMap.put(trade.getTradeId(), trade);
+        ProjectContext.tradeMap.put(trade.getTradeId(), trade);
 
         channelTarget.writeAndFlush(MessageUtil.turnToPacket("你收到了来自" + user.getUsername() + "的交易请求交易单为:" + uuid + ",同意交易请输入ytrade=交易单"));
     }
 
 
     private Channel getChannelByUserame(String s) {
-        for (Map.Entry<User, Channel> entry : NettyMemory.userToChannelMap.entrySet()) {
+        for (Map.Entry<User, Channel> entry : ProjectContext.userToChannelMap.entrySet()) {
             if (entry.getKey().getUsername().equals(s)) {
                 return entry.getValue();
             }
@@ -193,10 +196,10 @@ public class TransactionEvent {
             commonEvent.common(channel, msg);
             return;
         }
-        User user = NettyMemory.session2UserIds.get(channel);
-        Trade trade = NettyMemory.tradeMap.get(user.getTraceId());
-        Channel channelStart = NettyMemory.userToChannelMap.get(trade.getUserStart());
-        Channel channelEnd = NettyMemory.userToChannelMap.get(trade.getUserTo());
+        User user = ProjectContext.session2UserIds.get(channel);
+        Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
+        Channel channelStart = ProjectContext.userToChannelMap.get(trade.getUserStart());
+        Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
 //      交易终止
         if (msg.equals("jy=q")) {
             agreelock.lock();
@@ -213,18 +216,18 @@ public class TransactionEvent {
                 userbagCaculation.addUserBagForUser(trade.getUserStart(),entry.getValue());
             }
 //          交易失败金币还原
-            trade.getUserStart().addMoney(trade.getStartMoney());
-            trade.getUserTo().addMoney(trade.getToMoney());
+            moneyCaculation.addMoneyToUser(trade.getUserStart(),trade.getStartMoney().toString());
+            moneyCaculation.addMoneyToUser(trade.getUserTo(),trade.getToMoney().toString());
 
             channelStart.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FAILTRADEEND));
             channelEnd.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FAILTRADEEND));
             channelStart.writeAndFlush(MessageUtil.turnToPacket("", PacketType.TRADEMSG));
             channelEnd.writeAndFlush(MessageUtil.turnToPacket("", PacketType.TRADEMSG));
 //           内存交易单移除
-            NettyMemory.tradeMap.remove(trade.getTradeId());
+            ProjectContext.tradeMap.remove(trade.getTradeId());
 //          渠道状态还原
-            NettyMemory.eventStatus.put(channelStart, EventStatus.STOPAREA);
-            NettyMemory.eventStatus.put(channelEnd, EventStatus.STOPAREA);
+            ProjectContext.eventStatus.put(channelStart, EventStatus.STOPAREA);
+            ProjectContext.eventStatus.put(channelEnd, EventStatus.STOPAREA);
 //          人物tradeid移除
             trade.getUserStart().setTraceId(null);
             trade.getUserTo().setTraceId(null);
@@ -270,8 +273,8 @@ public class TransactionEvent {
             }
 
 //          交易成功金币处理
-            trade.getUserStart().addMoney(trade.getToMoney());
-            trade.getUserTo().addMoney(trade.getStartMoney());
+            moneyCaculation.addMoneyToUser(trade.getUserStart(),trade.getToMoney().toString());
+            moneyCaculation.addMoneyToUser(trade.getUserTo(),trade.getStartMoney().toString());
 
             for (Map.Entry<String, Userbag> entry : trade.getToUserBag().entrySet()) {
                 userbagCaculation.addUserBagForUser(trade.getUserStart(), entry.getValue());
@@ -284,18 +287,18 @@ public class TransactionEvent {
             channelStart.writeAndFlush(MessageUtil.turnToPacket("", PacketType.TRADEMSG));
             channelEnd.writeAndFlush(MessageUtil.turnToPacket("", PacketType.TRADEMSG));
 //           内存交易单移除
-            NettyMemory.tradeMap.remove(trade.getTradeId());
+            ProjectContext.tradeMap.remove(trade.getTradeId());
 //          渠道状态还原
-            NettyMemory.eventStatus.put(channelStart, EventStatus.STOPAREA);
-            NettyMemory.eventStatus.put(channelEnd, EventStatus.STOPAREA);
+            ProjectContext.eventStatus.put(channelStart, EventStatus.STOPAREA);
+            ProjectContext.eventStatus.put(channelEnd, EventStatus.STOPAREA);
 //          人物tradeid移除
             trade.getUserStart().setTraceId(null);
             trade.getUserTo().setTraceId(null);
 //          人物交易状态改为false
             trade.getUserTo().setIfTrade(false);
             trade.getUserStart().setIfTrade(false);
-            UserbagUtil.refreshUserbagInfo(NettyMemory.userToChannelMap.get(trade.getUserTo()));
-            UserbagUtil.refreshUserbagInfo(NettyMemory.userToChannelMap.get(trade.getUserStart()));
+            UserbagUtil.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserTo()));
+            UserbagUtil.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserStart()));
 
 //          第一次成功交易触发任务
             achievementExecutor.executeFirstTrade(trade.getUserStart(),trade.getUserTo());
@@ -316,7 +319,7 @@ public class TransactionEvent {
                     channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMONEYTORESET));
                     return;
                 } else {
-                    user.addMoney(noSendMoney);
+                    moneyCaculation.addMoneyToUser(user,noSendMoney.toString());
                     trade.setStartMoney(trade.getStartMoney().subtract(noSendMoney));
                 }
             } else {
@@ -324,7 +327,7 @@ public class TransactionEvent {
                     channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMONEYTORESET));
                     return;
                 } else {
-                    user.addMoney(noSendMoney);
+                    moneyCaculation.addMoneyToUser(user,noSendMoney.toString());
                     trade.setToMoney(trade.getToMoney().subtract(noSendMoney));
                 }
             }
@@ -486,11 +489,11 @@ public class TransactionEvent {
 
     private String getUserbagInfoByUserbag(Userbag userbag) {
         if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
-            MpMedicine mpMedicine = NettyMemory.mpMedicineMap.get(userbag.getWid());
+            MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
             return mpMedicine.getName();
         }
         if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
-            Equipment equipment = NettyMemory.equipmentMap.get(userbag.getWid());
+            Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
             return equipment.getName();
         }
         return null;

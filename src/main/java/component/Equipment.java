@@ -5,12 +5,14 @@ import component.parent.Good;
 public class Equipment extends Good {
 
     private Integer id;
-//    //武器名称
-//    private String name;
     //耐久度
     private Integer durability;
-    //经过计算后增加技能伤害
+    //增加技能伤害
     private Integer addValue;
+    //增加生命值
+    private Integer lifeValue;
+    //星级
+    private Integer startLevel;
 
     public Equipment(Integer id,String name,Integer durability, Integer addValue) {
         this.id =id;
@@ -20,16 +22,23 @@ public class Equipment extends Good {
     }
 
     public Equipment(){
-
     }
 
-//    public String getName() {
-//        return name;
-//    }
-//
-//    public void setName(String name) {
-//        this.name = name;
-//    }
+    public Integer getLifeValue() {
+        return lifeValue;
+    }
+
+    public void setLifeValue(Integer lifeValue) {
+        this.lifeValue = lifeValue;
+    }
+
+    public Integer getStartLevel() {
+        return startLevel;
+    }
+
+    public void setStartLevel(Integer startLevel) {
+        this.startLevel = startLevel;
+    }
 
     public Integer getId() {
         return id;

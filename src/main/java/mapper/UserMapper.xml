@@ -323,6 +323,7 @@
             <result column="sname" property="name"/>
             <result column="stype" property="typeof"/>
             <result column="sdurability" property="durability"/>
+            <result column="sstartlevel" property="startlevel"/>
         </collection>
         <collection property="weaponequipmentbars" ofType="pojo.Weaponequipmentbar" column="sid">
             <id column="w_id" property="id"/><!-- 这里的column对应的是下面查询的别名，而不是表字段名 -->
@@ -330,6 +331,7 @@
             <result column="wname" property="username"/>
             <result column="wtype" property="typeof"/>
             <result column="wdurability" property="durability"/>
+            <result column="wstartlevel" property="startlevel"/>
         </collection>
         <collection property="achievementprocesses" ofType="pojo.Achievementprocess" column="sid">
             <id column="aid" property="id"/><!-- 这里的column对应的是下面查询的别名，而不是表字段名 -->
@@ -360,11 +362,13 @@
 		 s.name AS sname,
 		 s.typeOf AS stype,
 		 s.durability AS sdurability,
+		 s.startLevel AS sstartlevel,
 		 w.id AS w_id,
 		 w.durability AS wdurability,
 		 w.username AS wname,
 		 w.wid AS wwid,
 		 w.typeOf AS wtype,
+		 w.startlevel AS wstartlevel,
 		 a.id AS aid,
 		 a.ifFinish AS aiffinish,
 		 a.username AS ausername,

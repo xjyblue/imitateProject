@@ -1,8 +1,5 @@
 package pojo;
 
-import component.parent.Good;
-import memory.NettyMemory;
-
 public class Userbag {
     private String id;
 
@@ -16,23 +13,7 @@ public class Userbag {
 
     private Integer durability;
 
-    public static Userbag getUserbagByUserbagId(User user,String userbagId) {
-        for(Userbag userbag:user.getUserBag()){
-            if(userbag.getId().equals(userbagId)){
-                return userbag;
-            }
-        }
-        return null;
-    }
-
-    public static Userbag getUserbagByWid(User user,Integer wid){
-        for(Userbag userbag:user.getUserBag()){
-            if(userbag.getWid().equals(wid)){
-                return userbag;
-            }
-        }
-        return null;
-    }
+    private Integer startlevel;
 
     public String getId() {
         return id;
@@ -80,5 +61,13 @@ public class Userbag {
 
     public void setDurability(Integer durability) {
         this.durability = durability;
+    }
+
+    public Integer getStartlevel() {
+        return startlevel;
+    }
+
+    public void setStartlevel(Integer startlevel) {
+        this.startlevel = startlevel;
     }
 }

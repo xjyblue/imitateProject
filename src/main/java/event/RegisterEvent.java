@@ -5,7 +5,7 @@ import io.netty.channel.Channel;
 import level.Level;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -32,7 +32,7 @@ public class RegisterEvent {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DOUBLEPASSWORDERROR));
             return;
         }
-        if (!NettyMemory.roleMap.containsKey(Integer.parseInt(temp[3]))) {
+        if (!ProjectContext.roleMap.containsKey(Integer.parseInt(temp[3]))) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOROLE));
             return;
         }
@@ -46,7 +46,7 @@ public class RegisterEvent {
         user.setRoleid(Integer.parseInt(temp[3]));
 //      设置用户1级血量和1级的经验值
         user.setExperience(1);
-        Level level = NettyMemory.levelMap.get(1);
+        Level level = ProjectContext.levelMap.get(1);
         user.setMp(level.getMaxMp());
         user.setHp(level.getMaxHp());
         userMapper.insertSelective(user);
@@ -65,7 +65,7 @@ public class RegisterEvent {
         }
 
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERSUCCESS));
-        NettyMemory.eventStatus.put(channel, EventStatus.LOGIN);
+        ProjectContext.eventStatus.put(channel, EventStatus.LOGIN);
 
 
     }

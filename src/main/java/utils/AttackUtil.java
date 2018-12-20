@@ -1,60 +1,74 @@
 package utils;
 
-import component.BossArea;
+import component.BossScene;
 import component.Monster;
 import config.DeadOrAliveConfig;
 import event.EventStatus;
 import io.netty.channel.Channel;
-import memory.NettyMemory;
+import context.ProjectContext;
 import pojo.User;
 import team.Team;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/12/6 21:09
+ * Created by server on 2018/12/6 21:09
  */
 public class AttackUtil {
 
-    public static void changeUserAttackMonster(User user, BossArea bossArea) {
+    public static void changeUserAttackMonster(User user, BossScene bossScene) {
 //      处理其他玩家在打该boss
-        Monster monster = NettyMemory.monsterMap.get(user).get(0);
-        for (Map.Entry<String, User> entry : NettyMemory.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
+        Monster monster = null;
+        for(Map.Entry<Integer,Monster> entry : ProjectContext.userToMonsterMap.get(user).entrySet()){
+            monster = entry.getValue();
+        }
+        for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
             User userT = entry.getValue();
-            if (userT != user && NettyMemory.monsterMap.containsKey(userT) && NettyMemory.monsterMap.get(userT).get(0) == monster) {
-                NettyMemory.monsterMap.get(entry.getValue()).remove(0);
-                NettyMemory.eventStatus.put(NettyMemory.userToChannelMap.get(entry.getValue()), EventStatus.BOSSAREA);
+            Monster monsterT = null;
+            if(ProjectContext.userToMonsterMap.containsKey(userT)){
+                for(Map.Entry<Integer,Monster> monsterEntry : ProjectContext.userToMonsterMap.get(userT).entrySet()){
+                    monsterT = monsterEntry.getValue();
+                }
+            }
+            if (userT != user && ProjectContext.userToMonsterMap.containsKey(userT) && monsterT == monster) {
+                for(Map.Entry<Integer,Monster> monsterEntry : ProjectContext.userToMonsterMap.get(user).entrySet()){
+                    monster = monsterEntry.getValue();
+                }
+                ProjectContext.userToMonsterMap.get(entry.getValue()).remove(monster.getId());
+                ProjectContext.eventStatus.put(ProjectContext.userToChannelMap.get(entry.getValue()), EventStatus.BOSSAREA);
             }
         }
 
 //      处理本人正在打该boss，并且让二号boss攻击人物，如果二号boss死掉就生成第二场景的boss攻击人物
-        for (Map.Entry<String, Monster> entry : bossArea.getMonsters().get(bossArea.getSequence().get(0)).entrySet()) {
+        for (Map.Entry<String, Monster> entry : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {
             if (!entry.getValue().getStatus().equals(DeadOrAliveConfig.DEAD)) {
-                NettyMemory.monsterMap.get(user).remove(0);
-                NettyMemory.monsterMap.get(user).add(entry.getValue());
+                for(Map.Entry<Integer,Monster> monsterEntry : ProjectContext.userToMonsterMap.get(user).entrySet()){
+                    monster = monsterEntry.getValue();
+                }
+                ProjectContext.userToMonsterMap.get(user).remove(monster.getId());
+                ProjectContext.userToMonsterMap.get(user).put(entry.getValue().getId(),entry.getValue());
                 return;
             }
         }
     }
 
     public static void killBossMessageToAll(User user, Monster monster) {
-        Team team = NettyMemory.teamMap.get(user.getTeamId());
+        Team team = ProjectContext.teamMap.get(user.getTeamId());
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
-            Channel channelTemp = NettyMemory.userToChannelMap.get(entry.getValue());
+            Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
             channelTemp.writeAndFlush(MessageUtil.turnToPacket("玩家" + user.getUsername() + "击杀了：" + monster.getName()));
         }
     }
 
     public static void addMonsterToUserMonsterList(User user, Monster monster) {
-        if (NettyMemory.monsterMap.containsKey(user)) {
-            NettyMemory.monsterMap.get(user).add(monster);
+        if (ProjectContext.userToMonsterMap.containsKey(user)) {
+            ProjectContext.userToMonsterMap.get(user).put(monster.getId(),monster);
         } else {
-            List<Monster> list = new ArrayList<>();
-            list.add(monster);
-            NettyMemory.monsterMap.put(user, list);
+            Map<Integer,Monster> map = new HashMap<>();
+            map.put(monster.getId(),monster);
+            ProjectContext.userToMonsterMap.put(user, map);
         }
     }
 }

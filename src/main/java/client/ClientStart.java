@@ -10,14 +10,14 @@ import java.awt.event.KeyListener;
 /**
  * 客户端主程序入口
  *
- * @author xiaojianyu
+ * @author server
  */
 public class ClientStart extends JFrame implements KeyListener {
     private JTextField txt;
 
     private JTextField txt2;
 
-    private Client bootstrap;
+    private ClientConfig bootstrap;
 
     private JTextArea jTextArea1;
 
@@ -193,11 +193,11 @@ public class ClientStart extends JFrame implements KeyListener {
         this.txt = txt;
     }
 
-    public Client getBootstrap() {
+    public ClientConfig getBootstrap() {
         return bootstrap;
     }
 
-    public void setBootstrap(Client bootstrap) {
+    public void setBootstrap(ClientConfig bootstrap) {
         this.bootstrap = bootstrap;
     }
 
@@ -311,6 +311,7 @@ public class ClientStart extends JFrame implements KeyListener {
                 frm.jTextArea3.setText("");
                 frm.jTextArea4.setText("");
             }
+
         });
 
         JButton b2 = new JButton("stop");
@@ -499,7 +500,7 @@ public class ClientStart extends JFrame implements KeyListener {
 //      设置监听
         frm.txt.addKeyListener(frm);
         frm.setVisible(true);
-        frm.bootstrap = new Client(8081, "127.0.0.1", frm);
+        frm.bootstrap = new ClientConfig(8081, "127.0.0.1", frm);
     }
 
     public void keyPressed(KeyEvent e) {

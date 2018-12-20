@@ -1,9 +1,9 @@
-package xiaojianyu.controller;
+package server;
 
 import event.EventStatus;
 import event.TeamEvent;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateEvent;
+import context.ProjectContext;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,25 +15,24 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.util.ReferenceCountUtil;
-import memory.NettyMemory;
 import packet.PacketProto;
 import packet.PacketType;
 import pojo.User;
+import utils.ChannelUtil;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static packet.PacketProto.Packet.newBuilder;
 
 @Sharable
-@Service("nettyServerHandler")
-public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
+@Service("serverDistributeHandler")
+public class ServerDistributeHandler extends SimpleChannelInboundHandler<String> {
 
-    private static Logger logger = Logger.getLogger(NettyServerHandler.class);
+    private static Logger logger = Logger.getLogger(ServerDistributeHandler.class);
 
-    public static final ChannelGroup group = NettyMemory.group;
+    public static final ChannelGroup group = ProjectContext.group;
 
     public static final Map<Channel, Integer> heartCounts = new ConcurrentHashMap<>();
 
@@ -59,41 +58,41 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         logger.info("客户端与服务端连接断开----inactive");
-        User user = NettyMemory.session2UserIds.get(ctx.channel());
+        User user = ProjectContext.session2UserIds.get(ctx.channel());
+        user.setIfOnline(false);
         if (user.getTeamId() != null) {
 //          处理一下用户的team对用户的处理
             teamEvent.handleUserOffline(user);
         }
-
 //          移除玩家的所有buff终止时间
-        if (user != null && NettyMemory.userBuffEndTime.containsKey(user)) {
-            NettyMemory.userBuffEndTime.remove(user);
+        if (user != null && ProjectContext.userBuffEndTime.containsKey(user)) {
+            ProjectContext.userBuffEndTime.remove(user);
         }
 //          移除怪物的buff终止时间
-        if (user != null && NettyMemory.monsterMap.containsKey(user)) {
-            NettyMemory.monsterMap.remove(user);
+        if (user != null && ProjectContext.userToMonsterMap.containsKey(user)) {
+            ProjectContext.userToMonsterMap.remove(user);
         }
-        if (NettyMemory.session2UserIds.containsKey(ctx.channel())) {
-            NettyMemory.session2UserIds.remove(ctx.channel());
+        if (ProjectContext.session2UserIds.containsKey(ctx.channel())) {
+            ProjectContext.session2UserIds.remove(ctx.channel());
         }
-        if (NettyMemory.eventStatus.containsKey(ctx.channel())) {
-            NettyMemory.eventStatus.remove(ctx.channel());
+        if (ProjectContext.eventStatus.containsKey(ctx.channel())) {
+            ProjectContext.eventStatus.remove(ctx.channel());
         }
-        if (user != null && NettyMemory.userToChannelMap.containsKey(user)) {
-            NettyMemory.userToChannelMap.remove(user);
+        if (user != null && ProjectContext.userToChannelMap.containsKey(user)) {
+            ProjectContext.userToChannelMap.remove(user);
         }
-        if (NettyMemory.userskillrelationMap.containsKey(ctx.channel())) {
-            NettyMemory.userskillrelationMap.remove(ctx.channel());
+        if (ProjectContext.userskillrelationMap.containsKey(ctx.channel())) {
+            ProjectContext.userskillrelationMap.remove(ctx.channel());
         }
-
 
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+//      渠道激活，对每个渠道发送登录消息
         Channel channel = ctx.channel();
         logger.info(channel.remoteAddress() + "客户端与服务端连接开始...");
-        NettyMemory.eventStatus.put(channel, EventStatus.COMING);
+        ProjectContext.eventStatus.put(channel, EventStatus.COMING);
         PacketProto.Packet.Builder builder = newBuilder();
         builder.setPacketType(PacketProto.Packet.PacketType.DATA);
         builder.setData("d:登录 z:注册");
@@ -110,31 +109,41 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
-            if (msg instanceof PacketProto.Packet) {
-                PacketProto.Packet packet = (PacketProto.Packet) msg;
-                switch (packet.getPacketType()) {
-                    case HEARTBEAT:
-                        handleHeartbreat(ctx, packet);
-                        break;
-                    case DATA:
-                        handleData(ctx, packet);
-                        break;
-                    default:
-                        break;
-                }
-            }
+//            旧的逻辑
+//            if (msg instanceof PacketProto.Packet) {
+//                PacketProto.Packet packet = (PacketProto.Packet) msg;
+//                switch (packet.getPacketType()) {
+//                    case HEARTBEAT:
+//                        handleHeartbreat(ctx, packet);
+//                        break;
+//                    case DATA:
+//                        handleData(ctx, packet);
+//                        break;
+//                    default:
+//                        break;
+//                }
+//            }
+
+//            新的逻辑
+            PacketProto.Packet packet = (PacketProto.Packet) msg;
+            handleData(ctx, packet);
         } finally {
             ReferenceCountUtil.release(msg);
         }
     }
 
     private void handleData(ChannelHandlerContext ctx, PacketProto.Packet packet) throws IOException {
-        for (Channel ch : group) {
-            if (ch == ctx.channel()) {
-                heartCounts.put(ch, 0);
-                eventDistributor.distributeEvent(ctx, packet.getData());
-            }
-        }
+//        新的处理逻辑
+//        把packet放到用户的消费列进行消费 拿到对应的channel 拿到对应的用户。。。 放进去
+        ChannelUtil.addPacketToUser(ctx.channel(), packet);
+
+//        以前的处理逻辑
+//        for (Channel ch : group) {
+//            if (ch == ctx.channel()) {
+//                heartCounts.put(ch, 0);
+//                eventDistributor.distributeEvent(ctx, packet.getData());
+//            }
+//        }
     }
 
 

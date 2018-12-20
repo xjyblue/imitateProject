@@ -1,7 +1,9 @@
 package test;
 
 import achievement.Achievement;
+import component.HpMedicine;
 import component.NPC;
+import component.parent.Good;
 import level.Level;
 import org.apache.poi.ss.formula.functions.Npv;
 import role.Role;
@@ -15,29 +17,36 @@ import java.util.List;
 public class InputUtil {
     public static void main(String[]args) throws Exception {
         //将生成的excel转换成文件，还可以用作文件下载
-        File file = new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\NPC.xls");
-        FileOutputStream fos = new FileOutputStream(file);
+        File file = new File("C:\\Users\\server\\IdeaProjects\\imitateProject\\src\\main\\resources\\HpMedicine.xls");
+        FileOutputStream hpMedicinefos = new FileOutputStream(file);
 
         //对象集合
-        List<NPC> pojoList=new ArrayList<NPC>();
+        List<HpMedicine> hpMedicineList=new ArrayList<HpMedicine>();
 
-        NPC npc = new NPC();
-        npc.setId(1);
-        npc.setTalk("我是塞里亚，欢迎来到起始之地");
-        npc.setName("赛利亚");
-        npc.setStatus("1");
-        npc.setAreaId(0);
-        pojoList.add(npc);
+        HpMedicine hpMedicine = new HpMedicine();
+        hpMedicine.setId(1);
+        hpMedicine.setCd(5);
+        hpMedicine.setImmediate(true);
+        hpMedicine.setKeepTime(0);
+        hpMedicine.setReplyValue("500");
+        hpMedicine.setSecondValue("3");
+        hpMedicine.setName("红烧牛肉丸");
+        hpMedicine.setType(Good.HPMEDICINE);
+        hpMedicine.setBuyMoney("5000");
+        hpMedicineList.add(hpMedicine);
 
         //设置属性别名（列名）
-        LinkedHashMap<String, String> alias = new LinkedHashMap<String, String>();
-        alias.put("id", "NPC的id");
-        alias.put("status","NPC的状态");
-        alias.put("name","NPC的名字");
-        alias.put("talk","NPC的话");
-        alias.put("areaId","NPC所在的地点");
+        LinkedHashMap<String, String> hpMedicineAlias = new LinkedHashMap<String, String>();
+        hpMedicineAlias.put("id", "红药的id");
+        hpMedicineAlias.put("immediate","红药是否为立即回复药品");
+        hpMedicineAlias.put("cd","红药的cd");
+        hpMedicineAlias.put("replyValue","红药每秒恢复的血量");
+        hpMedicineAlias.put("keepTime","红药持续的时间");
+        hpMedicineAlias.put("name","红药持续的名字");
+        hpMedicineAlias.put("buyMoney","物品的价值");
+        hpMedicineAlias.put("type","红药的种类");
         //标题
-        String headLine="NPC表";
-        ExcelUtil.pojo2Excel(pojoList, fos, alias,headLine);
+        String headLine="HpMedicine表";
+        ExcelUtil.pojo2Excel(hpMedicineList, hpMedicinefos, hpMedicineAlias,headLine);
     }
 }

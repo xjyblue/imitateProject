@@ -4,7 +4,7 @@ import component.parent.Good;
 import config.MessageConfig;
 import email.Mail;
 import io.netty.channel.Channel;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userbag;
@@ -15,16 +15,16 @@ import java.util.UUID;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/11/23 10:36
+ * Created by server on 2018/11/23 10:36
  */
 @Component("emailEvent")
 public class EmailEvent {
 
     public void email(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         if (msg.equals("email")) {
 //            展示用户的email信息
-            Map<String, Mail> emailMap = NettyMemory.userEmailMap.get(user.getUsername());
+            Map<String, Mail> emailMap = ProjectContext.userEmailMap.get(user.getUsername());
             if (emailMap.size() == 0) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.EMPTYEMAIL));
                 return;
@@ -42,7 +42,7 @@ public class EmailEvent {
         }
         if (msg.startsWith("email=send")) {
             String temp[] = msg.split("=");
-            if (!NettyMemory.userEmailMap.containsKey(temp[2])) {
+            if (!ProjectContext.userEmailMap.containsKey(temp[2])) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEMAILUSER));
                 return;
             }
@@ -68,12 +68,12 @@ public class EmailEvent {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
                 return;
             }
-            if(NettyMemory.userEmailMap.get(user.getUsername()).containsKey(temp[2])){
-                Mail mail = NettyMemory.userEmailMap.get(user.getUsername()).get(temp[2]);
+            if(ProjectContext.userEmailMap.get(user.getUsername()).containsKey(temp[2])){
+                Mail mail = ProjectContext.userEmailMap.get(user.getUsername()).get(temp[2]);
                 if(mail.isIfUserBag()){
                     mail.getUserbag().setName(user.getUsername());
                     user.getUserBag().add(mail.getUserbag());
-                    NettyMemory.userEmailMap.get(user.getUsername()).remove(temp[2]);
+                    ProjectContext.userEmailMap.get(user.getUsername()).remove(temp[2]);
                     channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILSUCCESS));
                     return;
                 }
@@ -110,7 +110,7 @@ public class EmailEvent {
             user.getUserBag().remove(userbagTemp);
         }
 //      存到全局中
-        NettyMemory.userEmailMap.get(toUser).put(mail.getEmailId(), mail);
+        ProjectContext.userEmailMap.get(toUser).put(mail.getEmailId(), mail);
         return userbagTemp;
     }
 

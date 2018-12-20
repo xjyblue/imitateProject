@@ -7,20 +7,20 @@ import io.netty.channel.Channel;
 import mapper.FriendapplyinfoMapper;
 import mapper.FriendinfoMapper;
 import mapper.UserMapper;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketType;
 import pojo.*;
 import utils.MessageUtil;
+import utils.UserUtil;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/12/13 17:04
+ * Created by server on 2018/12/13 17:04
  */
 @Component("friendEvent")
 public class FriendEvent {
@@ -35,13 +35,13 @@ public class FriendEvent {
 
     public void solve(Channel channel, String msg) {
         if (msg.equals("p")) {
-            NettyMemory.eventStatus.put(channel, EventStatus.FRIEND);
+            ProjectContext.eventStatus.put(channel, EventStatus.FRIEND);
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFRIENDVIEW));
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG, PacketType.FRIENDMSG));
             return;
         }
         if (msg.equals("q")) {
-            NettyMemory.eventStatus.put(channel, EventStatus.STOPAREA);
+            ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTFRIENDVIEW));
             channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.FRIENDMSG));
             return;
@@ -65,7 +65,7 @@ public class FriendEvent {
     }
 
     private void agreeApplyInfo(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != 2) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -90,9 +90,9 @@ public class FriendEvent {
         friendapplyinfoMapper.updateByPrimaryKeySelective(friendapplyinfo);
 //      通知双方如果在线的话
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG + "你同意了" + friendapplyinfo.getFromuser() + "的好友申请", PacketType.FRIENDMSG));
-        User userTarget = getUserByName(friendapplyinfo.getFromuser());
+        User userTarget = UserUtil.getUserByName(friendapplyinfo.getFromuser());
         if (userTarget != null) {
-            Channel channelTarget = NettyMemory.userToChannelMap.get(userTarget);
+            Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
             channelTarget.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "同意了你的好友申请，你们现在是好友啦"));
         }
 
@@ -106,7 +106,7 @@ public class FriendEvent {
     }
 
     private void queryFriendToSelf(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         FriendinfoExample friendinfoExample = new FriendinfoExample();
         FriendinfoExample.Criteria criteria = friendinfoExample.createCriteria();
         criteria.andUsernameEqualTo(user.getUsername());
@@ -123,7 +123,7 @@ public class FriendEvent {
     }
 
     private void applyFriendToOther(Channel channel, String msg) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("-");
         if (temp.length != 2) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -148,7 +148,7 @@ public class FriendEvent {
     }
 
     private void queryApplyUserInfo(Channel channel) {
-        User user = NettyMemory.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
         FriendapplyinfoExample friendapplyinfoExample = new FriendapplyinfoExample();
         FriendapplyinfoExample.Criteria criteria = friendapplyinfoExample.createCriteria();
         criteria.andTouserEqualTo(user.getUsername());
@@ -165,12 +165,4 @@ public class FriendEvent {
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG + resp, PacketType.FRIENDMSG));
     }
 
-    private User getUserByName(String s) {
-        for (Map.Entry<Channel, User> entry : NettyMemory.session2UserIds.entrySet()) {
-            if (entry.getValue().getUsername().equals(s)) {
-                return entry.getValue();
-            }
-        }
-        return null;
-    }
 }

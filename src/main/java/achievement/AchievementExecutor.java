@@ -5,24 +5,23 @@ import component.Monster;
 import component.NPC;
 import component.parent.Good;
 import mapper.AchievementprocessMapper;
-import memory.NettyMemory;
+import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
 import pojo.AchievementprocessExample;
 import pojo.User;
+import pojo.Weaponequipmentbar;
 import team.Team;
 import utils.AchievementUtil;
 import utils.LevelUtil;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/12/12 15:04
+ * Created by server on 2018/12/12 15:04
  */
 @Component
 public class AchievementExecutor {
@@ -46,13 +45,51 @@ public class AchievementExecutor {
                     s += "-";
                 }
             }
-            Achievement achievement = NettyMemory.achievementMap.get(achievementprocess.getAchievementid());
+            Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
             achievementprocess.setProcesss(s);
             if (achievementprocess.getProcesss().equals(achievement.getTarget())) {
                 achievementprocess.setIffinish(true);
+//              处理父任务
+                sloveParentProcess(user, achievement);
+                achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
+            } else {
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
             }
             AchievementUtil.refreshAchievementInfo(user);
+        }
+    }
+
+    private void sloveParentProcess(User user, Achievement achievement) {
+        if (!achievement.getParent().equals("0")) {
+            Achievement achievementParent = AchievementUtil.getAchievementById(Integer.parseInt(achievement.getParent()));
+            String[] sons = achievementParent.getSons().split("-");
+            List<String> sonSet = new ArrayList<>();
+//              添加要完成的子任务id
+            for (String sonT : sons) {
+                sonSet.add(sonT);
+            }
+//              遍历用户的所有任务,找出所有子任务
+            String process = "";
+            Achievementprocess achievementprocessParent = null;
+            for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
+//                  父子关联，找出用户的此父进度任务
+                if (achievementprocessT.getAchievementid().equals(achievementParent.getAchievementId())) {
+                    achievementprocessParent = achievementprocessT;
+                }
+                if (sonSet.contains(achievementprocessT.getAchievementid() + "") && achievementprocessT.getIffinish()) {
+                    sonSet.remove(achievementprocessT.getAchievementid() + "");
+                    process += achievementprocessT.getAchievementid() + "-";
+                }
+            }
+            process = process.substring(0, process.length() - 1);
+//              所有子任务已完成，更新父任务
+            if (sonSet.size() == 0) {
+                achievementprocessParent.setIffinish(true);
+
+            } else {
+                achievementprocessParent.setProcesss(process);
+            }
+            achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessParent);
         }
     }
 
@@ -128,7 +165,7 @@ public class AchievementExecutor {
 
     public void executeAddFirstFriend(Achievementprocess achievementprocess, User user, User userTarget, String fromUser) {
 //      更新用户自己的
-        Achievement achievement = NettyMemory.achievementMap.get(achievementprocess.getAchievementid());
+        Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
         if (!achievementprocess.getIffinish()) {
             achievementprocess.setProcesss(achievement.getTarget());
             achievementprocess.setIffinish(true);
@@ -157,6 +194,23 @@ public class AchievementExecutor {
         AchievementUtil.refreshAchievementInfo(user);
     }
 
+    public void executeMoneyAchievement(User user) {
+        for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
+            if (achievementprocessT.getType().equals(Achievement.MONEYFIRST)) {
+                Achievement achievement = ProjectContext.achievementMap.get(achievementprocessT.getAchievementid());
+                BigInteger targetMoney = new BigInteger(achievement.getTarget());
+                BigInteger userMoney = new BigInteger(user.getMoney());
+                if (userMoney.compareTo(targetMoney) >= 0) {
+                    achievementprocessT.setProcesss(achievement.getTarget());
+                    achievementprocessT.setIffinish(true);
+                    achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
+                }
+                return;
+            }
+        }
+        AchievementUtil.refreshAchievementInfo(user);
+    }
+
 
     public void executeAddUnionFirst(User user, String username) {
         List<Achievementprocess> list = null;
@@ -170,7 +224,7 @@ public class AchievementExecutor {
         }
         for (Achievementprocess achievementprocess : list) {
             if (achievementprocess.getType().equals(Achievement.UNIONFIRST) && !achievementprocess.getIffinish()) {
-                Achievement achievement = NettyMemory.achievementMap.get(achievementprocess.getAchievementid());
+                Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
                 achievementprocess.setIffinish(true);
                 achievementprocess.setProcesss(achievement.getTarget());
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
@@ -183,11 +237,11 @@ public class AchievementExecutor {
 
     //
     private void updateAchievementprocessWithOther(User user, Monster monster) {
-        Team team = NettyMemory.teamMap.get(user.getTeamId());
+        Team team = ProjectContext.teamMap.get(user.getTeamId());
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             User userT = entry.getValue();
             for (Achievementprocess achievementprocess : userT.getAchievementprocesses()) {
-                Achievement achievement = NettyMemory.achievementMap.get(achievementprocess.getAchievementid());
+                Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
                 if (achievementprocess.getType().equals(Achievement.FINISHBOSSAREA) && monster.getId().equals(Integer.parseInt(achievement.getTarget()))) {
 //                  此任务比较特殊和队伍挂钩
                     achievementprocess.setIffinish(true);
@@ -208,15 +262,59 @@ public class AchievementExecutor {
     }
 
     private void updateFirstTradeOnOneUser(User user) {
-        for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
-            Achievement achievement = NettyMemory.achievementMap.get(achievementprocess.getAchievementid());
-            if(achievementprocess.getType().equals(Achievement.TRADEFIRST)){
-                achievementprocess.setProcesss(achievement.getTarget());
-                achievementprocess.setIffinish(true);
-                achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
+        for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
+            Achievement achievement = ProjectContext.achievementMap.get(achievementprocessT.getAchievementid());
+            if (!achievementprocessT.getIffinish() && achievementprocessT.getType().equals(Achievement.TRADEFIRST)) {
+                achievementprocessT.setProcesss(achievement.getTarget());
+                achievementprocessT.setIffinish(true);
+                achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
             }
         }
     }
 
 
+    public void executeFirstAddTeam(User user) {
+        for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
+            if (achievementprocessT.getType().equals(Achievement.TEAMFIRST) && !achievementprocessT.getIffinish()) {
+                achievementprocessT.setIffinish(true);
+                achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
+            }
+        }
+        AchievementUtil.refreshAchievementInfo(user);
+    }
+
+    public void executeFirstPKWin(User user) {
+        for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
+            if (achievementprocessT.getType().equals(Achievement.PKFIRST) && !achievementprocessT.getIffinish()) {
+                achievementprocessT.setIffinish(true);
+                achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
+            }
+        }
+        AchievementUtil.refreshAchievementInfo(user);
+    }
+
+    public void executeEquipmentStartLevel(User user) {
+        for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
+            if (achievementprocessT.getType().equals(Achievement.EQUIPMENTSTARTLEVEL) && !achievementprocessT.getIffinish()) {
+                Achievement achievement = ProjectContext.achievementMap.get(achievementprocessT.getAchievementid());
+                if (checkUserWeaponStartLevel(user, achievement)){
+                    achievementprocessT.setIffinish(true);
+                    achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
+                }
+            }
+        }
+        AchievementUtil.refreshAchievementInfo(user);
+    }
+
+    private boolean checkUserWeaponStartLevel(User user, Achievement achievement) {
+        Integer allLevel = 0;
+        for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
+            allLevel += weaponequipmentbar.getStartlevel();
+        }
+        Integer tragetLevel = Integer.parseInt(achievement.getTarget());
+        if (allLevel >= tragetLevel) {
+            return true;
+        }
+        return false;
+    }
 }

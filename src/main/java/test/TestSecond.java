@@ -1,14 +1,6 @@
 package test;
 
-import achievement.Achievement;
-import buff.Buff;
-import component.Equipment;
-import component.Monster;
-import component.NPC;
-import level.Level;
-import memory.NettyMemory;
-import role.Role;
-import skill.MonsterSkill;
+import component.HpMedicine;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,19 +9,22 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * xiaojianyu
+ * server
  */
 public class TestSecond {
     public static void main(String[] argv) throws Exception {
         //指定输入文件
-        FileInputStream npcfis = new FileInputStream(new File("C:\\Users\\xiaojianyu\\IdeaProjects\\imitateProject\\src\\main\\resources\\NPC.xls"));
-        LinkedHashMap<String, String> npcalias = new LinkedHashMap<>();
-        npcalias.put("NPC的id","id");
-        npcalias.put("NPC的状态","status");
-        npcalias.put("NPC的名字","name");
-        npcalias.put("NPC的话","talk");
-        npcalias.put("NPC所在的地点","areaId");
-        List<NPC> levelList = ExcelUtil.excel2Pojo(npcfis,NPC.class, npcalias);
+        FileInputStream hpfis = new FileInputStream(new File("C:\\Users\\server\\IdeaProjects\\imitateProject\\src\\main\\resources\\HpMedicine.xls"));
+        LinkedHashMap<String, String> hpMedicineAlias = new LinkedHashMap<>();
+        hpMedicineAlias.put("红药的id","id");
+        hpMedicineAlias.put("红药是否为立即回复药品","immediate");
+        hpMedicineAlias.put("红药的cd","cd");
+        hpMedicineAlias.put("红药每秒恢复的血量","replyValue");
+        hpMedicineAlias.put("红药持续的时间","keepTime");
+        hpMedicineAlias.put("红药持续的名字","name");
+        hpMedicineAlias.put("物品的价值","buyMoney");
+        hpMedicineAlias.put("红药的种类","type");
+        List<HpMedicine> levelList = ExcelUtil.excel2Pojo(hpfis, HpMedicine.class, hpMedicineAlias);
 
         System.out.println(UUID.randomUUID().toString());
     }
