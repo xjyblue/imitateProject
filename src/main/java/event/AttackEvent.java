@@ -96,8 +96,8 @@ public class AttackEvent {
     }
 
     private void attackKeySolve(Channel channel,String msg) throws IOException {
-        if (ProjectContext.userskillrelationMap.get(channel).containsKey(msg)) {
-            User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
+        if (ProjectContext.userskillrelationMap.get(user).containsKey(msg)) {
 //          怪物buff处理
             if (user.getBuffMap().get(BuffConfig.SLEEPBUFF) != 5000) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SLEEPMESSAGE));
@@ -107,8 +107,8 @@ public class AttackEvent {
             for(Map.Entry<Integer,Monster> entry : ProjectContext.userToMonsterMap.get(user).entrySet()){
                 monster = entry.getValue();
             }
-            UserSkill userSkill = ProjectContext.skillMap.get(ProjectContext.userskillrelationMap.get(channel).get(msg).getSkillid());
-            Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(channel).get(msg);
+            UserSkill userSkill = ProjectContext.skillMap.get(ProjectContext.userskillrelationMap.get(user).get(msg).getSkillid());
+            Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(user).get(msg);
 //          技能CD检查
             if (System.currentTimeMillis() > userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
 
@@ -150,7 +150,6 @@ public class AttackEvent {
                                 + System.getProperty("line.separator")
                                 + "[人物剩余蓝量]:" + user.getMp();
                         channel.writeAndFlush(MessageUtil.turnToPacket(resp));
-                        monster.setStatus(DeadOrAliveConfig.DEAD);
 
 //                      boss战斗场景
                         if (monster.getType().equals(Monster.TYPEOFBOSS)) {
@@ -159,7 +158,12 @@ public class AttackEvent {
 //                          更改用户攻击的boss
                             AttackUtil.changeUserAttackMonster(user, bossScene);
                             AttackUtil.killBossMessageToAll(user,monster);
+//                          额外奖励最后一击的玩家
+                            if(monster.getPos().equals("A2")){
+                                outfitEquipmentEvent.extraBonus(user,channel);
+                            }
                         }
+                        monster.setStatus(DeadOrAliveConfig.DEAD);
 
 //                          普通战斗场景
                         if (monster.getType().equals(Monster.TYPEOFCOMMONMONSTER)) {
@@ -182,7 +186,7 @@ public class AttackEvent {
                                         + System.getProperty("line.separator")
                                         + "怪物剩余血量:" + monster.getValueOfLife();
                         userskillrelation.setSkillcds(System.currentTimeMillis());
-//                  更新用户总战斗伤害的值
+//                      更新用户总战斗伤害的值
                         if (user.getTeamId() != null && ProjectContext.bossAreaMap.get(user.getTeamId()) != null) {
                             if (!ProjectContext.bossAreaMap.get(user.getTeamId()).getDamageAll().containsKey(user)) {
                                 ProjectContext.bossAreaMap.get(user.getTeamId()).getDamageAll().put(user, attackDamage.toString());
@@ -203,14 +207,6 @@ public class AttackEvent {
         }
     }
 
-    private Map<String, Monster> changeToMap(User user) {
-        List<Monster> monsterList = ProjectContext.sceneMap.get(user.getPos()).getMonsters();
-        Map<String, Monster> map = new HashMap<>();
-        for (Monster monster : monsterList) {
-            map.put(monster.getId() + "", monster);
-        }
-        return map;
-    }
 
     private String out(User user) {
         String resp = "";

@@ -174,7 +174,7 @@ public class BossScene implements Runnable {
 
         Map<String, Monster> monsterMap = new HashMap<>();
         try {
-            FileInputStream fis = new FileInputStream(new File("C:\\Users\\server\\IdeaProjects\\imitateProject\\src\\main\\resources\\Monster.xls"));
+            FileInputStream fis = new FileInputStream(new File("src/main/resources/Monster.xls"));
             LinkedHashMap<String, String> alias = new LinkedHashMap<>();
             alias.put("怪物id", "id");
             alias.put("怪物名称", "name");
@@ -355,6 +355,7 @@ public class BossScene implements Runnable {
                     if (checkAllDead()) {
                         Future future = futureMap.remove(teamId);
                         future.cancel(true);
+                        ProjectContext.bossAreaMap.remove(teamId);
                         failMessageToAll(bossScene);
                         userMap.remove(userTarget.getUsername());
                         return;
@@ -419,12 +420,18 @@ public class BossScene implements Runnable {
     }
 
     private void sendMessageToAll(String msg, String type) {
-        for (Map.Entry<String, User> entry : userMap.entrySet()) {
-            Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
-            if (type == null) {
-                channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
-            } else {
-                channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg, type));
+        Team team = ProjectContext.teamMap.get(teamId);
+        for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
+            User user = entry.getValue();
+            Channel channel = ProjectContext.userToChannelMap.get(user);
+            String userStatus = ProjectContext.eventStatus.get(channel);
+            if(userStatus.equals(EventStatus.BOSSAREA)||userStatus.equals(EventStatus.DEADAREA)||userStatus.equals(EventStatus.ATTACK)){
+                Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
+                if (type == null) {
+                    channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
+                } else {
+                    channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg, type));
+                }
             }
         }
     }
@@ -442,7 +449,7 @@ public class BossScene implements Runnable {
 
     private void successMessToAll(BossScene bossScene, Monster monster) {
         Team team = ProjectContext.teamMap.get(bossScene.getTeamId());
-        for (Map.Entry<String, User> entry : userMap.entrySet()) {
+        for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
             channelTemp.writeAndFlush(MessageUtil.turnToPacket(bossScene.getBossName() + "副本攻略成功，热烈庆祝各位参与的小伙伴"));
             ProjectContext.eventStatus.put(channelTemp, EventStatus.STOPAREA);
@@ -455,16 +462,16 @@ public class BossScene implements Runnable {
     }
 
     private void oneDeadMessageToAll(BossScene bossScene, Monster monster, User user) {
-        Map<String, User> userMap = ProjectContext.teamMap.get(bossScene.getTeamId()).getUserMap();
-        for (Map.Entry<String, User> entry : userMap.entrySet()) {
+        Team team = ProjectContext.teamMap.get(teamId);
+        for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
             channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "被" + monster.getName() + "打死"));
         }
     }
 
     private void failMessageToAll(BossScene bossScene) {
-        ProjectContext.bossAreaMap.remove(bossScene.getTeamId());
-        for (Map.Entry<String, User> entry : userMap.entrySet()) {
+        Team team = ProjectContext.teamMap.get(teamId);
+        for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
             ProjectContext.eventStatus.put(channelTemp, EventStatus.DEADAREA);
             channelTemp.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.BOSSFAIL));

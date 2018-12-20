@@ -1,5 +1,6 @@
 package server;
 
+import component.Scene;
 import event.EventStatus;
 import event.TeamEvent;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -37,9 +38,6 @@ public class ServerDistributeHandler extends SimpleChannelInboundHandler<String>
     public static final Map<Channel, Integer> heartCounts = new ConcurrentHashMap<>();
 
     @Autowired
-    private EventDistributor eventDistributor;
-
-    @Autowired
     private TeamEvent teamEvent;
 
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -59,32 +57,39 @@ public class ServerDistributeHandler extends SimpleChannelInboundHandler<String>
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         logger.info("客户端与服务端连接断开----inactive");
         User user = ProjectContext.session2UserIds.get(ctx.channel());
-        user.setIfOnline(false);
-        if (user.getTeamId() != null) {
-//          处理一下用户的team对用户的处理
-            teamEvent.handleUserOffline(user);
-        }
-//          移除玩家的所有buff终止时间
-        if (user != null && ProjectContext.userBuffEndTime.containsKey(user)) {
-            ProjectContext.userBuffEndTime.remove(user);
-        }
-//          移除怪物的buff终止时间
-        if (user != null && ProjectContext.userToMonsterMap.containsKey(user)) {
-            ProjectContext.userToMonsterMap.remove(user);
-        }
-        if (ProjectContext.session2UserIds.containsKey(ctx.channel())) {
-            ProjectContext.session2UserIds.remove(ctx.channel());
-        }
-        if (ProjectContext.eventStatus.containsKey(ctx.channel())) {
+        if(user.isOccupied()){
             ProjectContext.eventStatus.remove(ctx.channel());
+            ProjectContext.session2UserIds.remove(ctx.channel());
+            user.setOccupied(false);
+        }else {
+            user.setIfOnline(false);
+            if (user.getTeamId() != null) {
+//          处理一下用户的team对用户的处理
+                teamEvent.handleUserOffline(user);
+            }
+            Scene scene = ProjectContext.sceneMap.get(user.getPos());
+            scene.getUserMap().remove(user.getUsername());
+//          移除玩家的所有buff终止时间
+            if (user != null && ProjectContext.userBuffEndTime.containsKey(user)) {
+                ProjectContext.userBuffEndTime.remove(user);
+            }
+//          移除怪物的buff终止时间
+            if (user != null && ProjectContext.userToMonsterMap.containsKey(user)) {
+                ProjectContext.userToMonsterMap.remove(user);
+            }
+            if (ProjectContext.session2UserIds.containsKey(ctx.channel())) {
+                ProjectContext.session2UserIds.remove(ctx.channel());
+            }
+            if (ProjectContext.eventStatus.containsKey(ctx.channel())) {
+                ProjectContext.eventStatus.remove(ctx.channel());
+            }
+            if (user != null && ProjectContext.userToChannelMap.containsKey(user)) {
+                ProjectContext.userToChannelMap.remove(user);
+            }
+            if (ProjectContext.userskillrelationMap.containsKey(user)) {
+                ProjectContext.userskillrelationMap.remove(user);
+            }
         }
-        if (user != null && ProjectContext.userToChannelMap.containsKey(user)) {
-            ProjectContext.userToChannelMap.remove(user);
-        }
-        if (ProjectContext.userskillrelationMap.containsKey(ctx.channel())) {
-            ProjectContext.userskillrelationMap.remove(ctx.channel());
-        }
-
     }
 
     @Override

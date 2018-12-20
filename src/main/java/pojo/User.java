@@ -54,11 +54,20 @@ public class User {
     private BuffTask buffTask;
 
     private Long buffRefreshTime;
-
+//  在线状态
     private boolean ifOnline;
-
+//  顶号转态处理
+    private boolean occupied;
     //玩家的命令消费队列
     private ConcurrentLinkedQueue<PacketProto.Packet> packetsQueue = new ConcurrentLinkedQueue<>();
+
+    public boolean isOccupied() {
+        return occupied;
+    }
+
+    public void setOccupied(boolean occupied) {
+        this.occupied = occupied;
+    }
 
     public boolean isIfOnline() {
         return ifOnline;

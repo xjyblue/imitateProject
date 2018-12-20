@@ -1,6 +1,7 @@
 package event;
 
 import achievement.AchievementExecutor;
+import caculation.MoneyCaculation;
 import caculation.UserbagCaculation;
 import component.parent.Good;
 import config.MessageConfig;
@@ -14,6 +15,7 @@ import pojo.*;
 import utils.MessageUtil;
 import utils.UserbagUtil;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -42,6 +44,8 @@ public class LabourUnionEvent {
     private UserbagCaculation userbagCaculation;
     @Autowired
     private AchievementExecutor achievementExecutor;
+    @Autowired
+    private MoneyCaculation moneyCaculation;
 
     private Lock lock = new ReentrantLock();
 
@@ -52,48 +56,95 @@ public class LabourUnionEvent {
         }
         if (msg.equals("q")) {
             outUnionView(channel, msg);
+            return;
         }
         if (msg.equals("g")) {
             enterUnionView(channel, msg);
+            return;
         }
         if (msg.equals("lu")) {
             queryUnion(channel, msg);
+            return;
         }
         if (msg.startsWith("cu")) {
             createUnion(channel, msg);
+            return;
         }
         if (msg.equals("tc")) {
             outUnion(channel, msg);
+            return;
         }
         if (msg.startsWith("sq")) {
             applyUnion(channel, msg);
+            return;
         }
         if (msg.startsWith("ls=y")) {
             agreeApplyInfo(channel, msg);
+            return;
         }
         if (msg.startsWith("ls=n")) {
             disagreeApplyInfo(channel, msg);
+            return;
         }
         if (msg.equals("ls")) {
             queryApplyInfo(channel, msg);
+            return;
         }
         if (msg.equals("zsry")) {
             queryUnionMemberInfo(channel, msg);
+            return;
         }
         if (msg.startsWith("sj")) {
             memberLevelChange(channel, msg);
+            return;
         }
         if (msg.startsWith("t=")) {
             removeMember(channel, msg);
+            return;
         }
         if (msg.equals("zsck")) {
             showWarehouse(channel, msg);
+            return;
+        }
+        if (msg.startsWith("jxjb")) {
+            giveMoneyToUnion(channel, msg);
+            return;
         }
         if (msg.startsWith("jx")) {
             giveUserbagToUnion(channel, msg);
+            return;
         }
         if (msg.startsWith("hq")) {
             getUserbagFromUnion(channel, msg);
+        }
+    }
+
+    private void giveMoneyToUnion(Channel channel, String msg) {
+        User user = ProjectContext.session2UserIds.get(channel);
+        String temp[] = msg.split("-");
+        if (temp.length != 2) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            return;
+        }
+        if (!checkUserHasEnoughMoney(user, temp[1])) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMONEYTOGIVE));
+            return;
+        }
+        moneyCaculation.removeMoneyToUser(user, temp[1]);
+        Unioninfo unioninfo = unioninfoMapper.selectByPrimaryKey(user.getUnionid());
+        unioninfo.setUnionmoney(unioninfo.getUnionmoney() + Integer.parseInt(temp[1]));
+        unioninfoMapper.updateByPrimaryKey(unioninfo);
+        messageToAllInUnion(user.getUnionid(), user.getUsername() + "向工会捐献了" + temp[1] + "个金币");
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEMONEYTOUNION, PacketType.UNIONINFO));
+    }
+
+    private boolean checkUserHasEnoughMoney(User user, String money) {
+        BigInteger userMoney = new BigInteger(user.getMoney());
+        BigInteger jxMoney = new BigInteger(money);
+        if (userMoney.compareTo(jxMoney) >= 0) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -108,7 +159,7 @@ public class LabourUnionEvent {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
             return;
         }
-        if(user.getUnionlevel()>3){
+        if (user.getUnionlevel() > 3) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
             return;
         }
@@ -130,7 +181,7 @@ public class LabourUnionEvent {
                 criteria.andUserbagidEqualTo(temp[1]);
                 unionwarehouseMapper.deleteByExample(unionwarehouseExample);
 
-                userbagCaculation.addUserBagForUser(user,userbag);
+                userbagCaculation.addUserBagForUser(user, userbag);
 
                 String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + Good.getGoodNameByUserbag(userbag);
                 messageToAllInUnion(user.getUnionid(), resp);
@@ -138,35 +189,35 @@ public class LabourUnionEvent {
                 return;
             }
 
-            if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
+
 //          工会格子处理，与用户格子处理有区别
-                userbag.setNum(userbag.getNum() - Integer.parseInt(temp[2]));
-                if (userbag.getNum() == 0) {
-                    UnionwarehouseExample unionwarehouseExample = new UnionwarehouseExample();
-                    UnionwarehouseExample.Criteria criteria = unionwarehouseExample.createCriteria();
-                    criteria.andUserbagidEqualTo(userbag.getId());
+            userbag.setNum(userbag.getNum() - Integer.parseInt(temp[2]));
+            if (userbag.getNum() == 0) {
+                UnionwarehouseExample unionwarehouseExample = new UnionwarehouseExample();
+                UnionwarehouseExample.Criteria criteria = unionwarehouseExample.createCriteria();
+                criteria.andUserbagidEqualTo(userbag.getId());
 //                  为0移除关联和背包格子
-                    unionwarehouseMapper.deleteByExample(unionwarehouseExample);
-                    userbagMapper.deleteByPrimaryKey(userbag.getId());
-                } else {
-                    userbagMapper.updateByPrimaryKey(userbag);
-                }
-
-//              新增格子，具体处理细节到里面去实现
-                Userbag userbagNew =new Userbag();
-                userbagNew.setName(user.getUsername());
-                userbagNew.setTypeof(userbag.getTypeof());
-                userbagNew.setNum(Integer.parseInt(temp[2]));
-                userbagNew.setWid(userbag.getWid());
-                userbagNew.setDurability(userbag.getDurability());
-                userbagNew.setId(UUID.randomUUID().toString());
-                userbagCaculation.addUserBagForUser(user,userbagNew);
-
-                String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + Good.getGoodNameByUserbag(userbagNew);
-                messageToAllInUnion(user.getUnionid(), resp);
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD, PacketType.UNIONINFO));
-                return;
+                unionwarehouseMapper.deleteByExample(unionwarehouseExample);
+                userbagMapper.deleteByPrimaryKey(userbag.getId());
+            } else {
+                userbagMapper.updateByPrimaryKey(userbag);
             }
+
+//          新增格子，具体处理细节到里面去实现
+            Userbag userbagNew = new Userbag();
+            userbagNew.setName(user.getUsername());
+            userbagNew.setTypeof(userbag.getTypeof());
+            userbagNew.setNum(Integer.parseInt(temp[2]));
+            userbagNew.setWid(userbag.getWid());
+            userbagNew.setDurability(userbag.getDurability());
+            userbagNew.setId(UUID.randomUUID().toString());
+            userbagCaculation.addUserBagForUser(user, userbagNew);
+
+            String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + Good.getGoodNameByUserbag(userbagNew);
+            messageToAllInUnion(user.getUnionid(), resp);
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD, PacketType.UNIONINFO));
+            return;
+
         } finally {
             lock.unlock();
         }
@@ -228,29 +279,27 @@ public class LabourUnionEvent {
         }
 
         Userbag userbagNew = new Userbag();
+        userbagNew.setId(UUID.randomUUID().toString());
         userbagNew.setWid(userbag.getWid());
         userbagNew.setNum(Integer.parseInt(temp[2]));
         userbagNew.setTypeof(userbag.getTypeof());
-        if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
-
-            boolean flag = false;
-            for (Userbag userbagTemp : list) {
-                if (userbagTemp.getWid().equals(userbag.getWid())) {
-                    userbagTemp.setNum(userbagTemp.getNum() + Integer.parseInt(temp[2]));
-                    userbagMapper.updateByPrimaryKeySelective(userbagTemp);
-                    userbagNew.setId(userbagTemp.getId());
-                    flag = true;
-                    break;
-                }
+        boolean flag = false;
+        for (Userbag userbagTemp : list) {
+            if (userbagTemp.getWid().equals(userbag.getWid())) {
+                userbagTemp.setNum(userbagTemp.getNum() + Integer.parseInt(temp[2]));
+                userbagMapper.updateByPrimaryKeySelective(userbagTemp);
+                userbagNew.setId(userbagTemp.getId());
+                flag = true;
+                break;
             }
-            if (!flag) {
-                userbagNew.setId(UUID.randomUUID().toString());
-                Unionwarehouse unionwarehouse = new Unionwarehouse();
-                unionwarehouse.setUserbagid(userbagNew.getId());
-                unionwarehouse.setUnionwarehouseid(unioninfo.getUnionwarehourseid());
-                unionwarehouseMapper.insert(unionwarehouse);
-                userbagMapper.insertSelective(userbagNew);
-            }
+        }
+        if (!flag) {
+            userbagNew.setId(UUID.randomUUID().toString());
+            Unionwarehouse unionwarehouse = new Unionwarehouse();
+            unionwarehouse.setUserbagid(userbagNew.getId());
+            unionwarehouse.setUnionwarehouseid(unioninfo.getUnionwarehourseid());
+            unionwarehouseMapper.insert(unionwarehouse);
+            userbagMapper.insertSelective(userbagNew);
         }
 
 
@@ -273,6 +322,7 @@ public class LabourUnionEvent {
         for (Userbag userbag : list) {
             resp += Good.getGoodNameByUserbag(userbag) + System.getProperty("line.separator");
         }
+        resp += "工会仓库金币数量为：" + unioninfo.getUnionmoney() + System.getProperty("line.separator");
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + resp, PacketType.UNIONINFO));
         return;
     }
@@ -491,6 +541,7 @@ public class LabourUnionEvent {
         String unioninfoId = UUID.randomUUID().toString();
         unioninfo.setUnionid(unioninfoId);
         unioninfo.setUnionname(temp[1]);
+        unioninfo.setUnionmoney(0);
         unioninfo.setUnionwarehourseid(UUID.randomUUID().toString());
         User userTemp = ProjectContext.session2UserIds.get(channel);
         userTemp.setUnionid(unioninfoId);

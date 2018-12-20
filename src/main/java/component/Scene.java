@@ -2,6 +2,7 @@ package component;
 
 import buff.Buff;
 import caculation.HpCaculation;
+import caculation.MoneyCaculation;
 import config.BuffConfig;
 import config.MessageConfig;
 import event.BuffEvent;
@@ -129,6 +130,7 @@ public class Scene implements Runnable {
 
     private void monsterFrequence() {
 //      推送战斗消息,触发处于战斗状态的用户
+        
 
 
 //      场景内所有用户在战斗的怪物
@@ -143,7 +145,8 @@ public class Scene implements Runnable {
                         for (Map.Entry<Integer, Monster> monsterEntry : ProjectContext.userToMonsterMap.get(user).entrySet()) {
                             monster = monsterEntry.getValue();
                         }
-
+//                      怪物buff刷新
+                        monsterBuffRefresh(monster,channel);
 //                      检查怪物是否死亡
                         if (checkMonsterStatus(channel, monster, user)) {
                             continue;
@@ -186,6 +189,33 @@ public class Scene implements Runnable {
                 }
             }
         }
+    }
+
+    private void monsterBuffRefresh(Monster monster,Channel channel) {
+        if (monster.getBuffRefreshTime() < System.currentTimeMillis()) {
+            monster.setBuffRefreshTime(System.currentTimeMillis() + 1000);
+        } else {
+            return;
+        }
+
+        if (monster != null && monster.getBufMap().containsKey(BuffConfig.POISONINGBUFF) && monster.getBufMap().get(BuffConfig.POISONINGBUFF) != 2000) {
+            Long endTime = ProjectContext.monsterBuffEndTime.get(monster).get(BuffConfig.POISONINGBUFF);
+            if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals("0")) {
+                Buff buff = ProjectContext.buffMap.get(monster.getBufMap().get(BuffConfig.POISONINGBUFF));
+
+                monster.subLife(new BigInteger(buff.getAddSecondValue()));
+//               处理中毒扣死
+                if (new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger("0")) < 0) {
+                    monster.setValueOfLife("0");
+                    monster.setStatus("0");
+                    monster.getBufMap().put(BuffConfig.POISONINGBUFF, 2000);
+                }
+                channel.writeAndFlush(MessageUtil.turnToPacket("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG));
+            } else {
+                monster.getBufMap().put(BuffConfig.POISONINGBUFF, 2000);
+            }
+        }
+
     }
 
 

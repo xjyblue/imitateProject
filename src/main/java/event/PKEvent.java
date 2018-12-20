@@ -70,7 +70,7 @@ public class PKEvent {
             return;
         }
 //      人物cd校验
-        Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(channel).get(temp[2]);
+        Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(user).get(temp[2]);
         if (System.currentTimeMillis() < userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNSKILLCD));
             return;

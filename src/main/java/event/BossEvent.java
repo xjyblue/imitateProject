@@ -12,6 +12,7 @@ import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
+import pojo.Userbag;
 import pojo.Userskillrelation;
 import pojo.Weaponequipmentbar;
 import skill.UserSkill;
@@ -31,8 +32,6 @@ import java.util.concurrent.TimeUnit;
 @Component("bossEvent")
 public class BossEvent {
     @Autowired
-    private AttackEvent attackEvent;
-    @Autowired
     private AttackCaculation attackCaculation;
     @Autowired
     private ShopEvent shopEvent;
@@ -51,6 +50,12 @@ public class BossEvent {
 //      处理用户死亡后重连副本逻辑
         if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId()) && ProjectContext.bossAreaMap.get(user.getTeamId()).isFight()) {
             ProjectContext.eventStatus.put(channel, EventStatus.BOSSAREA);
+//          进入副本，用户场景线程转移
+            BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+            bossScene.getUserMap().put(user.getUsername(),user);
+
+            Scene scene = ProjectContext.sceneMap.get(user.getPos());
+            scene.getUserMap().remove(user.getUsername());
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REBRORNANDCONNECTBOSSAREA));
             return;
         }
@@ -65,6 +70,10 @@ public class BossEvent {
             ProjectContext.teamMap.put(user.getTeamId(), team);
         } else {
             team = getTeam(user);
+            if (checkAllManAlive(team)) {
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SOMEBODYDEAD));
+                return;
+            }
         }
         if (!team.getLeader().getUsername().equals(user.getUsername())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.YOUARENOLEADER));
@@ -78,6 +87,15 @@ public class BossEvent {
         ProjectContext.bossAreaMap.put(team.getTeamId(), bossScene);
 
         changeChannelStatus(team, bossScene);
+    }
+
+    private boolean checkAllManAlive(Team team) {
+        for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
+            if(entry.getValue().getStatus().equals(DeadOrAliveConfig.DEAD)){
+                return true;
+            }
+        }
+        return false;
     }
 
     private void changeChannelStatus(Team team, BossScene bossScene) {
@@ -121,14 +139,14 @@ public class BossEvent {
         }
 
         String temp[] = msg.split("-");
-        if (temp.length == 3 && ProjectContext.userskillrelationMap.get(channel).containsKey(temp[2])) {
-            User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.session2UserIds.get(channel);
+        if (temp.length == 3 && ProjectContext.userskillrelationMap.get(user).containsKey(temp[2])) {
             Monster monster = null;
             for (Map.Entry<String, Monster> entry : getMonsterMap(user).entrySet()) {
 //             输入的怪物是否存在
                 monster = entry.getValue();
                 if (monster.getName().equals(temp[1]) && !monster.getStatus().equals(DeadOrAliveConfig.DEAD)) {
-                    Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(channel).get(temp[2]);
+                    Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(user).get(temp[2]);
                     UserSkill userSkill = ProjectContext.skillMap.get(userskillrelation.getSkillid());
 //                  判断人物MP量是否足够
                     BigInteger userMp = new BigInteger(user.getMp());
@@ -196,7 +214,7 @@ public class BossEvent {
                                         sendMessToAll(user, resp, monster);
                                     } else {
                                         bossScene.setFight(true);
-                                        ProjectContext.endBossAreaTime.put(user.getTeamId(),System.currentTimeMillis()+bossScene.getKeepTime()*1000);
+                                        ProjectContext.endBossAreaTime.put(user.getTeamId(), System.currentTimeMillis() + bossScene.getKeepTime() * 1000);
 
                                         sendMessToAll(user, resp, monster);
                                     }
@@ -205,7 +223,7 @@ public class BossEvent {
                                     successMessToAll(user, monster, resp);
                                 }
                             } else {
-                                Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(channel);
+                                Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(user);
 //                                    切换到攻击模式
                                 ProjectContext.eventStatus.put(channel, EventStatus.ATTACK);
                                 resp += System.getProperty("line.separator")
@@ -231,7 +249,7 @@ public class BossEvent {
                                 BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
 
                                 ProjectContext.bossAreaMap.get(user.getTeamId()).setFight(true);
-                                ProjectContext.endBossAreaTime.put(user.getTeamId(),System.currentTimeMillis()+bossScene.getKeepTime()*1000);
+                                ProjectContext.endBossAreaTime.put(user.getTeamId(), System.currentTimeMillis() + bossScene.getKeepTime() * 1000);
                             }
                         }
                     } else {

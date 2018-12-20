@@ -7,6 +7,8 @@ public class Unioninfo {
 
     private String unionwarehourseid;
 
+    private Integer unionmoney;
+
     public String getUnionid() {
         return unionid;
     }
@@ -29,5 +31,13 @@ public class Unioninfo {
 
     public void setUnionwarehourseid(String unionwarehourseid) {
         this.unionwarehourseid = unionwarehourseid == null ? null : unionwarehourseid.trim();
+    }
+
+    public Integer getUnionmoney() {
+        return unionmoney;
+    }
+
+    public void setUnionmoney(Integer unionmoney) {
+        this.unionmoney = unionmoney;
     }
 }

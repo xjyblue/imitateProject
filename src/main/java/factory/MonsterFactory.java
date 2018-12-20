@@ -99,6 +99,8 @@ public class MonsterFactory {
                 for (int i = 0; i < s.length; i++) {
                     list.add(ProjectContext.monsterSkillMap.get(Integer.parseInt(s[i])));
                 }
+                monster.setAttackEndTime(0L);
+                monster.setBuffRefreshTime(0L);
                 monster.setMonsterSkillList(list);
                 newMonsterList.add(monster);
             }

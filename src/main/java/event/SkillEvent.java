@@ -23,9 +23,10 @@ public class SkillEvent {
     public void skill(Channel channel, String msg) {
         String temp[] = null;
         if (msg.equals("lookSkill")) {
+            User user = ProjectContext.session2UserIds.get(channel);
             String skillLook = "";
             channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
-            Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(channel);
+            Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(user);
             for (Map.Entry<String, Userskillrelation> entry : map.entrySet()) {
                 UserSkill userSkill = ProjectContext.skillMap.get(entry.getValue().getSkillid());
                 skillLook += "键位:" + entry.getKey()
@@ -36,10 +37,11 @@ public class SkillEvent {
             }
             channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
         } else if (msg.startsWith("change")) {
+            User user = ProjectContext.session2UserIds.get(channel);
             temp = msg.split("-");
             if (temp.length == 3) {
                 boolean flag = false;
-                Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(channel);
+                Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(user);
                 for (Map.Entry<String, Userskillrelation> entry : map.entrySet()) {
                     UserSkill userSkill = ProjectContext.skillMap.get(entry.getValue().getSkillid());
                     if (userSkill.getSkillName().equals(temp[1])) {
@@ -48,7 +50,6 @@ public class SkillEvent {
                         map.remove(entry.getKey());
                         map.put(temp[2], userskillrelation);
 //                                    更新session
-                        User user = ProjectContext.session2UserIds.get(channel);
 //                                    更新数据库
                         UserskillrelationExample userskillrelationExample = new UserskillrelationExample();
                         UserskillrelationExample.Criteria criteria = userskillrelationExample.createCriteria();

@@ -105,4 +105,9 @@ public class OutfitEquipmentEvent {
     private User getUser(Channel channel) {
         return ProjectContext.session2UserIds.get(channel);
     }
+
+    public void extraBonus(User user, Channel channel) {
+        moneyCaculation.addMoneyToUser(user, "200");
+        channel.writeAndFlush(MessageUtil.turnToPacket("************最终击杀者额外奖励200金币*************"));
+    }
 }

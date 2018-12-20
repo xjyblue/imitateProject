@@ -69,10 +69,9 @@ public class MessageConfig {
     public static final String NOONLINEUSER = "用户离线无法收到聊天消息";
     public static final String NOSUPPORTREMOTEPK = "不支持跨场景pk";
     public static final String RESURRECTIONNOPK = "起始之地不允许玩家pk";
-    public static final String DEADNOOPERATEINBOSSAREA = "您已在副本中死亡，请不要做无效操作";
-    public static final String ALLDEADINBOSSAREA = "全队已死亡，挑战副本失败";
     public static final String REBRORNANDCONNECTBOSSAREA = "你复活后重新加入当前副本";
     public static final String DONOTATTACKDEADMONSTER = "无法攻击死亡的怪物";
+    public static final String SOMEBODYDEAD = "队伍中有人死亡，无法进入副本，请选择t出玩家或者让玩家自己复活";
 
 
     public static final String SLEEPMESSAGE = "你已被怪物击晕，等待时间即可攻击，也可在商城购买免击晕符";
@@ -104,7 +103,7 @@ public class MessageConfig {
     public static final String ENTERLABOURVIEW = "你已进入工会管理界面";
     public static final String OUTLABOURVIEW = "你已退出工会管理界面";
     public static final String YOUARENOUNON = "你还没有工会";
-    public static final String UNIONMSG = "[t=用户id 踢出某个成员][ls 查看入会申请] [ls=y=申请id 同意入会申请] [ls=n=申请id 否决入会申请]"
+    public static final String UNIONMSG = "[t=用户id 踢出某个成员][ls 查看入会申请] [ls=y=申请id 同意入会申请] [ls=n=申请id 否决入会申请][jxjb-金币数额]"
             + System.getProperty("line.separator") + "[lu查看已有的工会] [sq=工会编号 申请加入工会] [cu-工会名称 创建自己的工会] [zsry 展示工会所有成员信息] [zsck 展示工会仓库]" + System.getProperty("line.separator")
             + "[jx=格子编号=数量 捐献工会物品] [tc 退出工会] [sj=工会成员id=等级 提升工会会员等级] [hq=格子编号=数量 取得工会仓库物品]" + System.getProperty("line.separator");
     public static final String NOCREATEUNION = "无法创建工会，你目前已有工会";
@@ -120,6 +119,8 @@ public class MessageConfig {
     public static final String ERRORUSERBAGNUM = "请输入正确的物品数量";
     public static final String SUCCESSGIVEGOODTOUNION = "捐献成功";
     public static final String SUCCESSGETUNIONGOOD = "获取物品成功";
+    public static final String NOENOUGHMONEYTOGIVE = "你的金币数额不足";
+    public static final String SUCCESSGIVEMONEYTOUNION = "成功向工会捐献了金币";
 
     public static final String FRIENDMSG = "欢迎来到好友管理界面，sq-用户名申请新的好友，ls 查看好友申请" + System.getProperty("line.separator")
             + "lu 查看已有好友 ty=申请编号同意好友申请 tn=否决好友申请" + System.getProperty("line.separator");
@@ -128,4 +129,5 @@ public class MessageConfig {
     public static final String NOFOUNDMAN = "系统无此玩家";
     public static final String NOFRIEND = "您目前还没有好友";
     public static final String NOFRIENDRECORD = "无此好友申请记录";
+
 }

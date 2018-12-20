@@ -2,6 +2,7 @@ package utils;
 
 import io.netty.channel.Channel;
 import context.ProjectContext;
+import pojo.User;
 import skill.UserSkill;
 
 import java.util.ArrayList;
@@ -14,10 +15,11 @@ import java.util.Map;
  */
 public class UserSkillUtil {
     public static UserSkill getUserSkillByKey(Channel channel, String key) {
-        if(!ProjectContext.userskillrelationMap.get(channel).containsKey(key)){
+        User user = ProjectContext.session2UserIds.get(channel);
+        if(!ProjectContext.userskillrelationMap.get(user).containsKey(key)){
             return null;
         }
-        return ProjectContext.skillMap.get(ProjectContext.userskillrelationMap.get(channel).get(key).getSkillid());
+        return ProjectContext.skillMap.get(ProjectContext.userskillrelationMap.get(user).get(key).getSkillid());
     }
 
     public static List<UserSkill> getUserSkillByUserRole(int roleid){

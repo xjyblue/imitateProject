@@ -6,7 +6,10 @@ import event.BuffEvent;
 import event.OutfitEquipmentEvent;
 import level.Level;
 import context.ProjectContext;
+import mapper.UserMapper;
 import org.springframework.stereotype.Component;
+import pojo.User;
+import pojo.UserExample;
 import role.Role;
 import buff.Buff;
 import component.*;
@@ -57,6 +60,8 @@ public class ServerConfig {
     private BuffEvent buffEvent;
     @Autowired
     private OutfitEquipmentEvent outfitEquipmentEvent;
+    @Autowired
+    private UserMapper userMapper;
     // 程序初始方法入口注解，提示spring这个程序先执行这里
     public void serverStart() throws InterruptedException, IOException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -128,13 +133,11 @@ public class ServerConfig {
 //      初始化红药
 
 //      模拟从数据库初始化所有用户的邮件系统
-        ProjectContext.userEmailMap.put("z", new ConcurrentHashMap<String, Mail>());
-        ProjectContext.userEmailMap.put("k", new ConcurrentHashMap<String, Mail>());
-        ProjectContext.userEmailMap.put("w", new ConcurrentHashMap<String, Mail>());
-
-//        初始化定时任务 start
-//        ProjectContext.scheduledThreadPool.scheduleAtFixedRate(new BuffTask(hpCaculation), 0, 1, TimeUnit.SECONDS);
-//        初始化定时任务 end
+        UserExample userExample = new UserExample();
+        List<User> list = userMapper.selectByExample(userExample);
+        for(User user:list){
+            ProjectContext.userEmailMap.put(user.getUsername(),new ConcurrentHashMap<String,Mail>());
+        }
 
 //      初始化人物经验表start
         FileInputStream levelfis = new FileInputStream(new File("src/main/resources/Level.xls"));
@@ -286,6 +289,7 @@ public class ServerConfig {
 //      初始化npc end
 
 
+
 //		起始之地
         Scene scene = new Scene();
         scene.setName("起始之地");
@@ -299,6 +303,7 @@ public class ServerConfig {
         npcs.add(npc);
         scene.setNpcs(npcs);
         Monster monster = monsterFactory.getMonster(3);
+        monster.setBuffRefreshTime(0L);
         List<Monster> monsters = new ArrayList<>();
         monsters.add(monster);
         scene.setMonsters(monsters);
@@ -325,6 +330,7 @@ public class ServerConfig {
         scene.setNpcs(npcs);
         monsters = new ArrayList<>();
         monster = monsterFactory.getMonster(4);
+        monster.setBuffRefreshTime(0L);
         monsters.add(monster);
         scene.setMonsters(monsters);
         scene.setBuffEvent(buffEvent);
@@ -350,6 +356,7 @@ public class ServerConfig {
 //      初始化怪物
         monster = monsterFactory.getMonster(5);
         monsters = new ArrayList<>();
+        monster.setBuffRefreshTime(0L);
         monsters.add(monster);
         scene.setMonsters(monsters);
         scene.setBuffEvent(buffEvent);
@@ -378,6 +385,7 @@ public class ServerConfig {
 
 //      初始化怪物
         monster = monsterFactory.getMonster(6);
+        monster.setBuffRefreshTime(0L);
         monsters = new ArrayList<>();
         monsters.add(monster);
         scene.setMonsters(monsters);

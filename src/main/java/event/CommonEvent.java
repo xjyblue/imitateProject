@@ -123,6 +123,19 @@ public class CommonEvent {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEQUIPGOOD));
         }
 
+//      整理背包
+        if (msg.startsWith("b-arrange")) {
+            User user = ProjectContext.session2UserIds.get(channel);
+            for (Userbag userbag : user.getUserBag()) {
+                for (Userbag userbag2 : user.getUserBag()) {
+                    if (userbag != userbag2 && userbag.getWid() == userbag2.getWid() && !userbag.getTypeof().equals(Good.EQUIPMENT)) {
+//                      相同物品不同格子叠加
+                        userbag.setNum(userbag.getNum() + userbag2.getNum());
+                    }
+                }
+            }
+        }
+
         if (msg.startsWith("wq-")) {
             User user = ProjectContext.session2UserIds.get(channel);
             String temp[] = msg.split("-");

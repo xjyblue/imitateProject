@@ -39,7 +39,7 @@ public class ProjectContext {
 	/**初始化 地图线程池**/
 	public static ExecutorService sceneThreadPool = Executors.newFixedThreadPool(4);
 	/**初始化玩家技能*/
-	public static Map<Channel, Map<String,Userskillrelation>> userskillrelationMap = new ConcurrentHashMap<Channel, Map<String,Userskillrelation>>();
+	public static Map<User, Map<String,Userskillrelation>> userskillrelationMap = new ConcurrentHashMap<User, Map<String,Userskillrelation>>();
 	/**缓存用户所攻击的怪兽*/
 	public static Map<User, Map<Integer,Monster>> userToMonsterMap = new HashMap<>();
 	/**初始化Buff的截止时间*/

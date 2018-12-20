@@ -31,6 +31,11 @@ public class MoneyCaculation {
     }
 
     public void removeMoneyToUser(User user, String money) {
-
+        BigInteger usermoney = new BigInteger(user.getMoney());
+        BigInteger removemoney = new BigInteger(money);
+        usermoney = usermoney.subtract(removemoney);
+        user.setMoney(usermoney.toString());
+//      同步到数据库
+        userMapper.updateByPrimaryKeySelective(user);
     }
 }

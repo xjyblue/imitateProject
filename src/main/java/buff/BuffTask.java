@@ -21,7 +21,7 @@ import java.math.BigInteger;
 import java.util.Map;
 
 @Component
-public class BuffTask implements Runnable {
+public class BuffTask{
     private BigInteger add = new BigInteger("10");
     private HpCaculation hpCaculation;
 
@@ -71,63 +71,66 @@ public class BuffTask implements Runnable {
                             channel.writeAndFlush(MessageUtil.turnToPacket("你受到了怪物的中毒攻击，产生中毒伤害为:" + buff.getAddSecondValue() + "人物剩余血量" + user.getHp(), PacketType.USERBUFMSG));
                         }
                     }
-//               更新用户回血buff
-                    if (entrySecond.getKey().equals(BuffConfig.TREATMENTBUFF) && entrySecond.getValue() != 6000) {
-//                          红药buff处理
-                        if (ProjectContext.hpMedicineMap.containsKey(entrySecond.getValue())) {
-                            HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(entrySecond.getValue());
-                            if (hpMedicine.isImmediate()) {
-                                endTime = hpMedicine.getCd() * 1000 + System.currentTimeMillis();
-                                ProjectContext.userBuffEndTime.get(user).put(BuffConfig.TREATMENTBUFF, endTime);
-                                hpCaculation.addUserHp(user, hpMedicine.getReplyValue());
-                                user.getBuffMap().put(BuffConfig.TREATMENTBUFF, 6000);
-                            }
-                            return;
-                        }
-//                          技能buff处理
-                        Buff buff = ProjectContext.buffMap.get(entrySecond.getValue());
-                        if (user.getTeamId() != null) {
-                            Team team = ProjectContext.teamMap.get(user.getTeamId());
-                            for (Map.Entry<String, User> entryUser : team.getUserMap().entrySet()) {
-                                hpCaculation.addUserHp(entryUser.getValue(), buff.getRecoverValue());
-                                Channel channelTemp = ProjectContext.userToChannelMap.get(entryUser.getValue());
-                                channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "使用了全体回血技能,全体回复血量:" + buff.getRecoverValue()));
-                            }
-                        } else {
-                            hpCaculation.addUserHp(user, buff.getRecoverValue());
-                            channel.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "使用了全体回血技能,全体回复血量:" + buff.getRecoverValue()));
-                        }
-                        user.getBuffMap().put(BuffConfig.TREATMENTBUFF, 6000);
-                    }
-                }
+
 //               更新用户召唤师buff
-                if (entrySecond.getKey().equals(BuffConfig.BABYBUF)) {
-                    Buff buff = ProjectContext.buffMap.get(entrySecond.getValue());
-                    if (entrySecond.getKey().equals(BuffConfig.BABYBUF) && entrySecond.getValue() != 7000) {
-                        endTime = ProjectContext.userBuffEndTime.get(user).get(BuffConfig.BABYBUF);
-                        if (System.currentTimeMillis() > endTime) {
-                            user.getBuffMap().put(BuffConfig.BABYBUF, 7000);
-                        } else {
-                            if (ProjectContext.userToMonsterMap.containsKey(user)) {
-                                for (Map.Entry<Integer, Monster> monsterEntry : ProjectContext.userToMonsterMap.get(user).entrySet()) {
-                                    monster = monsterEntry.getValue();
-                                }
-//                                 后期改成场景线程去心跳执行这一块的内容,通过计算截止错开时间
-                                hpCaculation.subMonsterHp(monster, buff.getAddSecondValue());
-                                if (monster.getValueOfLife().equals("0")) {
-                                    monster.setStatus(DeadOrAliveConfig.DEAD);
-                                    user.getBuffMap().put(BuffConfig.BABYBUF, 7000);
-                                    if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
-                                        BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
-                                        AttackUtil.changeUserAttackMonster(user, bossScene);
-                                        AttackUtil.killBossMessageToAll(user, monster);
+                    if (entrySecond.getKey().equals(BuffConfig.BABYBUF)) {
+                        Buff buff = ProjectContext.buffMap.get(entrySecond.getValue());
+                        if (entrySecond.getKey().equals(BuffConfig.BABYBUF) && entrySecond.getValue() != 7000) {
+                            endTime = ProjectContext.userBuffEndTime.get(user).get(BuffConfig.BABYBUF);
+                            if (System.currentTimeMillis() > endTime) {
+                                user.getBuffMap().put(BuffConfig.BABYBUF, 7000);
+                            } else {
+                                if (ProjectContext.userToMonsterMap.containsKey(user)) {
+                                    for (Map.Entry<Integer, Monster> monsterEntry : ProjectContext.userToMonsterMap.get(user).entrySet()) {
+                                        monster = monsterEntry.getValue();
                                     }
+//                                 后期改成场景线程去心跳执行这一块的内容,通过计算截止错开时间
+                                    hpCaculation.subMonsterHp(monster, buff.getAddSecondValue());
+                                    if (monster.getValueOfLife().equals("0")) {
+                                        monster.setStatus(DeadOrAliveConfig.DEAD);
+                                        user.getBuffMap().put(BuffConfig.BABYBUF, 7000);
+                                        if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
+                                            BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+                                            AttackUtil.changeUserAttackMonster(user, bossScene);
+                                            AttackUtil.killBossMessageToAll(user, monster);
+                                        }
+                                    }
+                                    channel.writeAndFlush(MessageUtil.turnToPacket("你的召唤兽[" + buff.getName() + "]正在对" + monster.getName() + "造成" + buff.getAddSecondValue() + "点攻击", PacketType.ATTACKMSG));
                                 }
-                                channel.writeAndFlush(MessageUtil.turnToPacket("你的召唤兽[" + buff.getName() + "]正在对" + monster.getName() + "造成" + buff.getAddSecondValue() + "点攻击", PacketType.ATTACKMSG));
                             }
                         }
                     }
                 }
+
+//               更新用户回血buff
+                if (entrySecond.getKey().equals(BuffConfig.TREATMENTBUFF) && entrySecond.getValue() != 6000) {
+//                          红药buff处理
+                    if (ProjectContext.hpMedicineMap.containsKey(entrySecond.getValue())) {
+                        HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(entrySecond.getValue());
+                        if (hpMedicine.isImmediate()) {
+                            endTime = hpMedicine.getCd() * 1000 + System.currentTimeMillis();
+                            ProjectContext.userBuffEndTime.get(user).put(BuffConfig.TREATMENTBUFF, endTime);
+                            hpCaculation.addUserHp(user, hpMedicine.getReplyValue());
+                            user.getBuffMap().put(BuffConfig.TREATMENTBUFF, 6000);
+                        }
+                        return;
+                    }
+//                      技能buff处理
+                    Buff buff = ProjectContext.buffMap.get(entrySecond.getValue());
+                    if (user.getTeamId() != null) {
+                        Team team = ProjectContext.teamMap.get(user.getTeamId());
+                        for (Map.Entry<String, User> entryUser : team.getUserMap().entrySet()) {
+                            hpCaculation.addUserHp(entryUser.getValue(), buff.getRecoverValue());
+                            Channel channelTemp = ProjectContext.userToChannelMap.get(entryUser.getValue());
+                            channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "使用了全体回血技能,全体回复血量:" + buff.getRecoverValue()));
+                        }
+                    } else {
+                        hpCaculation.addUserHp(user, buff.getRecoverValue());
+                        channel.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "使用了全体回血技能,全体回复血量:" + buff.getRecoverValue()));
+                    }
+                    user.getBuffMap().put(BuffConfig.TREATMENTBUFF, 6000);
+                }
+
 //               更新用户回蓝buff
                 if (entrySecond.getKey().equals(BuffConfig.MPBUFF)) {
 //                自动回蓝
@@ -171,15 +174,4 @@ public class BuffTask implements Runnable {
         }
     }
 
-    private void sendMessageToAll(User user, Buff buff, Monster monster) {
-        for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
-            Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG));
-        }
-    }
-
-    @Override
-    public void run() {
-
-    }
 }

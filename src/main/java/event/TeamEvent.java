@@ -249,11 +249,11 @@ public class TeamEvent {
                     }
                 }
             }
+            team.getUserMap().remove(user.getUsername());
             if(!ProjectContext.bossAreaMap.containsKey(team.getTeamId())){
                 return;
             }
             BossScene bossScene = ProjectContext.bossAreaMap.get(team.getTeamId());
-            team.getUserMap().remove(user.getUsername());
             bossScene.getDamageAll().remove(user);
             ProjectContext.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
             return;

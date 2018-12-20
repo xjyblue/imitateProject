@@ -171,10 +171,10 @@ public class StopAreaEvent {
             ProjectContext.eventStatus.put(channel, EventStatus.SKILLMANAGER);
             channel.writeAndFlush(MessageUtil.turnToPacket("请输入lookSkill查看技能，请输入change-技能名-键位配置技能,请输入quitSkill退出技能管理界面"));
         } else if (msg.startsWith("attack")) {
+            User user = ProjectContext.session2UserIds.get(channel);
             temp = msg.split("-");
 //          输入的键位是否存在
-            if (temp.length == 3 && ProjectContext.userskillrelationMap.get(channel).containsKey(temp[2])) {
-                User user = ProjectContext.session2UserIds.get(channel);
+            if (temp.length == 3 && ProjectContext.userskillrelationMap.get(user).containsKey(temp[2])) {
                 for (Monster monster : ProjectContext.sceneMap.get(user.getPos()).getMonsters()) {
 //                 输入的怪物是否存在
                     if (monster.getName().equals(temp[1])) {
@@ -182,7 +182,7 @@ public class StopAreaEvent {
                             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DONOTATTACKDEADMONSTER));
                             return;
                         }
-                        Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(channel).get(temp[2]);
+                        Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(user).get(temp[2]);
                         UserSkill userSkill = ProjectContext.skillMap.get(userskillrelation.getSkillid());
 //                      判断人物MP量是否足够
                         BigInteger userMp = new BigInteger(user.getMp());
@@ -233,7 +233,7 @@ public class StopAreaEvent {
                                     scene.getMonsters().add(monsterFactory.getMonsterByArea(user.getPos()));
 
                                 } else {
-                                    Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(channel);
+                                    Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(user);
 //                                    切换到攻击模式
                                     ProjectContext.eventStatus.put(channel, EventStatus.ATTACK);
                                     resp += System.getProperty("line.separator")

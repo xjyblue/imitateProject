@@ -1,20 +1,25 @@
 package event;
 
+import achievement.Achievement;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import level.Level;
+import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
 import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import pojo.Achievementprocess;
 import pojo.User;
 import pojo.Userskillrelation;
 import skill.UserSkill;
+import utils.LevelUtil;
 import utils.UserSkillUtil;
 import utils.MessageUtil;
 
 import java.util.List;
+import java.util.Map;
 
 @Component("registerEvent")
 public class RegisterEvent {
@@ -22,6 +27,8 @@ public class RegisterEvent {
     private UserMapper userMapper;
     @Autowired
     private UserskillrelationMapper userskillrelationMapper;
+    @Autowired
+    private AchievementprocessMapper achievementprocessMapper;
     public void register(Channel channel, String msg) {
         String[] temp = msg.split("-");
         if (temp.length != 4) {
@@ -64,9 +71,28 @@ public class RegisterEvent {
             userskillrelationMapper.insert(userskillrelation);
         }
 
+
+//      为用户新增任务进程
+        for (Map.Entry<Integer, Achievement> entry : ProjectContext.achievementMap.entrySet()) {
+            Achievementprocess achievementprocess = new Achievementprocess();
+            achievementprocess.setIffinish(false);
+            achievementprocess.setType(entry.getValue().getType());
+            achievementprocess.setAchievementid(entry.getValue().getAchievementId());
+            achievementprocess.setUsername(user.getUsername());
+
+            if (entry.getValue().getType().equals(Achievement.UPLEVEL)) {
+                achievementprocess.setProcesss(LevelUtil.getLevelByExperience(user.getExperience()) + "");
+                if (Integer.parseInt(achievementprocess.getProcesss()) >= Integer.parseInt(entry.getValue().getTarget())) {
+                    achievementprocess.setIffinish(true);
+                }
+            } else {
+                achievementprocess.setProcesss(entry.getValue().getBegin());
+            }
+//              存数据库
+            achievementprocessMapper.insert(achievementprocess);
+        }
+
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERSUCCESS));
         ProjectContext.eventStatus.put(channel, EventStatus.LOGIN);
-
-
     }
 }

@@ -313,6 +313,66 @@ public class UnioninfoExample {
             addCriterion("unionWarehourseId not between", value1, value2, "unionwarehourseid");
             return (Criteria) this;
         }
+
+        public Criteria andUnionmoneyIsNull() {
+            addCriterion("unionMoney is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionmoneyIsNotNull() {
+            addCriterion("unionMoney is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionmoneyEqualTo(Integer value) {
+            addCriterion("unionMoney =", value, "unionmoney");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionmoneyNotEqualTo(Integer value) {
+            addCriterion("unionMoney <>", value, "unionmoney");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionmoneyGreaterThan(Integer value) {
+            addCriterion("unionMoney >", value, "unionmoney");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionmoneyGreaterThanOrEqualTo(Integer value) {
+            addCriterion("unionMoney >=", value, "unionmoney");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionmoneyLessThan(Integer value) {
+            addCriterion("unionMoney <", value, "unionmoney");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionmoneyLessThanOrEqualTo(Integer value) {
+            addCriterion("unionMoney <=", value, "unionmoney");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionmoneyIn(List<Integer> values) {
+            addCriterion("unionMoney in", values, "unionmoney");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionmoneyNotIn(List<Integer> values) {
+            addCriterion("unionMoney not in", values, "unionmoney");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionmoneyBetween(Integer value1, Integer value2) {
+            addCriterion("unionMoney between", value1, value2, "unionmoney");
+            return (Criteria) this;
+        }
+
+        public Criteria andUnionmoneyNotBetween(Integer value1, Integer value2) {
+            addCriterion("unionMoney not between", value1, value2, "unionmoney");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {
