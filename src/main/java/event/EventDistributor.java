@@ -2,12 +2,15 @@ package event;
 
 
 import context.ProjectContext;
+import context.ProjectUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.netty.channel.Channel;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * 具体事件分发器
@@ -40,45 +43,43 @@ public class EventDistributor {
     private LabourUnionEvent labourUnionEvent;
     @Autowired
     private FriendEvent friendEvent;
-    public void distributeEvent(Channel ch, String msg) throws IOException {
+    public void distributeEvent(Channel ch, String msg) throws IOException, InvocationTargetException, IllegalAccessException {
         String status = ProjectContext.eventStatus.get(ch);
         switch (status) {
             case EventStatus.COMING:
-                connectEvent.connect(ch,msg);
+                ProjectUtil.reflectAnnotation(connectEvent,ch,msg);
                 break;
             case EventStatus.LOGIN:
-                loginEvent.login(ch, msg);
+                ProjectUtil.reflectAnnotation(loginEvent,ch,msg);
                 break;
             case EventStatus.REGISTER:
-                registerEvent.register(ch, msg);
+                ProjectUtil.reflectAnnotation(registerEvent,ch,msg);
                 break;
             case EventStatus.STOPAREA:
-                stopAreaEvent.stopArea(ch, msg);
+                ProjectUtil.reflectAnnotation(stopAreaEvent,ch,msg);
                 break;
             case EventStatus.SKILLMANAGER:
-                skillEvent.skill(ch, msg);
+                ProjectUtil.reflectAnnotation(skillEvent,ch,msg);
                 break;
             case EventStatus.ATTACK:
-                attackEvent.attack(ch, msg);
+                ProjectUtil.reflectAnnotation(attackEvent,ch,msg);
                 break;
             case EventStatus.BOSSAREA:
-                bossEvent.attack(ch, msg);
-                break;
-            case EventStatus.SHOPAREA:
-                shopEvent.shop(ch, msg);
+                ProjectUtil.reflectAnnotation(bossEvent,ch,msg);
                 break;
             case EventStatus.TRADE:
-                transactionEvent.tradeing(ch,msg);
+                ProjectUtil.reflectAnnotation(transactionEvent,ch,msg);
                 break;
             case EventStatus.DEADAREA:
-                deadEvent.dead(ch,msg);
+                ProjectUtil.reflectAnnotation(deadEvent,ch,msg);
                 break;
             case EventStatus.LABOURUNION:
-                labourUnionEvent.solve(ch,msg);
+                ProjectUtil.reflectAnnotation(labourUnionEvent,ch,msg);
                 break;
             case EventStatus.FRIEND:
-                friendEvent.solve(ch,msg);
+                ProjectUtil.reflectAnnotation(friendEvent,ch,msg);
                 break;
         }
     }
+
 }

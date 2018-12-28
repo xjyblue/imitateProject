@@ -6,7 +6,7 @@ package config;
  */
 public class MessageConfig {
     public static final String LOGINMESSAGE = "请输入：用户名-密码";
-    public static final String REGISTERMESSAGE = "请输入：用户名-密码-确认密码-种族编号[1:战士 2:牧师 3:法师 4:召唤师]进行注册";
+    public static final String REGISTERMESSAGE = "请输入：用户名-密码-确认密码-种族编号[1:星武 2:星魂 3:星法 4:星宠师]进行注册";
     public static final String ERRORPASSWORD = "账户密码出错";
     public static final String DOUBLEPASSWORDERROR = "两次密码不一致";
     public static final String REGISTERSUCCESS = "注册成功请输入：用户名-密码进行登录";
@@ -14,9 +14,11 @@ public class MessageConfig {
     public static final String NOROLE = "请输入有效的种族";
 
     public static final String UNMOVELOCAL = "原地无需移动";
+    public static final String NOLEVELTOMOVE = "等级不够无法移动";
     public static final String NOTARGETTOMOVE = "移动地点不存在";
     public static final String REMOTEMOVEMESSAGE = "请充值才能启用传送门";
     public static final String NOFOUNDNPC = "找不到此NPC";
+    public static final String NOENOUGHCHANGEGOOD = "所要交换的物品不足够";
 
     public static final String ERRORORDER = "您输入的指令有误,请输入有效的指令";
     public static final String FAILGOODID = "请输入有效的物品ID";
@@ -28,6 +30,7 @@ public class MessageConfig {
 
     public static final String RETREATFIGHT = "您已退出战斗";
     public static final String UNENOUGHMP = "您当前蓝量(MP)不足";
+    public static final String NOFOUNDMONSTER = "找不到该怪物";
     public static final String UNSKILLCD = "你当前技能CD冷却中，请稍后重试";
     public static final String YOUARENOLEADER = "你无权带队进入副本，你不是队长";
     public static final String ENTERFIGHT = "你已进入战斗状态";
@@ -58,6 +61,7 @@ public class MessageConfig {
     public static final String SUCCESSSENDEMIAL = "邮件发送成功";
     public static final String RECEIVEEMAILSUCCESS = "成功接收邮件";
     public static final String RECEIVEEMAILFAIL = "接收邮件编号不存在";
+    public static final String NORECEIVEEMAIL = "该邮件无附带物品无法接受";
     public static final String NOFOUNDPKPERSON = "你要PK的玩家不存在";
     public static final String NOPKSELF = "PK对象不能是自己";
     public static final String NOKEYSKILL = "您无此键位的技能";
@@ -103,9 +107,9 @@ public class MessageConfig {
     public static final String ENTERLABOURVIEW = "你已进入工会管理界面";
     public static final String OUTLABOURVIEW = "你已退出工会管理界面";
     public static final String YOUARENOUNON = "你还没有工会";
-    public static final String UNIONMSG = "[t=用户id 踢出某个成员][ls 查看入会申请] [ls=y=申请id 同意入会申请] [ls=n=申请id 否决入会申请][jxjb-金币数额]"
+    public static final String UNIONMSG = "[t=用户id 踢出某个成员][lsu 查看入会申请] [ls=y=申请id 同意入会申请] [ls=n=申请id 否决入会申请][jxjb-金币数额]"
             + System.getProperty("line.separator") + "[lu查看已有的工会] [sq=工会编号 申请加入工会] [cu-工会名称 创建自己的工会] [zsry 展示工会所有成员信息] [zsck 展示工会仓库]" + System.getProperty("line.separator")
-            + "[jx=格子编号=数量 捐献工会物品] [tc 退出工会] [sj=工会成员id=等级 提升工会会员等级] [hq=格子编号=数量 取得工会仓库物品]" + System.getProperty("line.separator");
+            + "[jxwp=格子编号=数量 捐献工会物品] [tc 退出工会] [sj=工会成员id=等级 提升工会会员等级] [hq=格子编号=数量 取得工会仓库物品]" + System.getProperty("line.separator");
     public static final String NOCREATEUNION = "无法创建工会，你目前已有工会";
     public static final String NOOUTUNION = "创始人无法退出工会，你可将工会移交他人再退出";
     public static final String NOAPPLYUNION = "无法加入工会，你已有工会";
@@ -130,4 +134,10 @@ public class MessageConfig {
     public static final String NOFRIEND = "您目前还没有好友";
     public static final String NOFRIENDRECORD = "无此好友申请记录";
 
+    public static final String NOENOUGHMANTOFIGHT = "三层boss需多人组队才能挑战，游戏结束";
+    public static final String OUTBOSSAREA = "你成功退出副本";
+    public static final String NORECOVERUSERHPANDMP = "用户的血量和蓝量无法恢复";
+    public static final String RECOVRESUCCESS = "人物的蓝量和血量恢复成功";
+    public static final String MANDEAD = "人物已死亡，无法进行攻击";
+    public static final String NOEXACHANGEFORNPC = "该npc无法进行交换物品";
 }

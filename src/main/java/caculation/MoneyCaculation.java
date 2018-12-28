@@ -1,10 +1,14 @@
 package caculation;
 
 import achievement.AchievementExecutor;
+import config.MessageConfig;
+import context.ProjectContext;
+import io.netty.channel.Channel;
 import mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
+import utils.MessageUtil;
 
 import java.math.BigInteger;
 
@@ -33,6 +37,11 @@ public class MoneyCaculation {
     public void removeMoneyToUser(User user, String money) {
         BigInteger usermoney = new BigInteger(user.getMoney());
         BigInteger removemoney = new BigInteger(money);
+        if(removemoney.compareTo(usermoney)>0){
+            Channel channelT = ProjectContext.userToChannelMap.get(user);
+            channelT.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMONEYTOGIVE));
+            return;
+        }
         usermoney = usermoney.subtract(removemoney);
         user.setMoney(usermoney.toString());
 //      同步到数据库

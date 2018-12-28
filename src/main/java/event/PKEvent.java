@@ -2,10 +2,13 @@ package event;
 
 import achievement.AchievementExecutor;
 import caculation.AttackCaculation;
+import caculation.HpCaculation;
 import config.MessageConfig;
 import config.DeadOrAliveConfig;
 import io.netty.channel.Channel;
 import context.ProjectContext;
+import order.Order;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -27,7 +30,9 @@ public class PKEvent {
     private AttackCaculation attackCaculation;
     @Autowired
     private AchievementExecutor achievementExecutor;
-
+    @Autowired
+    private HpCaculation hpCaculation;
+    @Order(orderMsg = "pk")
     public void pkOthers(Channel channel, String msg) {
         String temp[] = msg.split("-");
         User user = ProjectContext.session2UserIds.get(channel);
@@ -76,7 +81,7 @@ public class PKEvent {
             return;
         }
         userskillrelation.setSkillcds(System.currentTimeMillis());
-        userTarget.subHp(attackDamage.toString());
+        hpCaculation.reduceUserHp(userTarget,attackDamage.toString());
 //      人物死亡处理
         if (new BigInteger(userTarget.getHp()).compareTo(minHp)<=0){
             userTarget.setHp("0");

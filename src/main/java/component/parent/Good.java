@@ -19,11 +19,23 @@ public class Good {
 
     public static final String HPMEDICINE = "2";
 
+    public static final String CHANGEGOOD = "4";
+
     protected String name;
 
     protected String type;
 
     protected String buyMoney;
+
+    protected String desc;
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
 
     public String getBuyMoney() {
         return buyMoney;

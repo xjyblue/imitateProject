@@ -1,5 +1,6 @@
 package utils;
 
+import component.CollectGood;
 import component.Equipment;
 import component.HpMedicine;
 import component.MpMedicine;
@@ -63,6 +64,14 @@ public class UserbagUtil {
                         + "] [物品数量" + userbag.getNum()
                         + "] [物品恢复血量" + hpMedicine.getReplyValue()
                         + "] [物品cd" + hpMedicine.getCd() + "]";
+            }else if(userbag.getTypeof().equals(Good.CHANGEGOOD)){
+                CollectGood collectGood = ProjectContext.collectGoodMap.get(userbag.getWid());
+                bagResp +=System.getProperty("line.separator")
+                        + "[格子id:" + userbag.getId()
+                        + "] [物品id:" + collectGood.getId()
+                        + "] [物品名称:" + collectGood.getName()
+                        + "] [物品数量:" + userbag.getNum()
+                        + "] [物品描述:" + collectGood.getDesc() + "]";
             }
         }
         channel.writeAndFlush(MessageUtil.turnToPacket(bagResp, PacketType.USERBAGMSG));

@@ -33,12 +33,21 @@ public class Monster {
 
     private String pos;
 
+    private String reward;
+
     private Integer experience;
 //  时间
     private Long attackEndTime;
 //  buff时间
     private Long buffRefreshTime;
 
+    public String getReward() {
+        return reward;
+    }
+
+    public void setReward(String reward) {
+        this.reward = reward;
+    }
 
     public Long getBuffRefreshTime() {
         return buffRefreshTime;

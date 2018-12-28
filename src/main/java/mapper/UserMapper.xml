@@ -312,6 +312,7 @@
         <result column="mp" property="mp"/>
         <result column="hp" property="hp"/>
         <result column="money" property="money"/>
+        <result column="upassword" property="password"/>
         <result column="roleId" property="roleid"/>
         <result column="unionId" property="unionid"/>
         <result column="unionLevel" property="unionlevel"/>
@@ -352,6 +353,7 @@
 		 u.pos,
 		 u.mp,
 		 u.hp,
+		 u.password as upassword,
 		 u.roleId,
 		 u.experience,
 		 u.unionId,

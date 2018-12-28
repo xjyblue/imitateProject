@@ -16,6 +16,26 @@ public class Level {
 
     private String maxMp;
 
+    private Integer upAttack;
+
+    private String caculatePercent;
+
+    public String getCaculatePercent() {
+        return caculatePercent;
+    }
+
+    public void setCaculatePercent(String caculatePercent) {
+        this.caculatePercent = caculatePercent;
+    }
+
+    public Integer getUpAttack() {
+        return upAttack;
+    }
+
+    public void setUpAttack(Integer upAttack) {
+        this.upAttack = upAttack;
+    }
+
     public Integer getExperienceUp() {
         return experienceUp;
     }

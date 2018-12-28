@@ -12,9 +12,7 @@ import java.io.IOException;
  *
  */
 public class ServerStart {
-	
-	private static Logger logger = Logger.getLogger(ServerStart.class);
-	
+
 	public static void main(String[] args) throws InterruptedException, IOException {
 		ApplicationContext context = new ClassPathXmlApplicationContext("classpath*:server.xml");
 		ServerConfig serverConfig = (ServerConfig) context.getBean("serverConfig");

@@ -1,5 +1,6 @@
 package client;
 
+import config.MessageConfig;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;
@@ -28,22 +29,14 @@ public class ClientHandler extends ChannelHandlerAdapter {
 //      收到玩家消息的时候触发
         try {
             if (msg instanceof PacketProto.Packet) {
-                PacketProto.Packet packet = (PacketProto.Packet) msg;
-                switch (packet.getPacketType()) {
-                    case HEARTBEAT:
-                        handleHeartbreat(ctx, msg);
-                        break;
-                    case DATA:
-                        handleData(ctx, msg);
-                        break;
-                    default:
-                        break;
-                }
+                handleData(ctx, msg);
             }
         } finally {
             ReferenceCountUtil.release(msg);
         }
+
     }
+
 
     private void handleData(ChannelHandlerContext ctx, Object msg) {
         PacketProto.Packet packet = (PacketProto.Packet) msg;
@@ -76,7 +69,7 @@ public class ClientHandler extends ChannelHandlerAdapter {
             jTextArea = clientStart.getjTextArea8();
             jTextArea.setText("");
         }
-        if(packet.getType().equals(PacketType.FRIENDMSG)){
+        if (packet.getType().equals(PacketType.FRIENDMSG)) {
             jTextArea = clientStart.getjTextArea9();
             jTextArea.setText("");
         }
@@ -87,7 +80,10 @@ public class ClientHandler extends ChannelHandlerAdapter {
             jTextArea.setCaretPosition(jTextArea.getDocument().getLength());
             return;
         }
-
+        if(packet.getType().equals(PacketType.CHANGECHANNEL)){
+            clientConfig.setChannel(null);
+            jTextArea = clientStart.getjTextArea1();
+        }
         String resp = jTextArea.getText();
         resp += "客户端收到：" + packet.getData() + System.getProperty("line.separator");
         jTextArea.setText(resp);
@@ -95,12 +91,6 @@ public class ClientHandler extends ChannelHandlerAdapter {
         jTextArea.setCaretPosition(jTextArea.getDocument().getLength());
 
         System.out.println("客户端收到：" + packet.getData());
-    }
-
-    private void handleHeartbreat(ChannelHandlerContext ctx, Object msg) {
-        PacketProto.Packet packet = (PacketProto.Packet) msg;
-//      这一句话不打印，只是用来测试能收到服务端的持续心跳
-//        System.out.println("客户端收到心跳包");
     }
 
 
@@ -118,7 +108,6 @@ public class ClientHandler extends ChannelHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-//        if (null != cause) cause.printStackTrace();
         if (null != ctx) ctx.close();
     }
 
@@ -132,10 +121,9 @@ public class ClientHandler extends ChannelHandlerAdapter {
     }
 
     /**
-     * 发送心跳包
+     * 发送空闲心跳包
      */
     private void sendHeartbeatPacket(ChannelHandlerContext ctx) {
-//        System.out.println("开始发送心跳包");
         if (clientStart.flag) {
             PacketProto.Packet.Builder builder = newBuilder();
             builder.setPacketType(PacketProto.Packet.PacketType.HEARTBEAT);

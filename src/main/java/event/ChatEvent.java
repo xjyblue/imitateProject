@@ -3,9 +3,12 @@ package event;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import context.ProjectContext;
+import order.Order;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import utils.MessageUtil;
+
+import java.util.Map;
 
 /**
  * Description ：nettySpringServer
@@ -14,39 +17,43 @@ import utils.MessageUtil;
 @Component("chatEvent")
 public class ChatEvent {
 
-    public void chat(Channel channel, String msg) {
+    @Order(orderMsg = "chatAll")
+    public void chatAll(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
-        if(msg.startsWith("chatAll")){
-            String temp[] = msg.split("-");
-            if(temp.length!=2){
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
-                return;
-            }
-            for(Channel channelTemp : ProjectContext.group){
-                if(ProjectContext.session2UserIds.get(channelTemp)==user){
-                    channelTemp.writeAndFlush(MessageUtil.turnToPacket("你发送了全服喇叭，消息为>>>>>"+temp[1]+"<<<<<"));
-                }else {
-                    channelTemp.writeAndFlush(MessageUtil.turnToPacket("您收到来自"+user.getUsername()+"的全服大喇叭:"+temp[1]));
-                }
-            }
-            return;
-        }else if(msg.startsWith("chat-")){
-            String temp[] = msg.split("-");
-            if(temp.length!=3){
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
-                return;
-            }
-            for(Channel channelTemp : ProjectContext.group){
-                User userTemp = ProjectContext.session2UserIds.get(channelTemp);
-                if(userTemp.getUsername().equals(temp[1])){
-                    channelTemp.writeAndFlush(MessageUtil.turnToPacket("您收到来自"+user.getUsername()+"的私聊大喇叭:"+temp[2]));
-                    return;
-                }
-            }
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOONLINEUSER));
-            //若用户未登陆，要保存该用户的聊天信息，一般保存在数据库，这里我保存在内存中
-        }else {
+        String temp[] = msg.split("-");
+        if (temp.length != 2) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            return;
+        }
+//      广播一次全服大喇叭
+        for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
+            Channel channelTemp = entry.getKey();
+            if (entry.getValue() == user) {
+                channelTemp.writeAndFlush(MessageUtil.turnToPacket("你发送了全服喇叭，消息为>>>>>" + temp[1] + "<<<<<"));
+            } else {
+                channelTemp.writeAndFlush(MessageUtil.turnToPacket("您收到来自" + user.getUsername() + "的全服大喇叭:" + temp[1]));
+            }
         }
     }
+
+    @Order(orderMsg = "chat-")
+    public void chatOne(Channel channel, String msg) {
+        User user = ProjectContext.session2UserIds.get(channel);
+        String temp[] = msg.split("-");
+        if (temp.length != 3) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            return;
+        }
+
+        for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
+            Channel channelTemp = entry.getKey();
+            if(entry.getValue().getUsername().equals(temp[1])){
+                channelTemp.writeAndFlush(MessageUtil.turnToPacket("您收到来自" + user.getUsername() + "的私聊大喇叭:" + temp[2]));
+                return;
+            }
+        }
+
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOONLINEUSER));
+    }
+
 }

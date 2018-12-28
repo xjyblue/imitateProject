@@ -1,6 +1,9 @@
 package component;
 
 import buff.Buff;
+import caculation.AttackCaculation;
+import caculation.HpCaculation;
+import com.google.common.collect.Lists;
 import config.BuffConfig;
 import config.DeadOrAliveConfig;
 import config.MessageConfig;
@@ -14,6 +17,7 @@ import skill.MonsterSkill;
 import team.Team;
 import test.ExcelUtil;
 import utils.MessageUtil;
+import utils.SpringContextUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,19 +51,23 @@ public class BossScene implements Runnable {
 
     private List<String> sequence;
 
+    private AttackCaculation attackCaculation;
+
     private Map<String, User> userMap = new ConcurrentHashMap<>();
 
     private Map<String, Map<String, Monster>> monsters;
 
-    private ConcurrentHashMap<String, Future> futureMap;
+    private Map<String, Future> futureMap;
 
     private OutfitEquipmentEvent outfitEquipmentEvent;
 
-    public ConcurrentHashMap<String, Future> getFutureMap() {
+    private HpCaculation hpCaculation;
+
+    public Map<String, Future> getFutureMap() {
         return futureMap;
     }
 
-    public void setFutureMap(ConcurrentHashMap<String, Future> futureMap) {
+    public void setFutureMap(Map<String, Future> futureMap) {
         this.futureMap = futureMap;
     }
 
@@ -167,9 +175,16 @@ public class BossScene implements Runnable {
     }
 
     public void init() {
+        AttackCaculation attackCaculation = (AttackCaculation) SpringContextUtil.getBean("attackCaculation");
+        this.attackCaculation = attackCaculation;
+        HpCaculation hpCaculation = (HpCaculation) SpringContextUtil.getBean("recoverHpCaculation");
+        this.hpCaculation = hpCaculation;
+
         sequence = new ArrayList<>();
+        sequence.add("A0");
         sequence.add("A1");
         sequence.add("A2");
+        sequence.add("A3");
         monsters = new HashMap<>();
 
         Map<String, Monster> monsterMap = new HashMap<>();
@@ -184,10 +199,11 @@ public class BossScene implements Runnable {
             alias.put("怪物技能", "skillIds");
             alias.put("出生地点", "pos");
             alias.put("怪物经验值", "experience");
+            alias.put("击杀获得的奖励", "reward");
             List<Monster> monsterList = ExcelUtil.excel2Pojo(fis, Monster.class, alias);
 
             for (Monster monster : monsterList) {
-                if (monster.getPos().equals("A1") || monster.getPos().equals("A2")) {
+                if (monster.getPos().equals("A0") || monster.getPos().equals("A1") || monster.getPos().equals("A2") || monster.getPos().equals("A3")) {
 //                  怪物buff初始化
                     Map<String, Integer> map = new HashMap<>();
                     map.put(BuffConfig.MPBUFF, 1000);
@@ -223,7 +239,7 @@ public class BossScene implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        this.bossName = "天灵魔殿";
+        this.bossName = "河西村魔洞";
         this.isEnd = false;
         this.isFight = false;
         this.damageAll = new HashMap<User, String>();
@@ -265,7 +281,6 @@ public class BossScene implements Runnable {
                     sendMessageToAll("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG);
                 } else {
                     sendMessageToAll("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG);
-//                    channel.writeAndFlush(MessageUtil.turnToPacket("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG));
                 }
             } else {
                 monster.getBufMap().put(BuffConfig.POISONINGBUFF, 2000);
@@ -276,6 +291,12 @@ public class BossScene implements Runnable {
 
     private void userFrequence() {
 //      持续触发玩家帧频
+
+//      解决玩家掉线线程回收问题
+        if (userMap.size() == 0) {
+            Future future = futureMap.remove(teamId);
+            future.cancel(true);
+        }
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             User user = entry.getValue();
             user.keepCall();
@@ -314,22 +335,42 @@ public class BossScene implements Runnable {
 //              判断某个场景的boss是否都死光，否则重新锁定boss
                 if (checkIfCheckArea(monsterMap, bossScene)) {
                     if (bossScene.getSequence().size() > 1) {
-                        bossScene.getSequence().remove(0);
 
-//                      切换到第二场景的怪物群
+//                      切换到下一场景的怪物群
+                        bossScene.getSequence().remove(0);
                         monsterMap = bossScene.getMonsters().get(bossScene.getSequence().get(0));
+
+
+                        bossScene.setFight(false);
+                        String bossMessage = "出现新场景boss:";
                         for (Map.Entry<String, Monster> entry : monsterMap.entrySet()) {
                             if (entry.getValue().getStatus().equals("1")) {
-                                if (monster != null) {
-                                    sendMessageToAll("出现第二boss" + entry.getValue().getName(),null);
-//                                  移除所有小组成员
-                                    removeMonster(teamId);
-                                    addMonster(teamId, entry.getValue());
-                                }
-                                monster = entry.getValue();
-                                break;
+                                bossMessage += (entry.getValue().getName() + " ");
+//                              移除所有小组成员之前的目标monster
+                                removeMonster(teamId);
                             }
                         }
+                        sendMessageToAll(bossMessage, null);
+
+
+//                      判断第三场景boss检查挑战者是否为多人挑战，不为多人不生成boss
+                        for (Map.Entry<String, Monster> entry : monsterMap.entrySet()) {
+                            if (entry.getValue().getPos().equals("A2")) {
+                                if (ProjectContext.teamMap.get(teamId).getUserMap().size() > 1) {
+//                                  继续往下走
+                                } else {
+//                                  三层boss需组队人数不够告诉玩家不能继续下去了
+                                    Future future = futureMap.remove(teamId);
+                                    future.cancel(true);
+                                    Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
+                                    channelTarget.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMANTOFIGHT));
+                                    ProjectContext.bossAreaMap.remove(teamId);
+                                    moveAllUser();
+                                }
+                            }
+                            break;
+                        }
+                        return;
                     } else {
 //                      boss场景只剩下一个并且场景下boss死光，游戏结束
                         successMessToAll(bossScene, monster);
@@ -340,38 +381,44 @@ public class BossScene implements Runnable {
                     }
                 }
 
-                BigInteger userHp = new BigInteger(userTarget.getHp());
-                Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
-                if (userHp.compareTo(new BigInteger("0")) <= 0) {
-                    userTarget.setHp("0");
-                    userTarget.setStatus(DeadOrAliveConfig.DEAD);
+//             全队人物死亡检查，排除死掉的玩家
+                for (Map.Entry<String, User> entry : userMap.entrySet()) {
+                    userTarget = entry.getValue();
+                    BigInteger userHp = new BigInteger(userTarget.getHp());
+                    Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
+                    if (userHp.compareTo(new BigInteger("0")) == 0) {
+                        userTarget.setHp("0");
+                        userTarget.setStatus(DeadOrAliveConfig.DEAD);
+//                  移除怪物所针对的boss
+                        ProjectContext.userToMonsterMap.remove(userTarget);
 //                  人物战斗中死亡
-                    ProjectContext.eventStatus.put(channelTarget, EventStatus.DEADAREA);
-                    channelTarget.writeAndFlush(MessageUtil.turnToPacket("你已死亡"));
+                        ProjectContext.eventStatus.put(channelTarget, EventStatus.DEADAREA);
+                        channelTarget.writeAndFlush(MessageUtil.turnToPacket("你已死亡"));
 //                  把人物从战斗场景移除到初始场景
-                    Scene scene = ProjectContext.sceneMap.get("0");
-                    scene.getUserMap().put(userTarget.getUsername(), userTarget);
-//                  全队死亡检查，是否副本失败
-                    if (checkAllDead()) {
-                        Future future = futureMap.remove(teamId);
-                        future.cancel(true);
-                        ProjectContext.bossAreaMap.remove(teamId);
-                        failMessageToAll(bossScene);
+                        Scene scene = ProjectContext.sceneMap.get("0");
+                        scene.getUserMap().put(userTarget.getUsername(), userTarget);
+//                  将人物的伤害置为0
+                        bossScene.getDamageAll().put(userTarget, "0");
+//                  人物死亡场景移除人物
                         userMap.remove(userTarget.getUsername());
-                        return;
-                    }
-                    userMap.remove(userTarget.getUsername());
 //                  人物死亡全队提示
-                    oneDeadMessageToAll(bossScene, monster, userTarget);
-//                  之前的人物死了，重选一次目标对象
-                    userTarget = getMaxDamageUser(bossScene);
+                        oneDeadMessageToAll(bossScene, monster, userTarget);
+                    }
                 }
 
+//              全队死亡检查，是否副本失败
+                if (checkAllDead()) {
+                    Future future = futureMap.remove(teamId);
+                    future.cancel(true);
+                    ProjectContext.bossAreaMap.remove(teamId);
+                    failMessageToAll();
+                    return;
+                }
 
 //              此处构建最简单的bossAI，就是根据谁的伤害最高打谁
                 if (!monster.getStatus().equals(DeadOrAliveConfig.DEAD) && monster.getAttackEndTime() < System.currentTimeMillis()) {
                     monster.setAttackEndTime(System.currentTimeMillis() + 1000);
-                    attack(userTarget, monster);
+                    attack(monster);
                 }
             }
         } catch (Exception e) {
@@ -384,9 +431,17 @@ public class BossScene implements Runnable {
         while (it.hasNext()) {
             Map.Entry<String, User> entry = it.next();
             User user = entry.getValue();
-//          将用户回退会刚才所在的场景
+//          移除该用户所有的战斗怪物信息
+            ProjectContext.userToMonsterMap.remove(user);
+            if (user.getStatus().equals(DeadOrAliveConfig.DEAD)) {
+                continue;
+            }
+//          将用户回退回刚才所在的场景
             Scene scene = ProjectContext.sceneMap.get(user.getPos());
             scene.getUserMap().put(user.getUsername(), user);
+//          改变用户渠道转态
+            Channel channelT = ProjectContext.userToChannelMap.get(user);
+            ProjectContext.eventStatus.put(channelT, EventStatus.STOPAREA);
 //          移除该场景的用户
             it.remove();
         }
@@ -403,14 +458,6 @@ public class BossScene implements Runnable {
         return true;
     }
 
-    private void addMonster(String teamId, Monster monster) {
-        for (Map.Entry<String, User> entry : userMap.entrySet()) {
-            Map<Integer, Monster> monsterMap = new HashMap<>();
-            monsterMap.put(monster.getId(), monster);
-            ProjectContext.userToMonsterMap.put(entry.getValue(), monsterMap);
-        }
-    }
-
     private void removeMonster(String teamId) {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             if (ProjectContext.userToMonsterMap.containsKey(entry.getValue())) {
@@ -425,7 +472,7 @@ public class BossScene implements Runnable {
             User user = entry.getValue();
             Channel channel = ProjectContext.userToChannelMap.get(user);
             String userStatus = ProjectContext.eventStatus.get(channel);
-            if(userStatus.equals(EventStatus.BOSSAREA)||userStatus.equals(EventStatus.DEADAREA)||userStatus.equals(EventStatus.ATTACK)){
+            if (userStatus.equals(EventStatus.BOSSAREA) || userStatus.equals(EventStatus.DEADAREA) || userStatus.equals(EventStatus.ATTACK)) {
                 Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
                 if (type == null) {
                     channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
@@ -469,7 +516,7 @@ public class BossScene implements Runnable {
         }
     }
 
-    private void failMessageToAll(BossScene bossScene) {
+    private void failMessageToAll() {
         Team team = ProjectContext.teamMap.get(teamId);
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
@@ -488,15 +535,14 @@ public class BossScene implements Runnable {
     }
 
 
-    private void attack(User user, Monster monster) {
-        BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+    private void attack(Monster monster) {
+        BossScene bossScene = ProjectContext.bossAreaMap.get(teamId);
 //      锁定攻击目标
         User userTarget = getMaxDamageUser(bossScene);
-        Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
 //      不断随机合适的boss技能
         MonsterSkill monsterSkill = selectMonsterSkill(monster, userTarget);
 
-        for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
+        for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(teamId).getUserMap().entrySet()) {
             String resp = null;
             if (ProjectContext.eventStatus.get(ProjectContext.userToChannelMap.get(entry.getValue())).equals(EventStatus.STOPAREA)) {
                 continue;
@@ -505,49 +551,33 @@ public class BossScene implements Runnable {
 
 //           怪物带攻击技能buff
             if (monsterSkill.getBuffMap() != null) {
+//              检查是否为集体攻击,锁定我们的攻击目标
+                List<User> listTarget = null;
+                if (monsterSkill.getBuffMap().containsKey(BuffConfig.ALLPERSON)) {
+                    listTarget = Lists.newArrayList(userMap.values());
+                } else {
+                    listTarget = Lists.newArrayList();
+                    listTarget.add(userTarget);
+                }
+
                 for (Map.Entry<String, Integer> entryBuf : monsterSkill.getBuffMap().entrySet()) {
-                    if (entryBuf.getKey().equals(BuffConfig.ALLPERSON)) {
-//                       全体攻击
-                        attackToAll(teamId, monster, monsterSkill);
-                        return;
-                    }
                     if (entryBuf.getKey().equals(BuffConfig.SLEEPBUFF) && userTarget.getBuffMap().get(BuffConfig.SLEEPBUFF) != 5001) {
-//                      减伤buff处理
-                        BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTarget, entry.getValue());
-
-
-//                      改变用户buff状态，设置用户buff时间
-                        Buff buff = ProjectContext.buffMap.get(entryBuf.getValue());
-                        userTarget.getBuffMap().put(BuffConfig.SLEEPBUFF, 5001);
-                        ProjectContext.userBuffEndTime.get(userTarget).put(BuffConfig.SLEEPBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
-                        userTarget.subHp(monsterSkillDamage.toString());
-                        channelTarget.writeAndFlush(MessageUtil.turnToPacket("您收到怪物boss击打晕效果,无法使用技能,人物受到" + monsterSkillDamage.toString() + "伤害", PacketType.ATTACKMSG));
-                        return;
-                    }
-                    if (entryBuf.getKey().equals(BuffConfig.POISONINGBUFF) && userTarget.getBuffMap().get(BuffConfig.POISONINGBUFF) != 2001) {
-//                     减伤buff处理
-                        BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTarget, entry.getValue());
-
-//                      改变用户buff状态，设置用户buff时间
-                        Buff buff = ProjectContext.buffMap.get(entryBuf.getValue());
-                        userTarget.getBuffMap().put(BuffConfig.POISONINGBUFF, 2001);
-                        ProjectContext.userBuffEndTime.get(userTarget).put(BuffConfig.POISONINGBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
-                        userTarget.subHp(monsterSkillDamage.toString());
-                        channelTarget.writeAndFlush(MessageUtil.turnToPacket("怪物boss使用中毒绝技,你会持续掉血，人物受到" + monsterSkillDamage.toString() + "伤害", PacketType.ATTACKMSG));
-                        return;
+                        sleepAttack(listTarget, monster, monsterSkill, entryBuf.getValue());
+                    } else if (entryBuf.getKey().equals(BuffConfig.POISONINGBUFF) && userTarget.getBuffMap().get(BuffConfig.POISONINGBUFF) != 2001) {
+                        poisonAttack(listTarget, monster, monsterSkill, entryBuf.getValue());
+                    } else {
+//                      普通攻击
+                        commonAttack(listTarget, monster, monsterSkill);
                     }
                 }
             }
 
 //          减伤buff处理
-            BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTarget, entry.getValue());
+            BigInteger monsterSkillDamage = attackCaculation.dealDefenseBuff(monsterSkill, userTarget, entry.getValue());
+
             if (entry.getValue().getUsername().equals(userTarget.getUsername())) {
-                BigInteger userHp = new BigInteger(userTarget.getHp());
-                BigInteger minHp = new BigInteger("0");
-                userTarget.subHp(monsterSkillDamage.toString());
-                if (userHp.compareTo(minHp) <= 0) {
-                    userTarget.setHp("0");
-                }
+//              扣血
+                hpCaculation.reduceUserHp(userTarget, monsterSkillDamage.toString());
                 resp = "怪物的仇恨值在你身上"
                         + "----怪物名称:" + monster.getName()
                         + "-----怪物技能:" + monsterSkill.getSkillName()
@@ -572,6 +602,34 @@ public class BossScene implements Runnable {
 
     }
 
+    private void sleepAttack(List<User> listTarget, Monster monster, MonsterSkill monsterSkill, Integer buffId) {
+        for (User user : listTarget) {
+//                      减伤buff处理
+            BigInteger monsterSkillDamage = attackCaculation.dealDefenseBuff(monsterSkill, user, user);
+//                      改变用户buff状态，设置用户buff时间
+            Buff buff = ProjectContext.buffMap.get(buffId);
+            user.getBuffMap().put(BuffConfig.SLEEPBUFF, 5001);
+            ProjectContext.userBuffEndTime.get(user).put(BuffConfig.SLEEPBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
+            hpCaculation.reduceUserHp(user, monsterSkillDamage.toString());
+            Channel channelTarget = ProjectContext.userToChannelMap.get(user);
+            channelTarget.writeAndFlush(MessageUtil.turnToPacket("您收到怪物boss击打晕效果,无法使用技能,人物受到" + monsterSkillDamage.toString() + "伤害", PacketType.ATTACKMSG));
+        }
+    }
+
+    private void poisonAttack(List<User> listTarget, Monster monster, MonsterSkill monsterSkill, Integer buffId) {
+        for (User user : listTarget) {
+//           减伤buff处理
+            BigInteger monsterSkillDamage = attackCaculation.dealDefenseBuff(monsterSkill, user, user);
+//           改变用户buff状态，设置用户buff时间
+            Buff buff = ProjectContext.buffMap.get(buffId);
+            user.getBuffMap().put(BuffConfig.POISONINGBUFF, 2001);
+            ProjectContext.userBuffEndTime.get(user).put(BuffConfig.POISONINGBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
+            hpCaculation.reduceUserHp(user, monsterSkillDamage.toString());
+            Channel channelTarget = ProjectContext.userToChannelMap.get(user);
+            channelTarget.writeAndFlush(MessageUtil.turnToPacket("怪物boss使用中毒绝技,你会持续掉血，人物受到" + monsterSkillDamage.toString() + "伤害", PacketType.ATTACKMSG));
+        }
+    }
+
     private MonsterSkill selectMonsterSkill(Monster monster, User userTarget) {
         int randomNumber = (int) (Math.random() * monster.getMonsterSkillList().size());
         MonsterSkill monsterSkill = monster.getMonsterSkillList().get(randomNumber);
@@ -593,31 +651,17 @@ public class BossScene implements Runnable {
         return selectMonsterSkill(monster, userTarget);
     }
 
-    private BigInteger dealDefenseBuff(MonsterSkill monsterSkill, User user, User target) {
-        if (user.getBuffMap().get(BuffConfig.DEFENSEBUFF) != 3000 && user == target) {
-            Buff buff = ProjectContext.buffMap.get(user.getBuffMap().get(BuffConfig.DEFENSEBUFF));
-            BigInteger mosterSkillDamage = new BigInteger(monsterSkill.getDamage());
-            BigInteger buffDefenceDamage = new BigInteger(buff.getInjurySecondValue());
-            mosterSkillDamage = mosterSkillDamage.subtract(buffDefenceDamage);
+    //  普通攻击
+    private void commonAttack(List<User> list, Monster monster, MonsterSkill monsterSkill) {
+        for (User user : list) {
+            BigInteger monsterSkillDamage = attackCaculation.dealDefenseBuff(monsterSkill, user, user);
             Channel channelTemp = ProjectContext.userToChannelMap.get(user);
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp(), PacketType.USERBUFMSG));
-            return mosterSkillDamage;
-        }
-        return new BigInteger(monsterSkill.getDamage());
-    }
-
-    private void attackToAll(String teamId, Monster monster, MonsterSkill monsterSkill) {
-        Team team = ProjectContext.teamMap.get(teamId);
-        for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
-            User userTemp = entry.getValue();
-            BigInteger monsterSkillDamage = dealDefenseBuff(monsterSkill, userTemp, entry.getValue());
-            Channel channelTemp = ProjectContext.userToChannelMap.get(userTemp);
-            userTemp.subHp(monsterSkillDamage.toString());
+            hpCaculation.reduceUserHp(user, monsterSkillDamage.toString());
             String resp = "怪物使用了全体攻击技能,对所有人造成攻击:"
                     + "-----怪物技能:" + monsterSkill.getSkillName()
                     + "-----怪物的伤害:" + monsterSkill.getDamage()
-                    + "-----你的剩余血:" + userTemp.getHp()
-                    + "-----你的蓝量" + userTemp.getMp()
+                    + "-----你的剩余血:" + user.getHp()
+                    + "-----你的蓝量" + user.getMp()
                     + "-----怪物血量:" + monster.getValueOfLife();
             channelTemp.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ATTACKMSG));
         }

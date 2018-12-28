@@ -2,10 +2,13 @@ package utils;
 
 import component.BossScene;
 import component.Monster;
+import config.BuffConfig;
 import config.DeadOrAliveConfig;
 import event.EventStatus;
+import event.OutfitEquipmentEvent;
 import io.netty.channel.Channel;
 import context.ProjectContext;
+import mapper.UserMapper;
 import pojo.User;
 import team.Team;
 
@@ -18,56 +21,58 @@ import java.util.Map;
  */
 public class AttackUtil {
 
-    public static void changeUserAttackMonster(User user, BossScene bossScene) {
-//      处理其他玩家在打该boss
-        Monster monster = null;
-        for(Map.Entry<Integer,Monster> entry : ProjectContext.userToMonsterMap.get(user).entrySet()){
-            monster = entry.getValue();
+    public static void changeUserAttackMonster(User user, BossScene bossScene, Monster monster) {
+//      清除所有玩家对刚刚boss的战斗，如果某些玩家在战斗的话
+        if(ProjectContext.userToMonsterMap.containsKey(user)){
+            ProjectContext.userToMonsterMap.get(user).remove(monster.getId());
         }
-        for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
-            User userT = entry.getValue();
-            Monster monsterT = null;
-            if(ProjectContext.userToMonsterMap.containsKey(userT)){
-                for(Map.Entry<Integer,Monster> monsterEntry : ProjectContext.userToMonsterMap.get(userT).entrySet()){
-                    monsterT = monsterEntry.getValue();
-                }
-            }
-            if (userT != user && ProjectContext.userToMonsterMap.containsKey(userT) && monsterT == monster) {
-                for(Map.Entry<Integer,Monster> monsterEntry : ProjectContext.userToMonsterMap.get(user).entrySet()){
-                    monster = monsterEntry.getValue();
-                }
-                ProjectContext.userToMonsterMap.get(entry.getValue()).remove(monster.getId());
-                ProjectContext.eventStatus.put(ProjectContext.userToChannelMap.get(entry.getValue()), EventStatus.BOSSAREA);
+//      将所有用户弄为战斗状态
+        for (Map.Entry<String, User> entry : bossScene.getUserMap().entrySet()) {
+            Channel channelT = ProjectContext.userToChannelMap.get(entry.getValue());
+            if(!ProjectContext.eventStatus.get(channelT).equals(EventStatus.DEADAREA)){
+                ProjectContext.eventStatus.put(channelT,EventStatus.ATTACK);
             }
         }
 
-//      处理本人正在打该boss，并且让二号boss攻击人物，如果二号boss死掉就生成第二场景的boss攻击人物
-        for (Map.Entry<String, Monster> entry : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {
-            if (!entry.getValue().getStatus().equals(DeadOrAliveConfig.DEAD)) {
-                for(Map.Entry<Integer,Monster> monsterEntry : ProjectContext.userToMonsterMap.get(user).entrySet()){
-                    monster = monsterEntry.getValue();
-                }
-                ProjectContext.userToMonsterMap.get(user).remove(monster.getId());
-                ProjectContext.userToMonsterMap.get(user).put(entry.getValue().getId(),entry.getValue());
-                return;
-            }
-        }
+//      刷新所有玩家的buff
+//      更新用户buff初始值
+        Map<String, Integer> map = new HashMap<>();
+        map.put(BuffConfig.MPBUFF, 1000);
+        map.put(BuffConfig.POISONINGBUFF, 2000);
+        map.put(BuffConfig.DEFENSEBUFF, 3000);
+        map.put(BuffConfig.SLEEPBUFF, 5000);
+        map.put(BuffConfig.TREATMENTBUFF, 6000);
+        map.put(BuffConfig.ALLPERSON, 4000);
+        map.put(BuffConfig.BABYBUF, 7000);
+        user.setBuffMap(map);
+//      buff终止时间
+        Map<String, Long> mapSecond = new HashMap<>();
+        mapSecond.put(BuffConfig.MPBUFF, 1000l);
+        mapSecond.put(BuffConfig.POISONINGBUFF, 2000l);
+        mapSecond.put(BuffConfig.DEFENSEBUFF, 3000l);
+        mapSecond.put(BuffConfig.SLEEPBUFF, 1000l);
+        mapSecond.put(BuffConfig.TREATMENTBUFF, 1000l);
+        mapSecond.put(BuffConfig.ALLPERSON, 1000l);
+        mapSecond.put(BuffConfig.BABYBUF, 1000l);
+        ProjectContext.userBuffEndTime.put(user, mapSecond);
     }
 
     public static void killBossMessageToAll(User user, Monster monster) {
+        OutfitEquipmentEvent outfitEquipmentEvent = (OutfitEquipmentEvent) SpringContextUtil.getBean("outfitEquipmentEvent");
         Team team = ProjectContext.teamMap.get(user.getTeamId());
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
+            outfitEquipmentEvent.getGoods(channelTemp, monster);
             channelTemp.writeAndFlush(MessageUtil.turnToPacket("玩家" + user.getUsername() + "击杀了：" + monster.getName()));
         }
     }
 
     public static void addMonsterToUserMonsterList(User user, Monster monster) {
         if (ProjectContext.userToMonsterMap.containsKey(user)) {
-            ProjectContext.userToMonsterMap.get(user).put(monster.getId(),monster);
+            ProjectContext.userToMonsterMap.get(user).put(monster.getId(), monster);
         } else {
-            Map<Integer,Monster> map = new HashMap<>();
-            map.put(monster.getId(),monster);
+            Map<Integer, Monster> map = new HashMap<>();
+            map.put(monster.getId(), monster);
             ProjectContext.userToMonsterMap.put(user, map);
         }
     }

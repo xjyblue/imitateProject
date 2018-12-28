@@ -12,8 +12,28 @@ public class NPC {
 
 	private Integer areaId;
 
+	private String getTarget;
+
+	private String getGoods;
+
 	public NPC(){
 
+	}
+
+	public String getGetTarget() {
+		return getTarget;
+	}
+
+	public void setGetTarget(String getTarget) {
+		this.getTarget = getTarget;
+	}
+
+	public String getGetGoods() {
+		return getGoods;
+	}
+
+	public void setGetGoods(String getGoods) {
+		this.getGoods = getGoods;
 	}
 
 	public Integer getAreaId() {

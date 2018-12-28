@@ -1,5 +1,6 @@
 package test;
 
+import com.google.common.collect.Maps;
 import mapper.ApplyunioninfoMapper;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import mapper.UserMapper;
 import pojo.User;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 
@@ -27,10 +32,12 @@ public class Test {
 //		user.setStatus("0");
 //		userMapper.updateByPrimaryKey(user);
 
-		User user1 = userMapper.getUser("z","zz");
-		System.out.println(user1.getPos());
+		System.out.println(ResultCode.BACKPACK_UPDATE);
+//		User user1 = userMapper.getUser("z","zz");
+//		System.out.println(user1.getPos());
 
 //		int count = applyunioninfoMapper.selectByUserIdAndUnionId("1","1");
 //		System.out.println(count);
 	}
+
 }

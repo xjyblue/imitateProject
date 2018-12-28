@@ -15,6 +15,7 @@ import packet.PacketType;
 import pojo.User;
 import team.Team;
 import utils.AttackUtil;
+import utils.LevelUtil;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
@@ -91,7 +92,7 @@ public class BuffTask{
                                         user.getBuffMap().put(BuffConfig.BABYBUF, 7000);
                                         if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
                                             BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
-                                            AttackUtil.changeUserAttackMonster(user, bossScene);
+//                                            AttackUtil.changeUserAttackMonster(user, bossScene,monster);
                                             AttackUtil.killBossMessageToAll(user, monster);
                                         }
                                     }
@@ -135,7 +136,7 @@ public class BuffTask{
                 if (entrySecond.getKey().equals(BuffConfig.MPBUFF)) {
 //                自动回蓝
                     BigInteger userMp = new BigInteger(user.getMp());
-                    BigInteger maxMp = new BigInteger("10000");
+                    BigInteger maxMp = new BigInteger(LevelUtil.getMaxHp(user));
                     if (userMp.compareTo(maxMp) < 0) {
                         if (user.getBuffMap().get(BuffConfig.MPBUFF).equals(1000)) {
                             userMp = userMp.add(add);

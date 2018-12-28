@@ -1,5 +1,15 @@
 package client;
 
+
+import component.Scene;
+import context.ProjectContext;
+import org.checkerframework.checker.units.qual.A;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Component;
+import server.ServerConfig;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -232,65 +242,64 @@ public class ClientStart extends JFrame implements KeyListener {
         frm.setResizable(false);
 
 
-
 //      初始化控件
         frm.txt = new JTextField(85);
         frm.txt2 = new JTextField(58);
         frm.txt2.setEditable(false);
 
-        frm.jTextArea1 = new JTextArea(8,1);
+        frm.jTextArea1 = new JTextArea(8, 1);
         frm.jTextArea1.setEditable(false);
-        frm.jTextArea1.setFont(new Font("宋体",Font.BOLD,15));
+        frm.jTextArea1.setFont(new Font("宋体", Font.BOLD, 15));
         frm.jScrollPane1 = new JScrollPane();
         frm.jScrollPane1.setViewportView(frm.jTextArea1);
 
         frm.jTextArea2 = new JTextArea(8, 1);
         frm.jTextArea2.setEditable(false);
-        frm.jTextArea2.setFont(new Font("宋体",Font.BOLD,14));
+        frm.jTextArea2.setFont(new Font("宋体", Font.BOLD, 14));
         frm.jScrollPane2 = new JScrollPane();
         frm.jScrollPane2.setViewportView(frm.jTextArea2);
 
         frm.jTextArea3 = new JTextArea(8, 1);
         frm.jTextArea3.setEditable(false);
-        frm.jTextArea3.setFont(new Font("宋体",Font.BOLD,14));
+        frm.jTextArea3.setFont(new Font("宋体", Font.BOLD, 14));
         frm.jScrollPane3 = new JScrollPane();
         frm.jScrollPane3.setViewportView(frm.jTextArea3);
 
-        frm.jTextArea4 = new JTextArea(8,1);
+        frm.jTextArea4 = new JTextArea(8, 1);
         frm.jTextArea4.setEditable(false);
         frm.jScrollPane4 = new JScrollPane();
-        frm.jTextArea4.setFont(new Font("宋体",Font.BOLD,14));
+        frm.jTextArea4.setFont(new Font("宋体", Font.BOLD, 14));
         frm.jScrollPane4.setViewportView(frm.jTextArea4);
 
         frm.jTextArea5 = new JTextArea(8, 5);
         frm.jTextArea5.setEditable(false);
         frm.jScrollPane5 = new JScrollPane();
         frm.jScrollPane5.setBounds(new Rectangle(76, 35, 257, 193));
-        frm.jTextArea5.setFont(new Font("宋体",Font.BOLD,14));
+        frm.jTextArea5.setFont(new Font("宋体", Font.BOLD, 14));
         frm.jScrollPane5.setViewportView(frm.jTextArea5);
 
         frm.jTextArea6 = new JTextArea(8, 5);
         frm.jTextArea6.setEditable(false);
         frm.jScrollPane6 = new JScrollPane();
-        frm.jTextArea6.setFont(new Font("宋体",Font.BOLD,14));
+        frm.jTextArea6.setFont(new Font("宋体", Font.BOLD, 14));
         frm.jScrollPane6.setViewportView(frm.jTextArea6);
 
         frm.jTextArea7 = new JTextArea(8, 5);
         frm.jTextArea7.setEditable(false);
         frm.jScrollPane7 = new JScrollPane();
-        frm.jTextArea7.setFont(new Font("宋体",Font.BOLD,14));
+        frm.jTextArea7.setFont(new Font("宋体", Font.BOLD, 14));
         frm.jScrollPane7.setViewportView(frm.jTextArea7);
 
         frm.jTextArea8 = new JTextArea(8, 5);
         frm.jTextArea8.setEditable(false);
         frm.jScrollPane8 = new JScrollPane();
-        frm.jTextArea8.setFont(new Font("宋体",Font.BOLD,14));
+        frm.jTextArea8.setFont(new Font("宋体", Font.BOLD, 14));
         frm.jScrollPane8.setViewportView(frm.jTextArea8);
 
         frm.jTextArea9 = new JTextArea(8, 5);
         frm.jTextArea9.setEditable(false);
         frm.jScrollPane9 = new JScrollPane();
-        frm.jTextArea9.setFont(new Font("宋体",Font.BOLD,14));
+        frm.jTextArea9.setFont(new Font("宋体", Font.BOLD, 14));
         frm.jScrollPane9.setViewportView(frm.jTextArea9);
 
         JLabel jLabel1 = new JLabel("命令提示信息");
@@ -323,7 +332,6 @@ public class ClientStart extends JFrame implements KeyListener {
         });
 
         JButton b3 = new JButton("continue");
-//        b3.setBounds(100, 100, 65, 30);
         b3.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 frm.flag = true;
@@ -510,7 +518,6 @@ public class ClientStart extends JFrame implements KeyListener {
                 String req = txt.getText();
                 txt.setText("");
                 bootstrap.sendMessage(req);
-
             }
         }
     }

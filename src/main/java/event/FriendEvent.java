@@ -8,6 +8,7 @@ import mapper.FriendapplyinfoMapper;
 import mapper.FriendinfoMapper;
 import mapper.UserMapper;
 import context.ProjectContext;
+import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketType;
@@ -33,38 +34,24 @@ public class FriendEvent {
     @Autowired
     private AchievementExecutor achievementExecutor;
 
-    public void solve(Channel channel, String msg) {
-        if (msg.equals("p")) {
-            ProjectContext.eventStatus.put(channel, EventStatus.FRIEND);
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFRIENDVIEW));
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG, PacketType.FRIENDMSG));
-            return;
-        }
-        if (msg.equals("q")) {
-            ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTFRIENDVIEW));
-            channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.FRIENDMSG));
-            return;
-        }
-        if (msg.equals("ls")) {
-            queryApplyUserInfo(channel);
-            return;
-        }
-        if (msg.startsWith("sq-")) {
-            applyFriendToOther(channel, msg);
-            return;
-        }
-        if (msg.equals("lu")) {
-            queryFriendToSelf(channel, msg);
-            return;
-        }
-        if (msg.startsWith("ty=")) {
-            agreeApplyInfo(channel, msg);
-            return;
-        }
+    @Order(orderMsg = "p")
+    public void enterFriendView(Channel channel,String msg){
+        ProjectContext.eventStatus.put(channel, EventStatus.FRIEND);
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFRIENDVIEW));
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG, PacketType.FRIENDMSG));
+        return;
     }
 
-    private void agreeApplyInfo(Channel channel, String msg) {
+    @Order(orderMsg = "q")
+    public void quitFriendView(Channel channel,String msg){
+        ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTFRIENDVIEW));
+        channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.FRIENDMSG));
+        return;
+    }
+
+    @Order(orderMsg = "ty=y")
+    public void agreeApplyInfo(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != 2) {
@@ -105,7 +92,8 @@ public class FriendEvent {
         return;
     }
 
-    private void queryFriendToSelf(Channel channel, String msg) {
+    @Order(orderMsg = "lu")
+    public void queryFriendToSelf(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         FriendinfoExample friendinfoExample = new FriendinfoExample();
         FriendinfoExample.Criteria criteria = friendinfoExample.createCriteria();
@@ -122,7 +110,8 @@ public class FriendEvent {
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG + resp, PacketType.FRIENDMSG));
     }
 
-    private void applyFriendToOther(Channel channel, String msg) {
+    @Order(orderMsg = "sq-")
+    public void applyFriendToOther(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("-");
         if (temp.length != 2) {
@@ -147,7 +136,8 @@ public class FriendEvent {
         friendapplyinfoMapper.insertSelective(friendapplyinfo);
     }
 
-    private void queryApplyUserInfo(Channel channel) {
+    @Order(orderMsg = "ls")
+    public void queryApplyUserInfo(Channel channel,String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         FriendapplyinfoExample friendapplyinfoExample = new FriendapplyinfoExample();
         FriendapplyinfoExample.Criteria criteria = friendapplyinfoExample.createCriteria();

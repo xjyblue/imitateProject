@@ -15,4 +15,5 @@ public class PacketType {
     public static final String ACHIEVEMENT = "8";
     public static final String USERBAGMSG = "9";
     public static final String FRIENDMSG = "10";
+    public static final String CHANGECHANNEL = "11";
 }

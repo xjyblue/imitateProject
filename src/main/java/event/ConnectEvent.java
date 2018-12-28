@@ -3,6 +3,7 @@ package event;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import context.ProjectContext;
+import order.Order;
 import org.springframework.stereotype.Component;
 import utils.MessageUtil;
 
@@ -12,14 +13,17 @@ import utils.MessageUtil;
  */
 @Component("connectEvent")
 public class ConnectEvent {
+
+    @Order(orderMsg = "d")
     public void connect(Channel channel, String msg) {
-        if (msg.equals("d")) {
-            ProjectContext.eventStatus.put(channel, EventStatus.LOGIN);
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LOGINMESSAGE));
-        }
-        if (msg.equals("z")) {
-            ProjectContext.eventStatus.put(channel, EventStatus.REGISTER);
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERMESSAGE));
-        }
+        ProjectContext.eventStatus.put(channel, EventStatus.LOGIN);
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LOGINMESSAGE));
     }
+
+    @Order(orderMsg = "z")
+    public void register(Channel channel, String msg) {
+        ProjectContext.eventStatus.put(channel, EventStatus.REGISTER);
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERMESSAGE));
+    }
+
 }

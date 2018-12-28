@@ -1,10 +1,12 @@
 package event;
 
 import buff.Buff;
+import com.google.common.collect.Lists;
 import component.BossScene;
 import component.Monster;
 import config.BuffConfig;
 import config.DeadOrAliveConfig;
+import config.MessageConfig;
 import io.netty.channel.Channel;
 import context.ProjectContext;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,7 @@ import utils.MessageUtil;
 
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -82,6 +85,24 @@ public class BuffEvent {
                 Buff buff = ProjectContext.buffMap.get(entry.getValue());
                 user.getBuffMap().put(BuffConfig.BABYBUF, buff.getBufferId());
                 ProjectContext.userBuffEndTime.get(user).put(BuffConfig.BABYBUF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
+            }
+
+//          集体解除控制
+            if (entry.getKey().equals(BuffConfig.RELIEVEBUFF)) {
+                Buff buff = ProjectContext.buffMap.get(entry.getValue());
+                List<User> userTarget = null;
+                if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
+                    BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+                    userTarget = Lists.newArrayList(bossScene.getUserMap().values());
+                } else {
+                    userTarget = Lists.newArrayList();
+                    userTarget.add(user);
+                }
+                for (User userT : userTarget) {
+                    userT.getBuffMap().put(BuffConfig.SLEEPBUFF,5000);
+                    Channel channelT = ProjectContext.userToChannelMap.get(user);
+                    channelT.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "解除了怪物的眩晕效果"));
+                }
             }
 
         }

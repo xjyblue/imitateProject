@@ -7,6 +7,7 @@ import packet.PacketProto;
 import buff.BuffTask;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -261,38 +262,6 @@ public class User {
         this.setMp(userMp.toString());
     }
 
-    public synchronized void subMp(String changeNum) {
-        BigInteger userMp = new BigInteger(this.getMp());
-        BigInteger subMp = new BigInteger(changeNum);
-        userMp = userMp.subtract(subMp);
-        this.setMp(userMp.toString());
-    }
-
-    public synchronized void subHp(String changeNum) {
-        BigInteger userHp = new BigInteger(this.getHp());
-        BigInteger subHp = new BigInteger(changeNum);
-        userHp = userHp.subtract(subHp);
-        if (userHp.compareTo(new BigInteger("0")) < 0) {
-            this.setHp("0");
-        } else {
-            this.setHp(userHp.toString());
-        }
-    }
-
-
-    public void subMoney(BigInteger sendMoney) {
-        BigInteger userMoney = new BigInteger(this.getMoney());
-        userMoney = userMoney.subtract(sendMoney);
-        this.setMoney(userMoney.toString());
-    }
-
-
-    public synchronized void addHp(String recoverValue) {
-        BigInteger addHp = new BigInteger(recoverValue);
-        BigInteger userHp = new BigInteger(this.hp);
-        userHp = userHp.add(addHp);
-        this.hp = userHp.toString();
-    }
 
     public void keepCall() {
         if (this.isIfOnline()) {
@@ -311,12 +280,12 @@ public class User {
     }
 
     private void consumePacket() {
-        while (packetsQueue.peek() != null) {
+        if(packetsQueue.peek() != null) {
             PacketProto.Packet packet = packetsQueue.poll();
             Channel channel = ProjectContext.userToChannelMap.get(this);
             try {
                 eventDistributor.distributeEvent(channel, packet.getData());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

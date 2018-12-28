@@ -4,6 +4,7 @@ import component.Equipment;
 import component.Monster;
 import component.NPC;
 import component.parent.Good;
+import level.Level;
 import mapper.AchievementprocessMapper;
 import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,8 @@ public class AchievementExecutor {
             achievementprocess.setProcesss(s);
             if (achievementprocess.getProcesss().equals(achievement.getTarget())) {
                 achievementprocess.setIffinish(true);
+//              任务奖励
+                sloveAchievementReward(achievement,user);
 //              处理父任务
                 sloveParentProcess(user, achievement);
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
@@ -107,8 +110,22 @@ public class AchievementExecutor {
             achievementprocess.setProcesss(achievement.getTarget());
             achievementprocess.setIffinish(true);
             achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
+            sloveAchievementReward(achievement,user);
         }
         AchievementUtil.refreshAchievementInfo(user);
+    }
+
+    private void sloveAchievementReward(Achievement achievement, User user) {
+        if (!achievement.getReward().equals("0")) {
+            String reward[] = achievement.getReward().split("-");
+            for (String rewardT : reward) {
+                String rewardArr[] = rewardT.split(":");
+//                  增加经验值
+                if(rewardArr[0].equals("1")){
+                    LevelUtil.upUserLevel(user,rewardArr[1]);
+                }
+            }
+        }
     }
 
     public void executeCollect(Achievementprocess achievementprocess, Good good, User user, Achievement achievement) {
@@ -297,7 +314,7 @@ public class AchievementExecutor {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
             if (achievementprocessT.getType().equals(Achievement.EQUIPMENTSTARTLEVEL) && !achievementprocessT.getIffinish()) {
                 Achievement achievement = ProjectContext.achievementMap.get(achievementprocessT.getAchievementid());
-                if (checkUserWeaponStartLevel(user, achievement)){
+                if (checkUserWeaponStartLevel(user, achievement)) {
                     achievementprocessT.setIffinish(true);
                     achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
                 }

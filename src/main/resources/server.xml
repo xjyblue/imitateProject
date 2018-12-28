@@ -12,7 +12,10 @@
 	<context:annotation-config />
 	<!-- 扫包 -->
 	<context:component-scan
-		base-package="server event caculation factory achievement buff" />
+		base-package="client server event caculation factory achievement buff" />
+
+	<!-- 获取spring管理bean的工具类 -->
+	<bean class="utils.SpringContextUtil" lazy-init="false" />
 
 	<context:property-placeholder
 		location="classpath*:config.properties" ignore-unresolvable="true" />

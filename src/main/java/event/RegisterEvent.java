@@ -8,6 +8,7 @@ import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
 import context.ProjectContext;
+import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
@@ -29,6 +30,8 @@ public class RegisterEvent {
     private UserskillrelationMapper userskillrelationMapper;
     @Autowired
     private AchievementprocessMapper achievementprocessMapper;
+
+    @Order(orderMsg = "*")
     public void register(Channel channel, String msg) {
         String[] temp = msg.split("-");
         if (temp.length != 4) {

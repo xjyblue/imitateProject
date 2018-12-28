@@ -5,7 +5,6 @@ package config;
  * Created by server on 2018/11/27 16:05
  */
 public class BuffConfig {
-
     public static final String MPBUFF = "mpBuff";
 
     public static final String DEFENSEBUFF = "defenseBuff";
@@ -20,4 +19,5 @@ public class BuffConfig {
 
     public static final String BABYBUF = "babyBuff";
 
+    public static final String RELIEVEBUFF = "relieveBuff";
 }

@@ -5,9 +5,11 @@ import caculation.MoneyCaculation;
 import caculation.UserbagCaculation;
 import component.parent.Good;
 import config.MessageConfig;
+import context.ProjectUtil;
 import io.netty.channel.Channel;
 import mapper.*;
 import context.ProjectContext;
+import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketType;
@@ -15,6 +17,7 @@ import pojo.*;
 import utils.MessageUtil;
 import utils.UserbagUtil;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -49,77 +52,14 @@ public class LabourUnionEvent {
 
     private Lock lock = new ReentrantLock();
 
-    public void solve(Channel channel, String msg) {
-        if (msg.startsWith("b") || msg.startsWith("w") || msg.startsWith("fix-")) {
-            commonEvent.common(channel, msg);
-            return;
-        }
-        if (msg.equals("q")) {
-            outUnionView(channel, msg);
-            return;
-        }
-        if (msg.equals("g")) {
-            enterUnionView(channel, msg);
-            return;
-        }
-        if (msg.equals("lu")) {
-            queryUnion(channel, msg);
-            return;
-        }
-        if (msg.startsWith("cu")) {
-            createUnion(channel, msg);
-            return;
-        }
-        if (msg.equals("tc")) {
-            outUnion(channel, msg);
-            return;
-        }
-        if (msg.startsWith("sq")) {
-            applyUnion(channel, msg);
-            return;
-        }
-        if (msg.startsWith("ls=y")) {
-            agreeApplyInfo(channel, msg);
-            return;
-        }
-        if (msg.startsWith("ls=n")) {
-            disagreeApplyInfo(channel, msg);
-            return;
-        }
-        if (msg.equals("ls")) {
-            queryApplyInfo(channel, msg);
-            return;
-        }
-        if (msg.equals("zsry")) {
-            queryUnionMemberInfo(channel, msg);
-            return;
-        }
-        if (msg.startsWith("sj")) {
-            memberLevelChange(channel, msg);
-            return;
-        }
-        if (msg.startsWith("t=")) {
-            removeMember(channel, msg);
-            return;
-        }
-        if (msg.equals("zsck")) {
-            showWarehouse(channel, msg);
-            return;
-        }
-        if (msg.startsWith("jxjb")) {
-            giveMoneyToUnion(channel, msg);
-            return;
-        }
-        if (msg.startsWith("jx")) {
-            giveUserbagToUnion(channel, msg);
-            return;
-        }
-        if (msg.startsWith("hq")) {
-            getUserbagFromUnion(channel, msg);
-        }
+
+    @Order(orderMsg = "qb,ub-,qw,fix,wq,ww")
+    public void commonEvent(Channel channel, String msg) throws InvocationTargetException, IllegalAccessException {
+        ProjectUtil.reflectAnnotation(commonEvent, channel, msg);
     }
 
-    private void giveMoneyToUnion(Channel channel, String msg) {
+    @Order(orderMsg = "jxjb")
+    public void giveMoneyToUnion(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("-");
         if (temp.length != 2) {
@@ -138,17 +78,8 @@ public class LabourUnionEvent {
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEMONEYTOUNION, PacketType.UNIONINFO));
     }
 
-    private boolean checkUserHasEnoughMoney(User user, String money) {
-        BigInteger userMoney = new BigInteger(user.getMoney());
-        BigInteger jxMoney = new BigInteger(money);
-        if (userMoney.compareTo(jxMoney) >= 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private void getUserbagFromUnion(Channel channel, String msg) {
+    @Order(orderMsg = "hq")
+    public void getUserbagFromUnion(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("=");
         if (temp.length != 3) {
@@ -225,7 +156,8 @@ public class LabourUnionEvent {
 
     }
 
-    private void giveUserbagToUnion(Channel channel, String msg) {
+    @Order(orderMsg = "jxwp")
+    public void giveUserbagToUnion(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("=");
         if (temp.length != 3) {
@@ -310,7 +242,8 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void showWarehouse(Channel channel, String msg) {
+    @Order(orderMsg = "zsck")
+    public void showWarehouse(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
@@ -327,7 +260,8 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void removeMember(Channel channel, String msg) {
+    @Order(orderMsg = "t=")
+    public void removeMember(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("=");
         if (temp.length != 2) {
@@ -361,7 +295,8 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void disagreeApplyInfo(Channel channel, String msg) {
+    @Order(orderMsg = "ls=n")
+    public void disagreeApplyInfo(Channel channel, String msg) {
         String temp[] = msg.split("=");
         if (temp.length != 3) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -378,7 +313,8 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void memberLevelChange(Channel channel, String msg) {
+    @Order(orderMsg = "sj")
+    public void memberLevelChange(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ProjectContext.session2UserIds.get(channel);
         if (temp.length != 3) {
@@ -408,7 +344,8 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void queryUnionMemberInfo(Channel channel, String msg) {
+    @Order(orderMsg = "zsry")
+    public void queryUnionMemberInfo(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
@@ -424,7 +361,8 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void agreeApplyInfo(Channel channel, String msg) {
+    @Order(orderMsg = "ls=y")
+    public void agreeApplyInfo(Channel channel, String msg) {
         String temp[] = msg.split("=");
         if (temp.length != 3) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -461,7 +399,8 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void queryApplyInfo(Channel channel, String msg) {
+    @Order(orderMsg = "lsu")
+    public void queryApplyInfo(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
@@ -480,7 +419,8 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void applyUnion(Channel channel, String msg) {
+    @Order(orderMsg = "sq")
+    public void applyUnion(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("=");
         if (temp.length != 2) {
@@ -514,8 +454,13 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void outUnion(Channel channel, String msg) {
+    @Order(orderMsg = "tc")
+    public void outUnion(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
+        if (user.getUnionid() == null) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            return;
+        }
         if (user.getUnionlevel() == 1) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOOUTUNION));
             return;
@@ -526,7 +471,8 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void createUnion(Channel channel, String msg) {
+    @Order(orderMsg = "cu")
+    public void createUnion(Channel channel, String msg) {
         String temp[] = msg.split("-");
         if (temp.length != 2) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -554,7 +500,8 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void queryUnion(Channel channel, String msg) {
+    @Order(orderMsg = "lu")
+    public void queryUnion(Channel channel, String msg) {
         UnioninfoExample unioninfoExample = new UnioninfoExample();
         List<Unioninfo> list = unioninfoMapper.selectByExample(unioninfoExample);
         String resp = "";
@@ -565,7 +512,8 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void enterUnionView(Channel channel, String msg) {
+    @Order(orderMsg = "g")
+    public void enterUnionView(Channel channel, String msg) {
         ProjectContext.eventStatus.put(channel, EventStatus.LABOURUNION);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERLABOURVIEW));
         User user = ProjectContext.session2UserIds.get(channel);
@@ -577,11 +525,22 @@ public class LabourUnionEvent {
         return;
     }
 
-    private void outUnionView(Channel channel, String msg) {
+    @Order(orderMsg = "qt")
+    public void outUnionView(Channel channel, String msg) {
         ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTLABOURVIEW));
         channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.UNIONINFO));
         return;
+    }
+
+    private boolean checkUserHasEnoughMoney(User user, String money) {
+        BigInteger userMoney = new BigInteger(user.getMoney());
+        BigInteger jxMoney = new BigInteger(money);
+        if (userMoney.compareTo(jxMoney) >= 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private User getUserFromSessionById(String username) {
@@ -593,11 +552,12 @@ public class LabourUnionEvent {
         return null;
     }
 
-    //  对在线的工会玩家广播一次内容
+//  对在线的工会玩家广播一次内容
     private void messageToAllInUnion(String unionId, String msg) {
-        for (Channel channelTemp : ProjectContext.group) {
-            User userTemp = ProjectContext.session2UserIds.get(channelTemp);
-            if (userTemp.getUnionid() != null && userTemp.getUnionid().equals(unionId)) {
+        for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
+            User userTemp = entry.getValue();
+            if(userTemp.getUnionid()!=null&&userTemp.getUnionid().equals(unionId)){
+                Channel channelTemp = entry.getKey();
                 channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
             }
         }

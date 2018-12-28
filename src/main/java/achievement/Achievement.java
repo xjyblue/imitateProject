@@ -46,6 +46,16 @@ public class Achievement {
 
     private String sons;
 
+    private String reward;
+
+    public String getReward() {
+        return reward;
+    }
+
+    public void setReward(String reward) {
+        this.reward = reward;
+    }
+
     public String getParent() {
         return parent;
     }

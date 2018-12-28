@@ -36,7 +36,7 @@ public class UserbagCaculation {
             } else {
                 userbagMapper.insertSelective(value);
             }
-        } else if (value.getTypeof().equals(Good.MPMEDICINE)||value.getTypeof().equals(Good.HPMEDICINE)) {
+        } else if (value.getTypeof().equals(Good.MPMEDICINE)||value.getTypeof().equals(Good.HPMEDICINE)||value.getTypeof().equals(Good.CHANGEGOOD)) {
             boolean flag = true;
             for (Userbag userbag : user.getUserBag()) {
                 if (userbag.getWid().equals(value.getWid())) {
@@ -73,6 +73,7 @@ public class UserbagCaculation {
     public void removeUserbagFromUser(User user, Userbag userbag, Integer num) {
         if (num == userbag.getNum()) {
             user.getUserBag().remove(userbag);
+            //todo:
             userbag.setName(null);
             userbagMapper.updateByPrimaryKey(userbag);
         } else {

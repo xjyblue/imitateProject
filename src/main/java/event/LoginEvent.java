@@ -1,14 +1,13 @@
 package event;
 
-import achievement.Achievement;
 import component.Scene;
 import config.BuffConfig;
 import config.MessageConfig;
 import io.netty.channel.Channel;
-import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
 import context.ProjectContext;
+import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketType;
@@ -17,7 +16,6 @@ import role.Role;
 import skill.UserSkill;
 import buff.BuffTask;
 import utils.AchievementUtil;
-import utils.LevelUtil;
 import utils.MessageUtil;
 
 import java.util.*;
@@ -32,14 +30,13 @@ public class LoginEvent {
     @Autowired
     private UserskillrelationMapper userskillrelationMapper;
     @Autowired
-    private AchievementprocessMapper achievementprocessMapper;
-    @Autowired
     private EventDistributor eventDistributor;
     @Autowired
     private BuffTask buffTask;
 
     private Lock lock = new ReentrantLock();
 
+    @Order(orderMsg = "*")
     public void login(Channel channel, String msg) {
         String temp[] = msg.split("-");
         if (temp.length != 2) {
@@ -74,7 +71,7 @@ public class LoginEvent {
 
             ProjectContext.userskillrelationMap.put(user, userskillrelationMap);
 
-//              初始化玩家的各种buffer
+//          初始化玩家的各种buffer
             Map<String, Integer> map = new HashMap<>();
             map.put(BuffConfig.MPBUFF, 1000);
             map.put(BuffConfig.POISONINGBUFF, 2000);
@@ -84,7 +81,7 @@ public class LoginEvent {
             map.put(BuffConfig.ALLPERSON, 4000);
             map.put(BuffConfig.BABYBUF, 7000);
             user.setBuffMap(map);
-//              初始化每个用户buff的终止时间
+//          初始化每个用户buff的终止时间
             Map<String, Long> mapSecond = new HashMap<>();
             mapSecond.put(BuffConfig.MPBUFF, 1000l);
             mapSecond.put(BuffConfig.POISONINGBUFF, 2000l);
@@ -93,16 +90,13 @@ public class LoginEvent {
             mapSecond.put(BuffConfig.TREATMENTBUFF, 1000l);
             mapSecond.put(BuffConfig.ALLPERSON, 1000l);
             mapSecond.put(BuffConfig.BABYBUF, 1000l);
-
-            if (!ProjectContext.userBuffEndTime.containsKey(user)) {
-                ProjectContext.userBuffEndTime.put(user, mapSecond);
-            }
+            ProjectContext.userBuffEndTime.put(user, mapSecond);
 
 //          这里注入事件处理器是为了让玩家自己心跳去消费命令，执行任务
             user.setEventDistributor(eventDistributor);
 //          注入buff处理器，让用户去刷新自己的buff
             user.setBuffTask(buffTask);
-            user.setBuffRefreshTime(0l);
+            user.setBuffRefreshTime(0L);
             user.setIfOnline(true);
 
 //          将玩家放入场景队列中
@@ -115,7 +109,7 @@ public class LoginEvent {
 //          展示成就信息
             AchievementUtil.refreshAchievementInfo(user);
 
-            channel.writeAndFlush(MessageUtil.turnToPacket("登录成功，你已进入" + ProjectContext.sceneMap.get(user.getPos()).getName()));
+            channel.writeAndFlush(MessageUtil.turnToPacket("登录成功"));
             Role role = ProjectContext.roleMap.get(user.getRoleid());
             channel.writeAndFlush(MessageUtil.turnToPacket("   " + user.getUsername() + "    职业为:" + role.getName() + "] " + skillLook, PacketType.USERINFO));
             ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
@@ -125,6 +119,7 @@ public class LoginEvent {
         }
     }
 
+//  顶号处理
     private boolean replaceUserChannel(String username, Channel channel) {
         try {
             lock.lock();
@@ -146,7 +141,8 @@ public class LoginEvent {
 
 //              顶号标记
                 user.setOccupied(true);
-                channelTarget.writeAndFlush(MessageUtil.turnToPacket("不好意思,有人在别处登录你的游戏号，请选择重新登录或者修改密码"));
+                channel.writeAndFlush(MessageUtil.turnToPacket("登录成功"));
+                channelTarget.writeAndFlush(MessageUtil.turnToPacket("不好意思,有人在别处登录你的游戏号，请选择重新登录或者修改密码",PacketType.CHANGECHANNEL));
                 channelTarget.close();
                 return true;
             }

@@ -4,6 +4,7 @@ import achievement.Achievement;
 import caculation.HpCaculation;
 import event.BuffEvent;
 import event.OutfitEquipmentEvent;
+import io.netty.handler.timeout.IdleStateHandler;
 import level.Level;
 import context.ProjectContext;
 import mapper.UserMapper;
@@ -62,6 +63,9 @@ public class ServerConfig {
     private OutfitEquipmentEvent outfitEquipmentEvent;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private ServerNetHandler serverNetHandler;
+
     // 程序初始方法入口注解，提示spring这个程序先执行这里
     public void serverStart() throws InterruptedException, IOException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -79,9 +83,10 @@ public class ServerConfig {
                             ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
                             ch.pipeline().addLast(new ProtobufEncoder());
                             ch.pipeline().addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
-//                          旧版本的，现在暂时不用了，写空闲,每隔5秒触发心跳包丢失统计
-//                          ch.pipeline().addLast(new IdleStateHandler(5, 0, 0));
-
+//                          写空闲,每隔3秒触发心跳包丢失统计
+                            ch.pipeline().addLast(new IdleStateHandler(3, 0, 0));
+//                          处理空闲客户端网络心跳包，网络波动处理在这里
+                            ch.pipeline().addLast(serverNetHandler);
 //                          这里会有并发问题，记得处理
                             ch.pipeline().addLast(serverLoginHandler);
 //                          这里只负责派发任务给用户，用户自己去消费packet
@@ -110,6 +115,7 @@ public class ServerConfig {
         achievementalias.put("开始阶段", "begin");
         achievementalias.put("父任务", "parent");
         achievementalias.put("子任务", "sons");
+        achievementalias.put("奖励", "reward");
         List<Achievement> achievementList = ExcelUtil.excel2Pojo(achievementfis, Achievement.class, achievementalias);
         for (Achievement achievement : achievementList) {
             ProjectContext.achievementMap.put(achievement.getAchievementId(), achievement);
@@ -135,8 +141,8 @@ public class ServerConfig {
 //      模拟从数据库初始化所有用户的邮件系统
         UserExample userExample = new UserExample();
         List<User> list = userMapper.selectByExample(userExample);
-        for(User user:list){
-            ProjectContext.userEmailMap.put(user.getUsername(),new ConcurrentHashMap<String,Mail>());
+        for (User user : list) {
+            ProjectContext.userEmailMap.put(user.getUsername(), new ConcurrentHashMap<String, Mail>());
         }
 
 //      初始化人物经验表start
@@ -147,6 +153,8 @@ public class ServerConfig {
         levelalias.put("经验下限", "experienceDown");
         levelalias.put("血量上限", "maxHp");
         levelalias.put("蓝量上限", "maxMp");
+        levelalias.put("攻击力加成", "upAttack");
+        levelalias.put("计算比例","caculatePercent");
         List<Level> levelList = ExcelUtil.excel2Pojo(levelfis, Level.class, levelalias);
         for (Level level : levelList) {
             ProjectContext.levelMap.put(level.getLevel(), level);
@@ -282,119 +290,68 @@ public class ServerConfig {
         npcalias.put("NPC的名字", "name");
         npcalias.put("NPC的话", "talk");
         npcalias.put("NPC所在的地点", "areaId");
+        npcalias.put("换取的条件", "getTarget");
+        npcalias.put("换取的物品", "getGoods");
         List<NPC> npcList = ExcelUtil.excel2Pojo(npcfis, NPC.class, npcalias);
         for (NPC npc : npcList) {
             ProjectContext.npcMap.put(npc.getId(), npc);
         }
 //      初始化npc end
 
+//      初始化收集类物品start
+        FileInputStream collectGoodfis = new FileInputStream(new File("src/main/resources/CollectGood.xls"));
+        LinkedHashMap<String, String> collectGoodAlias = new LinkedHashMap<>();
+        collectGoodAlias.put("物品的名字", "name");
+        collectGoodAlias.put("物品的id", "id");
+        collectGoodAlias.put("物品的描述", "desc");
+        collectGoodAlias.put("物品的价格", "buyMoney");
+        collectGoodAlias.put("物品的种类", "type");
+        List<CollectGood> collectGoodList = ExcelUtil.excel2Pojo(collectGoodfis, CollectGood.class, collectGoodAlias);
+        for (CollectGood collectGood : collectGoodList) {
+            ProjectContext.collectGoodMap.put(collectGood.getId(),collectGood);
+        }
+//      初始化收集类物品end
 
+//      初始化场景start
+        FileInputStream scenefis = new FileInputStream(new File("src/main/resources/Scene.xls"));
+        LinkedHashMap<String, String> sceneAlias = new LinkedHashMap<>();
+        sceneAlias.put("场景的名字", "name");
+        sceneAlias.put("场景的id", "id");
+        sceneAlias.put("关联的场景id", "sceneIds");
+        sceneAlias.put("npcId", "npcS");
+        sceneAlias.put("怪物id", "monsterS");
+        sceneAlias.put("需要的等级", "needLevel");
+        List<Scene> sceneList = ExcelUtil.excel2Pojo(scenefis, Scene.class, sceneAlias);
 
-//		起始之地
-        Scene scene = new Scene();
-        scene.setName("起始之地");
-        scene.setId("0");
-        Set<String> areaSet = new HashSet<String>();
-        areaSet.add("村子");
-        scene.setSceneSet(areaSet);
-//      初始化NPC和会话
-        NPC npc = ProjectContext.npcMap.get(1);
-        List<NPC> npcs = new ArrayList<NPC>();
-        npcs.add(npc);
-        scene.setNpcs(npcs);
-        Monster monster = monsterFactory.getMonster(3);
-        monster.setBuffRefreshTime(0L);
-        List<Monster> monsters = new ArrayList<>();
-        monsters.add(monster);
-        scene.setMonsters(monsters);
-        scene.setBuffEvent(buffEvent);
-        scene.setOutfitEquipmentEvent(outfitEquipmentEvent);
-        scene.setHpCaculation(hpCaculation);
+        for (Scene scene : sceneList) {
+//          初始化npc
+            List<NPC> npcs = new ArrayList<>();
+//          这里后面可以改成多个npc
+            npcs.add(ProjectContext.npcMap.get(Integer.parseInt(scene.getNpcS())));
+            scene.setNpcs(npcs);
 
-        ProjectContext.sceneMap.put("0", scene);
-        ProjectContext.sceneThreadPool.execute(scene);
+//          初始化怪物
+            List<Monster> monsters = new ArrayList<>();
+            monsters.add(monsterFactory.getMonster(Integer.parseInt(scene.getMonsterS())));
+            scene.setMonsters(monsters);
 
-//		村子
-        scene = new Scene();
-        scene.setName("村子");
-        scene.setId("1");
-        areaSet = new HashSet<String>();
-        areaSet.add("起始之地");
-        areaSet.add("城堡");
-        areaSet.add("森林");
-        scene.setSceneSet(areaSet);
-//        初始化NPC和会话
-        npc = ProjectContext.npcMap.get(2);
-        npcs = new ArrayList<NPC>();
-        npcs.add(npc);
-        scene.setNpcs(npcs);
-        monsters = new ArrayList<>();
-        monster = monsterFactory.getMonster(4);
-        monster.setBuffRefreshTime(0L);
-        monsters.add(monster);
-        scene.setMonsters(monsters);
-        scene.setBuffEvent(buffEvent);
-        scene.setOutfitEquipmentEvent(outfitEquipmentEvent);
-        scene.setHpCaculation(hpCaculation);
+//          初始化关联地图
+            Set<String> areaSet = new HashSet<String>();
+            String sceneConnect = scene.getSceneIds();
+            for (String sceneT : sceneConnect.split("-")) {
+                areaSet.add(sceneT);
+            }
+            scene.setSceneSet(areaSet);
 
-        ProjectContext.sceneMap.put("1", scene);
-        ProjectContext.sceneThreadPool.execute(scene);
-
-//      森林
-        scene = new Scene();
-        scene.setName("森林");
-        scene.setId("2");
-        areaSet = new HashSet<String>();
-        areaSet.add("村子");
-        scene.setSceneSet(areaSet);
-//        初始化NPC和会话
-        npc = ProjectContext.npcMap.get(3);
-        npcs = new ArrayList<NPC>();
-        npcs.add(npc);
-        scene.setNpcs(npcs);
-
-//      初始化怪物
-        monster = monsterFactory.getMonster(5);
-        monsters = new ArrayList<>();
-        monster.setBuffRefreshTime(0L);
-        monsters.add(monster);
-        scene.setMonsters(monsters);
-        scene.setBuffEvent(buffEvent);
-        scene.setOutfitEquipmentEvent(outfitEquipmentEvent);
-        scene.setHpCaculation(hpCaculation);
-
-        ProjectContext.sceneMap.put("2", scene);
-        ProjectContext.sceneThreadPool.execute(scene);
-
-
-//      城堡
-        scene = new Scene();
-        scene.setName("城堡");
-        areaSet = new HashSet<String>();
-        areaSet.add("村子");
-        scene.setId("3");
-        scene.setSceneSet(areaSet);
-//        初始化NPC和会话
-        npc = ProjectContext.npcMap.get(4);
-        npcs = new ArrayList<NPC>();
-        npcs.add(npc);
-        scene.setNpcs(npcs);
-        scene.setBuffEvent(buffEvent);
-        scene.setOutfitEquipmentEvent(outfitEquipmentEvent);
-        scene.setHpCaculation(hpCaculation);
-
-//      初始化怪物
-        monster = monsterFactory.getMonster(6);
-        monster.setBuffRefreshTime(0L);
-        monsters = new ArrayList<>();
-        monsters.add(monster);
-        scene.setMonsters(monsters);
-        ProjectContext.sceneMap.put("3", scene);
-        ProjectContext.areaSet.add("村子");
-        ProjectContext.areaSet.add("森林");
-        ProjectContext.areaSet.add("起始之地");
-        ProjectContext.areaSet.add("城堡");
-
-        ProjectContext.sceneThreadPool.execute(scene);
+//          注入一些要用的单例
+            scene.setBuffEvent(buffEvent);
+            scene.setOutfitEquipmentEvent(outfitEquipmentEvent);
+            scene.setHpCaculation(hpCaculation);
+//
+            ProjectContext.sceneMap.put(scene.getId(), scene);
+            ProjectContext.sceneSet.add(scene.getName());
+            ProjectContext.sceneThreadPool.execute(scene);
+        }
+//      初始化场景end
     }
 }

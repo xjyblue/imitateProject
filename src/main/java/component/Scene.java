@@ -2,18 +2,21 @@ package component;
 
 import buff.Buff;
 import caculation.HpCaculation;
-import caculation.MoneyCaculation;
+
 import config.BuffConfig;
 import config.MessageConfig;
 import event.BuffEvent;
 import event.EventStatus;
 import event.OutfitEquipmentEvent;
+import factory.MonsterFactory;
 import io.netty.channel.Channel;
 import context.ProjectContext;
 import packet.PacketType;
 import pojo.User;
 import utils.MessageUtil;
+import utils.SpringContextUtil;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +24,16 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Scene implements Runnable {
+
     private String id;
 
     private String name;
+
+    private String sceneIds;
+
+    private String npcS;
+
+    private String monsterS;
     //  关联的场景
     private Set<String> sceneSet;
     //  场景下的npc
@@ -31,13 +41,47 @@ public class Scene implements Runnable {
     //  场景下的怪物
     private List<Monster> monsters;
     //  场景下的玩家
+    private String needLevel;
+
     private Map<String, User> userMap = new ConcurrentHashMap<>();
+
+    public String getNeedLevel() {
+        return needLevel;
+    }
+
+    public void setNeedLevel(String needLevel) {
+        this.needLevel = needLevel;
+    }
+
+    public String getMonsterS() {
+        return monsterS;
+    }
+
+    public void setMonsterS(String monsterS) {
+        this.monsterS = monsterS;
+    }
+
+    public String getNpcS() {
+        return npcS;
+    }
+
+    public void setNpcS(String npcS) {
+        this.npcS = npcS;
+    }
 
     private OutfitEquipmentEvent outfitEquipmentEvent;
 
     private BuffEvent buffEvent;
 
     private HpCaculation hpCaculation;
+
+    public String getSceneIds() {
+        return sceneIds;
+    }
+
+    public void setSceneIds(String sceneIds) {
+        this.sceneIds = sceneIds;
+    }
 
     public OutfitEquipmentEvent getOutfitEquipmentEvent() {
         return outfitEquipmentEvent;
@@ -130,7 +174,6 @@ public class Scene implements Runnable {
 
     private void monsterFrequence() {
 //      推送战斗消息,触发处于战斗状态的用户
-        
 
 
 //      场景内所有用户在战斗的怪物
@@ -146,7 +189,7 @@ public class Scene implements Runnable {
                             monster = monsterEntry.getValue();
                         }
 //                      怪物buff刷新
-                        monsterBuffRefresh(monster,channel);
+                        monsterBuffRefresh(monster, channel);
 //                      检查怪物是否死亡
                         if (checkMonsterStatus(channel, monster, user)) {
                             continue;
@@ -191,7 +234,7 @@ public class Scene implements Runnable {
         }
     }
 
-    private void monsterBuffRefresh(Monster monster,Channel channel) {
+    private void monsterBuffRefresh(Monster monster, Channel channel) {
         if (monster.getBuffRefreshTime() < System.currentTimeMillis()) {
             monster.setBuffRefreshTime(System.currentTimeMillis() + 1000);
         } else {
@@ -219,7 +262,7 @@ public class Scene implements Runnable {
     }
 
 
-    private boolean checkMonsterStatus(Channel channel, Monster monster, User user) {
+    private boolean checkMonsterStatus(Channel channel, Monster monster, User user) throws IOException {
         if (monster != null && new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger("0")) <= 0) {
             monster.setValueOfLife("0");
             monster.setStatus("0");
@@ -228,6 +271,10 @@ public class Scene implements Runnable {
             channel.writeAndFlush(MessageUtil.turnToPacket("怪物已死亡", PacketType.ATTACKMSG));
             List<Monster> monsters = ProjectContext.sceneMap.get(user.getPos()).monsters;
             monsters.remove(monster);
+//          填充因buff中毒而死的怪物
+            MonsterFactory monsterFactory = SpringContextUtil.getBean("monsterFactory");
+            monsters.add(monsterFactory.getMonster(Integer.parseInt(ProjectContext.sceneMap.get(user.getPos()+"").getMonsterS())));
+
             ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
             outfitEquipmentEvent.getGoods(channel, monster);
             return true;
