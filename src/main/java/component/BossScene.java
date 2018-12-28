@@ -386,7 +386,7 @@ public class BossScene implements Runnable {
                     userTarget = entry.getValue();
                     BigInteger userHp = new BigInteger(userTarget.getHp());
                     Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
-                    if (userHp.compareTo(new BigInteger("0")) == 0) {
+                    if (userHp.compareTo(new BigInteger("0")) <= 0) {
                         userTarget.setHp("0");
                         userTarget.setStatus(DeadOrAliveConfig.DEAD);
 //                  移除怪物所针对的boss

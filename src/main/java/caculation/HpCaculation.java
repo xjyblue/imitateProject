@@ -41,13 +41,16 @@ public class HpCaculation {
         userHp = userHp.subtract(reduceValueB);
 
         BigInteger minHp = new BigInteger("0");
+        if (userHp.compareTo(minHp) <= 0) {
+            userHp = minHp;
+        }
         if (ProjectContext.eventStatus.get(channel).equals(EventStatus.ATTACK) && userHp.compareTo(minHp) <= 0 && user.getStatus().equals(DeadOrAliveConfig.ALIVE)) {
             user.setHp("0");
             user.setStatus("0");
 //          移除用户所攻击的所有怪物
             ProjectContext.userToMonsterMap.remove(user);
             ProjectContext.eventStatus.put(channel, EventStatus.DEADAREA);
-        }else {
+        } else {
             user.setHp(userHp.toString());
         }
     }
