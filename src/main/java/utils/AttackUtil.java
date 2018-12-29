@@ -3,12 +3,10 @@ package utils;
 import component.BossScene;
 import component.Monster;
 import config.BuffConfig;
-import config.DeadOrAliveConfig;
 import event.EventStatus;
 import event.OutfitEquipmentEvent;
 import io.netty.channel.Channel;
 import context.ProjectContext;
-import mapper.UserMapper;
 import pojo.User;
 import team.Team;
 
@@ -58,7 +56,7 @@ public class AttackUtil {
     }
 
     public static void killBossMessageToAll(User user, Monster monster) {
-        OutfitEquipmentEvent outfitEquipmentEvent = (OutfitEquipmentEvent) SpringContextUtil.getBean("outfitEquipmentEvent");
+        OutfitEquipmentEvent outfitEquipmentEvent = SpringContextUtil.getBean("outfitEquipmentEvent");
         Team team = ProjectContext.teamMap.get(user.getTeamId());
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());

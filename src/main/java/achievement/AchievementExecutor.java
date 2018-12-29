@@ -3,8 +3,8 @@ package achievement;
 import component.Equipment;
 import component.Monster;
 import component.NPC;
-import component.parent.Good;
-import level.Level;
+import component.parent.PGood;
+import config.GrobalConfig;
 import mapper.AchievementprocessMapper;
 import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +63,7 @@ public class AchievementExecutor {
     }
 
     private void sloveParentProcess(User user, Achievement achievement) {
-        if (!achievement.getParent().equals("0")) {
+        if (!achievement.getParent().equals(GrobalConfig.NULL)) {
             Achievement achievementParent = AchievementUtil.getAchievementById(Integer.parseInt(achievement.getParent()));
             String[] sons = achievementParent.getSons().split("-");
             List<String> sonSet = new ArrayList<>();
@@ -116,7 +116,7 @@ public class AchievementExecutor {
     }
 
     private void sloveAchievementReward(Achievement achievement, User user) {
-        if (!achievement.getReward().equals("0")) {
+        if (!achievement.getReward().equals(GrobalConfig.NULL)) {
             String reward[] = achievement.getReward().split("-");
             for (String rewardT : reward) {
                 String rewardArr[] = rewardT.split(":");
@@ -128,10 +128,10 @@ public class AchievementExecutor {
         }
     }
 
-    public void executeCollect(Achievementprocess achievementprocess, Good good, User user, Achievement achievement) {
+    public void executeCollect(Achievementprocess achievementprocess, PGood PGood, User user, Achievement achievement) {
         if (!achievementprocess.getIffinish()) {
-            if (good instanceof Equipment) {
-                Equipment equipment = (Equipment) good;
+            if (PGood instanceof Equipment) {
+                Equipment equipment = (Equipment) PGood;
 
                 String target[] = achievement.getTarget().split("-");
                 Set<String> targetSet = new HashSet<>();
@@ -141,7 +141,7 @@ public class AchievementExecutor {
 
                 if (targetSet.contains(equipment.getId() + "")) {
 //                 包含目标才处理
-                    if (achievementprocess.getProcesss().equals("0")) {
+                    if (achievementprocess.getProcesss().equals(GrobalConfig.NULL)) {
                         achievementprocess.setProcesss(equipment.getId() + "");
                     } else {
 //                       检查里面有没有该物品，没有再添加，添加完再校验

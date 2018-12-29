@@ -17,7 +17,6 @@ public class NPC {
 	private String getGoods;
 
 	public NPC(){
-
 	}
 
 	public String getGetTarget() {

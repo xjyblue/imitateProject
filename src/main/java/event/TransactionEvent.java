@@ -5,7 +5,8 @@ import caculation.MoneyCaculation;
 import caculation.UserbagCaculation;
 import component.Equipment;
 import component.MpMedicine;
-import component.parent.Good;
+import component.parent.PGood;
+import config.GrobalConfig;
 import config.MessageConfig;
 import context.ProjectUtil;
 import io.netty.channel.Channel;
@@ -160,8 +161,8 @@ public class TransactionEvent {
         trade.setEndTime(System.currentTimeMillis() + 500000);
         trade.setTradeId(uuid);
         trade.setToUserAgree(false);
-        trade.setStartMoney(new BigInteger("0"));
-        trade.setToMoney(new BigInteger("0"));
+        trade.setStartMoney(new BigInteger(GrobalConfig.MINVALUE));
+        trade.setToMoney(new BigInteger(GrobalConfig.MINVALUE));
         trade.setStartUserAgree(false);
         trade.setIfexe(false);
         trade.setStartUserBag(new HashMap<String, Userbag>());
@@ -423,12 +424,12 @@ public class TransactionEvent {
     }
 
     private void moveToUserBag(Userbag userbag, User user, Map<String, Userbag> userBag, String num) {
-        if (userbag.getTypeof().equals(Good.EQUIPMENT) && Integer.parseInt(num) == 1) {
+        if (userbag.getTypeof().equals(PGood.EQUIPMENT) && Integer.parseInt(num) == 1) {
             userBag.remove(userbag.getId());
             user.getUserBag().add(userbag);
             return;
         }
-        if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
+        if (userbag.getTypeof().equals(PGood.MPMEDICINE)) {
             if (userbag.getNum() == Integer.parseInt(num)) {
                 userBag.remove(userbag.getId());
             } else {
@@ -487,11 +488,11 @@ public class TransactionEvent {
     }
 
     private String getUserbagInfoByUserbag(Userbag userbag) {
-        if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
+        if (userbag.getTypeof().equals(PGood.MPMEDICINE)) {
             MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
             return mpMedicine.getName();
         }
-        if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
+        if (userbag.getTypeof().equals(PGood.EQUIPMENT)) {
             Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
             return equipment.getName();
         }

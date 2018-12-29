@@ -4,7 +4,7 @@ import component.CollectGood;
 import component.Equipment;
 import component.HpMedicine;
 import component.MpMedicine;
-import component.parent.Good;
+import component.parent.PGood;
 import io.netty.channel.Channel;
 import context.ProjectContext;
 import packet.PacketType;
@@ -33,7 +33,7 @@ public class UserbagUtil {
                 + "按b-物品编号使用蓝药"
                 + "  按ww=物品编号装备武器";
         for (Userbag userbag : user.getUserBag()) {
-            if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
+            if (userbag.getTypeof().equals(PGood.MPMEDICINE)) {
                 MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
                 bagResp += System.getProperty("line.separator")
                         + "[格子id:" + userbag.getId()
@@ -45,7 +45,7 @@ public class UserbagUtil {
                 } else {
                     bagResp += " [即时回复]";
                 }
-            } else if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
+            } else if (userbag.getTypeof().equals(PGood.EQUIPMENT)) {
                 Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
                 bagResp += System.getProperty("line.separator")
                         + "[格子id:" + userbag.getId()
@@ -55,7 +55,7 @@ public class UserbagUtil {
                         + "] [武器攻击力加成" + equipment.getAddValue()
                         + "] [武器星级" + userbag.getStartlevel()
                         + "] [武器数量:" + userbag.getNum() + "]";
-            } else if (userbag.getTypeof().equals(Good.HPMEDICINE)) {
+            } else if (userbag.getTypeof().equals(PGood.HPMEDICINE)) {
                 HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(userbag.getWid());
                 bagResp += System.getProperty("line.separator")
                         + "[格子id:" + userbag.getId()
@@ -64,7 +64,7 @@ public class UserbagUtil {
                         + "] [物品数量" + userbag.getNum()
                         + "] [物品恢复血量" + hpMedicine.getReplyValue()
                         + "] [物品cd" + hpMedicine.getCd() + "]";
-            }else if(userbag.getTypeof().equals(Good.CHANGEGOOD)){
+            }else if(userbag.getTypeof().equals(PGood.CHANGEGOOD)){
                 CollectGood collectGood = ProjectContext.collectGoodMap.get(userbag.getWid());
                 bagResp +=System.getProperty("line.separator")
                         + "[格子id:" + userbag.getId()

@@ -1,8 +1,8 @@
 package component;
 
-import component.parent.Good;
+import component.parent.PGood;
 
-public class Equipment extends Good {
+public class Equipment extends PGood {
 
     private Integer id;
     //耐久度

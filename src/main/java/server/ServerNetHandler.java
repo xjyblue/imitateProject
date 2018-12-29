@@ -74,7 +74,6 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
                 ProjectContext.session2UserIds.remove(ctx.channel());
                 user.setOccupied(false);
             } else {
-//              这个状态是为了解决线程安全问题，volatile可见保证
                 user.setIfOnline(false);
                 if (user.getTeamId() != null) {
 //              处理一下用户的team对用户的处理
@@ -86,7 +85,7 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
                 if (user != null && ProjectContext.userBuffEndTime.containsKey(user)) {
                     ProjectContext.userBuffEndTime.remove(user);
                 }
-//          移除怪物的buff终止时间
+//              移除怪物的buff终止时间
                 if (user != null && ProjectContext.userToMonsterMap.containsKey(user)) {
                     ProjectContext.userToMonsterMap.remove(user);
                 }
@@ -118,7 +117,7 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
             // 空闲5s之后触发 (心跳包丢失)
             if (counter >= 15) {
                 // 连续丢失3个心跳包 (断开连接)
-                // 可以改成 30秒检查一次丢包  1分钟检查一次丢包 3分钟检查一次丢包 5分钟不上就是玩家上不来了清除渠道信息
+                // 后期可以改成 30秒检查一次丢包  1分钟检查一次丢包 3分钟检查一次丢包 5分钟不上就是玩家上不来了清除渠道信息
                 ctx.channel().close().sync();
                 System.out.println("已与Client断开连接");
             } else {

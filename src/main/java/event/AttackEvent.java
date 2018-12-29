@@ -7,20 +7,18 @@ import component.BossScene;
 import component.Equipment;
 import config.BuffConfig;
 import config.MessageConfig;
-import config.DeadOrAliveConfig;
+import config.GrobalConfig;
 import context.ProjectUtil;
 import factory.MonsterFactory;
 import io.netty.channel.Channel;
 import context.ProjectContext;
 import order.Order;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userskillrelation;
 import pojo.Weaponequipmentbar;
 import skill.UserSkill;
-import team.Team;
 import utils.AttackUtil;
 import utils.MessageUtil;
 import component.Monster;
@@ -30,6 +28,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component("attackEvent")
@@ -67,9 +66,9 @@ public class AttackEvent {
     public void quitFight(Channel channel, String msg) throws InvocationTargetException, IllegalAccessException {
         User user = ProjectContext.session2UserIds.get(channel);
 //      boss的战斗中推出
-        if(user.getTeamId()!=null&&ProjectContext.bossAreaMap.containsKey(user.getTeamId())){
-            ProjectUtil.reflectAnnotation(bossEvent,channel,msg);
-        }else {
+        if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
+            ProjectUtil.reflectAnnotation(bossEvent, channel, msg);
+        } else {
 //          普通战斗中退出
             ProjectContext.userToMonsterMap.remove(ProjectContext.session2UserIds.get(channel));
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RETREATFIGHT));
@@ -117,7 +116,7 @@ public class AttackEvent {
                         map.put(monster.getId(), monster);
                         ProjectContext.userToMonsterMap.put(user, map);
                     }
-//                   让副本继续处于战斗状态
+//                  让副本继续处于战斗状态
                     if (!bossScene.isFight()) {
                         bossScene.setFight(true);
                     }
@@ -210,7 +209,7 @@ public class AttackEvent {
         hpCaculation.subMonsterHp(monster, attackDamage.toString());
 //      蓝量计算
         userMp -= skillMp;
-        user.setMp(userMp + "");
+        user.setMp(userMp.toString());
 
         String resp = out(user);
         resp += System.getProperty("line.separator")
@@ -225,10 +224,10 @@ public class AttackEvent {
                 + System.getProperty("line.separator")
                 + "[人物剩余蓝量]:" + user.getMp();
 
-        if (monster.getValueOfLife().equals("0")) {
+        if (monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
 //          通知玩家技能伤害情况
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
-            monster.setStatus(DeadOrAliveConfig.DEAD);
+            monster.setStatus(GrobalConfig.DEAD);
 
 //          boss战斗场景
             if (monster.getType().equals(Monster.TYPEOFBOSS)) {
@@ -237,7 +236,7 @@ public class AttackEvent {
                 AttackUtil.changeUserAttackMonster(user, bossScene, monster);
                 AttackUtil.killBossMessageToAll(user, monster);
 //              额外奖励最后一击的玩家
-                if (monster.getPos().equals("A3")) {
+                if (monster.getPos().equals(bossScene.getFinalReward())) {
                     outfitEquipmentEvent.extraBonus(user, channel);
                 }
             }
@@ -246,9 +245,12 @@ public class AttackEvent {
             if (monster.getType().equals(Monster.TYPEOFCOMMONMONSTER)) {
 //              移除死掉的怪物
                 ProjectContext.sceneMap.get(user.getPos()).getMonsters().remove(monster);
-//              成新的怪物
+//              新增怪物
                 Scene scene = ProjectContext.sceneMap.get(user.getPos());
-                scene.getMonsters().add(monsterFactory.getMonsterByArea(user.getPos()));
+                List<Monster> monsters = monsterFactory.getMonsterByArea(user.getPos());
+                for (Monster monsterT : monsters) {
+                    scene.getMonsters().add(monsterT);
+                }
             }
         } else {
 //          通知玩家技能伤害情况

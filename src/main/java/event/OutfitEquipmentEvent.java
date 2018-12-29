@@ -7,13 +7,12 @@ import caculation.UserbagCaculation;
 import component.CollectGood;
 import component.Equipment;
 import component.Monster;
-import component.parent.Good;
+import component.parent.PGood;
+import config.GrobalConfig;
 import io.netty.channel.Channel;
-import level.Level;
 import mapper.UserMapper;
 import context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
 import pojo.User;
@@ -43,11 +42,11 @@ public class OutfitEquipmentEvent {
         int num = (int) (Math.random() * 100);
         if (monster.getType().equals(Monster.TYPEOFCOMMONMONSTER)) {
             String reward = monster.getReward();
-            if (!reward.equals("0")) {
+            if (!reward.equals(GrobalConfig.NULL)) {
                 for (String rewardT : reward.split("-")) {
                     String rewardArr[] = rewardT.split(":");
                     if (num > Integer.parseInt(rewardArr[2])) {
-                        if (rewardArr[0].equals("0")) {
+                        if (rewardArr[0].equals(GrobalConfig.NULL)) {
                             String money = rewardArr[3];
                             moneyCaculation.addMoneyToUser(user, money);
                             channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + money + "金币,当前人物金币为[" + user.getMoney() + "]"));
@@ -62,11 +61,11 @@ public class OutfitEquipmentEvent {
             }
 
         } else if (monster.getType().equals(Monster.TYPEOFBOSS)) {
-            if(!monster.getReward().equals("0")){
+            if(!monster.getReward().equals(GrobalConfig.NULL)){
                 String reward = monster.getReward();
                 for (String rewardT : reward.split("-")) {
                     String rewardArr[] = rewardT.split(":");
-                    if (rewardArr[0].equals("0")) {
+                    if (rewardArr[0].equals(GrobalConfig.NULL)) {
                         String money = rewardArr[3];
                         moneyCaculation.addMoneyToUser(user, money);
                         channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + money + "金币,当前人物金币为[" + user.getMoney() + "]"));
@@ -80,42 +79,29 @@ public class OutfitEquipmentEvent {
             }
         }
 
-        int levelStart = LevelUtil.getLevelByExperience(user.getExperience());
-        user.setExperience(user.getExperience() + monster.getExperience());
-        int levelEnd = LevelUtil.getLevelByExperience(user.getExperience());
-        userMapper.updateByPrimaryKeySelective(user);
-        if (levelEnd > levelStart) {
-            user.setHp(LevelUtil.getMaxHp(user));
-            user.setMp(LevelUtil.getMaxMp(user));
-            channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你升级啦，升到了万众瞩目的[" + levelEnd + "]级"));
-        }
+//      升级
+        LevelUtil.upUserLevel(user,monster.getExperience().toString());
 
-//      触发任务事件
+//      触发打怪任务事件
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
             Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.ATTACKMONSTER)) {
                 achievementExecutor.executeKillMonster(user, achievementprocess, monster.getId());
             }
-            if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.UPLEVEL)) {
-                achievementExecutor.executeLevelUp(achievementprocess, user, achievement);
-            }
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.FINISHBOSSAREA) && monster.getType().equals(Monster.TYPEOFBOSS)) {
                 achievementExecutor.executeBossAttack(achievementprocess, user, achievement, monster);
             }
         }
-
-        channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + monster.getExperience() + "经验"));
-
     }
 
     private void goodToUser(String goodType,Integer goodId, User user, Channel channel) {
-       if(goodType.equals(Good.EQUIPMENT)){
+       if(goodType.equals(PGood.EQUIPMENT)){
            Equipment equipment = ProjectContext.equipmentMap.get(goodId);
            Userbag userbag = new Userbag();
            userbag.setId(UUID.randomUUID().toString());
            userbag.setName(equipment.getName());
            userbag.setNum(1);
-           userbag.setTypeof(Good.EQUIPMENT);
+           userbag.setTypeof(PGood.EQUIPMENT);
            userbag.setName(equipment.getName());
            userbag.setStartlevel(equipment.getStartLevel());
            userbag.setWid(equipment.getId());
@@ -123,14 +109,14 @@ public class OutfitEquipmentEvent {
            userbagCaculation.addUserBagForUser(user, userbag);
            channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + equipment.getName() + "增加攻击力为" + equipment.getAddValue()));
        }
-       if(goodType.equals(Good.CHANGEGOOD)){
+       if(goodType.equals(PGood.CHANGEGOOD)){
            CollectGood collectGood = ProjectContext.collectGoodMap.get(goodId);
            Userbag userbag = new Userbag();
            userbag.setId(UUID.randomUUID().toString());
            userbag.setName(user.getUsername());
            userbag.setNum(1);
            userbag.setWid(goodId);
-           userbag.setTypeof(Good.CHANGEGOOD);
+           userbag.setTypeof(PGood.CHANGEGOOD);
            userbagCaculation.addUserBagForUser(user, userbag);
            channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + collectGood.getName()));
        }

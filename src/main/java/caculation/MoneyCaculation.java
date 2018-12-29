@@ -24,10 +24,10 @@ public class MoneyCaculation {
     private AchievementExecutor achievementExecutor;
 
     public void addMoneyToUser(User user, String money) {
-        BigInteger usermoney = new BigInteger(user.getMoney());
-        BigInteger addmoney = new BigInteger(money);
-        usermoney = usermoney.add(addmoney);
-        user.setMoney(usermoney.toString());
+        int usermoney = Integer.parseInt(user.getMoney());
+        int addmoney = Integer.parseInt(money);
+        usermoney += addmoney;
+        user.setMoney(String.valueOf(usermoney));
 //      处理用户成就
         achievementExecutor.executeMoneyAchievement(user);
 //      同步到数据库
@@ -35,15 +35,15 @@ public class MoneyCaculation {
     }
 
     public void removeMoneyToUser(User user, String money) {
-        BigInteger usermoney = new BigInteger(user.getMoney());
-        BigInteger removemoney = new BigInteger(money);
-        if(removemoney.compareTo(usermoney)>0){
+        int usermoney = Integer.parseInt(user.getMoney());
+        int removemoney = Integer.parseInt(money);
+        if (removemoney > usermoney) {
             Channel channelT = ProjectContext.userToChannelMap.get(user);
             channelT.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMONEYTOGIVE));
             return;
         }
-        usermoney = usermoney.subtract(removemoney);
-        user.setMoney(usermoney.toString());
+        usermoney -= removemoney;
+        user.setMoney(String.valueOf(usermoney));
 //      同步到数据库
         userMapper.updateByPrimaryKeySelective(user);
     }

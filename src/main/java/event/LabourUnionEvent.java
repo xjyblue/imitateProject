@@ -3,7 +3,7 @@ package event;
 import achievement.AchievementExecutor;
 import caculation.MoneyCaculation;
 import caculation.UserbagCaculation;
-import component.parent.Good;
+import component.parent.PGood;
 import config.MessageConfig;
 import context.ProjectUtil;
 import io.netty.channel.Channel;
@@ -105,7 +105,7 @@ public class LabourUnionEvent {
             }
 
 
-            if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
+            if (userbag.getTypeof().equals(PGood.EQUIPMENT)) {
 //              关联处理
                 UnionwarehouseExample unionwarehouseExample = new UnionwarehouseExample();
                 UnionwarehouseExample.Criteria criteria = unionwarehouseExample.createCriteria();
@@ -114,7 +114,7 @@ public class LabourUnionEvent {
 
                 userbagCaculation.addUserBagForUser(user, userbag);
 
-                String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + Good.getGoodNameByUserbag(userbag);
+                String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + PGood.getGoodNameByUserbag(userbag);
                 messageToAllInUnion(user.getUnionid(), resp);
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD, PacketType.UNIONINFO));
                 return;
@@ -144,7 +144,7 @@ public class LabourUnionEvent {
             userbagNew.setId(UUID.randomUUID().toString());
             userbagCaculation.addUserBagForUser(user, userbagNew);
 
-            String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + Good.getGoodNameByUserbag(userbagNew);
+            String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + PGood.getGoodNameByUserbag(userbagNew);
             messageToAllInUnion(user.getUnionid(), resp);
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD, PacketType.UNIONINFO));
             return;
@@ -180,7 +180,7 @@ public class LabourUnionEvent {
 
 //      处理捐赠逻辑
 //      先处理用户背包的这一块
-        if (!userbag.getTypeof().equals(Good.EQUIPMENT)) {
+        if (!userbag.getTypeof().equals(PGood.EQUIPMENT)) {
             userbag.setNum(userbag.getNum() - Integer.parseInt(temp[2]));
             if (userbag.getNum() == 0) {
                 user.getUserBag().remove(userbag);
@@ -196,7 +196,7 @@ public class LabourUnionEvent {
 //      处理工会仓库这一块
         Unioninfo unioninfo = unioninfoMapper.selectByPrimaryKey(user.getUnionid());
         List<Userbag> list = userbagMapper.selectUserbagByWarehourseId(unioninfo.getUnionwarehourseid());
-        if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
+        if (userbag.getTypeof().equals(PGood.EQUIPMENT)) {
             userbag.setName(null);
             Unionwarehouse unionwarehouse = new Unionwarehouse();
             unionwarehouse.setUserbagid(userbag.getId());
@@ -204,7 +204,7 @@ public class LabourUnionEvent {
             unionwarehouseMapper.insert(unionwarehouse);
             userbagMapper.updateByPrimaryKey(userbag);
 
-            String resp = "用户：" + user.getUsername() + "向工会捐献了" + Good.getGoodNameByUserbag(userbag);
+            String resp = "用户：" + user.getUsername() + "向工会捐献了" + PGood.getGoodNameByUserbag(userbag);
             messageToAllInUnion(user.getUnionid(), resp);
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION, PacketType.UNIONINFO));
             return;
@@ -236,7 +236,7 @@ public class LabourUnionEvent {
 
 
 //      广播
-        String resp = "用户：" + user.getUsername() + "向工会捐献了" + Good.getGoodNameByUserbag(userbagNew);
+        String resp = "用户：" + user.getUsername() + "向工会捐献了" + PGood.getGoodNameByUserbag(userbagNew);
         messageToAllInUnion(user.getUnionid(), resp);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION, PacketType.UNIONINFO));
         return;
@@ -253,7 +253,7 @@ public class LabourUnionEvent {
         List<Userbag> list = userbagMapper.selectUserbagByWarehourseId(unioninfo.getUnionwarehourseid());
         String resp = "";
         for (Userbag userbag : list) {
-            resp += Good.getGoodNameByUserbag(userbag) + System.getProperty("line.separator");
+            resp += PGood.getGoodNameByUserbag(userbag) + System.getProperty("line.separator");
         }
         resp += "工会仓库金币数量为：" + unioninfo.getUnionmoney() + System.getProperty("line.separator");
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + resp, PacketType.UNIONINFO));

@@ -4,11 +4,10 @@ import achievement.AchievementExecutor;
 import caculation.AttackCaculation;
 import caculation.HpCaculation;
 import config.MessageConfig;
-import config.DeadOrAliveConfig;
+import config.GrobalConfig;
 import io.netty.channel.Channel;
 import context.ProjectContext;
 import order.Order;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -48,7 +47,7 @@ public class PKEvent {
             return;
         }
 //       解决起始之地不允许pk
-        if(user.getPos().equals("0")){
+        if(user.getPos().equals(GrobalConfig.STARTSCENE)){
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RESURRECTIONNOPK));
             return;
         }
@@ -69,7 +68,7 @@ public class PKEvent {
 //      人物蓝量校验
         BigInteger userSkillMp = new BigInteger(userSkill.getSkillMp());
         BigInteger userMp = new BigInteger(user.getMp());
-        BigInteger minHp = new BigInteger("0");
+        BigInteger minHp = new BigInteger(GrobalConfig.MINVALUE);
         if (userSkillMp.compareTo(userMp) > 0) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNENOUGHMP));
             return;
@@ -81,11 +80,11 @@ public class PKEvent {
             return;
         }
         userskillrelation.setSkillcds(System.currentTimeMillis());
-        hpCaculation.reduceUserHp(userTarget,attackDamage.toString());
+        hpCaculation.subUserHp(userTarget,attackDamage.toString());
 //      人物死亡处理
         if (new BigInteger(userTarget.getHp()).compareTo(minHp)<=0){
-            userTarget.setHp("0");
-            userTarget.setStatus(DeadOrAliveConfig.DEAD);
+            userTarget.setHp(GrobalConfig.MINVALUE);
+            userTarget.setStatus(GrobalConfig.DEAD);
             String resp = "你受到来自：" + user.getUsername() + "的" + userSkill.getSkillName() + "的攻击，伤害为["
                     + attackDamage.toString() + "]你的剩余血量为：" + userTarget.getHp() + ",你已死亡";
             channelTarget.writeAndFlush(MessageUtil.turnToPacket(resp));

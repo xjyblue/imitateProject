@@ -4,11 +4,13 @@ import buff.Buff;
 import caculation.AttackCaculation;
 import caculation.HpCaculation;
 import com.google.common.collect.Lists;
+import component.parent.PScene;
 import config.BuffConfig;
-import config.DeadOrAliveConfig;
+import config.GrobalConfig;
 import config.MessageConfig;
 import event.EventStatus;
 import event.OutfitEquipmentEvent;
+import factory.MonsterFactory;
 import io.netty.channel.Channel;
 import context.ProjectContext;
 import packet.PacketType;
@@ -21,6 +23,7 @@ import utils.SpringContextUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +34,9 @@ import java.util.concurrent.Future;
  * Created by server on 2018/11/19 16:24
  * 副本
  */
-public class BossScene implements Runnable {
+public class BossScene extends PScene implements Runnable {
+
+    private String bossSceneId;
 
     private String teamId;
 
@@ -43,9 +48,9 @@ public class BossScene implements Runnable {
 
     private Long keepTime;
 
-    private volatile boolean isEnd;
-
     private volatile boolean isFight;
+
+    private String finalReward;
 
     private Monster firstMonster;
 
@@ -62,6 +67,34 @@ public class BossScene implements Runnable {
     private OutfitEquipmentEvent outfitEquipmentEvent;
 
     private HpCaculation hpCaculation;
+
+    private MonsterFactory monsterFactory;
+
+    private Set<String> needMordMen;
+
+    public Set<String> getNeedMordMen() {
+        return needMordMen;
+    }
+
+    public void setNeedMordMen(Set<String> needMordMen) {
+        this.needMordMen = needMordMen;
+    }
+
+    public String getFinalReward() {
+        return finalReward;
+    }
+
+    public void setFinalReward(String finalReward) {
+        this.finalReward = finalReward;
+    }
+
+    public MonsterFactory getMonsterFactory() {
+        return monsterFactory;
+    }
+
+    public void setMonsterFactory(MonsterFactory monsterFactory) {
+        this.monsterFactory = monsterFactory;
+    }
 
     public Map<String, Future> getFutureMap() {
         return futureMap;
@@ -113,14 +146,6 @@ public class BossScene implements Runnable {
         this.damageAll = damageAll;
     }
 
-    public boolean isEnd() {
-        return isEnd;
-    }
-
-    public void setEnd(boolean end) {
-        isEnd = end;
-    }
-
     public Long getKeepTime() {
         return keepTime;
     }
@@ -169,80 +194,60 @@ public class BossScene implements Runnable {
         this.teamId = teamId;
     }
 
-    public BossScene(OutfitEquipmentEvent outfitEquipmentEvent) {
-        this.outfitEquipmentEvent = outfitEquipmentEvent;
-        init();
+    public BossScene(String teamId, String bossSceneId) {
+        this.teamId = teamId;
+        this.bossSceneId = bossSceneId;
+//      填充boss副本配置
+        BossSceneConfig bossSceneConfig = ProjectContext.bossSceneConfigMap.get(bossSceneId);
+//      填充时间
+        this.keepTime = bossSceneConfig.getKeeptime();
+//      填充副本关数
+        sequence = new ArrayList<>();
+        String sequences[] = bossSceneConfig.getSequences().split("-");
+        monsters = new HashMap<>();
+        for (String sequenceT : sequences) {
+            sequence.add(sequenceT);
+//          为每个副本关数填充怪物
+            try {
+                List<Monster> list = monsterFactory.getMonsterByArea(sequenceT);
+                for (Monster monster : list) {
+                    if (!monsters.containsKey(sequenceT)) {
+                        monsters.put(sequenceT, new HashMap<>());
+                        monsters.get(sequenceT).put(monster.getName(), monster);
+                    } else {
+                        monsters.get(sequenceT).put(monster.getName(), monster);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+//      填充必须组队的副本
+        String[] needMoreMens = bossSceneConfig.getNeedMoreMen().split("-");
+        this.needMordMen = new HashSet<>();
+        for (String needMoreMenT : needMoreMens) {
+            this.needMordMen.add(needMoreMenT);
+        }
+
+//      副本的名称
+        this.bossName = bossSceneConfig.getBossSceneName();
+//      其他参数
+        this.isFight = false;
+//      副本的伤害伤害计算
+        this.damageAll = new HashMap<User, String>();
+//      最后一击奖励场景歌
+        this.finalReward = bossSceneConfig.getFinalReward();
     }
 
     public void init() {
-        AttackCaculation attackCaculation = (AttackCaculation) SpringContextUtil.getBean("attackCaculation");
+        AttackCaculation attackCaculation = SpringContextUtil.getBean("attackCaculation");
         this.attackCaculation = attackCaculation;
-        HpCaculation hpCaculation = (HpCaculation) SpringContextUtil.getBean("recoverHpCaculation");
+        HpCaculation hpCaculation = SpringContextUtil.getBean("hpCaculation");
         this.hpCaculation = hpCaculation;
-
-        sequence = new ArrayList<>();
-        sequence.add("A0");
-        sequence.add("A1");
-        sequence.add("A2");
-        sequence.add("A3");
-        monsters = new HashMap<>();
-
-        Map<String, Monster> monsterMap = new HashMap<>();
-        try {
-            FileInputStream fis = new FileInputStream(new File("src/main/resources/Monster.xls"));
-            LinkedHashMap<String, String> alias = new LinkedHashMap<>();
-            alias.put("怪物id", "id");
-            alias.put("怪物名称", "name");
-            alias.put("怪物类别", "type");
-            alias.put("怪物生命值", "valueOfLife");
-            alias.put("怪物状态", "status");
-            alias.put("怪物技能", "skillIds");
-            alias.put("出生地点", "pos");
-            alias.put("怪物经验值", "experience");
-            alias.put("击杀获得的奖励", "reward");
-            List<Monster> monsterList = ExcelUtil.excel2Pojo(fis, Monster.class, alias);
-
-            for (Monster monster : monsterList) {
-                if (monster.getPos().equals("A0") || monster.getPos().equals("A1") || monster.getPos().equals("A2") || monster.getPos().equals("A3")) {
-//                  怪物buff初始化
-                    Map<String, Integer> map = new HashMap<>();
-                    map.put(BuffConfig.MPBUFF, 1000);
-                    map.put(BuffConfig.POISONINGBUFF, 2000);
-                    map.put(BuffConfig.DEFENSEBUFF, 3000);
-                    monster.setBufMap(map);
-//                  初始化每个怪物buff的终止时间
-                    Map<String, Long> mapSecond = new HashMap<>();
-                    mapSecond.put(BuffConfig.MPBUFF, 1000l);
-                    mapSecond.put(BuffConfig.POISONINGBUFF, 2000l);
-                    mapSecond.put(BuffConfig.DEFENSEBUFF, 3000l);
-                    ProjectContext.monsterBuffEndTime.put(monster, mapSecond);
-//                  怪物buff初始化结束
-
-//                  初始化怪物技能
-                    String s[] = monster.getSkillIds().split("-");
-                    List<MonsterSkill> list = new ArrayList<>();
-                    for (int i = 0; i < s.length; i++) {
-                        list.add(ProjectContext.monsterSkillMap.get(Integer.parseInt(s[i])));
-                    }
-                    monster.setMonsterSkillList(list);
-                    monster.setAttackEndTime(0L);
-                    monster.setBuffRefreshTime(0L);
-
-                    if (!monsters.containsKey(monster.getPos())) {
-                        monsters.put(monster.getPos(), new HashMap<>());
-                        monsters.get(monster.getPos()).put(monster.getName(), monster);
-                    } else {
-                        monsters.get(monster.getPos()).put(monster.getName(), monster);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        this.bossName = "河西村魔洞";
-        this.isEnd = false;
-        this.isFight = false;
-        this.damageAll = new HashMap<User, String>();
+        OutfitEquipmentEvent outfitEquipmentEvent = SpringContextUtil.getBean("outfitEquipmentEvent");
+        this.outfitEquipmentEvent = outfitEquipmentEvent;
+        MonsterFactory monsterFactory = SpringContextUtil.getBean("monsterFactory");
+        this.monsterFactory = monsterFactory;
     }
 
 
@@ -256,6 +261,7 @@ public class BossScene implements Runnable {
         }
     }
 
+    //  刷新怪物的buff
     private void monsterBuffRefresh(Monster monster) {
         if (monster.getBuffRefreshTime() < System.currentTimeMillis()) {
             monster.setBuffRefreshTime(System.currentTimeMillis() + 1000);
@@ -265,14 +271,14 @@ public class BossScene implements Runnable {
 
         if (monster != null && monster.getBufMap().containsKey(BuffConfig.POISONINGBUFF) && monster.getBufMap().get(BuffConfig.POISONINGBUFF) != 2000) {
             Long endTime = ProjectContext.monsterBuffEndTime.get(monster).get(BuffConfig.POISONINGBUFF);
-            if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals("0")) {
+            if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
                 Buff buff = ProjectContext.buffMap.get(monster.getBufMap().get(BuffConfig.POISONINGBUFF));
 
                 monster.subLife(new BigInteger(buff.getAddSecondValue()));
 //               处理中毒扣死
-                if (new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger("0")) < 0) {
-                    monster.setValueOfLife("0");
-                    monster.setStatus("0");
+                if (new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger(GrobalConfig.MINVALUE)) < 0) {
+                    monster.setValueOfLife(GrobalConfig.MINVALUE);
+                    monster.setStatus(GrobalConfig.DEAD);
                     monster.getBufMap().put(BuffConfig.POISONINGBUFF, 2000);
                 }
 
@@ -344,7 +350,7 @@ public class BossScene implements Runnable {
                         bossScene.setFight(false);
                         String bossMessage = "出现新场景boss:";
                         for (Map.Entry<String, Monster> entry : monsterMap.entrySet()) {
-                            if (entry.getValue().getStatus().equals("1")) {
+                            if (entry.getValue().getStatus().equals(GrobalConfig.ALIVE)) {
                                 bossMessage += (entry.getValue().getName() + " ");
 //                              移除所有小组成员之前的目标monster
                                 removeMonster(teamId);
@@ -353,12 +359,11 @@ public class BossScene implements Runnable {
                         sendMessageToAll(bossMessage, null);
 
 
-//                      判断第三场景boss检查挑战者是否为多人挑战，不为多人不生成boss
+//                      判断下个场景boss检查挑战者是否为多人挑战，不为多人不生成boss
                         for (Map.Entry<String, Monster> entry : monsterMap.entrySet()) {
-                            if (entry.getValue().getPos().equals("A2")) {
-                                if (ProjectContext.teamMap.get(teamId).getUserMap().size() > 1) {
-//                                  继续往下走
-                                } else {
+//                          检查怪物场景是否为要求多人场景
+                            if (this.needMordMen.contains(entry.getValue().getPos())) {
+                                if (ProjectContext.teamMap.get(teamId).getUserMap().size() == 1) {
 //                                  三层boss需组队人数不够告诉玩家不能继续下去了
                                     Future future = futureMap.remove(teamId);
                                     future.cancel(true);
@@ -366,11 +371,11 @@ public class BossScene implements Runnable {
                                     channelTarget.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMANTOFIGHT));
                                     ProjectContext.bossAreaMap.remove(teamId);
                                     moveAllUser();
+                                    return;
                                 }
                             }
                             break;
                         }
-                        return;
                     } else {
 //                      boss场景只剩下一个并且场景下boss死光，游戏结束
                         successMessToAll(bossScene, monster);
@@ -386,19 +391,19 @@ public class BossScene implements Runnable {
                     userTarget = entry.getValue();
                     BigInteger userHp = new BigInteger(userTarget.getHp());
                     Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
-                    if (userHp.compareTo(new BigInteger("0")) <= 0) {
-                        userTarget.setHp("0");
-                        userTarget.setStatus(DeadOrAliveConfig.DEAD);
+                    if (userHp.compareTo(new BigInteger(GrobalConfig.MINVALUE)) <= 0) {
+                        userTarget.setHp(GrobalConfig.MINVALUE);
+                        userTarget.setStatus(GrobalConfig.DEAD);
 //                  移除怪物所针对的boss
                         ProjectContext.userToMonsterMap.remove(userTarget);
 //                  人物战斗中死亡
                         ProjectContext.eventStatus.put(channelTarget, EventStatus.DEADAREA);
                         channelTarget.writeAndFlush(MessageUtil.turnToPacket("你已死亡"));
 //                  把人物从战斗场景移除到初始场景
-                        Scene scene = ProjectContext.sceneMap.get("0");
+                        Scene scene = ProjectContext.sceneMap.get(GrobalConfig.STARTSCENE);
                         scene.getUserMap().put(userTarget.getUsername(), userTarget);
 //                  将人物的伤害置为0
-                        bossScene.getDamageAll().put(userTarget, "0");
+                        bossScene.getDamageAll().put(userTarget, GrobalConfig.MINVALUE);
 //                  人物死亡场景移除人物
                         userMap.remove(userTarget.getUsername());
 //                  人物死亡全队提示
@@ -416,7 +421,7 @@ public class BossScene implements Runnable {
                 }
 
 //              此处构建最简单的bossAI，就是根据谁的伤害最高打谁
-                if (!monster.getStatus().equals(DeadOrAliveConfig.DEAD) && monster.getAttackEndTime() < System.currentTimeMillis()) {
+                if (!monster.getStatus().equals(GrobalConfig.DEAD) && monster.getAttackEndTime() < System.currentTimeMillis()) {
                     monster.setAttackEndTime(System.currentTimeMillis() + 1000);
                     attack(monster);
                 }
@@ -433,7 +438,7 @@ public class BossScene implements Runnable {
             User user = entry.getValue();
 //          移除该用户所有的战斗怪物信息
             ProjectContext.userToMonsterMap.remove(user);
-            if (user.getStatus().equals(DeadOrAliveConfig.DEAD)) {
+            if (user.getStatus().equals(GrobalConfig.DEAD)) {
                 continue;
             }
 //          将用户回退回刚才所在的场景
@@ -451,7 +456,7 @@ public class BossScene implements Runnable {
 
     private boolean checkIfCheckArea(Map<String, Monster> monsterMap, BossScene bossScene) {
         for (Map.Entry<String, Monster> monsterEntry : monsterMap.entrySet()) {
-            if (monsterEntry.getValue().getStatus().equals(DeadOrAliveConfig.ALIVE)) {
+            if (monsterEntry.getValue().getStatus().equals(GrobalConfig.ALIVE)) {
                 return false;
             }
         }
@@ -527,7 +532,7 @@ public class BossScene implements Runnable {
 
     private boolean checkAllDead() {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
-            if (entry.getValue().getStatus().equals("1")) {
+            if (entry.getValue().getStatus().equals(GrobalConfig.ALIVE)) {
                 return false;
             }
         }
@@ -577,7 +582,7 @@ public class BossScene implements Runnable {
 
             if (entry.getValue().getUsername().equals(userTarget.getUsername())) {
 //              扣血
-                hpCaculation.reduceUserHp(userTarget, monsterSkillDamage.toString());
+                hpCaculation.subUserHp(userTarget, monsterSkillDamage.toString());
                 resp = "怪物的仇恨值在你身上"
                         + "----怪物名称:" + monster.getName()
                         + "-----怪物技能:" + monsterSkill.getSkillName()
@@ -610,7 +615,7 @@ public class BossScene implements Runnable {
             Buff buff = ProjectContext.buffMap.get(buffId);
             user.getBuffMap().put(BuffConfig.SLEEPBUFF, 5001);
             ProjectContext.userBuffEndTime.get(user).put(BuffConfig.SLEEPBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
-            hpCaculation.reduceUserHp(user, monsterSkillDamage.toString());
+            hpCaculation.subUserHp(user, monsterSkillDamage.toString());
             Channel channelTarget = ProjectContext.userToChannelMap.get(user);
             channelTarget.writeAndFlush(MessageUtil.turnToPacket("您收到怪物boss击打晕效果,无法使用技能,人物受到" + monsterSkillDamage.toString() + "伤害", PacketType.ATTACKMSG));
         }
@@ -624,7 +629,7 @@ public class BossScene implements Runnable {
             Buff buff = ProjectContext.buffMap.get(buffId);
             user.getBuffMap().put(BuffConfig.POISONINGBUFF, 2001);
             ProjectContext.userBuffEndTime.get(user).put(BuffConfig.POISONINGBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
-            hpCaculation.reduceUserHp(user, monsterSkillDamage.toString());
+            hpCaculation.subUserHp(user, monsterSkillDamage.toString());
             Channel channelTarget = ProjectContext.userToChannelMap.get(user);
             channelTarget.writeAndFlush(MessageUtil.turnToPacket("怪物boss使用中毒绝技,你会持续掉血，人物受到" + monsterSkillDamage.toString() + "伤害", PacketType.ATTACKMSG));
         }
@@ -656,7 +661,7 @@ public class BossScene implements Runnable {
         for (User user : list) {
             BigInteger monsterSkillDamage = attackCaculation.dealDefenseBuff(monsterSkill, user, user);
             Channel channelTemp = ProjectContext.userToChannelMap.get(user);
-            hpCaculation.reduceUserHp(user, monsterSkillDamage.toString());
+            hpCaculation.subUserHp(user, monsterSkillDamage.toString());
             String resp = "怪物使用了全体攻击技能,对所有人造成攻击:"
                     + "-----怪物技能:" + monsterSkill.getSkillName()
                     + "-----怪物的伤害:" + monsterSkill.getDamage()
@@ -668,18 +673,18 @@ public class BossScene implements Runnable {
     }
 
     private User getMaxDamageUser(BossScene bossScene) {
-        BigInteger max = new BigInteger("0");
+        BigInteger max = new BigInteger(GrobalConfig.MINVALUE);
         User userTarget = null;
         for (Map.Entry<User, String> entry : bossScene.getDamageAll().entrySet()) {
             BigInteger temp = new BigInteger(entry.getValue());
-            if (temp.compareTo(max) > 0 && !entry.getKey().getStatus().equals(DeadOrAliveConfig.DEAD)) {
+            if (temp.compareTo(max) > 0 && !entry.getKey().getStatus().equals(GrobalConfig.DEAD)) {
                 max = temp;
                 userTarget = entry.getKey();
             }
         }
         if (userTarget == null) {
             for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(bossScene.getTeamId()).getUserMap().entrySet()) {
-                if (!entry.getValue().getStatus().equals(DeadOrAliveConfig.DEAD)) {
+                if (!entry.getValue().getStatus().equals(GrobalConfig.DEAD)) {
                     userTarget = entry.getValue();
                 }
             }

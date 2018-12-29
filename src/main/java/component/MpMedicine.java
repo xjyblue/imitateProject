@@ -1,8 +1,8 @@
 package component;
 
-import component.parent.Good;
+import component.parent.PGood;
 
-public class MpMedicine extends Good {
+public class MpMedicine extends PGood {
 
     public MpMedicine(){
 

@@ -1,14 +1,13 @@
 package event;
 
-import achievement.AchievementExecutor;
 import caculation.UserbagCaculation;
 import component.Equipment;
 import component.HpMedicine;
 import component.MpMedicine;
-import component.parent.Good;
+import component.parent.PGood;
+import config.GrobalConfig;
 import config.MessageConfig;
 import io.netty.channel.Channel;
-import mapper.UserbagMapper;
 import context.ProjectContext;
 import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +99,7 @@ public class ShopEvent {
             userbag.setName(user.getUsername());
             userbag.setNum(Integer.parseInt(temp[2]));
             userbag.setId(UUID.randomUUID().toString());
-            userbag.setTypeof(Good.MPMEDICINE);
+            userbag.setTypeof(PGood.MPMEDICINE);
             userbagCaculation.addUserBagForUser(user, userbag);
             String goodAllMoney = changeUserMoney(mpMedicine.getBuyMoney(), temp[2], user);
             channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + mpMedicine.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));
@@ -115,7 +114,7 @@ public class ShopEvent {
                 userbag.setName(equipment.getName());
                 userbag.setNum(1);
                 userbag.setStartlevel(equipment.getStartLevel());
-                userbag.setTypeof(Good.EQUIPMENT);
+                userbag.setTypeof(PGood.EQUIPMENT);
                 userbag.setName(user.getUsername());
                 userbag.setStartlevel(equipment.getStartLevel());
                 userbag.setId(UUID.randomUUID().toString());
@@ -135,7 +134,7 @@ public class ShopEvent {
             userbag.setName(user.getUsername());
             userbag.setNum(Integer.parseInt(temp[2]));
             userbag.setId(UUID.randomUUID().toString());
-            userbag.setTypeof(Good.HPMEDICINE);
+            userbag.setTypeof(PGood.HPMEDICINE);
             userbagCaculation.addUserBagForUser(user, userbag);
             String goodAllMoney = changeUserMoney(hpMedicine.getBuyMoney(), temp[2], user);
             channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + hpMedicine.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));
@@ -155,7 +154,7 @@ public class ShopEvent {
     private boolean checkUserMoneyEnough(String num, String s, Channel channel) {
         User user = ProjectContext.session2UserIds.get(channel);
         BigInteger userMoney = new BigInteger(user.getMoney());
-        BigInteger goodMoney = new BigInteger("0");
+        BigInteger goodMoney = new BigInteger(GrobalConfig.MINVALUE);
         if (ProjectContext.equipmentMap.containsKey(Integer.parseInt(s))) {
             goodMoney = new BigInteger(ProjectContext.equipmentMap.get(Integer.parseInt(s)).getBuyMoney()).multiply(new BigInteger(num));
         } else if (ProjectContext.mpMedicineMap.containsKey(Integer.parseInt(s))) {

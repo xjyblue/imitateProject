@@ -11,7 +11,7 @@ import pojo.Userbag;
  * Created by server on 2018/11/21 9:46
  */
 //存储所有物品的共有属性
-public class Good {
+public class PGood {
 
     public static final String EQUIPMENT = "3";
 
@@ -62,15 +62,15 @@ public class Good {
     }
 
     public static String getGoodNameByUserbag(Userbag userbag) {
-        if (userbag.getTypeof().equals(Good.MPMEDICINE)) {
+        if (userbag.getTypeof().equals(PGood.MPMEDICINE)) {
             MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
             return "[蓝药--》] [物品id:" + userbag.getId() + "] [药品名称：" + mpMedicine.getName() + "]" + " [药品数量: " + userbag.getNum() + "]";
         }
-        if (userbag.getTypeof().equals(Good.EQUIPMENT)) {
+        if (userbag.getTypeof().equals(PGood.EQUIPMENT)) {
             Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
             return "[武器--》] [物品id:" + userbag.getId() + "] [武器名称：" + equipment.getName() + "]" + " [武器耐久度：" + userbag.getDurability() + "]" + " [武器数量： " + userbag.getNum() + "]" + "[武器星级：]" + userbag.getStartlevel();
         }
-        if (userbag.getTypeof().equals(Good.HPMEDICINE)) {
+        if (userbag.getTypeof().equals(PGood.HPMEDICINE)) {
             HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(userbag.getWid());
             return "[红药--》] [物品id:" + userbag.getId() + "] [药品名称：" + hpMedicine.getName() + "]" + " [武器数量： " + userbag.getNum() + "]";
         }

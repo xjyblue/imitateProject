@@ -1,8 +1,7 @@
 package test;
 
+import component.BossSceneConfig;
 import component.CollectGood;
-import component.HpMedicine;
-import component.Scene;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,14 +15,14 @@ import java.util.UUID;
 public class TestSecond {
     public static void main(String[] argv) throws Exception {
         //指定输入文件
-        FileInputStream scenefis = new FileInputStream(new File("src/main/resources/CollectGood.xls"));
-        LinkedHashMap<String, String> collectGoodAlias = new LinkedHashMap<>();
-        collectGoodAlias.put("物品的名字","name");
-        collectGoodAlias.put("物品的id","id");
-        collectGoodAlias.put("物品的描述","desc");
-        collectGoodAlias.put("物品的价格","buyMoney");
-        collectGoodAlias.put("物品的种类","type");
-        List<CollectGood> sceneList = ExcelUtil.excel2Pojo(scenefis, CollectGood.class,collectGoodAlias);
+        FileInputStream bossSceneConfigfis = new FileInputStream(new File("src/main/resources/BossSceneConfig.xls"));
+        LinkedHashMap<String, String> bossSceneConfigfisAlias = new LinkedHashMap<>();
+        bossSceneConfigfisAlias.put("副本的id","bossSceneId");
+        bossSceneConfigfisAlias.put("副本场景的顺序","sequences");
+        bossSceneConfigfisAlias.put("副本的持续时间","keeptime");
+        bossSceneConfigfisAlias.put("副本的名字","bossSceneName");
+
+        List<BossSceneConfig> bossSceneConfigList = ExcelUtil.excel2Pojo(bossSceneConfigfis, BossSceneConfig.class,bossSceneConfigfisAlias);
 
         System.out.println(UUID.randomUUID().toString());
     }

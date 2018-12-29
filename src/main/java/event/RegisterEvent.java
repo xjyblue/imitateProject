@@ -1,6 +1,7 @@
 package event;
 
 import achievement.Achievement;
+import config.GrobalConfig;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import level.Level;
@@ -50,8 +51,8 @@ public class RegisterEvent {
         User user = new User();
         user.setUsername(temp[0]);
         user.setPassword(temp[1]);
-        user.setStatus("1");
-        user.setPos("0");
+        user.setStatus(GrobalConfig.ALIVE);
+        user.setPos(GrobalConfig.MINVALUE);
         user.setMoney("10000");
         user.setRoleid(Integer.parseInt(temp[3]));
 //      设置用户1级血量和1级的经验值

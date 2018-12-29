@@ -7,12 +7,11 @@ import component.Equipment;
 import component.Monster;
 import component.Scene;
 import config.MessageConfig;
-import config.DeadOrAliveConfig;
+import config.GrobalConfig;
 import context.ProjectUtil;
 import io.netty.channel.Channel;
 import context.ProjectContext;
 import order.Order;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -43,8 +42,6 @@ public class BossEvent {
     @Autowired
     private CommonEvent commonEvent;
     @Autowired
-    private OutfitEquipmentEvent outfitEquipmentEvent;
-    @Autowired
     private ChatEvent chatEvent;
     @Autowired
     private BuffEvent buffEvent;
@@ -53,6 +50,11 @@ public class BossEvent {
 
     @Order(orderMsg = "ef")
     public void enterBossArea(Channel channel, String msg) {
+        String temp[] = msg.split("-");
+        if (temp.length != 2) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            return;
+        }
         User user = getUser(channel);
 //      10级以下无法进入副本
         if (LevelUtil.getLevelByExperience(user.getExperience()) < 10) {
@@ -74,6 +76,7 @@ public class BossEvent {
             return;
         }
 
+//      处理用户一个人加入副本的逻辑
         if (user.getTeamId() == null) {
             team = new Team();
             team.setTeamId(UUID.randomUUID().toString());
@@ -84,23 +87,27 @@ public class BossEvent {
             team.setUserMap(teamUserMap);
             ProjectContext.teamMap.put(user.getTeamId(), team);
         } else {
+//      进入副本队员死亡检查
             team = getTeam(user);
             if (checkAllManAlive(team)) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SOMEBODYDEAD));
                 return;
             }
         }
+//      进入副本队长检查
         if (!team.getLeader().getUsername().equals(user.getUsername())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.YOUARENOLEADER));
             return;
         }
-        BossScene bossScene = new BossScene(outfitEquipmentEvent);
-        bossScene.setKeepTime(5000l);
-        bossScene.setTeamId(user.getTeamId());
-
-
+//      生成新副本
+        BossScene bossScene = new BossScene(user.getTeamId(), temp[1]);
         ProjectContext.bossAreaMap.put(team.getTeamId(), bossScene);
+//      开启副本场景帧频线程
+        Future future = ProjectContext.bossAreaThreadPool.scheduleAtFixedRate(bossScene, 0, 30, TimeUnit.MILLISECONDS);
+        ProjectContext.futureMap.put(bossScene.getTeamId(), future);
+        bossScene.setFutureMap(ProjectContext.futureMap);
 
+//      改变用户渠道状态
         changeChannelStatus(team, bossScene);
     }
 
@@ -152,7 +159,7 @@ public class BossEvent {
 //      锁定怪物  输入的怪物是否存在
         Monster monster = null;
         for (Map.Entry<String, Monster> entry : getMonsterMap(user).entrySet()) {
-            if (entry.getValue().getName().equals(temp[1]) && !entry.getValue().getStatus().equals(DeadOrAliveConfig.DEAD)) {
+            if (entry.getValue().getName().equals(temp[1]) && !entry.getValue().getStatus().equals(GrobalConfig.DEAD)) {
                 monster = entry.getValue();
             }
         }
@@ -160,7 +167,6 @@ public class BossEvent {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDMONSTER));
             return;
         }
-
 
         Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(user).get(temp[2]);
         UserSkill userSkill = ProjectContext.skillMap.get(userskillrelation.getSkillid());
@@ -221,10 +227,10 @@ public class BossEvent {
 
         BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
         bossScene.setFight(true);
-        if (monster.getValueOfLife().equals("0")) {
+        if (monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
             resp += "怪物已死亡";
 //          修改怪物状态
-            monster.setStatus(DeadOrAliveConfig.DEAD);
+            monster.setStatus(GrobalConfig.DEAD);
 //          更改用户攻击的boss
             AttackUtil.changeUserAttackMonster(user, bossScene, monster);
 
@@ -254,7 +260,7 @@ public class BossEvent {
 
     private boolean checkAllManAlive(Team team) {
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
-            if (entry.getValue().getStatus().equals(DeadOrAliveConfig.DEAD)) {
+            if (entry.getValue().getStatus().equals(GrobalConfig.DEAD)) {
                 return true;
             }
         }
@@ -280,11 +286,6 @@ public class BossEvent {
             }
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
         }
-        //          开启副本场景帧频线程
-        Future future = ProjectContext.bossAreaThreadPool.scheduleAtFixedRate(bossScene, 0, 30, TimeUnit.MILLISECONDS);
-        ProjectContext.futureMap.put(bossScene.getTeamId(), future);
-        bossScene.setFutureMap(ProjectContext.futureMap);
-
     }
 
     private boolean checkBossAreaAllBoss(BossScene bossScene) {
@@ -292,7 +293,7 @@ public class BossEvent {
             return false;
         }
         for (Map.Entry<String, Monster> entry : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {
-            if (entry.getValue().getStatus().equals(DeadOrAliveConfig.ALIVE)) {
+            if (entry.getValue().getStatus().equals(GrobalConfig.ALIVE)) {
                 return false;
             }
         }

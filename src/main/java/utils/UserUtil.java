@@ -31,7 +31,7 @@ public class UserUtil {
         user.setHp(userHp + "");
         user.setMp(userMp + "");
 //      更新用户血量和mp
-        UserMapper userMapper = (UserMapper) SpringContextUtil.getBean("userMapper");
+        UserMapper userMapper = SpringContextUtil.getBean("userMapper");
         userMapper.updateByPrimaryKeySelective(user);
     }
 

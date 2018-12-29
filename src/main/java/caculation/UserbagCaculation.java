@@ -3,7 +3,7 @@ package caculation;
 import achievement.Achievement;
 import achievement.AchievementExecutor;
 import component.Equipment;
-import component.parent.Good;
+import component.parent.PGood;
 import io.netty.channel.Channel;
 import mapper.UserbagMapper;
 import context.ProjectContext;
@@ -29,14 +29,14 @@ public class UserbagCaculation {
 
     public void addUserBagForUser(User user, Userbag value) {
         value.setName(user.getUsername());
-        if (value.getTypeof().equals(Good.EQUIPMENT)) {
+        if (value.getTypeof().equals(PGood.EQUIPMENT)) {
             user.getUserBag().add(value);
             if (userbagMapper.selectByPrimaryKey(value.getId()) != null) {
                 userbagMapper.updateByPrimaryKeySelective(value);
             } else {
                 userbagMapper.insertSelective(value);
             }
-        } else if (value.getTypeof().equals(Good.MPMEDICINE)||value.getTypeof().equals(Good.HPMEDICINE)||value.getTypeof().equals(Good.CHANGEGOOD)) {
+        } else if (value.getTypeof().equals(PGood.MPMEDICINE)||value.getTypeof().equals(PGood.HPMEDICINE)||value.getTypeof().equals(PGood.CHANGEGOOD)) {
             boolean flag = true;
             for (Userbag userbag : user.getUserBag()) {
                 if (userbag.getWid().equals(value.getWid())) {
@@ -57,7 +57,7 @@ public class UserbagCaculation {
         }
 
 //      触发成就
-        if(value.getTypeof().equals(Good.EQUIPMENT)){
+        if(value.getTypeof().equals(PGood.EQUIPMENT)){
             Equipment equipment = ProjectContext.equipmentMap.get(value.getWid());
             for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
                 Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());

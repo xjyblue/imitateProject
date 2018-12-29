@@ -5,7 +5,7 @@ import component.BossScene;
 import component.HpMedicine;
 import component.MpMedicine;
 import config.BuffConfig;
-import config.DeadOrAliveConfig;
+import config.GrobalConfig;
 import event.EventStatus;
 import component.Monster;
 import io.netty.channel.Channel;
@@ -87,8 +87,8 @@ public class BuffTask{
                                     }
 //                                 后期改成场景线程去心跳执行这一块的内容,通过计算截止错开时间
                                     hpCaculation.subMonsterHp(monster, buff.getAddSecondValue());
-                                    if (monster.getValueOfLife().equals("0")) {
-                                        monster.setStatus(DeadOrAliveConfig.DEAD);
+                                    if (monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
+                                        monster.setStatus(GrobalConfig.DEAD);
                                         user.getBuffMap().put(BuffConfig.BABYBUF, 7000);
                                         if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
                                             BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());

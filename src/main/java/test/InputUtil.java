@@ -1,14 +1,8 @@
 package test;
 
-import achievement.Achievement;
+import component.BossSceneConfig;
 import component.CollectGood;
-import component.HpMedicine;
-import component.NPC;
-import component.Scene;
-import component.parent.Good;
-import level.Level;
-import org.apache.poi.ss.formula.functions.Npv;
-import role.Role;
+import component.parent.PGood;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,30 +13,29 @@ import java.util.List;
 public class InputUtil {
     public static void main(String[]args) throws Exception {
         //将生成的excel转换成文件，还可以用作文件下载
-        File file = new File("src/main/resources/CollectGood.xls");
+        File file = new File("src/main/resources/BossSceneConfig.xls");
         FileOutputStream hpMedicinefos = new FileOutputStream(file);
 
         //对象集合
-        List<CollectGood> hpMedicineList=new ArrayList<>();
-        CollectGood collectGood = new CollectGood();
-        collectGood.setDesc("此物品有神秘力量");
-        collectGood.setType(Good.CHANGEGOOD);
-        collectGood.setName("魂石");
-        collectGood.setBuyMoney("9999999");
-        collectGood.setId(90000);
+        List<BossSceneConfig> hpMedicineList=new ArrayList<>();
+        BossSceneConfig bossSceneConfig = new BossSceneConfig();
+        bossSceneConfig.setBossSceneId("1");
+        bossSceneConfig.setBossSceneName("天魔灵殿");
+        bossSceneConfig.setKeeptime(5000L);
+        bossSceneConfig.setSequences("A0-A1-A2-A3");
+
 
 
 
         //设置属性别名（列名）
         LinkedHashMap<String, String> hpMedicineAlias = new LinkedHashMap<String, String>();
-        hpMedicineAlias.put("name", "物品的名字");
-        hpMedicineAlias.put("id","物品的id");
-        hpMedicineAlias.put("desc","物品的描述");
-        hpMedicineAlias.put("buyMoney","物品的价格");
-        hpMedicineAlias.put("type","物品的种类");
+        hpMedicineAlias.put("bossSceneId","副本的id");
+        hpMedicineAlias.put("sequences","副本场景的顺序");
+        hpMedicineAlias.put("keeptime","副本的持续时间");
+        hpMedicineAlias.put("bossSceneName","副本的名字");
 
         //标题
-        String headLine="HpMedicine表";
+        String headLine="BossSceneConfig表";
         ExcelUtil.pojo2Excel(hpMedicineList, hpMedicinefos, hpMedicineAlias,headLine);
     }
 }

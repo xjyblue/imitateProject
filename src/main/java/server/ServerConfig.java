@@ -2,6 +2,7 @@ package server;
 
 import achievement.Achievement;
 import caculation.HpCaculation;
+import config.GrobalConfig;
 import event.BuffEvent;
 import event.OutfitEquipmentEvent;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -14,7 +15,7 @@ import pojo.UserExample;
 import role.Role;
 import buff.Buff;
 import component.*;
-import component.parent.Good;
+import component.parent.PGood;
 import email.Mail;
 import factory.MonsterFactory;
 import io.netty.bootstrap.ServerBootstrap;
@@ -154,7 +155,7 @@ public class ServerConfig {
         levelalias.put("血量上限", "maxHp");
         levelalias.put("蓝量上限", "maxMp");
         levelalias.put("攻击力加成", "upAttack");
-        levelalias.put("计算比例","caculatePercent");
+        levelalias.put("计算比例", "caculatePercent");
         List<Level> levelList = ExcelUtil.excel2Pojo(levelfis, Level.class, levelalias);
         for (Level level : levelList) {
             ProjectContext.levelMap.put(level.getLevel(), level);
@@ -174,7 +175,7 @@ public class ServerConfig {
         List<Equipment> equipmentList = ExcelUtil.excel2Pojo(equipFis, Equipment.class, equipAlias);
         if (equipmentList != null && equipmentList.size() > 0) {
             for (Equipment equipment : equipmentList) {
-                equipment.setType(Good.EQUIPMENT);
+                equipment.setType(PGood.EQUIPMENT);
                 ProjectContext.equipmentMap.put(equipment.getId(), equipment);
             }
         }
@@ -193,7 +194,7 @@ public class ServerConfig {
         List<MpMedicine> mpMedicineList = ExcelUtil.excel2Pojo(mpMedicineFis, MpMedicine.class, mpMedicineAlias);
         if (mpMedicineList != null && mpMedicineList.size() > 0) {
             for (MpMedicine mpMedicine : mpMedicineList) {
-                mpMedicine.setType(Good.MPMEDICINE);
+                mpMedicine.setType(PGood.MPMEDICINE);
                 ProjectContext.mpMedicineMap.put(mpMedicine.getId(), mpMedicine);
             }
         }
@@ -242,7 +243,7 @@ public class ServerConfig {
         monsterBufalias.put("技能附带buff", "bufferMapId");
         List<MonsterSkill> skillList = ExcelUtil.excel2Pojo(monsterBuffis, MonsterSkill.class, monsterBufalias);
         for (MonsterSkill monsterSkillTemp : skillList) {
-            if (!monsterSkillTemp.getBufferMapId().equals("0")) {
+            if (!monsterSkillTemp.getBufferMapId().equals(GrobalConfig.NULL)) {
                 Map<String, Integer> map = new HashMap<>();
                 String temp[] = monsterSkillTemp.getBufferMapId().split("-");
                 for (int i = 0; i < temp.length; i++) {
@@ -271,7 +272,7 @@ public class ServerConfig {
             Map<String, Integer> map = new HashMap<>();
             userSkill.setBuffMap(map);
             ProjectContext.skillMap.put(userSkill.getSkillId(), userSkill);
-            if (!userSkill.getBufferMapId().equals("0")) {
+            if (!userSkill.getBufferMapId().equals(GrobalConfig.NULL)) {
                 String temp[] = userSkill.getBufferMapId().split("-");
                 for (int i = 0; i < temp.length; i++) {
                     Buff buffTemp = ProjectContext.buffMap.get(Integer.parseInt(temp[i]));
@@ -280,7 +281,6 @@ public class ServerConfig {
             }
         }
 //        初始化技能表end
-
 
 //      初始化npc start
         FileInputStream npcfis = new FileInputStream(new File("src/main/resources/NPC.xls"));
@@ -308,9 +308,42 @@ public class ServerConfig {
         collectGoodAlias.put("物品的种类", "type");
         List<CollectGood> collectGoodList = ExcelUtil.excel2Pojo(collectGoodfis, CollectGood.class, collectGoodAlias);
         for (CollectGood collectGood : collectGoodList) {
-            ProjectContext.collectGoodMap.put(collectGood.getId(),collectGood);
+            ProjectContext.collectGoodMap.put(collectGood.getId(), collectGood);
         }
 //      初始化收集类物品end
+
+//      初始化怪物start
+        FileInputStream monsterfis = new FileInputStream(new File("src/main/resources/Monster.xls"));
+        LinkedHashMap<String, String> monsteralias = new LinkedHashMap<>();
+        monsteralias.put("怪物id", "id");
+        monsteralias.put("怪物名称", "name");
+        monsteralias.put("怪物类别", "type");
+        monsteralias.put("怪物生命值", "valueOfLife");
+        monsteralias.put("怪物状态", "status");
+        monsteralias.put("怪物技能", "skillIds");
+        monsteralias.put("出生地点", "pos");
+        monsteralias.put("怪物经验值", "experience");
+        monsteralias.put("击杀获得的奖励", "reward");
+        List<Monster> monsterList = ExcelUtil.excel2Pojo(monsterfis, Monster.class, monsteralias);
+        for (Monster monster : monsterList) {
+            ProjectContext.monsterMap.put(monster.getId(), monster);
+        }
+//      初始化怪物end
+
+//      初始化副本配置类start
+        FileInputStream bossSceneConfigfis = new FileInputStream(new File("src/main/resources/BossSceneConfig.xls"));
+        LinkedHashMap<String, String> bossSceneConfigfisAlias = new LinkedHashMap<>();
+        bossSceneConfigfisAlias.put("副本的id", "bossSceneId");
+        bossSceneConfigfisAlias.put("副本场景的顺序", "sequences");
+        bossSceneConfigfisAlias.put("副本的持续时间", "keeptime");
+        bossSceneConfigfisAlias.put("副本的名字", "bossSceneName");
+        bossSceneConfigfisAlias.put("最后一击奖励场景", "finalReward");
+        bossSceneConfigfisAlias.put("需要组队的场景", "needMoreMen");
+        List<BossSceneConfig> bossSceneConfigList = ExcelUtil.excel2Pojo(bossSceneConfigfis, BossSceneConfig.class, bossSceneConfigfisAlias);
+        for (BossSceneConfig bossSceneConfig : bossSceneConfigList) {
+            ProjectContext.bossSceneConfigMap.put(bossSceneConfig.getBossSceneId(), bossSceneConfig);
+        }
+//      初始化副本配置类end
 
 //      初始化场景start
         FileInputStream scenefis = new FileInputStream(new File("src/main/resources/Scene.xls"));
@@ -322,7 +355,6 @@ public class ServerConfig {
         sceneAlias.put("怪物id", "monsterS");
         sceneAlias.put("需要的等级", "needLevel");
         List<Scene> sceneList = ExcelUtil.excel2Pojo(scenefis, Scene.class, sceneAlias);
-
         for (Scene scene : sceneList) {
 //          初始化npc
             List<NPC> npcs = new ArrayList<>();
@@ -342,12 +374,6 @@ public class ServerConfig {
                 areaSet.add(sceneT);
             }
             scene.setSceneSet(areaSet);
-
-//          注入一些要用的单例
-            scene.setBuffEvent(buffEvent);
-            scene.setOutfitEquipmentEvent(outfitEquipmentEvent);
-            scene.setHpCaculation(hpCaculation);
-//
             ProjectContext.sceneMap.put(scene.getId(), scene);
             ProjectContext.sceneSet.add(scene.getName());
             ProjectContext.sceneThreadPool.execute(scene);

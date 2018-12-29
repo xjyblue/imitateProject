@@ -1,6 +1,7 @@
 package utils;
 
 import achievement.Achievement;
+import config.GrobalConfig;
 import io.netty.channel.Channel;
 import context.ProjectContext;
 import packet.PacketType;
@@ -144,7 +145,7 @@ public class AchievementUtil {
     }
 
     private static String getCombinationProcessName(String process) {
-        if(process.equals("0")){
+        if(process.equals(GrobalConfig.NULL)){
             return "";
         }
         String[] proArr = process.split("-");
@@ -167,8 +168,8 @@ public class AchievementUtil {
     }
 
     private static String getGoodNameByGoodId(String process) {
-        if (process.equals("0")) {
-            return "0";
+        if (process.equals(GrobalConfig.NULL)) {
+            return GrobalConfig.NULL;
         }
         String[] goodId = process.split("-");
         String resp = "";

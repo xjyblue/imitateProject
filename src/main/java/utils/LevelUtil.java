@@ -1,10 +1,13 @@
 package utils;
 
+import achievement.Achievement;
+import achievement.AchievementExecutor;
 import component.Equipment;
 import io.netty.channel.Channel;
 import level.Level;
 import context.ProjectContext;
 import mapper.UserMapper;
+import pojo.Achievementprocess;
 import pojo.User;
 import pojo.Weaponequipmentbar;
 
@@ -31,9 +34,9 @@ public class LevelUtil {
         Level level = ProjectContext.levelMap.get(getLevelByExperience(user.getExperience()));
 //      这里可以附加装备属性
         int addValue = 0;
-//      职业计算
+//      职业因子计算
         addValue += Integer.parseInt(level.getMaxHp());
-        double factor = caculateByRole(level,user);
+        double factor = caculateFactorByRole(level, user);
         addValue *= factor;
 //      装备加成
         for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
@@ -56,12 +59,21 @@ public class LevelUtil {
             channelTarget.writeAndFlush(MessageUtil.turnToPacket(">>>>>>>>>>>>>>恭喜您升到了万众瞩目的" + getLevelByExperience(user.getExperience()) + "级<<<<<<<<<<<<<<<"));
         } else {
             Channel channelTarget = ProjectContext.userToChannelMap.get(user);
-            channelTarget.writeAndFlush(MessageUtil.turnToPacket("您当前任务经验值增长了" + value + ",你目前的经验值为：" + user.getExperience()));
+            channelTarget.writeAndFlush(MessageUtil.turnToPacket("您当前经验值增长了" + value + ",你目前的经验值为：" + user.getExperience()));
         }
-        UserMapper userMapper = (UserMapper) SpringContextUtil.getBean("userMapper");
+        UserMapper userMapper = SpringContextUtil.getBean("userMapper");
 //      升级就刷新人物的hp和mp
         user.setHp(getMaxHp(user));
         user.setMp(getMaxMp(user));
+
+//      升级触发成就
+        AchievementExecutor achievementExecutor = SpringContextUtil.getBean("achievementExecutor");
+        for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
+            if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.UPLEVEL)) {
+                Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
+                achievementExecutor.executeLevelUp(achievementprocess, user, achievement);
+            }
+        }
         userMapper.updateByPrimaryKeySelective(user);
     }
 
@@ -69,21 +81,21 @@ public class LevelUtil {
     public static String getMaxMp(User user) {
         Level level = ProjectContext.levelMap.get(getLevelByExperience(user.getExperience()));
         int addValue = 0;
-//      职业计算
+//      职业因子计算
         addValue += Integer.parseInt(level.getMaxMp());
-        double factor = caculateByRole(level,user);
+        double factor = caculateFactorByRole(level, user);
         addValue *= factor;
-
 //      这里可以附加装备属性
         return addValue + "";
     }
 
-    public static Double caculateByRole(Level level, User user) {
+    //  职业因子计算
+    public static Double caculateFactorByRole(Level level, User user) {
         String levelCaculation = level.getCaculatePercent();
         String temps[] = levelCaculation.split("-");
         for (String temp : temps) {
             String tt[] = temp.split(":");
-            if (tt[0].equals(user.getRoleid() + "")){
+            if (tt[0].equals(user.getRoleid() + "")) {
                 return Double.parseDouble(tt[1]);
             }
         }

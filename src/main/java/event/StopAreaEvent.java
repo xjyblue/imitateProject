@@ -6,14 +6,13 @@ import caculation.AttackCaculation;
 import caculation.HpCaculation;
 import caculation.MoneyCaculation;
 import caculation.UserbagCaculation;
-import com.sun.org.apache.regexp.internal.RE;
 import component.Scene;
 import component.Equipment;
 import component.Monster;
 import component.NPC;
-import component.parent.Good;
+import component.parent.PGood;
 import config.MessageConfig;
-import config.DeadOrAliveConfig;
+import config.GrobalConfig;
 import context.ProjectUtil;
 import factory.MonsterFactory;
 import io.netty.channel.Channel;
@@ -21,7 +20,6 @@ import mapper.UserMapper;
 import mapper.UserbagMapper;
 import context.ProjectContext;
 import order.Order;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.*;
@@ -215,19 +213,22 @@ public class StopAreaEvent {
                 + "[人物剩余蓝量]:" + user.getMp()
                 + System.getProperty("line.separator");
 
-        if (monster.getValueOfLife().equals("0")) {
+        if (monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
             resp += System.getProperty("line.separator")
                     + "怪物已死亡";
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
 //          修改怪物状态
-            monster.setStatus(DeadOrAliveConfig.DEAD);
+            monster.setStatus(GrobalConfig.DEAD);
 //          爆装备
             outfitEquipmentEvent.getGoods(channel, monster);
 //          移除死掉的怪物
             ProjectContext.sceneMap.get(user.getPos()).getMonsters().remove(monster);
 //          生成新的怪物
             Scene scene = ProjectContext.sceneMap.get(user.getPos());
-            scene.getMonsters().add(monsterFactory.getMonsterByArea(user.getPos()));
+            List<Monster> monsters = monsterFactory.getMonsterByArea(user.getPos());
+            for (Monster monsterT : monsters) {
+                scene.getMonsters().add(monsterT);
+            }
         } else {
 //          切换到攻击模式
             ProjectContext.eventStatus.put(channel, EventStatus.ATTACK);
@@ -274,7 +275,7 @@ public class StopAreaEvent {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDNPC));
             return;
         }
-        if (npc.getGetGoods().equals("0")) {
+        if (npc.getGetGoods().equals(GrobalConfig.NULL)) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEXACHANGEFORNPC));
             return;
         }
@@ -304,7 +305,7 @@ public class StopAreaEvent {
             userbag1.setId(UUID.randomUUID().toString());
             userbag1.setDurability(equipment.getDurability());
             userbag1.setName(user.getUsername());
-            userbag1.setTypeof(Good.EQUIPMENT);
+            userbag1.setTypeof(PGood.EQUIPMENT);
             userbagCaculation.addUserBagForUser(user, userbag1);
         }
     }

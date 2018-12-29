@@ -5,8 +5,7 @@ import com.google.common.collect.Lists;
 import component.BossScene;
 import component.Monster;
 import config.BuffConfig;
-import config.DeadOrAliveConfig;
-import config.MessageConfig;
+import config.GrobalConfig;
 import io.netty.channel.Channel;
 import context.ProjectContext;
 import org.springframework.stereotype.Component;
@@ -54,6 +53,7 @@ public class BuffEvent {
                 ProjectContext.userBuffEndTime.get(user).put(BuffConfig.TREATMENTBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
             }
 //          集体伤害处理
+            //todo:要改掉这里
             if (entry.getKey().equals(BuffConfig.ALLPERSON)) {
                 Buff buff = ProjectContext.buffMap.get(entry.getValue());
                 Channel channelTemp = ProjectContext.userToChannelMap.get(user);
@@ -64,15 +64,15 @@ public class BuffEvent {
                     for (Map.Entry<String, Monster> monsterEntry : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {
                         monsterEntry.getValue().subLife(new BigInteger(userSkill.getDamage()));
                         BigInteger monsterLife = new BigInteger(monsterEntry.getValue().getValueOfLife());
-                        BigInteger minLife = new BigInteger("0");
+                        BigInteger minLife = new BigInteger(GrobalConfig.MINVALUE);
                         if (monsterLife.compareTo(minLife) <= 0) {
-                            monsterEntry.getValue().setValueOfLife("0");
-                            monsterEntry.getValue().setStatus(DeadOrAliveConfig.DEAD);
+                            monsterEntry.getValue().setValueOfLife(GrobalConfig.MINVALUE);
+                            monsterEntry.getValue().setStatus(GrobalConfig.DEAD);
                         }
                     }
                 } else {
                     for (Monster monsterTemp : ProjectContext.sceneMap.get(user.getPos()).getMonsters()) {
-                        if (monsterTemp.getStatus().equals(DeadOrAliveConfig.ALIVE)) {
+                        if (monsterTemp.getStatus().equals(GrobalConfig.ALIVE)) {
                             monsterTemp.subLife(new BigInteger(userSkill.getDamage()));
                         }
                     }
@@ -115,7 +115,7 @@ public class BuffEvent {
             Buff buff = ProjectContext.buffMap.get(user.getBuffMap().get(BuffConfig.DEFENSEBUFF));
             if (monsterDamage.compareTo(new BigInteger(buff.getInjurySecondValue())) <= 0) {
 //              相当于没有攻击
-                return new BigInteger("0");
+                return new BigInteger(GrobalConfig.MINVALUE);
             }
             BigInteger buffDefence = new BigInteger(buff.getInjurySecondValue());
             monsterDamage = monsterDamage.subtract(buffDefence);

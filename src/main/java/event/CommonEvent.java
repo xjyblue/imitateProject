@@ -1,18 +1,15 @@
 package event;
 
 import achievement.AchievementExecutor;
-import caculation.HpCaculation;
 import component.*;
-import component.parent.Good;
+import component.parent.PGood;
 import config.BuffConfig;
 import config.MessageConfig;
 import io.netty.channel.Channel;
 import context.ProjectContext;
-import level.Level;
 import mapper.UserbagMapper;
 import mapper.WeaponequipmentbarMapper;
 import order.Order;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -150,7 +147,7 @@ public class CommonEvent {
                     userbag.setDurability(weaponequipmentbar.getDurability());
                     userbag.setId(UUID.randomUUID().toString());
                     userbag.setName(weaponequipmentbar.getUsername());
-                    userbag.setTypeof(Good.EQUIPMENT);
+                    userbag.setTypeof(PGood.EQUIPMENT);
                     userbag.setWid(weaponequipmentbar.getWid());
                     user.getUserBag().add(userbag);
                     user.getWeaponequipmentbars().remove(weaponequipmentbar);
@@ -199,7 +196,7 @@ public class CommonEvent {
         Weaponequipmentbar weaponequipmentbar = new Weaponequipmentbar();
         weaponequipmentbar.setId(200);
         weaponequipmentbar.setDurability(userbag.getDurability());
-        weaponequipmentbar.setTypeof(Good.EQUIPMENT);
+        weaponequipmentbar.setTypeof(PGood.EQUIPMENT);
         weaponequipmentbar.setStartlevel(userbag.getStartlevel());
         weaponequipmentbar.setUsername(user.getUsername());
         weaponequipmentbar.setWid(userbag.getWid());
@@ -249,7 +246,7 @@ public class CommonEvent {
         User user = ProjectContext.session2UserIds.get(channel);
         for (Userbag userbag : user.getUserBag()) {
             for (Userbag userbag2 : user.getUserBag()) {
-                if (userbag != userbag2 && userbag.getWid() == userbag2.getWid() && !userbag.getTypeof().equals(Good.EQUIPMENT)) {
+                if (userbag != userbag2 && userbag.getWid() == userbag2.getWid() && !userbag.getTypeof().equals(PGood.EQUIPMENT)) {
 //                      相同物品不同格子叠加
                     userbag.setNum(userbag.getNum() + userbag2.getNum());
                 }

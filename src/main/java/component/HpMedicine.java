@@ -1,12 +1,12 @@
 package component;
 
-import component.parent.Good;
+import component.parent.PGood;
 
 /**
  * Description ：nettySpringServer
  * Created by server on 2018/12/17 9:11
  */
-public class HpMedicine extends Good {
+public class HpMedicine extends PGood {
 
     private Integer id;
     //  总回复蓝量

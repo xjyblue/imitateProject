@@ -3,7 +3,9 @@ package component;
 import buff.Buff;
 import caculation.HpCaculation;
 
+import component.parent.PScene;
 import config.BuffConfig;
+import config.GrobalConfig;
 import config.MessageConfig;
 import event.BuffEvent;
 import event.EventStatus;
@@ -23,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Scene implements Runnable {
+public class Scene extends PScene implements Runnable {
 
     private String id;
 
@@ -42,6 +44,22 @@ public class Scene implements Runnable {
     private List<Monster> monsters;
     //  场景下的玩家
     private String needLevel;
+
+    private OutfitEquipmentEvent outfitEquipmentEvent;
+
+    private BuffEvent buffEvent;
+
+    private HpCaculation hpCaculation;
+
+    //注入一些要用的单例
+    public void init() {
+        BuffEvent buffEvent = SpringContextUtil.getBean("buffEvent");
+        this.buffEvent = buffEvent;
+        OutfitEquipmentEvent outfitEquipmentEvent = SpringContextUtil.getBean("outfitEquipmentEvent");
+        this.outfitEquipmentEvent = outfitEquipmentEvent;
+        HpCaculation hpCaculation = SpringContextUtil.getBean("hpCaculation");
+        this.hpCaculation = hpCaculation;
+    }
 
     private Map<String, User> userMap = new ConcurrentHashMap<>();
 
@@ -68,12 +86,6 @@ public class Scene implements Runnable {
     public void setNpcS(String npcS) {
         this.npcS = npcS;
     }
-
-    private OutfitEquipmentEvent outfitEquipmentEvent;
-
-    private BuffEvent buffEvent;
-
-    private HpCaculation hpCaculation;
 
     public String getSceneIds() {
         return sceneIds;
@@ -175,7 +187,6 @@ public class Scene implements Runnable {
     private void monsterFrequence() {
 //      推送战斗消息,触发处于战斗状态的用户
 
-
 //      场景内所有用户在战斗的怪物
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             User user = entry.getValue();
@@ -211,7 +222,7 @@ public class Scene implements Runnable {
                         }
 
 //                      用户扣血，死亡状态处理
-                        hpCaculation.reduceUserHp(user, monsterDamage.toString());
+                        hpCaculation.subUserHp(user, monsterDamage.toString());
 
 //                      刷新攻击信息
                         String resp = "怪物名称:" + monster.getName()
@@ -221,7 +232,7 @@ public class Scene implements Runnable {
                                 + "-----你的蓝量" + user.getMp()
                                 + "-----怪物血量:" + monster.getValueOfLife();
                         channel.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ATTACKMSG));
-                        if (user.getHp().equals("0")) {
+                        if (user.getHp().equals(GrobalConfig.MINVALUE)) {
                             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY, PacketType.ATTACKMSG));
                             return;
                         }
@@ -243,14 +254,14 @@ public class Scene implements Runnable {
 
         if (monster != null && monster.getBufMap().containsKey(BuffConfig.POISONINGBUFF) && monster.getBufMap().get(BuffConfig.POISONINGBUFF) != 2000) {
             Long endTime = ProjectContext.monsterBuffEndTime.get(monster).get(BuffConfig.POISONINGBUFF);
-            if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals("0")) {
+            if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
                 Buff buff = ProjectContext.buffMap.get(monster.getBufMap().get(BuffConfig.POISONINGBUFF));
 
                 monster.subLife(new BigInteger(buff.getAddSecondValue()));
 //               处理中毒扣死
-                if (new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger("0")) < 0) {
-                    monster.setValueOfLife("0");
-                    monster.setStatus("0");
+                if (new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger(GrobalConfig.MINVALUE)) < 0) {
+                    monster.setValueOfLife(GrobalConfig.MINVALUE);
+                    monster.setStatus(GrobalConfig.DEAD);
                     monster.getBufMap().put(BuffConfig.POISONINGBUFF, 2000);
                 }
                 channel.writeAndFlush(MessageUtil.turnToPacket("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG));
@@ -263,9 +274,9 @@ public class Scene implements Runnable {
 
 
     private boolean checkMonsterStatus(Channel channel, Monster monster, User user) throws IOException {
-        if (monster != null && new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger("0")) <= 0) {
-            monster.setValueOfLife("0");
-            monster.setStatus("0");
+        if (monster != null && new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger(GrobalConfig.MINVALUE)) <= 0) {
+            monster.setValueOfLife(GrobalConfig.MINVALUE);
+            monster.setStatus(GrobalConfig.DEAD);
             ProjectContext.userToMonsterMap.remove(user);
             broadcastMessage(monster.getName() + "已死亡", null);
             channel.writeAndFlush(MessageUtil.turnToPacket("怪物已死亡", PacketType.ATTACKMSG));
@@ -273,7 +284,7 @@ public class Scene implements Runnable {
             monsters.remove(monster);
 //          填充因buff中毒而死的怪物
             MonsterFactory monsterFactory = SpringContextUtil.getBean("monsterFactory");
-            monsters.add(monsterFactory.getMonster(Integer.parseInt(ProjectContext.sceneMap.get(user.getPos()+"").getMonsterS())));
+            monsters.add(monsterFactory.getMonster(Integer.parseInt(ProjectContext.sceneMap.get(user.getPos() + "").getMonsterS())));
 
             ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
             outfitEquipmentEvent.getGoods(channel, monster);
