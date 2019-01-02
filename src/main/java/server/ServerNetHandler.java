@@ -1,14 +1,14 @@
 package server;
 
-import component.Scene;
-import config.BuffConfig;
+import component.scene.Scene;
 import context.ProjectContext;
 import event.EventStatus;
-import event.TeamEvent;
+import service.teamservice.service.TeamService;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleStateEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -27,12 +27,13 @@ import static packet.PacketProto.Packet.newBuilder;
  * Created by xiaojianyu on 2018/12/21 14:29
  */
 @Sharable
+@Slf4j
 @Service("serverNetHandler")
 public class ServerNetHandler extends ChannelHandlerAdapter {
 
     public static final Map<Channel, Integer> heartCounts = new ConcurrentHashMap<>();
     @Autowired
-    private TeamEvent teamEvent;
+    private TeamService teamService;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -49,7 +50,7 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 //      渠道激活，对每个渠道发送登录消息
         Channel channel = ctx.channel();
-        System.out.println(channel.remoteAddress() + "客户端与服务端连接开始...");
+        log.info("端口号为：{}的渠道开始与服务端连接",channel.remoteAddress());
         heartCounts.put(channel, 0);
 
 //      有渠道连接进来的时候
@@ -64,7 +65,8 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("客户端与服务端连接断开----inactive");
+        Channel channel = ctx.channel();
+        log.info("端口号为{}的渠道与服务器断开连接",channel.remoteAddress());
 //      已登录的情况下断开
         if (ProjectContext.session2UserIds.containsKey(ctx.channel())) {
             User user = ProjectContext.session2UserIds.get(ctx.channel());
@@ -77,7 +79,7 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
                 user.setIfOnline(false);
                 if (user.getTeamId() != null) {
 //              处理一下用户的team对用户的处理
-                    teamEvent.handleUserOffline(user);
+                    teamService.handleUserOffline(user);
                 }
                 Scene scene = ProjectContext.sceneMap.get(user.getPos());
                 scene.getUserMap().remove(user.getUsername());
@@ -119,10 +121,10 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
                 // 连续丢失3个心跳包 (断开连接)
                 // 后期可以改成 30秒检查一次丢包  1分钟检查一次丢包 3分钟检查一次丢包 5分钟不上就是玩家上不来了清除渠道信息
                 ctx.channel().close().sync();
-                System.out.println("已与Client断开连接");
+                log.info("客户端已于服务端断开连接");
             } else {
                 counter++;
-                System.out.println(ctx.channel().remoteAddress() + "丢失了第 " + counter + " 个心跳包");
+                log.info("端口号为{}的渠道丢失了{}个心跳包",ctx.channel().remoteAddress(),counter);
             }
             heartCounts.put(ctx.channel(), counter);
         }

@@ -3,21 +3,29 @@ package context;
 import java.util.*;
 import java.util.concurrent.*;
 
-import achievement.Achievement;
+import component.boss.BossSceneConfig;
+import component.good.CollectGood;
+import component.good.Equipment;
+import component.good.HpMedicine;
+import component.good.MpMedicine;
+import component.monster.Monster;
+import service.npcservice.entity.NPC;
+import component.scene.BossScene;
+import component.scene.Scene;
+import service.achievementservice.entity.Achievement;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import level.Level;
-import role.Role;
-import buff.Buff;
-import component.*;
-import email.Mail;
+import service.levelservice.entity.Level;
+import component.role.Role;
+import service.buffservice.entity.Buff;
+import service.emailservice.entity.Mail;
 import io.netty.channel.Channel;
 import pojo.User;
 import pojo.Userskillrelation;
-import skill.MonsterSkill;
-import skill.UserSkill;
-import team.Team;
-import trade.Trade;
+import component.monster.MonsterSkill;
+import service.skillservice.entity.UserSkill;
+import service.teamservice.entity.Team;
+import service.transactionservice.entity.Trade;
 
 /**
  * @author server
@@ -98,7 +106,7 @@ public class ProjectContext {
      */
     public static Map<String, Long> endBossAreaTime = Maps.newConcurrentMap();
     /**
-     * 副本boss定时攻击的任务
+     * 副本boss攻击线程池
      */
     public static ScheduledExecutorService bossAreaThreadPool = Executors.newScheduledThreadPool(5);
     /**

@@ -1,10 +1,10 @@
 package utils;
 
-import component.CollectGood;
-import component.Equipment;
-import component.HpMedicine;
-import component.MpMedicine;
-import component.parent.PGood;
+import component.good.CollectGood;
+import component.good.Equipment;
+import component.good.HpMedicine;
+import component.good.MpMedicine;
+import component.good.parent.PGood;
 import io.netty.channel.Channel;
 import context.ProjectContext;
 import packet.PacketType;

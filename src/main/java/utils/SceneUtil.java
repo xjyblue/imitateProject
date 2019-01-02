@@ -1,6 +1,6 @@
 package utils;
 
-import component.Scene;
+import component.scene.Scene;
 import context.ProjectContext;
 
 import java.util.Map;

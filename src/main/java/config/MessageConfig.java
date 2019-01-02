@@ -1,7 +1,7 @@
 package config;
 
 /**
- * Description ：nettySpringServer
+ * Description ：nettySpringServer 信息文字配置
  * Created by server on 2018/11/21 15:14
  */
 public class MessageConfig {
@@ -10,7 +10,6 @@ public class MessageConfig {
     public static final String ERRORPASSWORD = "账户密码出错";
     public static final String DOUBLEPASSWORDERROR = "两次密码不一致";
     public static final String REGISTERSUCCESS = "注册成功请输入：用户名-密码进行登录";
-    public static final String REPEATUSER = "你的账号已在其他地方登陆，无法重复登陆";
     public static final String NOROLE = "请输入有效的种族";
 
     public static final String UNMOVELOCAL = "原地无需移动";
@@ -34,7 +33,6 @@ public class MessageConfig {
     public static final String UNSKILLCD = "你当前技能CD冷却中，请稍后重试";
     public static final String YOUARENOLEADER = "你无权带队进入副本，你不是队长";
     public static final String ENTERFIGHT = "你已进入战斗状态";
-    public static final String BOSSAREASUCCESS = "副本攻略成功，热烈庆祝各位参与的小伙伴";
     public static final String BOSSFAIL = "挑战副本失败，人物已死光,按Y复活到起始之地";
     public static final String BOSSAREATIMEOUT = "时间结束挑战副本失败,你已退出副本世界，重刷副本请按F";
 

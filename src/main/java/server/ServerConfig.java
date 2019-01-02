@@ -1,22 +1,30 @@
 package server;
 
-import achievement.Achievement;
-import caculation.HpCaculation;
+import service.caculationservice.service.HpCaculationService;
+import component.boss.BossSceneConfig;
+import component.good.CollectGood;
+import component.good.Equipment;
+import component.good.HpMedicine;
+import component.good.MpMedicine;
+import component.monster.Monster;
+import service.npcservice.entity.NPC;
+import component.scene.Scene;
+import service.achievementservice.entity.Achievement;
 import config.GrobalConfig;
-import event.BuffEvent;
-import event.OutfitEquipmentEvent;
+import service.buffservice.service.BuffService;
+import service.rewardservice.service.RewardService;
 import io.netty.handler.timeout.IdleStateHandler;
-import level.Level;
+import service.levelservice.entity.Level;
 import context.ProjectContext;
+import lombok.extern.slf4j.Slf4j;
 import mapper.UserMapper;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.UserExample;
-import role.Role;
-import buff.Buff;
-import component.*;
-import component.parent.PGood;
-import email.Mail;
+import component.role.Role;
+import service.buffservice.entity.Buff;
+import component.good.parent.PGood;
+import service.emailservice.entity.Mail;
 import factory.MonsterFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -27,12 +35,11 @@ import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import packet.PacketProto;
-import skill.MonsterSkill;
-import skill.UserSkill;
+import component.monster.MonsterSkill;
+import service.skillservice.entity.UserSkill;
 import test.ExcelUtil;
 
 import java.io.File;
@@ -45,11 +52,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author server
  */
 @Component
+@Slf4j
 public class ServerConfig {
-
-    private static Logger logger = Logger.getLogger(ServerConfig.class);
-
-    private static final int portNumber = 8081;
     @Autowired
     private ServerLoginHandler serverLoginHandler;
     @Autowired
@@ -57,11 +61,11 @@ public class ServerConfig {
     @Autowired
     private MonsterFactory monsterFactory;
     @Autowired
-    private HpCaculation hpCaculation;
+    private HpCaculationService hpCaculationService;
     @Autowired
-    private BuffEvent buffEvent;
+    private BuffService buffService;
     @Autowired
-    private OutfitEquipmentEvent outfitEquipmentEvent;
+    private RewardService rewardService;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -94,9 +98,10 @@ public class ServerConfig {
                             ch.pipeline().addLast(serverDistributeHandler);
                         }
                     });
+            log.info("开始加载游戏资源");
             initServer();
-            logger.info("初始化netty服务器启动参数，开放8080端口");
-            ChannelFuture f = b.bind(portNumber).sync();
+            log.info("游戏资源加载完毕，开放8080端口");
+            ChannelFuture f = b.bind(GrobalConfig.PORTNUM).sync();
             f.channel().closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();
@@ -257,7 +262,7 @@ public class ServerConfig {
 //      初始化怪物技能end
 
 
-//        初始化技能表start
+//        初始化人物技能表start
         FileInputStream userSkillfis = new FileInputStream(new File("src/main/resources/UserSkill.xls"));
         LinkedHashMap<String, String> userSkillalias = new LinkedHashMap<>();
         userSkillalias.put("技能id", "skillId");
@@ -313,7 +318,7 @@ public class ServerConfig {
 //      初始化收集类物品end
 
 //      初始化怪物start
-        FileInputStream monsterfis = new FileInputStream(new File("src/main/resources/Monster.xls"));
+        FileInputStream monsterfis = new FileInputStream(new File("src/main/resources/monster.xls"));
         LinkedHashMap<String, String> monsteralias = new LinkedHashMap<>();
         monsteralias.put("怪物id", "id");
         monsteralias.put("怪物名称", "name");

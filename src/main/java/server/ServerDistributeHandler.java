@@ -1,24 +1,12 @@
 package server;
 
-import component.Scene;
-import event.EventStatus;
-import event.TeamEvent;
-import io.netty.handler.timeout.IdleStateEvent;
-import context.ProjectContext;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import event.EventDistributor;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.group.ChannelGroup;
 import io.netty.util.ReferenceCountUtil;
 import packet.PacketProto;
-import packet.PacketType;
-import pojo.User;
 import utils.ChannelUtil;
 
 import java.io.IOException;

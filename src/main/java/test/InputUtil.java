@@ -1,8 +1,6 @@
 package test;
 
-import component.BossSceneConfig;
-import component.CollectGood;
-import component.parent.PGood;
+import component.boss.BossSceneConfig;
 
 import java.io.File;
 import java.io.FileOutputStream;

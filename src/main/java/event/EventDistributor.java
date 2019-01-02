@@ -2,82 +2,89 @@ package event;
 
 
 import context.ProjectContext;
-import context.ProjectUtil;
+import utils.ReflectMethodUtil;
+import service.attackservice.service.AttackService;
+import service.bossservice.service.BossService;
+import service.connectservice.service.ConnectService;
+import service.deadservice.service.DeadService;
+import service.friendservice.service.FriendService;
+import service.labourUnionservice.service.LabourUnionService;
+import service.loginservice.service.loginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.netty.channel.Channel;
+import service.registerservice.service.RegisterService;
+import service.shopservice.service.ShopService;
+import service.skillservice.service.SkillService;
+import service.transactionservice.service.TransactionService;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * 具体事件分发器
- *
  * @author server
  */
 @Component("eventDistributor")
 public class EventDistributor {
     @Autowired
-    private LoginEvent loginEvent;
+    private loginService loginService;
     @Autowired
-    private RegisterEvent registerEvent;
+    private RegisterService registerService;
     @Autowired
     private StopAreaEvent stopAreaEvent;
     @Autowired
-    private SkillEvent skillEvent;
+    private SkillService skillService;
     @Autowired
-    private AttackEvent attackEvent;
+    private AttackService attackEvent;
     @Autowired
-    private BossEvent bossEvent;
+    private BossService bossService;
     @Autowired
-    private ShopEvent shopEvent;
+    private ConnectService connectService;
     @Autowired
-    private ConnectEvent connectEvent;
+    private DeadService deadService;
     @Autowired
-    private DeadEvent deadEvent;
+    private TransactionService transactionService;
     @Autowired
-    private TransactionEvent transactionEvent;
+    private LabourUnionService labourUnionService;
     @Autowired
-    private LabourUnionEvent labourUnionEvent;
-    @Autowired
-    private FriendEvent friendEvent;
+    private FriendService friendService;
     public void distributeEvent(Channel ch, String msg) throws IOException, InvocationTargetException, IllegalAccessException {
         String status = ProjectContext.eventStatus.get(ch);
         switch (status) {
             case EventStatus.COMING:
-                ProjectUtil.reflectAnnotation(connectEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(connectService,ch,msg);
                 break;
             case EventStatus.LOGIN:
-                ProjectUtil.reflectAnnotation(loginEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(loginService,ch,msg);
                 break;
             case EventStatus.REGISTER:
-                ProjectUtil.reflectAnnotation(registerEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(registerService,ch,msg);
                 break;
             case EventStatus.STOPAREA:
-                ProjectUtil.reflectAnnotation(stopAreaEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(stopAreaEvent,ch,msg);
                 break;
             case EventStatus.SKILLMANAGER:
-                ProjectUtil.reflectAnnotation(skillEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(skillService,ch,msg);
                 break;
             case EventStatus.ATTACK:
-                ProjectUtil.reflectAnnotation(attackEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(attackEvent,ch,msg);
                 break;
             case EventStatus.BOSSAREA:
-                ProjectUtil.reflectAnnotation(bossEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(bossService,ch,msg);
                 break;
             case EventStatus.TRADE:
-                ProjectUtil.reflectAnnotation(transactionEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(transactionService,ch,msg);
                 break;
             case EventStatus.DEADAREA:
-                ProjectUtil.reflectAnnotation(deadEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(deadService,ch,msg);
                 break;
             case EventStatus.LABOURUNION:
-                ProjectUtil.reflectAnnotation(labourUnionEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(labourUnionService,ch,msg);
                 break;
             case EventStatus.FRIEND:
-                ProjectUtil.reflectAnnotation(friendEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(friendService,ch,msg);
                 break;
         }
     }

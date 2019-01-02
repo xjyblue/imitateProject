@@ -1,7 +1,6 @@
 package server;
 
 
-import config.BuffConfig;
 import event.EventDistributor;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerAdapter;

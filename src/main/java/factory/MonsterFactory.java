@@ -1,17 +1,13 @@
 package factory;
 
-import component.Monster;
-import config.BuffConfig;
+import component.monster.Monster;
+import service.buffservice.entity.BuffConstant;
 import context.ProjectContext;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.stereotype.Component;
-import skill.MonsterSkill;
-import test.ExcelUtil;
+import component.monster.MonsterSkill;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -63,15 +59,15 @@ public class MonsterFactory {
     private void initMonsterProperties(Monster monster) {
 //      怪物buff初始化
         Map<String, Integer> map = new HashMap<>();
-        map.put(BuffConfig.MPBUFF, 1000);
-        map.put(BuffConfig.POISONINGBUFF, 2000);
-        map.put(BuffConfig.DEFENSEBUFF, 3000);
+        map.put(BuffConstant.MPBUFF, 1000);
+        map.put(BuffConstant.POISONINGBUFF, 2000);
+        map.put(BuffConstant.DEFENSEBUFF, 3000);
         monster.setBufMap(map);
 //      初始化每个怪物buff的终止时间
         Map<String, Long> mapSecond = new HashMap<>();
-        mapSecond.put(BuffConfig.MPBUFF, 1000l);
-        mapSecond.put(BuffConfig.POISONINGBUFF, 2000l);
-        mapSecond.put(BuffConfig.DEFENSEBUFF, 3000l);
+        mapSecond.put(BuffConstant.MPBUFF, 1000l);
+        mapSecond.put(BuffConstant.POISONINGBUFF, 2000l);
+        mapSecond.put(BuffConstant.DEFENSEBUFF, 3000l);
         ProjectContext.monsterBuffEndTime.put(monster, mapSecond);
 //      怪物buff初始化结束
 

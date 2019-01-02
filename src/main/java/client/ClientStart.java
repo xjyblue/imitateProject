@@ -1,15 +1,6 @@
 package client;
 
 
-import component.Scene;
-import context.ProjectContext;
-import org.checkerframework.checker.units.qual.A;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.stereotype.Component;
-import server.ServerConfig;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
