@@ -12,46 +12,47 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class User {
+//  用户名
     private String username;
-
+//  密码
     private String password;
-
+//  用户状态
     private String status;
-
+//  用户位置
     private String pos;
-
+//  用户mp
     private String mp;
-
+//  用户hp
     private String hp;
-
+//  用户金钱
     private String money;
-
+//  用户队伍
     private String teamId;
-
+//  用户交易单
     private String traceId;
-
+//  用户角色
     private Integer roleid;
-
+//  用户经验值
     private Integer experience;
-
+//  用户工会id
     private String unionid;
-
+//  用户的工会会员等级
     private Integer unionlevel;
-
+//  用户背包
     private List<Userbag> userBag;
-
+//  用户武器栏
     private List<Weaponequipmentbar> weaponequipmentbars;
-
+//  用户buff
     private Map<String, Integer> buffMap;
-
+//  用户成就任务
     private List<Achievementprocess> achievementprocesses;
-
+//  用户是否交易
     private boolean ifTrade;
-
+//  事件分发器
     private EventDistributor eventDistributor;
-
+//  用户buff
     private BuffTask buffTask;
-
+//  用户buff刷新时间
     private Long buffRefreshTime;
 //  在线状态
     private boolean ifOnline;
