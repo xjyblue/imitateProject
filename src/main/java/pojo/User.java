@@ -1,8 +1,8 @@
 package pojo;
 
-import event.EventDistributor;
+import core.ServiceDistributor;
 import io.netty.channel.Channel;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import packet.PacketProto;
 import service.buffservice.service.BuffTask;
 
@@ -49,7 +49,7 @@ public class User {
 //  用户是否交易
     private boolean ifTrade;
 //  事件分发器
-    private EventDistributor eventDistributor;
+    private ServiceDistributor serviceDistributor;
 //  用户buff
     private BuffTask buffTask;
 //  用户buff刷新时间
@@ -93,12 +93,12 @@ public class User {
         this.buffTask = buffTask;
     }
 
-    public EventDistributor getEventDistributor() {
-        return eventDistributor;
+    public ServiceDistributor getServiceDistributor() {
+        return serviceDistributor;
     }
 
-    public void setEventDistributor(EventDistributor eventDistributor) {
-        this.eventDistributor = eventDistributor;
+    public void setServiceDistributor(ServiceDistributor serviceDistributor) {
+        this.serviceDistributor = serviceDistributor;
     }
 
     public ConcurrentLinkedQueue<PacketProto.Packet> getPacketsQueue() {
@@ -283,7 +283,7 @@ public class User {
             PacketProto.Packet packet = packetsQueue.poll();
             Channel channel = ProjectContext.userToChannelMap.get(this);
             try {
-                eventDistributor.distributeEvent(channel, packet.getData());
+                serviceDistributor.distributeEvent(channel, packet.getData());
             } catch (Exception e) {
                 e.printStackTrace();
             }

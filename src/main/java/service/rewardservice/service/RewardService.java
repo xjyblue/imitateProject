@@ -1,17 +1,17 @@
 package service.rewardservice.service;
 
 import service.achievementservice.entity.Achievement;
-import service.achievementservice.service.AchievementExecutor;
+import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
-import component.good.CollectGood;
-import component.good.Equipment;
-import component.monster.Monster;
-import component.good.parent.PGood;
-import config.GrobalConfig;
+import core.component.good.CollectGood;
+import core.component.good.Equipment;
+import core.component.monster.Monster;
+import core.component.good.parent.PGood;
+import core.config.GrobalConfig;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
@@ -31,7 +31,7 @@ public class RewardService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
-    private AchievementExecutor achievementExecutor;
+    private AchievementService achievementService;
     @Autowired
     private UserbagCaculationService userbagCaculationService;
     @Autowired
@@ -87,10 +87,10 @@ public class RewardService {
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
             Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.ATTACKMONSTER)) {
-                achievementExecutor.executeKillMonster(user, achievementprocess, monster.getId());
+                achievementService.executeKillMonster(user, achievementprocess, monster.getId());
             }
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.FINISHBOSSAREA) && monster.getType().equals(Monster.TYPEOFBOSS)) {
-                achievementExecutor.executeBossAttack(achievementprocess, user, achievement, monster);
+                achievementService.executeBossAttack(achievementprocess, user, achievement, monster);
             }
         }
     }

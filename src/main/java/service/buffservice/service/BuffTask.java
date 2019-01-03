@@ -1,15 +1,15 @@
 package service.buffservice.service;
 
 import service.caculationservice.service.HpCaculationService;
-import component.scene.BossScene;
-import component.good.HpMedicine;
-import component.good.MpMedicine;
+import service.sceneservice.entity.BossScene;
+import core.component.good.HpMedicine;
+import core.component.good.MpMedicine;
 import service.buffservice.entity.BuffConstant;
-import config.GrobalConfig;
-import event.EventStatus;
-import component.monster.Monster;
+import core.config.GrobalConfig;
+import core.ChannelStatus;
+import core.component.monster.Monster;
 import io.netty.channel.Channel;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketType;
@@ -49,7 +49,7 @@ public class BuffTask{
 
             Map<String, Integer> bufferMap = user.getBuffMap();
             for (Map.Entry<String, Integer> entrySecond : bufferMap.entrySet()) {
-                if (ProjectContext.eventStatus.get(channel).equals(EventStatus.ATTACK) || ProjectContext.eventStatus.get(channel).equals(EventStatus.BOSSAREA)) {
+                if (ProjectContext.eventStatus.get(channel).equals(ChannelStatus.ATTACK) || ProjectContext.eventStatus.get(channel).equals(ChannelStatus.BOSSSCENE)) {
 //              更新用户防御buff
                     if (entrySecond.getKey().equals(BuffConstant.DEFENSEBUFF) && entrySecond.getValue() != 3000) {
                         endTime = ProjectContext.userBuffEndTime.get(user).get(BuffConstant.DEFENSEBUFF);

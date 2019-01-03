@@ -1,8 +1,8 @@
 package server;
 
-import component.scene.Scene;
-import context.ProjectContext;
-import event.EventStatus;
+import service.sceneservice.entity.Scene;
+import core.context.ProjectContext;
+import core.ChannelStatus;
 import service.teamservice.service.TeamService;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerAdapter;
@@ -54,7 +54,7 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
         heartCounts.put(channel, 0);
 
 //      有渠道连接进来的时候
-        ProjectContext.eventStatus.put(channel, EventStatus.COMING);
+        ProjectContext.eventStatus.put(channel, ChannelStatus.COMING);
         PacketProto.Packet.Builder builder = newBuilder();
         builder.setPacketType(PacketProto.Packet.PacketType.DATA);
         builder.setData("欢迎来到【星宇征服】,请按以下提示操作：d:登录 z:注册");
@@ -77,12 +77,15 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
                 user.setOccupied(false);
             } else {
                 user.setIfOnline(false);
+//              移除队伍或者副本中玩家
                 if (user.getTeamId() != null) {
-//              处理一下用户的team对用户的处理
                     teamService.handleUserOffline(user);
                 }
+//              移除场景下的玩家
                 Scene scene = ProjectContext.sceneMap.get(user.getPos());
-                scene.getUserMap().remove(user.getUsername());
+                if(scene.getUserMap().containsKey(user.getUsername())){
+                    scene.getUserMap().remove(user.getUsername());
+                }
 //              移除玩家的所有buff终止时间
                 if (user != null && ProjectContext.userBuffEndTime.containsKey(user)) {
                     ProjectContext.userBuffEndTime.remove(user);
@@ -91,15 +94,18 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
                 if (user != null && ProjectContext.userToMonsterMap.containsKey(user)) {
                     ProjectContext.userToMonsterMap.remove(user);
                 }
+//              移除channel和用户的关联
                 if (ProjectContext.session2UserIds.containsKey(ctx.channel())) {
                     ProjectContext.session2UserIds.remove(ctx.channel());
-                }
-                if (ProjectContext.eventStatus.containsKey(ctx.channel())) {
-                    ProjectContext.eventStatus.remove(ctx.channel());
                 }
                 if (user != null && ProjectContext.userToChannelMap.containsKey(user)) {
                     ProjectContext.userToChannelMap.remove(user);
                 }
+//              移除渠道状态
+                if (ProjectContext.eventStatus.containsKey(ctx.channel())) {
+                    ProjectContext.eventStatus.remove(ctx.channel());
+                }
+//              移除用户技能关联
                 if (ProjectContext.userskillrelationMap.containsKey(user)) {
                     ProjectContext.userskillrelationMap.remove(user);
                 }

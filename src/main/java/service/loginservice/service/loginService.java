@@ -1,21 +1,21 @@
 package service.loginservice.service;
 
-import component.scene.Scene;
+import service.sceneservice.entity.Scene;
 import service.buffservice.entity.BuffConstant;
-import config.MessageConfig;
-import event.EventDistributor;
-import event.EventStatus;
+import core.config.MessageConfig;
+import core.ServiceDistributor;
+import core.ChannelStatus;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketType;
 import pojo.*;
-import component.role.Role;
+import core.component.role.Role;
 import service.skillservice.entity.UserSkill;
 import service.buffservice.service.BuffTask;
 import service.achievementservice.util.AchievementUtil;
@@ -34,7 +34,7 @@ public class loginService {
     @Autowired
     private UserskillrelationMapper userskillrelationMapper;
     @Autowired
-    private EventDistributor eventDistributor;
+    private ServiceDistributor serviceDistributor;
     @Autowired
     private BuffTask buffTask;
 
@@ -98,7 +98,7 @@ public class loginService {
             ProjectContext.userBuffEndTime.put(user, mapSecond);
 
 //          这里注入事件处理器是为了让玩家自己心跳去消费命令，执行任务
-            user.setEventDistributor(eventDistributor);
+            user.setServiceDistributor(serviceDistributor);
 //          注入buff处理器，让用户去刷新自己的buff
             user.setBuffTask(buffTask);
             user.setBuffRefreshTime(0L);
@@ -117,7 +117,7 @@ public class loginService {
             channel.writeAndFlush(MessageUtil.turnToPacket("登录成功"));
             Role role = ProjectContext.roleMap.get(user.getRoleid());
             channel.writeAndFlush(MessageUtil.turnToPacket("   " + user.getUsername() + "    职业为:" + role.getName() + "] " + skillLook, PacketType.USERINFO));
-            ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
+            ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
 
         } finally {
             lock.unlock();

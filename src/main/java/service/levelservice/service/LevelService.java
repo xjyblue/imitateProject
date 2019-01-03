@@ -1,11 +1,11 @@
 package service.levelservice.service;
 
 import service.achievementservice.entity.Achievement;
-import service.achievementservice.service.AchievementExecutor;
-import component.good.Equipment;
+import service.achievementservice.service.AchievementService;
+import core.component.good.Equipment;
 import io.netty.channel.Channel;
 import service.levelservice.entity.Level;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import mapper.UserMapper;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
@@ -71,11 +71,11 @@ public class LevelService {
         user.setMp(getMaxMp(user));
 
 //      升级触发成就
-        AchievementExecutor achievementExecutor = SpringContextUtil.getBean("achievementExecutor");
+        AchievementService achievementService = SpringContextUtil.getBean("achievementService");
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.UPLEVEL)) {
                 Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
-                achievementExecutor.executeLevelUp(achievementprocess, user, achievement);
+                achievementService.executeLevelUp(achievementprocess, user, achievement);
             }
         }
         userMapper.updateByPrimaryKeySelective(user);

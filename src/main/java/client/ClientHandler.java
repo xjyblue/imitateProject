@@ -1,6 +1,5 @@
 package client;
 
-import config.MessageConfig;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;

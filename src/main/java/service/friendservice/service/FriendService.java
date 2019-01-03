@@ -1,14 +1,14 @@
 package service.friendservice.service;
 
 import service.achievementservice.entity.Achievement;
-import service.achievementservice.service.AchievementExecutor;
-import config.MessageConfig;
-import event.EventStatus;
+import service.achievementservice.service.AchievementService;
+import core.config.MessageConfig;
+import core.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.FriendapplyinfoMapper;
 import mapper.FriendinfoMapper;
 import mapper.UserMapper;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,13 +33,13 @@ public class FriendService {
     @Autowired
     private FriendinfoMapper friendinfoMapper;
     @Autowired
-    private AchievementExecutor achievementExecutor;
+    private AchievementService achievementService;
     @Autowired
     private UserService userService;
 
     @Order(orderMsg = "pe")
     public void enterFriendView(Channel channel,String msg){
-        ProjectContext.eventStatus.put(channel, EventStatus.FRIEND);
+        ProjectContext.eventStatus.put(channel, ChannelStatus.FRIEND);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFRIENDVIEW));
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG, PacketType.FRIENDMSG));
         return;
@@ -47,7 +47,7 @@ public class FriendService {
 
     @Order(orderMsg = "q")
     public void quitFriendView(Channel channel,String msg){
-        ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
+        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTFRIENDVIEW));
         channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.FRIENDMSG));
         return;
@@ -89,7 +89,7 @@ public class FriendService {
 //      触发好友成就
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.FRIEND)) {
-                achievementExecutor.executeAddFirstFriend(achievementprocess,user,userTarget,friendapplyinfo.getFromuser());
+                achievementService.executeAddFirstFriend(achievementprocess,user,userTarget,friendapplyinfo.getFromuser());
             }
         }
         return;

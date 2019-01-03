@@ -1,11 +1,10 @@
 package service.emailservice.service;
 
-import component.good.parent.PGood;
-import config.MessageConfig;
+import core.component.good.parent.PGood;
+import core.config.MessageConfig;
 import service.emailservice.entity.Mail;
 import io.netty.channel.Channel;
-import context.ProjectContext;
-import order.Order;
+import core.context.ProjectContext;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userbag;
@@ -18,11 +17,11 @@ import java.util.UUID;
  * Description ：nettySpringServer
  * Created by server on 2018/11/23 10:36
  */
-@Component("emailEvent")
+@Component
 public class EmailService {
 
-    @Order(orderMsg = "qemail")
-    public void queryEmail(Channel channel,String msg){
+
+    public void queryEmail(Channel channel, String msg) {
 //      展示用户的email信息
         User user = ProjectContext.session2UserIds.get(channel);
         Map<String, Mail> emailMap = ProjectContext.userEmailMap.get(user.getUsername());
@@ -42,8 +41,8 @@ public class EmailService {
         }
     }
 
-    @Order(orderMsg = "send=emailservice")
-    public void sendEmail(Channel channel,String msg){
+
+    public void sendEmail(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("=");
         if (!ProjectContext.userEmailMap.containsKey(temp[2])) {
@@ -67,26 +66,26 @@ public class EmailService {
         }
     }
 
-    @Order(orderMsg = "receive=emailservice")
-    public void receiveEmail(Channel channel,String msg){
+
+    public void receiveEmail(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("=");
-        if(temp.length!=3){
+        if (temp.length != 3) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        if(ProjectContext.userEmailMap.get(user.getUsername()).containsKey(temp[2])){
+        if (ProjectContext.userEmailMap.get(user.getUsername()).containsKey(temp[2])) {
             Mail mail = ProjectContext.userEmailMap.get(user.getUsername()).get(temp[2]);
-            if(mail.isIfUserBag()){
+            if (mail.isIfUserBag()) {
                 mail.getUserbag().setName(user.getUsername());
                 user.getUserBag().add(mail.getUserbag());
                 ProjectContext.userEmailMap.get(user.getUsername()).remove(temp[2]);
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILSUCCESS));
                 return;
-            }else {
+            } else {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NORECEIVEEMAIL));
             }
-        }else {
+        } else {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILFAIL));
             return;
         }

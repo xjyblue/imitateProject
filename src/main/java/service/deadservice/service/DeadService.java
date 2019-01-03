@@ -1,13 +1,12 @@
 package service.deadservice.service;
 
-import component.scene.Scene;
-import config.GrobalConfig;
-import config.MessageConfig;
-import utils.ReflectMethodUtil;
-import event.EventStatus;
+import service.sceneservice.entity.Scene;
+import core.config.GrobalConfig;
+import core.config.MessageConfig;
+import core.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,8 +14,6 @@ import pojo.User;
 import service.chatservice.service.ChatService;
 import utils.MessageUtil;
 import service.userservice.service.UserService;
-
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Description ：nettySpringServer
@@ -31,9 +28,14 @@ public class DeadService {
     @Autowired
     private UserService userService;
 
-    @Order(orderMsg = "chat-,chatAll")
-    public void chatEvent(Channel channel, String msg) throws InvocationTargetException, IllegalAccessException {
-        ReflectMethodUtil.reflectAnnotation(chatService, channel, msg);
+    @Order(orderMsg = "chat-")
+    public void chatOne(Channel channel, String msg) {
+        chatService.chatOne(channel, msg);
+    }
+
+    @Order(orderMsg = "chatAll")
+    public void chatAll(Channel channel,String msg){
+        chatService.chatAll(channel,msg);
     }
 
     @Order(orderMsg = "y")
@@ -42,7 +44,7 @@ public class DeadService {
         if (!user.getPos().equals(GrobalConfig.STARTSCENE)) {
             Scene scene = ProjectContext.sceneMap.get(user.getPos());
 //          这句是为了解决普通场景复活和怪物副本复活的bug
-            if(scene.getUserMap().containsKey(user.getUsername())){
+            if (scene.getUserMap().containsKey(user.getUsername())) {
                 scene.getUserMap().remove(user.getUsername());
             }
         }
@@ -55,7 +57,7 @@ public class DeadService {
         userService.recoverUser(user);
         userMapper.updateByPrimaryKeySelective(user);
 
-        ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
+        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LIVEINSTART));
 
     }

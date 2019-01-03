@@ -1,11 +1,12 @@
 package service.teamservice.service;
 
-import service.achievementservice.service.AchievementExecutor;
-import component.scene.BossScene;
-import config.MessageConfig;
+import core.ChannelStatus;
+import service.achievementservice.service.AchievementService;
+import service.sceneservice.entity.BossScene;
+import core.config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.TeamapplyinfoMapper;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,7 +31,7 @@ public class TeamService {
     @Autowired
     private TeamapplyinfoMapper teamapplyinfoMapper;
     @Autowired
-    private AchievementExecutor achievementExecutor;
+    private AchievementService achievementService;
     @Autowired
     private UserService userService;
 
@@ -172,7 +173,7 @@ public class TeamService {
 //          加入后销毁申请记录，队伍应该数据库持久化的。。。
         teamapplyinfoMapper.deleteByPrimaryKey(teamapplyinfo.getId());
 //          触发第一次组队的任务
-        achievementExecutor.executeFirstAddTeam(userTarget);
+        achievementService.executeFirstAddTeam(userTarget);
         return;
     }
 
@@ -230,20 +231,23 @@ public class TeamService {
     //   处理玩家离线
     public void handleUserOffline(User user) {
 
-//      当队伍只有一个玩家要回收副本场景
         Map<String, User> userMap = ProjectContext.teamMap.get(user.getTeamId()).getUserMap();
         if (userMap.size() == 1) {
-//          移除游戏场景的boss的usermap
+//          普通的移除
+            if(!ProjectContext.bossAreaMap.containsKey(user.getTeamId())){
+                ProjectContext.teamMap.remove(user.getTeamId());
+                return;
+            }
+//          游戏副本的回收
             BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
-
-            try{
+            try {
                 bossScene.getBossSceneLock().lock();
-                if(!bossScene.isEnd()){
+                if (!bossScene.isEnd()) {
                     bossScene.setEnd(true);
-                }else {
+                } else {
                     return;
                 }
-            }finally {
+            } finally {
                 bossScene.getBossSceneLock().unlock();
             }
             bossScene.getUserMap().remove(user.getUsername());
@@ -295,5 +299,17 @@ public class TeamService {
 
         ProjectContext.teamMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
         ProjectContext.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
+    }
+
+
+    public void enterTeamView(Channel channel, String msg) {
+        ProjectContext.eventStatus.put(channel, ChannelStatus.TEAM);
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERTEAMMANAGERVIEW));
+    }
+
+    @Order(orderMsg = "qt")
+    public void outTeamView(Channel channel, String msg) {
+        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTTEAMVIEW));
     }
 }

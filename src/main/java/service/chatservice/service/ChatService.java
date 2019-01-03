@@ -1,9 +1,8 @@
 package service.chatservice.service;
 
-import config.MessageConfig;
+import core.config.MessageConfig;
 import io.netty.channel.Channel;
-import context.ProjectContext;
-import order.Order;
+import core.context.ProjectContext;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import utils.MessageUtil;
@@ -17,7 +16,6 @@ import java.util.Map;
 @Component
 public class ChatService {
 
-    @Order(orderMsg = "chatAll")
     public void chatAll(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("-");
@@ -36,7 +34,6 @@ public class ChatService {
         }
     }
 
-    @Order(orderMsg = "chat-")
     public void chatOne(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("-");

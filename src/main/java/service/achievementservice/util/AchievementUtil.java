@@ -1,9 +1,9 @@
 package service.achievementservice.util;
 
 import service.achievementservice.entity.Achievement;
-import config.GrobalConfig;
+import core.config.GrobalConfig;
 import io.netty.channel.Channel;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import packet.PacketType;
 import pojo.Achievementprocess;
 import pojo.User;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 
 /**
- * Description ：nettySpringServer
+ * Description ：nettySpringServer 刷新成就信息
  * Created by server on 2018/12/12 15:46
  */
 public class AchievementUtil {

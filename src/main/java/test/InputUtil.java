@@ -1,6 +1,6 @@
 package test;
 
-import component.boss.BossSceneConfig;
+import core.component.boss.BossSceneConfig;
 
 import java.io.File;
 import java.io.FileOutputStream;

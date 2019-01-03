@@ -1,19 +1,18 @@
 package service.caculationservice.service;
 
 import service.achievementservice.entity.Achievement;
-import service.achievementservice.service.AchievementExecutor;
-import component.good.Equipment;
-import component.good.parent.PGood;
+import service.achievementservice.service.AchievementService;
+import core.component.good.Equipment;
+import core.component.good.parent.PGood;
 import io.netty.channel.Channel;
 import mapper.UserbagMapper;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
 import pojo.User;
 import pojo.Userbag;
-import utils.UserbagUtil;
-
+import service.userbagservice.service.UserbagService;
 
 
 /**
@@ -25,7 +24,9 @@ public class UserbagCaculationService {
     @Autowired
     private UserbagMapper userbagMapper;
     @Autowired
-    private AchievementExecutor achievementExecutor;
+    private AchievementService achievementService;
+    @Autowired
+    private UserbagService userbagService;
 
     public void addUserBagForUser(User user, Userbag value) {
         value.setName(user.getUsername());
@@ -62,12 +63,12 @@ public class UserbagCaculationService {
             for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
                 Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
                 if (achievementprocess.getType().equals(Achievement.COLLECT)) {
-                    achievementExecutor.executeCollect(achievementprocess, equipment, user, achievement);
+                    achievementService.executeCollect(achievementprocess, equipment, user, achievement);
                 }
             }
         }
         Channel channel = ProjectContext.userToChannelMap.get(user);
-        UserbagUtil.refreshUserbagInfo(channel);
+        userbagService.refreshUserbagInfo(channel,null);
     }
 
     public void removeUserbagFromUser(User user, Userbag userbag, Integer num) {
@@ -81,7 +82,7 @@ public class UserbagCaculationService {
             userbagMapper.updateByPrimaryKey(userbag);
         }
         Channel channel = ProjectContext.userToChannelMap.get(user);
-        UserbagUtil.refreshUserbagInfo(channel);
+        userbagService.refreshUserbagInfo(channel,null);
     }
 
 }

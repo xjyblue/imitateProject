@@ -1,16 +1,16 @@
 package service.weaponservice.service;
 
-import component.good.Equipment;
-import component.good.parent.PGood;
-import config.MessageConfig;
-import context.ProjectContext;
+import core.component.good.Equipment;
+import core.component.good.parent.PGood;
+import core.config.MessageConfig;
+import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userbag;
 import pojo.Weaponequipmentbar;
-import service.achievementservice.service.AchievementExecutor;
+import service.achievementservice.service.AchievementService;
 import utils.MessageUtil;
 
 import java.util.UUID;
@@ -22,7 +22,7 @@ import java.util.UUID;
 @Component
 public class Weaponservice {
     @Autowired
-    private AchievementExecutor achievementExecutor;
+    private AchievementService achievementService;
 
     //  展示武器栏
     public void queryEquipmentBar(Channel channel, String msg) {
@@ -139,7 +139,7 @@ public class Weaponservice {
         user.getUserBag().remove(userbag);
         channel.writeAndFlush(MessageUtil.turnToPacket("[" + ProjectContext.equipmentMap.get(userbag.getWid()).getName() + "]" + "该装备穿戴成功"));
 //          成就装备等级总和
-        achievementExecutor.executeEquipmentStartLevel(user);
+        achievementService.executeEquipmentStartLevel(user);
 
         return;
     }

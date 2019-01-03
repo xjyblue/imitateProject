@@ -2,20 +2,20 @@ package service.attackservice.service;
 
 import service.caculationservice.service.AttackCaculationService;
 import service.caculationservice.service.HpCaculationService;
-import component.scene.Scene;
-import component.scene.BossScene;
-import component.good.Equipment;
+import service.sceneservice.entity.Scene;
+import service.sceneservice.entity.BossScene;
+import core.component.good.Equipment;
 import service.buffservice.entity.BuffConstant;
-import config.MessageConfig;
-import config.GrobalConfig;
+import core.config.MessageConfig;
+import core.config.GrobalConfig;
 import service.userbagservice.service.UserbagService;
 import service.weaponservice.service.Weaponservice;
 import utils.ReflectMethodUtil;
 import service.buffservice.service.BuffService;
-import event.EventStatus;
-import factory.MonsterFactory;
+import core.ChannelStatus;
+import core.factory.MonsterFactory;
 import io.netty.channel.Channel;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ import service.shopservice.service.ShopService;
 import service.skillservice.entity.UserSkill;
 import service.attackservice.util.AttackUtil;
 import utils.MessageUtil;
-import component.monster.Monster;
+import core.component.monster.Monster;
 import service.userservice.service.UserService;
 
 import java.io.IOException;
@@ -67,14 +67,24 @@ public class AttackService {
     @Autowired
     private Weaponservice weaponservice;
 
-    @Order(orderMsg = "chat-,chatAll")
-    public void chatEvent(Channel channel, String msg) throws InvocationTargetException, IllegalAccessException {
-        ReflectMethodUtil.reflectAnnotation(chatService, channel, msg);
+    @Order(orderMsg = "chat-")
+    public void chatOne(Channel channel, String msg) {
+        chatService.chatOne(channel, msg);
     }
 
-    @Order(orderMsg = "bg,qs")
-    public void shopEvent(Channel channel, String msg) throws InvocationTargetException, IllegalAccessException {
-        ReflectMethodUtil.reflectAnnotation(shopService, channel, msg);
+    @Order(orderMsg = "chatAll")
+    public void chatAll(Channel channel, String msg) {
+        chatService.chatAll(channel, msg);
+    }
+
+    @Order(orderMsg = "qs")
+    public void queryShop(Channel channel, String msg) {
+        shopService.queryShopGood(channel, msg);
+    }
+
+    @Order(orderMsg = "bg")
+    public void buyShopGood(Channel channel, String msg) {
+        shopService.buyShopGood(channel, msg);
     }
 
     @Order(orderMsg = "qf")
@@ -87,39 +97,39 @@ public class AttackService {
 //          普通战斗中退出
             ProjectContext.userToMonsterMap.remove(ProjectContext.session2UserIds.get(channel));
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RETREATFIGHT));
-            ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
+            ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
             return;
         }
     }
 
     @Order(orderMsg = "qw")
-    public void showUserWeapon(Channel channel,String msg){
-        weaponservice.queryEquipmentBar(channel,msg);
+    public void showUserWeapon(Channel channel, String msg) {
+        weaponservice.queryEquipmentBar(channel, msg);
     }
 
     @Order(orderMsg = "fix")
-    public void fixWeapon(Channel channel,String msg){
-        weaponservice.fixEquipment(channel,msg);
+    public void fixWeapon(Channel channel, String msg) {
+        weaponservice.fixEquipment(channel, msg);
     }
 
     @Order(orderMsg = "wq")
-    public void takeOffWeapon(Channel channel,String msg){
-        weaponservice.quitEquipment(channel,msg);
+    public void takeOffWeapon(Channel channel, String msg) {
+        weaponservice.quitEquipment(channel, msg);
     }
 
     @Order(orderMsg = "ww")
-    public void takeInWeapon(Channel channel,String msg){
-        weaponservice.takeEquipment(channel,msg);
+    public void takeInWeapon(Channel channel, String msg) {
+        weaponservice.takeEquipment(channel, msg);
     }
 
     @Order(orderMsg = "qb")
-    public void showUserbag(Channel channel,String msg){
-        userbagService.refreshUserbagInfo(channel,msg);
+    public void showUserbag(Channel channel, String msg) {
+        userbagService.refreshUserbagInfo(channel, msg);
     }
 
     @Order(orderMsg = "ub-")
-    public void useUserbag(Channel channel,String msg){
-        userbagService.useUserbag(channel,msg);
+    public void useUserbag(Channel channel, String msg) {
+        userbagService.useUserbag(channel, msg);
     }
 
     @Order(orderMsg = "*")
@@ -170,6 +180,7 @@ public class AttackService {
         }
     }
 
+//  战斗完成后恢复血量，仅限副本可用
     @Order(orderMsg = "recover")
     public void recoverUserHpAndMp(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -191,7 +202,8 @@ public class AttackService {
         channel.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "的血量为：" + user.getHp() + "蓝量为：" + user.getMp()));
     }
 
-//  持续攻击逻辑
+
+    //  持续攻击逻辑
     private void attackKeySolve(Channel channel, String msg) throws IOException {
         User user = ProjectContext.session2UserIds.get(channel);
         if (!ProjectContext.userskillrelationMap.get(user).containsKey(msg)) {
@@ -309,7 +321,7 @@ public class AttackService {
     }
 
 
-//  对普通场景的怪物进行第一次攻击
+    //  对普通场景的怪物进行第一次攻击
     public void attackCommonFirst(Channel channel, String msg) throws IOException {
         User user = ProjectContext.session2UserIds.get(channel);
         String[] temp = msg.split("-");
@@ -390,7 +402,7 @@ public class AttackService {
             }
         } else {
 //          切换到攻击模式
-            ProjectContext.eventStatus.put(channel, EventStatus.ATTACK);
+            ProjectContext.eventStatus.put(channel, ChannelStatus.ATTACK);
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
 //          记录当前攻击的目标
             Map<Integer, Monster> monsterMap = new HashMap<>();
@@ -401,7 +413,7 @@ public class AttackService {
         }
     }
 
-//  获取普通场景的怪物
+    //  获取普通场景的怪物
     private Monster getMonster(User user, String monsterName) {
         for (Monster monster : ProjectContext.sceneMap.get(user.getPos()).getMonsters()) {
             if (monster.getName().equals(monsterName)) {
@@ -411,6 +423,7 @@ public class AttackService {
         return null;
     }
 
+//  武器耐久度输出
     private String out(User user) {
         String resp = "";
         for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
@@ -420,4 +433,5 @@ public class AttackService {
         }
         return resp;
     }
+
 }

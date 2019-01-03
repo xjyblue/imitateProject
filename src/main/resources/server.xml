@@ -12,10 +12,7 @@
 	<context:annotation-config />
 	<!-- 扫包 -->
 	<context:component-scan
-		base-package="client server event caculation factory achievement buff" />
-
-	<context:component-scan
-		base-package="service" />
+		base-package="client server core service" />
 
 	<!-- 获取spring管理bean的工具类 -->
 	<bean class="utils.SpringContextUtil" lazy-init="false" />

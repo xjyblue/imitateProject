@@ -1,8 +1,8 @@
 package service.caculationservice.service;
 
-import service.achievementservice.service.AchievementExecutor;
-import config.MessageConfig;
-import context.ProjectContext;
+import service.achievementservice.service.AchievementService;
+import core.config.MessageConfig;
+import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class MoneyCaculationService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
-    private AchievementExecutor achievementExecutor;
+    private AchievementService achievementService;
 
     public void addMoneyToUser(User user, String money) {
         int usermoney = Integer.parseInt(user.getMoney());
@@ -27,7 +27,7 @@ public class MoneyCaculationService {
         usermoney += addmoney;
         user.setMoney(String.valueOf(usermoney));
 //      处理用户成就
-        achievementExecutor.executeMoneyAchievement(user);
+        achievementService.executeMoneyAchievement(user);
 //      同步到数据库
         userMapper.updateByPrimaryKeySelective(user);
     }

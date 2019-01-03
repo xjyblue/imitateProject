@@ -1,11 +1,11 @@
 package service.npcservice.service;
 
-import component.good.Equipment;
-import component.good.parent.PGood;
-import component.scene.Scene;
-import config.GrobalConfig;
-import config.MessageConfig;
-import context.ProjectContext;
+import core.component.good.Equipment;
+import core.component.good.parent.PGood;
+import service.sceneservice.entity.Scene;
+import core.config.GrobalConfig;
+import core.config.MessageConfig;
+import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import pojo.Achievementprocess;
 import pojo.User;
 import pojo.Userbag;
 import service.achievementservice.entity.Achievement;
-import service.achievementservice.service.AchievementExecutor;
+import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.UserbagCaculationService;
 import service.npcservice.entity.NPC;
 import utils.MessageUtil;
@@ -28,7 +28,7 @@ import java.util.UUID;
 @Component
 public class NpcService {
     @Autowired
-    private AchievementExecutor achievementExecutor;
+    private AchievementService achievementService;
     @Autowired
     private UserbagCaculationService userbagCaculationService;
 
@@ -47,7 +47,7 @@ public class NpcService {
                     for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
                         Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
                         if (achievementprocess.getType().equals(Achievement.TALKTONPC)) {
-                            achievementExecutor.executeTalkNPC(achievementprocess, user, achievement, npc);
+                            achievementService.executeTalkNPC(achievementprocess, user, achievement, npc);
                         }
                     }
                     return;

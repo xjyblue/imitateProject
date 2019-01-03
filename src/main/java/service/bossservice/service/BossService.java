@@ -2,20 +2,19 @@ package service.bossservice.service;
 
 import service.caculationservice.service.AttackCaculationService;
 import service.caculationservice.service.HpCaculationService;
-import component.scene.BossScene;
-import component.good.Equipment;
-import component.monster.Monster;
-import component.scene.Scene;
-import config.MessageConfig;
-import config.GrobalConfig;
+import service.sceneservice.entity.BossScene;
+import core.component.good.Equipment;
+import core.component.monster.Monster;
+import service.sceneservice.entity.Scene;
+import core.config.MessageConfig;
+import core.config.GrobalConfig;
 import service.userbagservice.service.UserbagService;
 import service.weaponservice.service.Weaponservice;
-import utils.ReflectMethodUtil;
 import service.buffservice.service.BuffService;
-import event.EventStatus;
+import core.ChannelStatus;
 import service.shopservice.service.ShopService;
 import io.netty.channel.Channel;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,7 +28,6 @@ import service.attackservice.util.AttackUtil;
 import service.levelservice.service.LevelService;
 import utils.MessageUtil;
 
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.Future;
@@ -74,7 +72,7 @@ public class BossService {
 
 //      处理用户死亡后重连副本逻辑
         if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
-            ProjectContext.eventStatus.put(channel, EventStatus.BOSSAREA);
+            ProjectContext.eventStatus.put(channel, ChannelStatus.BOSSSCENE);
 //          进入副本，用户场景线程转移
             BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
             bossScene.getUserMap().put(user.getUsername(), user);
@@ -120,14 +118,24 @@ public class BossService {
         changeChannelStatus(team, bossScene);
     }
 
-    @Order(orderMsg = "chat-,chatAll")
-    public void chatEvent(Channel channel, String msg) throws InvocationTargetException, IllegalAccessException {
-        ReflectMethodUtil.reflectAnnotation(chatService, channel, msg);
+    @Order(orderMsg = "chat-")
+    public void chatOne(Channel channel, String msg){
+       chatService.chatOne(channel,msg);
     }
 
-    @Order(orderMsg = "bg,qs")
-    public void shopEvent(Channel channel, String msg) throws InvocationTargetException, IllegalAccessException {
-        ReflectMethodUtil.reflectAnnotation(shopService, channel, msg);
+    @Order(orderMsg = "chatAll")
+    public void chatAll(Channel channel,String msg){
+        chatService.chatAll(channel,msg);
+    }
+
+    @Order(orderMsg = "bg")
+    public void buyShopGood(Channel channel, String msg) {
+        shopService.buyShopGood(channel,msg);
+    }
+
+    @Order(orderMsg = "qs")
+    public void queryShopGood(Channel channel,String msg){
+        shopService.queryShopGood(channel,msg);
     }
 
     @Order(orderMsg = "qw")
@@ -178,7 +186,7 @@ public class BossService {
 //      提示
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTBOSSAREA));
 //      渠道状态更新
-        ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
+        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
     }
 
     @Order(orderMsg = "attack")
@@ -280,12 +288,12 @@ public class BossService {
             }
         } else {
 //          切换到攻击模式
-            ProjectContext.eventStatus.put(channel, EventStatus.ATTACK);
+            ProjectContext.eventStatus.put(channel, ChannelStatus.ATTACK);
 
 //          记录人物当前攻击的怪物
             AttackUtil.addMonsterToUserMonsterList(user, monster);
 
-            ProjectContext.eventStatus.put(channel, EventStatus.ATTACK);
+            ProjectContext.eventStatus.put(channel, ChannelStatus.ATTACK);
             ProjectContext.endBossAreaTime.put(user.getTeamId(), System.currentTimeMillis() + bossScene.getKeepTime() * 1000);
         }
         channel.writeAndFlush(MessageUtil.turnToPacket(resp));
@@ -312,7 +320,7 @@ public class BossService {
 
 //          更新渠道的状态
             Channel channel = ProjectContext.userToChannelMap.get(entry.getValue());
-            ProjectContext.eventStatus.put(channel, EventStatus.BOSSAREA);
+            ProjectContext.eventStatus.put(channel, ChannelStatus.BOSSSCENE);
 
             String resp = "进入" + bossScene.getBossName() + "副本,出现boss有：";
             for (Map.Entry<String, Monster> entryMonster : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {

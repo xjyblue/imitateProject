@@ -2,12 +2,12 @@ package service.buffservice.service;
 
 import service.buffservice.entity.Buff;
 import com.google.common.collect.Lists;
-import component.scene.BossScene;
-import component.monster.Monster;
+import service.sceneservice.entity.BossScene;
+import core.component.monster.Monster;
 import service.buffservice.entity.BuffConstant;
-import config.GrobalConfig;
+import core.config.GrobalConfig;
 import io.netty.channel.Channel;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userskillrelation;

@@ -1,18 +1,18 @@
 package service.transactionservice.service;
 
-import service.achievementservice.service.AchievementExecutor;
+import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
-import component.good.Equipment;
-import component.good.MpMedicine;
-import component.good.parent.PGood;
-import config.GrobalConfig;
-import config.MessageConfig;
+import core.component.good.Equipment;
+import core.component.good.MpMedicine;
+import core.component.good.parent.PGood;
+import core.config.GrobalConfig;
+import core.config.MessageConfig;
 import service.userbagservice.service.UserbagService;
 import service.weaponservice.service.Weaponservice;
-import event.EventStatus;
+import core.ChannelStatus;
 import io.netty.channel.Channel;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,6 @@ import pojo.Userbag;
 import service.transactionservice.entity.Trade;
 import utils.MessageUtil;
 import service.userservice.service.UserService;
-import utils.UserbagUtil;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -44,7 +43,7 @@ public class TransactionService {
     @Autowired
     private UserbagCaculationService userbagCaculationService;
     @Autowired
-    private AchievementExecutor achievementExecutor;
+    private AchievementService achievementService;
     @Autowired
     private MoneyCaculationService moneyCaculationService;
     @Autowired
@@ -53,6 +52,7 @@ public class TransactionService {
     private UserbagService userbagService;
     @Autowired
     private Weaponservice weaponservice;
+
     @Order(orderMsg = "ntrade")
     public void cancelTrade(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -117,9 +117,9 @@ public class TransactionService {
 //      把用户和另外一个用户设置成交易状态
 //      处理建立交易的逻辑
         user.setTraceId(userStart.getTraceId());
-        ProjectContext.eventStatus.put(channel, EventStatus.TRADE);
+        ProjectContext.eventStatus.put(channel, ChannelStatus.TRADE);
         Channel channelStart = ProjectContext.userToChannelMap.get(userStart);
-        ProjectContext.eventStatus.put(channelStart, EventStatus.TRADE);
+        ProjectContext.eventStatus.put(channelStart, ChannelStatus.TRADE);
         trade.setUserTo(user);
         trade.setEndTime(System.currentTimeMillis() + 500000);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSCREATETRADE));
@@ -183,7 +183,7 @@ public class TransactionService {
         Channel channelStart = ProjectContext.userToChannelMap.get(trade.getUserStart());
         Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
         try {
-            lock.lock();
+            agreelock.lock();
             trade.setIfexe(false);
         } finally {
             agreelock.unlock();
@@ -206,8 +206,8 @@ public class TransactionService {
 //           内存交易单移除
         ProjectContext.tradeMap.remove(trade.getTradeId());
 //          渠道状态还原
-        ProjectContext.eventStatus.put(channelStart, EventStatus.STOPAREA);
-        ProjectContext.eventStatus.put(channelEnd, EventStatus.STOPAREA);
+        ProjectContext.eventStatus.put(channelStart, ChannelStatus.COMMONSCENE);
+        ProjectContext.eventStatus.put(channelEnd, ChannelStatus.COMMONSCENE);
 //          人物tradeid移除
         trade.getUserStart().setTraceId(null);
         trade.getUserTo().setTraceId(null);
@@ -273,19 +273,20 @@ public class TransactionService {
 //           内存交易单移除
         ProjectContext.tradeMap.remove(trade.getTradeId());
 //          渠道状态还原
-        ProjectContext.eventStatus.put(channelStart, EventStatus.STOPAREA);
-        ProjectContext.eventStatus.put(channelEnd, EventStatus.STOPAREA);
+        ProjectContext.eventStatus.put(channelStart, ChannelStatus.COMMONSCENE);
+        ProjectContext.eventStatus.put(channelEnd, ChannelStatus.COMMONSCENE);
 //          人物tradeid移除
         trade.getUserStart().setTraceId(null);
         trade.getUserTo().setTraceId(null);
 //          人物交易状态改为false
         trade.getUserTo().setIfTrade(false);
         trade.getUserStart().setIfTrade(false);
-        UserbagUtil.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserTo()));
-        UserbagUtil.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserStart()));
+
+        userbagService.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserTo()),null);
+        userbagService.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserStart()),null);
 
 //          第一次成功交易触发任务
-        achievementExecutor.executeFirstTrade(trade.getUserStart(), trade.getUserTo());
+        achievementService.executeFirstTrade(trade.getUserStart(), trade.getUserTo());
     }
 
     @Order(orderMsg = "xjbjy")

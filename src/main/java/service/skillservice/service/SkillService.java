@@ -1,10 +1,10 @@
 package service.skillservice.service;
 
-import config.MessageConfig;
-import event.EventStatus;
+import core.config.MessageConfig;
+import core.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.UserskillrelationMapper;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,6 +14,7 @@ import pojo.UserskillrelationExample;
 import service.skillservice.entity.UserSkill;
 import utils.MessageUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,9 +26,9 @@ public class SkillService {
     @Autowired
     private UserskillrelationMapper userskillrelationMapper;
 
-//  查看用户技能
+    //  查看用户技能
     @Order(orderMsg = "lookSkill")
-    public void lookSkill(Channel channel,String msg){
+    public void lookSkill(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String skillLook = "";
         channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
@@ -43,11 +44,11 @@ public class SkillService {
         channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
     }
 
-//  改变用户技能键位
+    //  改变用户技能键位
     @Order(orderMsg = "change")
-    public void changeSkill(Channel channel,String msg){
+    public void changeSkill(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
-        String[]temp = msg.split("-");
+        String[] temp = msg.split("-");
         if (temp.length == 3) {
             boolean flag = false;
             Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(user);
@@ -77,12 +78,34 @@ public class SkillService {
         }
     }
 
-//  退出用户技能管理
+    //  退出用户技能管理
     @Order(orderMsg = "quitSkill")
-    public void quitSkill(Channel channel,String msg){
+    public void quitSkill(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         channel.writeAndFlush(MessageUtil.turnToPacket("您已退出技能管理模块，进入" + ProjectContext.sceneMap.get(user.getPos()).getName()));
-        ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
+        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
     }
 
+    public void enterSkillView(Channel channel, String msg) {
+        ProjectContext.eventStatus.put(channel, ChannelStatus.SKILLVIEW);
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SKILLVIEWMESG));
+    }
+
+    public UserSkill getUserSkillByKey(Channel channel, String key) {
+        User user = ProjectContext.session2UserIds.get(channel);
+        if (!ProjectContext.userskillrelationMap.get(user).containsKey(key)) {
+            return null;
+        }
+        return ProjectContext.skillMap.get(ProjectContext.userskillrelationMap.get(user).get(key).getSkillid());
+    }
+
+    public List<UserSkill> getUserSkillByUserRole(int roleid) {
+        List<UserSkill> list = new ArrayList<>();
+        for (Map.Entry<Integer, UserSkill> entry : ProjectContext.skillMap.entrySet()) {
+            if (roleid == entry.getValue().getRoleSkill()) {
+                list.add(entry.getValue());
+            }
+        }
+        return list;
+    }
 }

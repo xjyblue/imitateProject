@@ -1,11 +1,11 @@
 package server;
 
 
-import event.EventDistributor;
+import core.ServiceDistributor;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import packet.PacketProto;
@@ -18,7 +18,7 @@ import packet.PacketProto;
 @Service("serverLoginHandler")
 public class ServerLoginHandler extends ChannelHandlerAdapter {
     @Autowired
-    private EventDistributor eventDistributor;
+    private ServiceDistributor serviceDistributor;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -26,7 +26,7 @@ public class ServerLoginHandler extends ChannelHandlerAdapter {
 //          没登录走这里
             if (msg instanceof PacketProto.Packet) {
                 PacketProto.Packet packet = (PacketProto.Packet) msg;
-                eventDistributor.distributeEvent(ctx.channel(),packet.getData());
+                serviceDistributor.distributeEvent(ctx.channel(),packet.getData());
             }
         }else {
             ctx.fireChannelRead(msg);

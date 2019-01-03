@@ -1,15 +1,14 @@
 package service.shopservice.service;
 
 import service.caculationservice.service.UserbagCaculationService;
-import component.good.Equipment;
-import component.good.HpMedicine;
-import component.good.MpMedicine;
-import component.good.parent.PGood;
-import config.GrobalConfig;
-import config.MessageConfig;
+import core.component.good.Equipment;
+import core.component.good.HpMedicine;
+import core.component.good.MpMedicine;
+import core.component.good.parent.PGood;
+import core.config.GrobalConfig;
+import core.config.MessageConfig;
 import io.netty.channel.Channel;
-import context.ProjectContext;
-import order.Order;
+import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -29,7 +28,6 @@ public class ShopService {
     @Autowired
     private UserbagCaculationService userbagCaculationService;
 
-    @Order(orderMsg = "qs")
     public void queryShopGood(Channel channel,String msg){
         String resp = System.getProperty("line.separator")
                 + MessageConfig.MESSAGESTART
@@ -73,7 +71,6 @@ public class ShopService {
         channel.writeAndFlush(MessageUtil.turnToPacket(resp));
     }
 
-    @Order(orderMsg = "bg")
     public void buyShopGood(Channel channel,String msg){
         User user = ProjectContext.session2UserIds.get(channel);
         String temp[] = msg.split("-");

@@ -1,9 +1,9 @@
 package service.caculationservice.service;
 
 import service.buffservice.entity.Buff;
-import component.good.Equipment;
+import core.component.good.Equipment;
 import service.buffservice.entity.BuffConstant;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import service.levelservice.entity.Level;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import packet.PacketType;
 import pojo.User;
 import pojo.Weaponequipmentbar;
-import component.monster.MonsterSkill;
+import core.component.monster.MonsterSkill;
 import service.levelservice.service.LevelService;
 import utils.MessageUtil;
 

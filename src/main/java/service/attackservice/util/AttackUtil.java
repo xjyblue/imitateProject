@@ -1,12 +1,12 @@
 package service.attackservice.util;
 
-import component.scene.BossScene;
-import component.monster.Monster;
+import service.sceneservice.entity.BossScene;
+import core.component.monster.Monster;
 import service.buffservice.entity.BuffConstant;
-import event.EventStatus;
+import core.ChannelStatus;
 import service.rewardservice.service.RewardService;
 import io.netty.channel.Channel;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import pojo.User;
 import service.teamservice.entity.Team;
 import utils.MessageUtil;
@@ -29,8 +29,8 @@ public class AttackUtil {
 //      将所有用户弄为战斗状态
         for (Map.Entry<String, User> entry : bossScene.getUserMap().entrySet()) {
             Channel channelT = ProjectContext.userToChannelMap.get(entry.getValue());
-            if(!ProjectContext.eventStatus.get(channelT).equals(EventStatus.DEADAREA)){
-                ProjectContext.eventStatus.put(channelT,EventStatus.ATTACK);
+            if(!ProjectContext.eventStatus.get(channelT).equals(ChannelStatus.DEADSCENE)){
+                ProjectContext.eventStatus.put(channelT, ChannelStatus.ATTACK);
             }
         }
 

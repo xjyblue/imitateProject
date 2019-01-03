@@ -1,10 +1,10 @@
 package service.caculationservice.service;
 
-import component.monster.Monster;
-import config.GrobalConfig;
-import event.EventStatus;
+import core.component.monster.Monster;
+import core.config.GrobalConfig;
+import core.ChannelStatus;
 import io.netty.channel.Channel;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import service.levelservice.service.LevelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,12 +41,12 @@ public class HpCaculationService {
         if (userHp < 0) {
             userHp = 0;
         }
-        if (ProjectContext.eventStatus.get(channel).equals(EventStatus.ATTACK) && userHp == 0 && user.getStatus().equals(GrobalConfig.ALIVE)) {
+        if (ProjectContext.eventStatus.get(channel).equals(ChannelStatus.ATTACK) && userHp == 0 && user.getStatus().equals(GrobalConfig.ALIVE)) {
             user.setHp(GrobalConfig.MINVALUE);
             user.setStatus(GrobalConfig.DEAD);
 //          移除用户所攻击的所有怪物
             ProjectContext.userToMonsterMap.remove(user);
-            ProjectContext.eventStatus.put(channel, EventStatus.DEADAREA);
+            ProjectContext.eventStatus.put(channel, ChannelStatus.DEADSCENE);
         } else {
             user.setHp(userHp.toString());
         }

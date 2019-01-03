@@ -1,15 +1,15 @@
 package service.registerservice.service;
 
 import service.achievementservice.entity.Achievement;
-import config.GrobalConfig;
-import config.MessageConfig;
-import event.EventStatus;
+import core.config.GrobalConfig;
+import core.config.MessageConfig;
+import core.ChannelStatus;
 import io.netty.channel.Channel;
 import service.levelservice.entity.Level;
 import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ import pojo.User;
 import pojo.Userskillrelation;
 import service.skillservice.entity.UserSkill;
 import service.levelservice.service.LevelService;
-import service.skillservice.util.UserSkillUtil;
+import service.skillservice.service.SkillService;
 import utils.MessageUtil;
 
 import java.util.List;
@@ -34,6 +34,9 @@ public class RegisterService {
     private AchievementprocessMapper achievementprocessMapper;
     @Autowired
     private LevelService levelService;
+    @Autowired
+    private SkillService skillService;
+
     @Order(orderMsg = "*")
     public void register(Channel channel, String msg) {
         String[] temp = msg.split("-");
@@ -65,7 +68,7 @@ public class RegisterService {
         userMapper.insertSelective(user);
 
 //      根据用户种族填充初始技能信息
-        List<UserSkill> list = UserSkillUtil.getUserSkillByUserRole(user.getRoleid());
+        List<UserSkill> list = skillService.getUserSkillByUserRole(user.getRoleid());
 //      键位初始值，我们统一在注册时初始键位，后期玩家自己去调整自己想要的键位
         int count = 1;
         for(UserSkill userSkill : list){
@@ -99,6 +102,6 @@ public class RegisterService {
         }
 
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERSUCCESS));
-        ProjectContext.eventStatus.put(channel, EventStatus.LOGIN);
+        ProjectContext.eventStatus.put(channel, ChannelStatus.LOGIN);
     }
 }

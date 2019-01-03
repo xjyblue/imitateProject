@@ -1,27 +1,23 @@
 package service.labourUnionservice.service;
 
-import org.checkerframework.checker.units.qual.A;
-import service.achievementservice.service.AchievementExecutor;
+import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
-import component.good.parent.PGood;
-import config.MessageConfig;
+import core.component.good.parent.PGood;
+import core.config.MessageConfig;
 import service.userbagservice.service.UserbagService;
 import service.weaponservice.service.Weaponservice;
-import utils.ReflectMethodUtil;
-import event.EventStatus;
+import core.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.*;
-import context.ProjectContext;
+import core.context.ProjectContext;
 import order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import packet.PacketType;
 import pojo.*;
 import utils.MessageUtil;
-import utils.UserbagUtil;
 
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +44,7 @@ public class LabourUnionService {
     @Autowired
     private UserbagCaculationService userbagCaculationService;
     @Autowired
-    private AchievementExecutor achievementExecutor;
+    private AchievementService achievementService;
     @Autowired
     private MoneyCaculationService moneyCaculationService;
     @Autowired
@@ -199,7 +195,7 @@ public class LabourUnionService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
             return;
         }
-        Userbag userbag = UserbagUtil.getUserbagByUserbagId(user, temp[1]);
+        Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
             return;
@@ -421,7 +417,7 @@ public class LabourUnionService {
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + "您同意了" + userTarget.getUsername() + "加入本工会", PacketType.UNIONINFO));
 
 //      处理第一次加入工会的事件
-        achievementExecutor.executeAddUnionFirst(userSession, userTarget.getUsername());
+        achievementService.executeAddUnionFirst(userSession, userTarget.getUsername());
 
         String msgToAll = "欢迎" + userTarget.getUsername() + "加入了本公会";
         messageToAllInUnion(applyunioninfo.getUnionid(), msgToAll);
@@ -543,9 +539,8 @@ public class LabourUnionService {
         return;
     }
 
-    @Order(orderMsg = "g")
     public void enterUnionView(Channel channel, String msg) {
-        ProjectContext.eventStatus.put(channel, EventStatus.LABOURUNION);
+        ProjectContext.eventStatus.put(channel, ChannelStatus.LABOURUNION);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERLABOURVIEW));
         User user = ProjectContext.session2UserIds.get(channel);
         if (user.getUnionid() == null) {
@@ -558,7 +553,7 @@ public class LabourUnionService {
 
     @Order(orderMsg = "qt")
     public void outUnionView(Channel channel, String msg) {
-        ProjectContext.eventStatus.put(channel, EventStatus.STOPAREA);
+        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTLABOURVIEW));
         channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.UNIONINFO));
         return;
