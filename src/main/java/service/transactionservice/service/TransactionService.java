@@ -5,7 +5,7 @@ import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
 import core.component.good.Equipment;
 import core.component.good.MpMedicine;
-import core.component.good.parent.PGood;
+import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import service.userbagservice.service.UserbagService;
@@ -13,10 +13,10 @@ import service.weaponservice.service.Weaponservice;
 import core.ChannelStatus;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
-import order.Order;
+import core.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import packet.PacketType;
+import core.packet.PacketType;
 import pojo.User;
 import pojo.Userbag;
 import service.transactionservice.entity.Trade;
@@ -31,9 +31,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/12/3 10:14
- */
+ * @ClassName TransactionService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class TransactionService {
 
@@ -52,7 +55,11 @@ public class TransactionService {
     private UserbagService userbagService;
     @Autowired
     private Weaponservice weaponservice;
-
+    /**
+     * 不同意交易
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "ntrade")
     public void cancelTrade(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -80,11 +87,16 @@ public class TransactionService {
         }
     }
 
+    /**
+     * 同意交易
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "ytrade")
     public void agreeTrade(Channel channel, String msg) {
-        String temp[] = msg.split("=");
+        String[] temp = msg.split("=");
         User user = ProjectContext.session2UserIds.get(channel);
-        if (temp.length != 2) {
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
@@ -129,15 +141,20 @@ public class TransactionService {
         channelStart.writeAndFlush(MessageUtil.turnToPacket("欢迎来到交易界面，现在您与" + user.getUsername() + "建立交易，jbjy=金币金额进行金币交易，jyg=交易格子号可以把交易物品填充到交易栏，jy=y确认交易物品，双方都确认后交易完成", PacketType.TRADEMSG));
     }
 
+    /**
+     * 请求交易
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "iftrade")
     public void createTrade(Channel channel, String msg) {
-        String temp[] = msg.split("-");
+        String[] temp = msg.split("-");
         User user = ProjectContext.session2UserIds.get(channel);
-        if (temp.length != 2) {
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        Channel channelTarget = ProjectContext.userToChannelMap.get(userService.getUserByName(temp[1]));
+        Channel channelTarget = ProjectContext.userToChannelMap.get(userService.getUserByNameFromSession(temp[1]));
         if (channelTarget == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTRACEUSER));
             return;
@@ -169,13 +186,18 @@ public class TransactionService {
         trade.setToMoney(new BigInteger(GrobalConfig.MINVALUE));
         trade.setStartUserAgree(false);
         trade.setIfexe(false);
-        trade.setStartUserBag(new HashMap<String, Userbag>());
-        trade.setToUserBag(new HashMap<String, Userbag>());
+        trade.setStartUserBag(new HashMap<String, Userbag>(64));
+        trade.setToUserBag(new HashMap<String, Userbag>(64));
         trade.setUserStart(user);
         ProjectContext.tradeMap.put(trade.getTradeId(), trade);
         channelTarget.writeAndFlush(MessageUtil.turnToPacket("你收到了来自" + user.getUsername() + "的交易请求交易单为:" + uuid + ",同意交易请输入ytrade=交易单"));
     }
 
+    /**
+     * 取消交易
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "jy=q")
     public void quitTrade(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -216,6 +238,11 @@ public class TransactionService {
         trade.getUserStart().setIfTrade(false);
     }
 
+    /**
+     * 同意交易的物品
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "jy=y")
     public void trading(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -242,7 +269,7 @@ public class TransactionService {
             if (user == trade.getUserTo() && !trade.getToUserAgree()) {
                 trade.setToUserAgree(true);
             }
-            if ((trade.getStartUserAgree() && !trade.getToUserAgree()) || (trade.getToUserAgree() && !trade.getStartUserAgree())) {
+            if (selectTradeUser(trade)) {
                 if (user == trade.getUserStart()) {
                     channelStart.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.YOUCOMFIRMTRADE));
                     channelEnd.writeAndFlush(MessageUtil.turnToPacket(trade.getUserStart().getUsername() + "同意了此次交易，请您尽快做出抉择"));
@@ -282,13 +309,28 @@ public class TransactionService {
         trade.getUserTo().setIfTrade(false);
         trade.getUserStart().setIfTrade(false);
 
-        userbagService.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserTo()),null);
-        userbagService.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserStart()),null);
+        userbagService.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserTo()), null);
+        userbagService.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserStart()), null);
 
 //          第一次成功交易触发任务
         achievementService.executeFirstTrade(trade.getUserStart(), trade.getUserTo());
     }
 
+    /**
+     * 判断哪个一交易方
+     *
+     * @param trade
+     * @return
+     */
+    private boolean selectTradeUser(Trade trade) {
+        return (trade.getStartUserAgree() && !trade.getToUserAgree()) || (trade.getToUserAgree() && !trade.getStartUserAgree());
+    }
+
+    /**
+     * 金币交易减少
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "xjbjy")
     public void reduceMoney(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -296,11 +338,10 @@ public class TransactionService {
         Channel channelStart = ProjectContext.userToChannelMap.get(trade.getUserStart());
         Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
-        if (temp.length != 2) {
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        BigInteger userMoney = new BigInteger(user.getMoney());
         BigInteger noSendMoney = new BigInteger(temp[1]);
         if (user == trade.getUserStart()) {
             if (trade.getStartMoney().compareTo(noSendMoney) < 0) {
@@ -327,6 +368,11 @@ public class TransactionService {
         return;
     }
 
+    /**
+     * 金币交易增加
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "jbjy")
     public void addMoney(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -334,7 +380,7 @@ public class TransactionService {
         Channel channelStart = ProjectContext.userToChannelMap.get(trade.getUserStart());
         Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
-        if (temp.length != 2) {
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
@@ -344,7 +390,7 @@ public class TransactionService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.TRADENOENOUGHMONEY));
             return;
         }
-        moneyCaculationService.removeMoneyToUser(user,sendMoney.toString());
+        moneyCaculationService.removeMoneyToUser(user, sendMoney.toString());
         channel.writeAndFlush(MessageUtil.turnToPacket("你的剩余金额为：" + user.getMoney()));
         if (user == trade.getUserStart()) {
             trade.setStartMoney(trade.getStartMoney().add(sendMoney));
@@ -356,37 +402,71 @@ public class TransactionService {
         channelEnd.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
     }
 
-
+    /**
+     * 展示装备
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "qw")
-    public void showUserWeapon(Channel channel,String msg){
-        weaponservice.queryEquipmentBar(channel,msg);
+    public void showUserWeapon(Channel channel, String msg) {
+        weaponservice.queryEquipmentBar(channel, msg);
     }
 
+    /**
+     * 修复武器
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "fix")
-    public void fixWeapon(Channel channel,String msg){
-        weaponservice.fixEquipment(channel,msg);
+    public void fixWeapon(Channel channel, String msg) {
+        weaponservice.fixEquipment(channel, msg);
     }
 
+    /**
+     * 退下装备
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "wq")
-    public void takeOffWeapon(Channel channel,String msg){
-        weaponservice.quitEquipment(channel,msg);
+    public void takeOffWeapon(Channel channel, String msg) {
+        weaponservice.quitEquipment(channel, msg);
     }
 
+    /**
+     * 穿上装备
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "ww")
-    public void takeInWeapon(Channel channel,String msg){
-        weaponservice.takeEquipment(channel,msg);
+    public void takeInWeapon(Channel channel, String msg) {
+        weaponservice.takeEquipment(channel, msg);
     }
 
+    /**
+     * 展示背包
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "qb")
-    public void showUserbag(Channel channel,String msg){
-        userbagService.refreshUserbagInfo(channel,msg);
+    public void showUserbag(Channel channel, String msg) {
+        userbagService.refreshUserbagInfo(channel, msg);
     }
 
+    /**
+     * 使用背包
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "ub-")
-    public void useUserbag(Channel channel,String msg){
-        userbagService.useUserbag(channel,msg);
+    public void useUserbag(Channel channel, String msg) {
+        userbagService.useUserbag(channel, msg);
     }
 
+    /**
+     * 添加交易物品
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "jyg=")
     public void addGood(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -394,19 +474,19 @@ public class TransactionService {
         Channel channelStart = ProjectContext.userToChannelMap.get(trade.getUserStart());
         Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
-        if (temp.length != 3) {
+        if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
 //          移除背包给子物品到交易单
-        Userbag userbag = getUserBagById(user, temp[1]);
+        Userbag userbag =userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
             return;
         }
 //          移除背包格子,放到交易单中
         if (trade.getUserStart() == user) {
-            if (userbag.getNum() < Integer.parseInt(temp[2])) {
+            if (userbag.getNum() < Integer.parseInt(temp[GrobalConfig.TWO])) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHGOODFORTRADE));
                 return;
             }
@@ -420,6 +500,11 @@ public class TransactionService {
         channelEnd.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
     }
 
+    /**
+     * 取消交易物品
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "xjyg=")
     public void reduceGood(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -428,7 +513,7 @@ public class TransactionService {
         Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
 //      移除交易单号武平到背包格子
-        if (temp.length != 3) {
+        if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
@@ -453,13 +538,20 @@ public class TransactionService {
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
     }
 
+    /**
+     * 移动
+     * @param userbag
+     * @param user
+     * @param userBag
+     * @param num
+     */
     private void moveToUserBag(Userbag userbag, User user, Map<String, Userbag> userBag, String num) {
-        if (userbag.getTypeof().equals(PGood.EQUIPMENT) && Integer.parseInt(num) == 1) {
+        if (userbag.getTypeof().equals(BaseGood.EQUIPMENT) && Integer.parseInt(num) == 1) {
             userBag.remove(userbag.getId());
             user.getUserBag().add(userbag);
             return;
         }
-        if (userbag.getTypeof().equals(PGood.MPMEDICINE)) {
+        if (userbag.getTypeof().equals(BaseGood.MPMEDICINE)) {
             if (userbag.getNum() == Integer.parseInt(num)) {
                 userBag.remove(userbag.getId());
             } else {
@@ -498,6 +590,11 @@ public class TransactionService {
     }
 
 
+    /**
+     * 输出信息
+     * @param trade
+     * @return
+     */
     private String outTradeMessage(Trade trade) {
         String resp = MessageConfig.TRADEMSG;
         resp += System.getProperty("line.separator") +
@@ -517,23 +614,19 @@ public class TransactionService {
         return resp;
     }
 
+    /**
+     * 获取物品名字
+     * @param userbag
+     * @return
+     */
     private String getUserbagInfoByUserbag(Userbag userbag) {
-        if (userbag.getTypeof().equals(PGood.MPMEDICINE)) {
+        if (userbag.getTypeof().equals(BaseGood.MPMEDICINE)) {
             MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
             return mpMedicine.getName();
         }
-        if (userbag.getTypeof().equals(PGood.EQUIPMENT)) {
+        if (userbag.getTypeof().equals(BaseGood.EQUIPMENT)) {
             Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
             return equipment.getName();
-        }
-        return null;
-    }
-
-    private Userbag getUserBagById(User user, String ubId) {
-        for (Userbag userbag : user.getUserBag()) {
-            if (userbag.getId().equals(ubId)) {
-                return userbag;
-            }
         }
         return null;
     }

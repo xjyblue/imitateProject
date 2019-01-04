@@ -16,9 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/12/6 21:09
- */
+ * @ClassName AttackUtil
+ * @Description 战斗系统工具类
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class AttackUtil {
 
     public static void changeUserAttackMonster(User user, BossScene bossScene, Monster monster) {
@@ -36,7 +39,7 @@ public class AttackUtil {
 
 //      刷新所有玩家的buff
 //      更新用户buff初始值
-        Map<String, Integer> map = new HashMap<>();
+        Map<String, Integer> map = new HashMap<>(64);
         map.put(BuffConstant.MPBUFF, 1000);
         map.put(BuffConstant.POISONINGBUFF, 2000);
         map.put(BuffConstant.DEFENSEBUFF, 3000);
@@ -46,17 +49,22 @@ public class AttackUtil {
         map.put(BuffConstant.BABYBUF, 7000);
         user.setBuffMap(map);
 //      buff终止时间
-        Map<String, Long> mapSecond = new HashMap<>();
-        mapSecond.put(BuffConstant.MPBUFF, 1000l);
-        mapSecond.put(BuffConstant.POISONINGBUFF, 2000l);
-        mapSecond.put(BuffConstant.DEFENSEBUFF, 3000l);
-        mapSecond.put(BuffConstant.SLEEPBUFF, 1000l);
-        mapSecond.put(BuffConstant.TREATMENTBUFF, 1000l);
-        mapSecond.put(BuffConstant.ALLPERSON, 1000l);
-        mapSecond.put(BuffConstant.BABYBUF, 1000l);
+        Map<String, Long> mapSecond = new HashMap<>(64);
+        mapSecond.put(BuffConstant.MPBUFF, 1000L);
+        mapSecond.put(BuffConstant.POISONINGBUFF, 2000L);
+        mapSecond.put(BuffConstant.DEFENSEBUFF, 3000L);
+        mapSecond.put(BuffConstant.SLEEPBUFF, 1000L);
+        mapSecond.put(BuffConstant.TREATMENTBUFF, 1000L);
+        mapSecond.put(BuffConstant.ALLPERSON, 1000L);
+        mapSecond.put(BuffConstant.BABYBUF, 1000L);
         ProjectContext.userBuffEndTime.put(user, mapSecond);
     }
 
+    /**
+     * 战胜提示
+     * @param user
+     * @param monster
+     */
     public static void killBossMessageToAll(User user, Monster monster) {
         RewardService rewardService = SpringContextUtil.getBean("rewardService");
         Team team = ProjectContext.teamMap.get(user.getTeamId());
@@ -67,11 +75,16 @@ public class AttackUtil {
         }
     }
 
+    /**
+     * 为用户添加战斗的怪物
+     * @param user
+     * @param monster
+     */
     public static void addMonsterToUserMonsterList(User user, Monster monster) {
         if (ProjectContext.userToMonsterMap.containsKey(user)) {
             ProjectContext.userToMonsterMap.get(user).put(monster.getId(), monster);
         } else {
-            Map<Integer, Monster> map = new HashMap<>();
+            Map<Integer, Monster> map = new HashMap<>(64);
             map.put(monster.getId(), monster);
             ProjectContext.userToMonsterMap.put(user, map);
         }

@@ -2,20 +2,20 @@ package service.sceneservice.entity;
 
 import service.caculationservice.service.HpCaculationService;
 import core.component.monster.Monster;
-import service.npcservice.entity.NPC;
+import service.npcservice.entity.Npc;
 import service.buffservice.entity.Buff;
 
-import service.sceneservice.entity.parent.PScene;
+import service.sceneservice.entity.parent.AbstractScene;
 import service.buffservice.entity.BuffConstant;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
-import service.buffservice.service.BuffService;
+import service.buffservice.service.AttackBuffService;
 import core.ChannelStatus;
 import service.rewardservice.service.RewardService;
 import core.factory.MonsterFactory;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
-import packet.PacketType;
+import core.packet.PacketType;
 import pojo.User;
 import utils.MessageUtil;
 import utils.SpringContextUtil;
@@ -27,36 +27,64 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Scene extends PScene implements Runnable {
-    //  场景的id
+/**
+ * @ClassName Scene
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
+public class Scene extends AbstractScene implements Runnable {
+    /**
+     * 场景的id
+     */
     private String id;
-    //  场景的名字
+    /**
+     * 场景的名字
+     */
     private String name;
-    //  场景关联的ids
+    /**
+     * 场景关联的ids
+     */
     private String sceneIds;
-    //  场景关联的npc
+    /**
+     * 场景关联的npc
+     */
     private String npcS;
-    //  场景关联的怪物
+    /**
+     * 场景关联的怪物
+     */
     private String monsterS;
-    //  关联的场景
+    /**
+     * 关联的场景
+     */
     private Set<String> sceneSet;
-    //  场景下的npc
-    private List<NPC> npcs;
-    //  场景下的怪物
+    /**
+     * 场景下的npc
+     */
+    private List<Npc> npcs;
+    /**
+     * 场景下的怪物
+     */
     private List<Monster> monsters;
-    //  场景下的玩家
+    /**
+     * 场景下的玩家
+     */
     private String needLevel;
 
     private RewardService rewardService;
 
-    private BuffService buffService;
+    private AttackBuffService attackBuffService;
 
     private HpCaculationService hpCaculationService;
 
-    //注入一些要用的单例
+    /**
+     * 注入一些要用的单例
+     */
+    @Override
     public void preConstruct() {
-        BuffService buffService = SpringContextUtil.getBean("buffService");
-        this.buffService = buffService;
+        AttackBuffService attackBuffService = SpringContextUtil.getBean("attackBuffService");
+        this.attackBuffService = attackBuffService;
         RewardService rewardService = SpringContextUtil.getBean("rewardService");
         this.rewardService = rewardService;
         HpCaculationService hpCaculationService = SpringContextUtil.getBean("hpCaculationService");
@@ -113,12 +141,12 @@ public class Scene extends PScene implements Runnable {
         this.rewardService = rewardService;
     }
 
-    public BuffService getBuffService() {
-        return buffService;
+    public AttackBuffService getAttackBuffService() {
+        return attackBuffService;
     }
 
-    public void setBuffService(BuffService buffService) {
-        this.buffService = buffService;
+    public void setAttackBuffService(AttackBuffService attackBuffService) {
+        this.attackBuffService = attackBuffService;
     }
 
     public Map<String, User> getUserMap() {
@@ -153,11 +181,11 @@ public class Scene extends PScene implements Runnable {
         this.name = name;
     }
 
-    public List<NPC> getNpcs() {
+    public List<Npc> getNpcs() {
         return npcs;
     }
 
-    public void setNpcs(List<NPC> npcs) {
+    public void setNpcs(List<Npc> npcs) {
         this.npcs = npcs;
     }
 
@@ -217,7 +245,7 @@ public class Scene extends PScene implements Runnable {
 
                         BigInteger monsterDamage = new BigInteger(monster.getMonsterSkillList().get(0).getDamage());
 //                      怪物攻击对人物造成伤害处理buff处理
-                        monsterDamage = buffService.defendBuff(monsterDamage, user, channel);
+                        monsterDamage = attackBuffService.monsterAttackDefendBuff(monsterDamage, user);
                         Buff buff = ProjectContext.buffMap.get(user.getBuffMap().get(BuffConstant.DEFENSEBUFF));
                         if (user.getBuffMap().get(BuffConstant.DEFENSEBUFF) != 3000) {
                             channel.writeAndFlush(MessageUtil.turnToPacket("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp(), PacketType.USERBUFMSG));
@@ -248,18 +276,17 @@ public class Scene extends PScene implements Runnable {
     }
 
     private void monsterBuffRefresh(Monster monster, Channel channel) {
-        if (monster.getBuffRefreshTime() < System.currentTimeMillis()) {
+        if (monster != null && monster.getBuffRefreshTime() < System.currentTimeMillis()) {
             monster.setBuffRefreshTime(System.currentTimeMillis() + 1000);
         } else {
             return;
         }
 
-        if (monster != null && monster.getBufMap().containsKey(BuffConstant.POISONINGBUFF) && monster.getBufMap().get(BuffConstant.POISONINGBUFF) != 2000) {
+        if (monster.getBufMap().containsKey(BuffConstant.POISONINGBUFF) && monster.getBufMap().get(BuffConstant.POISONINGBUFF) != GrobalConfig.POISONINGBUFF_DEFAULTVALUE) {
             Long endTime = ProjectContext.monsterBuffEndTime.get(monster).get(BuffConstant.POISONINGBUFF);
             if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
                 Buff buff = ProjectContext.buffMap.get(monster.getBufMap().get(BuffConstant.POISONINGBUFF));
-
-                monster.subLife(new BigInteger(buff.getAddSecondValue()));
+                hpCaculationService.subMonsterHp(monster, buff.getAddSecondValue());
 //               处理中毒扣死
                 if (new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger(GrobalConfig.MINVALUE)) < 0) {
                     monster.setValueOfLife(GrobalConfig.MINVALUE);
@@ -303,7 +330,12 @@ public class Scene extends PScene implements Runnable {
         }
     }
 
-    //  场景内广播消息
+    /**
+     * 场景内广播消息
+     *
+     * @param msg
+     * @param packetType
+     */
     private void broadcastMessage(String msg, String packetType) {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             Channel channelT = ProjectContext.userToChannelMap.get(entry.getValue());

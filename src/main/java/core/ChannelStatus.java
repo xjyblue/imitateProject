@@ -1,4 +1,11 @@
 package core;
+/**
+ * @ClassName ChannelStatus
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 
 public class ChannelStatus {
 	public static final String COMING ="coming";

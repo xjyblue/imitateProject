@@ -1,10 +1,16 @@
 package utils;
 
-import packet.PacketProto;
-import packet.PacketType;
+import core.packet.PacketProto;
+import core.packet.PacketType;
 
-import static packet.PacketProto.Packet.newBuilder;
-
+import static core.packet.PacketProto.Packet.newBuilder;
+/**
+ * @ClassName MessageUtil
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class MessageUtil {
 
 	public static PacketProto.Packet turnToPacket(String data){

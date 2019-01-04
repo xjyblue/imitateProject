@@ -2,7 +2,13 @@ package pojo;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * @ClassName TeamapplyinfoExample
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class TeamapplyinfoExample {
     protected String orderByClause;
 

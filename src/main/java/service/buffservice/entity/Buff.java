@@ -1,24 +1,46 @@
 package service.buffservice.entity;
-
+/**
+ * @ClassName Buff
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class Buff {
-//  buffId
+    /**
+     * buffId
+     */
     private Integer bufferId;
-//  buff抵挡伤害量伤害量
+    /**
+     * buff抵挡伤害量伤害量
+     */
     private String injurySecondValue;
-//  buff增加伤害量
+    /**
+     * buff增加伤害量
+     */
     private String addSecondValue;
-//  buff回复的血量
+    /**
+     * buff回复的血量
+     */
     private String recoverValue;
-//  buff的名称
+    /**
+     * buff的名称
+     */
     private Integer keepTime;
-//  buff的名字
+    /**
+     * buff的名字
+     */
     private String name;
-//  buff的种类
+    /**
+     * buff的种类
+     */
     private String typeOf;
-//  buff的截止时间
+    /**
+     * buff的截止时间
+     */
     private Long endTime;
 
-    public Buff(){
+    public Buff() {
     }
 
     public Long getEndTime() {

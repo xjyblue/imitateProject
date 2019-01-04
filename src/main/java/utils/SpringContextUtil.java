@@ -4,9 +4,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 /**
- * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/12/25 14:14
- */
+ * @ClassName SpringContextUtil
+ * @Description 上下文
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class SpringContextUtil implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
@@ -14,8 +17,9 @@ public class SpringContextUtil implements ApplicationContextAware {
     /**
      * 实现ApplicationContextAware接口的context注入函数, 将其存入静态变量.
      */
+    @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
-        SpringContextUtil.applicationContext = applicationContext; // NOSONAR
+        SpringContextUtil.applicationContext = applicationContext;
     }
 
     /**

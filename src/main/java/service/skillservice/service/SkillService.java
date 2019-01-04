@@ -1,11 +1,12 @@
 package service.skillservice.service;
 
+import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.UserskillrelationMapper;
 import core.context.ProjectContext;
-import order.Order;
+import core.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -19,14 +20,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 用户技能管理服务
- */
+ * @ClassName SkillService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class SkillService {
     @Autowired
     private UserskillrelationMapper userskillrelationMapper;
 
-    //  查看用户技能
+    /**
+     * 查看用户技能
+     *
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "lookSkill")
     public void lookSkill(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -44,12 +54,17 @@ public class SkillService {
         channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
     }
 
-    //  改变用户技能键位
+    /**
+     * 改变用户技能键位
+     *
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "change")
     public void changeSkill(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String[] temp = msg.split("-");
-        if (temp.length == 3) {
+        if (temp.length == GrobalConfig.THREE) {
             boolean flag = false;
             Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(user);
             for (Map.Entry<String, Userskillrelation> entry : map.entrySet()) {
@@ -78,7 +93,12 @@ public class SkillService {
         }
     }
 
-    //  退出用户技能管理
+    /**
+     * 退出用户技能管理
+     *
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "quitSkill")
     public void quitSkill(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -86,11 +106,22 @@ public class SkillService {
         ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
     }
 
+    /**
+     * 进入技能管理界面
+     * @param channel
+     * @param msg
+     */
     public void enterSkillView(Channel channel, String msg) {
         ProjectContext.eventStatus.put(channel, ChannelStatus.SKILLVIEW);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SKILLVIEWMESG));
     }
 
+    /**
+     * 根据键位获取用户技能
+     * @param channel
+     * @param key
+     * @return
+     */
     public UserSkill getUserSkillByKey(Channel channel, String key) {
         User user = ProjectContext.session2UserIds.get(channel);
         if (!ProjectContext.userskillrelationMap.get(user).containsKey(key)) {
@@ -99,6 +130,11 @@ public class SkillService {
         return ProjectContext.skillMap.get(ProjectContext.userskillrelationMap.get(user).get(key).getSkillid());
     }
 
+    /**
+     * 根据角色获取用户技能
+     * @param roleid
+     * @return
+     */
     public List<UserSkill> getUserSkillByUserRole(int roleid) {
         List<UserSkill> list = new ArrayList<>();
         for (Map.Entry<Integer, UserSkill> entry : ProjectContext.skillMap.entrySet()) {

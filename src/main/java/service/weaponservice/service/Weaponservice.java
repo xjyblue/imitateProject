@@ -1,7 +1,8 @@
 package service.weaponservice.service;
 
 import core.component.good.Equipment;
-import core.component.good.parent.PGood;
+import core.component.good.parent.BaseGood;
+import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.context.ProjectContext;
 import io.netty.channel.Channel;
@@ -11,20 +12,31 @@ import pojo.User;
 import pojo.Userbag;
 import pojo.Weaponequipmentbar;
 import service.achievementservice.service.AchievementService;
+import service.userbagservice.service.UserbagService;
 import utils.MessageUtil;
 
 import java.util.UUID;
 
 /**
- * Description ：nettySpringServer
- * Created by xiaojianyu on 2019/1/2 16:30
- */
+ * @ClassName Weaponservice
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class Weaponservice {
     @Autowired
     private AchievementService achievementService;
+    @Autowired
+    private UserbagService userbagService;
 
-    //  展示武器栏
+    /**
+     * 展示武器栏
+     *
+     * @param channel
+     * @param msg
+     */
     public void queryEquipmentBar(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String wresp = "";
@@ -46,10 +58,15 @@ public class Weaponservice {
     }
 
 
-    //  修复武器
+    /**
+     * 修复武器
+     *
+     * @param channel
+     * @param msg
+     */
     public void fixEquipment(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
-        String temp[] = msg.split("-");
+        String[] temp = msg.split("-");
         if (!ProjectContext.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
             return;
@@ -69,10 +86,15 @@ public class Weaponservice {
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEQUIPGOOD));
     }
 
-    //    卸下武器
+    /**
+     * 卸下武器
+     *
+     * @param channel
+     * @param msg
+     */
     public void quitEquipment(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
-        String temp[] = msg.split("-");
+        String[] temp = msg.split("-");
         if (ProjectContext.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
             for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
                 if (weaponequipmentbar.getWid() == Integer.parseInt(temp[1])) {
@@ -82,7 +104,7 @@ public class Weaponservice {
                     userbag.setDurability(weaponequipmentbar.getDurability());
                     userbag.setId(UUID.randomUUID().toString());
                     userbag.setName(weaponequipmentbar.getUsername());
-                    userbag.setTypeof(PGood.EQUIPMENT);
+                    userbag.setTypeof(BaseGood.EQUIPMENT);
                     userbag.setWid(weaponequipmentbar.getWid());
                     user.getUserBag().add(userbag);
                     user.getWeaponequipmentbars().remove(weaponequipmentbar);
@@ -97,16 +119,21 @@ public class Weaponservice {
         }
     }
 
-    //    穿戴武器
+    /**
+     * 穿戴武器
+     *
+     * @param channel
+     * @param msg
+     */
     public void takeEquipment(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
-        String temp[] = msg.split("=");
-        if (temp.length != 2) {
+        String[] temp = msg.split("=");
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket("请按照ww=背包格子id"));
             return;
         }
 //          背包中是否存在该物品
-        Userbag userbag = getUserBagById(temp[1], user);
+        Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
             return;
@@ -117,13 +144,13 @@ public class Weaponservice {
             return;
         }
 //          检查是否穿戴主武器
-        if (userbag.getWid() >= 3000 && userbag.getWid() < 3100 && checkHasCoreEquipment(user)) {
+        if (userbag.getWid() >= GrobalConfig.EQUIPMENT_WEAPON_START && userbag.getWid() < GrobalConfig.EQUIPMENT_WEAPON_END && checkHasCoreEquipment(user)) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.HASCOREEQUIP));
             return;
         }
 
 //          检查是否已穿戴帽子
-        if (userbag.getWid() >= 3100 && userbag.getWid() < 3200 && checkHasHatEquipment(user)) {
+        if (userbag.getWid() >= GrobalConfig.HAT_WEAPON_START && userbag.getWid() < GrobalConfig.HAT_WEAPON_END && checkHasHatEquipment(user)) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.HASHATEQUIP));
             return;
         }
@@ -131,7 +158,7 @@ public class Weaponservice {
         Weaponequipmentbar weaponequipmentbar = new Weaponequipmentbar();
         weaponequipmentbar.setId(200);
         weaponequipmentbar.setDurability(userbag.getDurability());
-        weaponequipmentbar.setTypeof(PGood.EQUIPMENT);
+        weaponequipmentbar.setTypeof(BaseGood.EQUIPMENT);
         weaponequipmentbar.setStartlevel(userbag.getStartlevel());
         weaponequipmentbar.setUsername(user.getUsername());
         weaponequipmentbar.setWid(userbag.getWid());
@@ -144,33 +171,33 @@ public class Weaponservice {
         return;
     }
 
-//  判断是否为主武器
+    /**
+     * 检查是否为主武器
+     *
+     * @param user
+     * @return
+     */
     private boolean checkHasCoreEquipment(User user) {
         for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
-            if (weaponequipmentbar.getWid() >= 3000 && weaponequipmentbar.getWid() < 3100) {
+            if (weaponequipmentbar.getWid() >= GrobalConfig.EQUIPMENT_WEAPON_START && weaponequipmentbar.getWid() < GrobalConfig.EQUIPMENT_WEAPON_END) {
                 return true;
             }
         }
         return false;
     }
 
-//  判断是否为武器饰品
+    /**
+     * 判断是否为帽子
+     *
+     * @param user
+     * @return
+     */
     private boolean checkHasHatEquipment(User user) {
         for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
-            if (weaponequipmentbar.getWid() >= 3100 && weaponequipmentbar.getWid() < 3200) {
+            if (weaponequipmentbar.getWid() >= GrobalConfig.HAT_WEAPON_START && weaponequipmentbar.getWid() < GrobalConfig.HAT_WEAPON_END) {
                 return true;
             }
         }
         return false;
-    }
-
-//  通过id拿到userbag
-    private Userbag getUserBagById(String id, User user) {
-        for (Userbag userbag : user.getUserBag()) {
-            if (userbag.getId().equals(id)) {
-                return userbag;
-            }
-        }
-        return null;
     }
 }

@@ -2,6 +2,7 @@ package core;
 
 
 import core.context.ProjectContext;
+import service.labourunionservice.service.LabourUnionService;
 import service.sceneservice.service.CommonSceneService;
 import service.teamservice.service.TeamService;
 import utils.ReflectMethodUtil;
@@ -10,8 +11,7 @@ import service.bossservice.service.BossService;
 import service.connectservice.service.ConnectService;
 import service.deadservice.service.DeadService;
 import service.friendservice.service.FriendService;
-import service.labourUnionservice.service.LabourUnionService;
-import service.loginservice.service.loginService;
+import service.loginservice.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,13 +24,17 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * 具体服务调用器
- * @author server
- */
+ * @ClassName ServiceDistributor
+ * @Description 服务分发器
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
+
 @Component
 public class ServiceDistributor {
     @Autowired
-    private loginService loginService;
+    private LoginService loginService;
     @Autowired
     private RegisterService registerService;
     @Autowired
@@ -38,7 +42,7 @@ public class ServiceDistributor {
     @Autowired
     private SkillService skillService;
     @Autowired
-    private AttackService attackEvent;
+    private AttackService attackService;
     @Autowired
     private BossService bossService;
     @Autowired
@@ -72,7 +76,7 @@ public class ServiceDistributor {
                 ReflectMethodUtil.reflectAnnotation(skillService,ch,msg);
                 break;
             case ChannelStatus.ATTACK:
-                ReflectMethodUtil.reflectAnnotation(attackEvent,ch,msg);
+                ReflectMethodUtil.reflectAnnotation(attackService,ch,msg);
                 break;
             case ChannelStatus.BOSSSCENE:
                 ReflectMethodUtil.reflectAnnotation(bossService,ch,msg);
@@ -92,6 +96,8 @@ public class ServiceDistributor {
             case ChannelStatus.TEAM:
                 ReflectMethodUtil.reflectAnnotation(teamService,ch,msg);
                 break;
+             default:
+
         }
     }
 

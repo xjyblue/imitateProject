@@ -11,16 +11,22 @@ import org.springframework.stereotype.Component;
 import pojo.User;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/12/5 16:14
- */
-
+ * @ClassName HpCaculationService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class HpCaculationService {
     @Autowired
     private LevelService levelService;
 
-    //  计算血量全部在这里，顺便可以加减血
+    /**
+     * 用户加血
+     * @param user
+     * @param recoverValue
+     */
     public void addUserHp(User user, String recoverValue) {
         Integer userHp = Integer.parseInt(user.getHp());
         Integer maxHp = Integer.parseInt(levelService.getMaxMp(user));
@@ -33,6 +39,11 @@ public class HpCaculationService {
         }
     }
 
+    /**
+     * 用户扣血
+     * @param user
+     * @param reduceValue
+     */
     public void subUserHp(User user, String reduceValue) {
         Channel channel = ProjectContext.userToChannelMap.get(user);
         Integer reduceValueB = Integer.parseInt(reduceValue);
@@ -52,6 +63,11 @@ public class HpCaculationService {
         }
     }
 
+    /**
+     * 怪物扣血
+     * @param monster
+     * @param subValue
+     */
     public void subMonsterHp(Monster monster, String subValue) {
         Integer subHp = Integer.parseInt(subValue);
         Integer monsterHp = Integer.parseInt(monster.getValueOfLife());

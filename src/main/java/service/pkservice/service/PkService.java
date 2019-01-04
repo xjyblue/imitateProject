@@ -1,7 +1,7 @@
 package service.pkservice.service;
 
 import service.achievementservice.service.AchievementService;
-import service.caculationservice.service.AttackCaculationService;
+import service.caculationservice.service.AttackDamageCaculationService;
 import service.caculationservice.service.HpCaculationService;
 import core.config.MessageConfig;
 import core.config.GrobalConfig;
@@ -20,13 +20,16 @@ import service.userservice.service.UserService;
 import java.math.BigInteger;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/11/23 16:22
- */
+ * @ClassName PkService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
-public class PKService {
+public class PkService {
     @Autowired
-    private AttackCaculationService attackCaculationService;
+    private AttackDamageCaculationService attackDamageCaculationService;
     @Autowired
     private AchievementService achievementService;
     @Autowired
@@ -36,22 +39,27 @@ public class PKService {
     @Autowired
     private SkillService skillService;
 
+    /**
+     * 和他人PK
+     * @param channel
+     * @param msg
+     */
     public void pkOthers(Channel channel, String msg) {
-        String temp[] = msg.split("-");
+        String[] temp = msg.split("-");
         User user = ProjectContext.session2UserIds.get(channel);
-        if (temp.length != 3) {
+        if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User userTarget = userService.getUserByName(temp[1]);
+        User userTarget = userService.getUserByNameFromSession(temp[1]);
         Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
 //       解决夸场景pk禁止
-        if(!user.getPos().equals(userTarget.getPos())){
+        if (userTarget != null && user != null && !user.getPos().equals(userTarget.getPos())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOSUPPORTREMOTEPK));
             return;
         }
 //       解决起始之地不允许pk
-        if(user.getPos().equals(GrobalConfig.STARTSCENE)){
+        if (user != null && user.getPos().equals(GrobalConfig.STARTSCENE)) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RESURRECTIONNOPK));
             return;
         }
@@ -64,11 +72,11 @@ public class PKService {
             return;
         }
         UserSkill userSkill = skillService.getUserSkillByKey(channel, temp[2]);
-        if(userSkill == null){
+        if (userSkill == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
             return;
         }
-        BigInteger attackDamage = attackCaculationService.caculate(user, new BigInteger(userSkill.getDamage()));
+        BigInteger attackDamage = attackDamageCaculationService.caculate(user, new BigInteger(userSkill.getDamage()));
 //      人物蓝量校验
         BigInteger userSkillMp = new BigInteger(userSkill.getSkillMp());
         BigInteger userMp = new BigInteger(user.getMp());
@@ -84,16 +92,16 @@ public class PKService {
             return;
         }
         userskillrelation.setSkillcds(System.currentTimeMillis());
-        hpCaculationService.subUserHp(userTarget,attackDamage.toString());
+        hpCaculationService.subUserHp(userTarget, attackDamage.toString());
 //      人物死亡处理
-        if (new BigInteger(userTarget.getHp()).compareTo(minHp)<=0){
+        if (new BigInteger(userTarget.getHp()).compareTo(minHp) <= 0) {
             userTarget.setHp(GrobalConfig.MINVALUE);
             userTarget.setStatus(GrobalConfig.DEAD);
             String resp = "你受到来自：" + user.getUsername() + "的" + userSkill.getSkillName() + "的攻击，伤害为["
                     + attackDamage.toString() + "]你的剩余血量为：" + userTarget.getHp() + ",你已死亡";
             channelTarget.writeAndFlush(MessageUtil.turnToPacket(resp));
             resp = "你对" + userTarget.getUsername() + "使用" + userSkill.getSkillName() + "进行攻击，造成伤害[" + attackDamage.toString() + "]" +
-                    "，" + userTarget.getUsername() + "的剩余血量为：" + userTarget.getHp()+"，你已杀死"+userTarget.getUsername();
+                    "，" + userTarget.getUsername() + "的剩余血量为：" + userTarget.getHp() + "，你已杀死" + userTarget.getUsername();
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
             channelTarget.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY));
 //          死亡后处理

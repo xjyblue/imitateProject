@@ -1,5 +1,6 @@
 package service.weaponstartservice.service;
 
+import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.context.ProjectContext;
 import io.netty.channel.Channel;
@@ -13,9 +14,12 @@ import service.userbagservice.service.UserbagService;
 import utils.MessageUtil;
 
 /**
- * Description ：nettySpringServer  装备星级系统
- * Created by xiaojianyu on 2019/1/2 17:37
- */
+ * @ClassName WeaponStartService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class WeaponStartService {
 
@@ -26,10 +30,15 @@ public class WeaponStartService {
     @Autowired
     private UserbagMapper userbagMapper;
 
-    //  装备升星，先不注入后期注入
+    /**
+     * 装备升星
+     *
+     * @param channel
+     * @param msg
+     */
     public void upEquipmentStartlevel(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        if (temp.length != 2) {
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
@@ -50,7 +59,7 @@ public class WeaponStartService {
         userbag.setStartlevel(userbag.getStartlevel() + 1);
         userbagMapper.updateByPrimaryKeySelective(userbag);
         channel.writeAndFlush(MessageUtil.turnToPacket("升星成功，升星花费100000金币,当前装备星级" + userbag.getStartlevel()));
-        userbagService.refreshUserbagInfo(channel,null);
+        userbagService.refreshUserbagInfo(channel, null);
     }
 
 }

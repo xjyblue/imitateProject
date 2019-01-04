@@ -1,23 +1,40 @@
 package service.levelservice.entity;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/12/5 11:22
- */
+ * @ClassName Level
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class Level {
-
+    /**
+     * 等级
+     */
     private Integer level;
-
+    /**
+     * 经验上限
+     */
     private Integer experienceUp;
-
+    /**
+     * 经验下线
+     */
     private Integer experienceDown;
-
+    /**
+     * 最大血量
+     */
     private String maxHp;
-
+    /**
+     * 最大蓝量
+     */
     private String maxMp;
-
+    /**
+     * 攻击提升
+     */
     private Integer upAttack;
-
+    /**
+     * 计算因子
+     */
     private String caculatePercent;
 
     public String getCaculatePercent() {

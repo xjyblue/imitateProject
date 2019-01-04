@@ -1,17 +1,27 @@
 package utils;
 
 import io.netty.channel.Channel;
-import order.Order;
+import core.order.Order;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/12/24 9:43
- */
+ * @ClassName ReflectMethodUtil
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class ReflectMethodUtil {
-
+    /**
+     * 反射
+     * @param o
+     * @param ch
+     * @param msg
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
     public static void reflectAnnotation(Object o, Channel ch, String msg) throws InvocationTargetException, IllegalAccessException {
         Class<?> t = o.getClass();
         Method[] method = t.getMethods();
@@ -23,14 +33,14 @@ public class ReflectMethodUtil {
                 Order order = m.getAnnotation(Order.class);
                 String orderMsg = order.orderMsg();
 
-                if (orderMsg.equals("*")) {
+                if ("*".equals(orderMsg)) {
                     mT = m;
                     continue;
                 }
 
                 String[] orderArr = orderMsg.split(",");
                 for (String temp : orderArr) {
-                    if (!temp.equals("")) {
+                    if (!"".equals(temp)) {
                         if (msg.startsWith(temp)) {
                             m.invoke(o, ch, msg);
                             flag = false;

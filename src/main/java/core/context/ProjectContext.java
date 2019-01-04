@@ -3,13 +3,14 @@ package core.context;
 import java.util.*;
 import java.util.concurrent.*;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import core.component.boss.BossSceneConfig;
 import core.component.good.CollectGood;
 import core.component.good.Equipment;
 import core.component.good.HpMedicine;
 import core.component.good.MpMedicine;
 import core.component.monster.Monster;
-import service.npcservice.entity.NPC;
+import service.npcservice.entity.Npc;
 import service.sceneservice.entity.BossScene;
 import service.sceneservice.entity.Scene;
 import service.achievementservice.entity.Achievement;
@@ -28,11 +29,17 @@ import service.teamservice.entity.Team;
 import service.transactionservice.entity.Trade;
 
 /**
- * @author server
- */
+ * @ClassName ProjectContext
+ * @Description 项目上下文
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class ProjectContext {
-
-//	此处用户和通道发生关联
+    /**
+     * 初始化普通线程池工厂
+     */
+    public static ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("thread-call-scene-runner-%d").build();
     /**
      * 缓存通信上下文环境对应的登录用户
      */
@@ -64,7 +71,7 @@ public class ProjectContext {
     /**
      * 初始化 地图线程池
      **/
-    public static ExecutorService sceneThreadPool = Executors.newFixedThreadPool(4);
+    public static ExecutorService sceneThreadPool = new ThreadPoolExecutor(4,4,0L,TimeUnit.MILLISECONDS,new LinkedBlockingQueue<Runnable>(),namedThreadFactory);
     /**
      * 初始化玩家技能
      */
@@ -108,7 +115,7 @@ public class ProjectContext {
     /**
      * 副本boss攻击线程池
      */
-    public static ScheduledExecutorService bossAreaThreadPool = Executors.newScheduledThreadPool(5);
+    public static ScheduledExecutorService bossAreaThreadPool = new ScheduledThreadPoolExecutor(5,namedThreadFactory);
     /**
      * 缓存副本的配置，为生成副本而用
      */
@@ -148,7 +155,7 @@ public class ProjectContext {
     /**
      * npc
      */
-    public static Map<Integer, NPC> npcMap = Maps.newHashMap();
+    public static Map<Integer, Npc> npcMap = Maps.newHashMap();
     /**
      * 红药恢复的时间
      */

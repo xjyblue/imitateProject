@@ -17,13 +17,20 @@ import utils.SpringContextUtil;
 import java.util.Map;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/12/5 14:26
- */
+ * @ClassName LevelService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class LevelService {
-
-    //  根据经验拿到等级
+    /**
+     * 根据经验拿到等级
+     *
+     * @param experience
+     * @return
+     */
     public int getLevelByExperience(int experience) {
         for (Map.Entry<Integer, Level> entry : ProjectContext.levelMap.entrySet()) {
             if (entry.getValue().getExperienceDown() <= experience && entry.getValue().getExperienceUp() >= experience) {
@@ -33,7 +40,12 @@ public class LevelService {
         return 11;
     }
 
-    //  根据角色拿到血量上限
+    /**
+     * 根据角色拿到血量上限
+     *
+     * @param user
+     * @return
+     */
     public String getMaxHp(User user) {
         Level level = ProjectContext.levelMap.get(getLevelByExperience(user.getExperience()));
 //      这里可以附加装备属性
@@ -52,7 +64,12 @@ public class LevelService {
         return addValue + "";
     }
 
-    //  根据经验值提升人物等级
+    /**
+     * 根据经验值提升人物等级
+     *
+     * @param user
+     * @param value
+     */
     public void upUserLevel(User user, String value) {
         int oleL = getLevelByExperience(user.getExperience());
         int newE = user.getExperience() + Integer.parseInt(value);
@@ -81,7 +98,11 @@ public class LevelService {
         userMapper.updateByPrimaryKeySelective(user);
     }
 
-
+    /**
+     * 人物mp最大值
+     * @param user
+     * @return
+     */
     public String getMaxMp(User user) {
         Level level = ProjectContext.levelMap.get(getLevelByExperience(user.getExperience()));
         int addValue = 0;
@@ -93,12 +114,18 @@ public class LevelService {
         return addValue + "";
     }
 
-    //  职业因子获取，可以进行更复杂的运算
+    /**
+     * 职业因子获取，可以进行更复杂的运算
+     *
+     * @param level
+     * @param user
+     * @return
+     */
     public Double caculateFactorByRole(Level level, User user) {
         String levelCaculation = level.getCaculatePercent();
-        String temps[] = levelCaculation.split("-");
+        String[] temps = levelCaculation.split("-");
         for (String temp : temps) {
-            String tt[] = temp.split(":");
+            String[] tt = temp.split(":");
             if (tt[0].equals(user.getRoleid() + "")) {
                 return Double.parseDouble(tt[1]);
             }

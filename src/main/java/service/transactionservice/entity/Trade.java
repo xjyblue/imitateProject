@@ -7,32 +7,57 @@ import java.math.BigInteger;
 import java.util.Map;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/12/3 14:44
- */
+ * @ClassName Trade
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class Trade {
-
+    /**
+     * 交易单号
+     */
     private String tradeId;
-
+    /**
+     * 交易截止时间
+     */
     private Long endTime;
-
+    /**
+     * 发起方
+     */
     private User userStart;
-
+    /**
+     * 接收方
+     */
     private User userTo;
-
+    /**
+     * 交易金钱发起方
+     */
     private BigInteger startMoney;
-
+    /**
+     * 交易金钱接收方
+     */
     private BigInteger toMoney;
-
-    private volatile boolean ifexe;
-
-    private Map<String,Userbag> startUserBag;
-
-    private Map<String,Userbag> toUserBag;
-
-    private volatile Boolean startUserAgree;
-
-    private volatile Boolean toUserAgree;
+    /**
+     * 是否已经交易
+     */
+    private boolean ifexe;
+    /**
+     * 发起方背包
+     */
+    private Map<String, Userbag> startUserBag;
+    /**
+     * 接收方背包
+     */
+    private Map<String, Userbag> toUserBag;
+    /**
+     * 发起方同意
+     */
+    private Boolean startUserAgree;
+    /**
+     * 接收方同意
+     */
+    private Boolean toUserAgree;
 
     public boolean isIfexe() {
         return ifexe;

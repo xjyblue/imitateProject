@@ -4,7 +4,11 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import pojo.Applyunioninfo;
 import pojo.ApplyunioninfoExample;
-
+/**
+ * Created on 2018/12/25 15:25
+ *
+ * @Author: xiaojianyu
+ */
 public interface ApplyunioninfoMapper {
     int countByExample(ApplyunioninfoExample example);
 

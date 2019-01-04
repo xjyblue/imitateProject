@@ -1,27 +1,43 @@
 package core.component.good;
 
-import core.component.good.parent.PGood;
-
-public class Equipment extends PGood {
-
+import core.component.good.parent.BaseGood;
+/**
+ * @ClassName Equipment
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
+public class Equipment extends BaseGood {
+    /**
+     * 武器的id
+     */
     private Integer id;
-    //耐久度
+    /**
+     * 耐久度
+     */
     private Integer durability;
-    //增加技能伤害
+    /**
+     * 增加技能伤害
+     */
     private Integer addValue;
-    //增加生命值
+    /**
+     * 增加生命值
+     */
     private Integer lifeValue;
-    //星级
+    /**
+     * 武器星级
+     */
     private Integer startLevel;
 
-    public Equipment(Integer id,String name,Integer durability, Integer addValue) {
-        this.id =id;
+    public Equipment(Integer id, String name, Integer durability, Integer addValue) {
+        this.id = id;
         this.name = name;
         this.durability = durability;
         this.addValue = addValue;
     }
 
-    public Equipment(){
+    public Equipment() {
     }
 
     public Integer getLifeValue() {

@@ -1,5 +1,11 @@
 package pojo;
-
+/**
+ * @ClassName Unioninfo
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class Unioninfo {
     private String unionid;
 

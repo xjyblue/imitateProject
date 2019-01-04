@@ -8,12 +8,16 @@ import io.netty.channel.ChannelHandlerContext;
 import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import packet.PacketProto;
+import core.packet.PacketProto;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/12/18 9:35
- */
+ * @ClassName ServerLoginHandler
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
+
 @Sharable
 @Service("serverLoginHandler")
 public class ServerLoginHandler extends ChannelHandlerAdapter {

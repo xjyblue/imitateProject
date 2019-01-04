@@ -1,23 +1,45 @@
 package service.skillservice.entity;
 
 import java.util.Map;
-
+/**
+ * @ClassName UserSkill
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class UserSkill {
-
+    /**
+     * 技能id
+     */
     private Integer skillId;
-
+    /**
+     * 技能名称
+     */
     private String skillName;
-
+    /**
+     * 技能cd
+     */
     private Long attackCd;
-
+    /**
+     * 技能伤害
+     */
     private String damage;
-
+    /**
+     * 技能蓝量
+     */
     private String skillMp;
-
+    /**
+     * 技能附带buff
+     */
     private String bufferMapId;
-
+    /**
+     * 技能所带buff
+     */
     private Map<String,Integer>buffMap;
-
+    /**
+     * 技能所属角色
+     */
     private Integer roleSkill;
 
     public Integer getRoleSkill() {

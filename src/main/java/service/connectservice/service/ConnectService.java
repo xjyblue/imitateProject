@@ -4,23 +4,35 @@ import core.config.MessageConfig;
 import core.ChannelStatus;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
-import order.Order;
+import core.order.Order;
 import org.springframework.stereotype.Component;
 import utils.MessageUtil;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/11/26 12:03
- */
+ * @ClassName ConnectService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class ConnectService {
-
+    /**
+     * 登录
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "d")
     public void connect(Channel channel, String msg) {
         ProjectContext.eventStatus.put(channel, ChannelStatus.LOGIN);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LOGINMESSAGE));
     }
 
+    /**
+     * 注册
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "z")
     public void register(Channel channel, String msg) {
         ProjectContext.eventStatus.put(channel, ChannelStatus.REGISTER);

@@ -1,22 +1,42 @@
 package service.npcservice.entity;
-
-public class NPC {
-//	id
+/**
+ * @ClassName Npc
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
+public class Npc {
+	/**
+	 * npc的id
+	 */
 	private Integer id;
-//	npc状态
+	/**
+	 * npc的状态
+	 */
 	private String status;
-//	npc名字
+	/**
+	 * npc的名字
+	 */
 	private String name;
-//	npc的话
+	/**
+	 * npc的对话
+	 */
 	private String talk;
-//	npc的位置
+	/**
+	 * npc的位置
+	 */
 	private Integer areaId;
-//	npc兑换物品的条件
+	/**
+	 * npc兑换物品的条件
+	 */
 	private String getTarget;
-//	npc能兑换的物品
+	/**
+	 * npc能兑换的物品
+	 */
 	private String getGoods;
 
-	public NPC(){
+	public Npc(){
 	}
 
 	public String getGetTarget() {
@@ -59,7 +79,7 @@ public class NPC {
 		this.id = id;
 	}
 
-	public NPC(String status, String name) {
+	public Npc(String status, String name) {
 		super();
 		this.status = status;
 		this.name = name;

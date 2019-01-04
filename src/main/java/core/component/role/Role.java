@@ -1,26 +1,35 @@
 package core.component.role;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/11/30 15:02
- */
-//职业类
+ * @ClassName Role
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class Role {
-
-//  职业id
+    /**
+     * 职业id
+     */
     private Integer roleId;
-//  职业名称
+    /**
+     * 职业名称
+     */
     private String name;
-//  职业拥有的技能 技能按照 XX-XX的格式隔开
+    /**
+     * 职业拥有的技能 技能按照 XX-XX的格式隔开
+     */
     private String skills;
-//  职业所拥有的防御力
+    /**
+     * 职业所拥有的防御力
+     */
     private String defense;
 
-    public Role(){
+    public Role() {
     }
 
     public Role(Integer roleId, String name) {
-        this.roleId =roleId;
+        this.roleId = roleId;
         this.name = name;
     }
 

@@ -1,22 +1,36 @@
 package core.component.boss;
 
 /**
- * Description ：nettySpringServer 副本场景的配置类
- * Created by xiaojianyu on 2018/12/29 15:07
- */
+ * @ClassName BossSceneConfig
+ * @Description 副本场景配置类
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class BossSceneConfig {
-
-//  副本的id
+    /**
+     * 副本的id
+     */
     private String bossSceneId;
-//  副本的场景
+    /**
+     *  副本的场景
+     */
     private String sequences;
-//  副本的截止时间
+    /**
+     *  副本的截止时间
+     */
     private Long keeptime;
-//  副本的名字
+    /**
+     *   副本的名字
+     */
     private String bossSceneName;
-//  最后一击奖励场景
+    /**
+     * 最后一击奖励场景
+     */
     private String finalReward;
-//  需要组队的场景
+    /**
+     * 需要组队的场景
+     */
     private String needMoreMen;
 
     public String getNeedMoreMen() {

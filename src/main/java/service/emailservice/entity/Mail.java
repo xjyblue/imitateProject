@@ -3,21 +3,36 @@ package service.emailservice.entity;
 import pojo.Userbag;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/11/23 10:29
- */
+ * @ClassName Mail
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class Mail {
-//  是否由附件
+    /**
+     * 是否有附件
+     */
     private boolean ifUserBag;
-//  email的id
+    /**
+     * email的id
+     */
     private String emailId;
-//  email的正文
+    /**
+     * email的正文
+     */
     private String emailText;
-//  email来自的人
+    /**
+     * email来自的人
+     */
     private String fromUser;
-//  email发给的人
+    /**
+     * email发给的人
+     */
     private String toUser;
-//  附带的物品
+    /**
+     * 附带的物品
+     */
     private Userbag userbag;
 
     public boolean isIfUserBag() {

@@ -4,7 +4,7 @@ import service.achievementservice.entity.Achievement;
 import core.config.GrobalConfig;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
-import packet.PacketType;
+import core.packet.PacketType;
 import pojo.Achievementprocess;
 import pojo.User;
 import utils.MessageUtil;
@@ -13,11 +13,17 @@ import java.util.Map;
 
 
 /**
- * Description ：nettySpringServer 刷新成就信息
- * Created by server on 2018/12/12 15:46
- */
+ * @ClassName AchievementUtil
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class AchievementUtil {
-
+    /**
+     * 成就提示
+     * @param user
+     */
     public static void refreshAchievementInfo(User user) {
         String resp = "";
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {

@@ -4,7 +4,7 @@ import service.caculationservice.service.UserbagCaculationService;
 import core.component.good.Equipment;
 import core.component.good.HpMedicine;
 import core.component.good.MpMedicine;
-import core.component.good.parent.PGood;
+import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import io.netty.channel.Channel;
@@ -20,14 +20,22 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Description ：nettySpringServer 商城模块
- * Created by server on 2018/11/20 17:46
- */
+ * @ClassName ShopService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class ShopService {
     @Autowired
     private UserbagCaculationService userbagCaculationService;
 
+    /**
+     * 展示商城信息
+     * @param channel
+     * @param msg
+     */
     public void queryShopGood(Channel channel,String msg){
         String resp = System.getProperty("line.separator")
                 + MessageConfig.MESSAGESTART
@@ -71,10 +79,15 @@ public class ShopService {
         channel.writeAndFlush(MessageUtil.turnToPacket(resp));
     }
 
+    /**
+     * 购买商城物品
+     * @param channel
+     * @param msg
+     */
     public void buyShopGood(Channel channel,String msg){
         User user = ProjectContext.session2UserIds.get(channel);
-        String temp[] = msg.split("-");
-        if (temp.length != 3) {
+        String[] temp = msg.split("-");
+        if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
@@ -84,7 +97,7 @@ public class ShopService {
             return;
         }
 //          校验用户的金钱是否足够
-        if (!checkUserMoneyEnough(temp[2], temp[1], channel)) {
+        if (!checkUserMoneyEnough(temp[GrobalConfig.TWO], temp[1], channel)) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNENOUGHMONEY));
             return;
         }
@@ -96,7 +109,7 @@ public class ShopService {
             userbag.setName(user.getUsername());
             userbag.setNum(Integer.parseInt(temp[2]));
             userbag.setId(UUID.randomUUID().toString());
-            userbag.setTypeof(PGood.MPMEDICINE);
+            userbag.setTypeof(BaseGood.MPMEDICINE);
             userbagCaculationService.addUserBagForUser(user, userbag);
             String goodAllMoney = changeUserMoney(mpMedicine.getBuyMoney(), temp[2], user);
             channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + mpMedicine.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));
@@ -111,7 +124,7 @@ public class ShopService {
                 userbag.setName(equipment.getName());
                 userbag.setNum(1);
                 userbag.setStartlevel(equipment.getStartLevel());
-                userbag.setTypeof(PGood.EQUIPMENT);
+                userbag.setTypeof(BaseGood.EQUIPMENT);
                 userbag.setName(user.getUsername());
                 userbag.setStartlevel(equipment.getStartLevel());
                 userbag.setId(UUID.randomUUID().toString());
@@ -131,7 +144,7 @@ public class ShopService {
             userbag.setName(user.getUsername());
             userbag.setNum(Integer.parseInt(temp[2]));
             userbag.setId(UUID.randomUUID().toString());
-            userbag.setTypeof(PGood.HPMEDICINE);
+            userbag.setTypeof(BaseGood.HPMEDICINE);
             userbagCaculationService.addUserBagForUser(user, userbag);
             String goodAllMoney = changeUserMoney(hpMedicine.getBuyMoney(), temp[2], user);
             channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + hpMedicine.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));

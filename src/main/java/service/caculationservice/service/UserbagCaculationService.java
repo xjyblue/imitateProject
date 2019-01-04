@@ -3,7 +3,7 @@ package service.caculationservice.service;
 import service.achievementservice.entity.Achievement;
 import service.achievementservice.service.AchievementService;
 import core.component.good.Equipment;
-import core.component.good.parent.PGood;
+import core.component.good.parent.BaseGood;
 import io.netty.channel.Channel;
 import mapper.UserbagMapper;
 import core.context.ProjectContext;
@@ -16,9 +16,12 @@ import service.userbagservice.service.UserbagService;
 
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/12/13 12:11
- */
+ * @ClassName UserbagCaculationService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class UserbagCaculationService {
     @Autowired
@@ -28,16 +31,21 @@ public class UserbagCaculationService {
     @Autowired
     private UserbagService userbagService;
 
+    /**
+     * 新增用户背包道具
+     * @param user
+     * @param value
+     */
     public void addUserBagForUser(User user, Userbag value) {
         value.setName(user.getUsername());
-        if (value.getTypeof().equals(PGood.EQUIPMENT)) {
+        if (value.getTypeof().equals(BaseGood.EQUIPMENT)) {
             user.getUserBag().add(value);
             if (userbagMapper.selectByPrimaryKey(value.getId()) != null) {
                 userbagMapper.updateByPrimaryKeySelective(value);
             } else {
                 userbagMapper.insertSelective(value);
             }
-        } else if (value.getTypeof().equals(PGood.MPMEDICINE)||value.getTypeof().equals(PGood.HPMEDICINE)||value.getTypeof().equals(PGood.CHANGEGOOD)) {
+        } else if (value.getTypeof().equals(BaseGood.MPMEDICINE)||value.getTypeof().equals(BaseGood.HPMEDICINE)||value.getTypeof().equals(BaseGood.CHANGEGOOD)) {
             boolean flag = true;
             for (Userbag userbag : user.getUserBag()) {
                 if (userbag.getWid().equals(value.getWid())) {
@@ -58,7 +66,7 @@ public class UserbagCaculationService {
         }
 
 //      触发成就
-        if(value.getTypeof().equals(PGood.EQUIPMENT)){
+        if(value.getTypeof().equals(BaseGood.EQUIPMENT)){
             Equipment equipment = ProjectContext.equipmentMap.get(value.getWid());
             for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
                 Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
@@ -71,10 +79,15 @@ public class UserbagCaculationService {
         userbagService.refreshUserbagInfo(channel,null);
     }
 
+    /**
+     * 移除用户背包道具
+     * @param user
+     * @param userbag
+     * @param num
+     */
     public void removeUserbagFromUser(User user, Userbag userbag, Integer num) {
-        if (num == userbag.getNum()) {
+        if (num.equals(userbag.getNum())) {
             user.getUserBag().remove(userbag);
-            //todo:
             userbag.setName(null);
             userbagMapper.updateByPrimaryKey(userbag);
         } else {

@@ -1,13 +1,18 @@
 package core.component.good;
 
-import core.component.good.parent.PGood;
+import core.component.good.parent.BaseGood;
 
 /**
- * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/12/25 15:25
- */
-public class CollectGood extends PGood {
-//    id
+ * @ClassName CollectGood
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
+public class CollectGood extends BaseGood {
+    /**
+     * id
+     */
     private Integer id;
 
     public CollectGood() {

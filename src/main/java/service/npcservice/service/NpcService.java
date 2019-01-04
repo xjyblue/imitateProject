@@ -1,7 +1,8 @@
 package service.npcservice.service;
 
 import core.component.good.Equipment;
-import core.component.good.parent.PGood;
+import core.component.good.parent.BaseGood;
+import service.npcservice.entity.Npc;
 import service.sceneservice.entity.Scene;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
@@ -15,16 +16,18 @@ import pojo.Userbag;
 import service.achievementservice.entity.Achievement;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.UserbagCaculationService;
-import service.npcservice.entity.NPC;
 import utils.MessageUtil;
 
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Description ：nettySpringServer
- * Created by xiaojianyu on 2019/1/2 17:00
- */
+ * @ClassName NpcService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class NpcService {
     @Autowired
@@ -32,15 +35,20 @@ public class NpcService {
     @Autowired
     private UserbagCaculationService userbagCaculationService;
 
+    /**
+     * 和npc交流
+     * @param channel
+     * @param msg
+     */
     public void talkMethod(Channel channel, String msg) {
         String[] temp = msg.split("-");
         User user = ProjectContext.session2UserIds.get(channel);
-        if (temp.length != 2) {
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
         } else {
-            List<NPC> npcs = ProjectContext.sceneMap.get(ProjectContext.session2UserIds.get(channel).getPos())
+            List<Npc> npcs = ProjectContext.sceneMap.get(ProjectContext.session2UserIds.get(channel).getPos())
                     .getNpcs();
-            for (NPC npc : npcs) {
+            for (Npc npc : npcs) {
                 if (npc.getName().equals(temp[1])) {
                     channel.writeAndFlush(MessageUtil.turnToPacket(npc.getTalk()));
 //                      人物任务触发
@@ -57,16 +65,21 @@ public class NpcService {
         }
     }
 
+    /**
+     * 向npc兑换装备
+     * @param channel
+     * @param msg
+     */
     public void getEquipFromNpc(Channel channel, String msg) {
-        String temp[] = msg.split("-");
-        if (temp.length != 2) {
+        String[] temp = msg.split("-");
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
         User user = ProjectContext.session2UserIds.get(channel);
         Scene scene = ProjectContext.sceneMap.get(user.getPos());
-        NPC npc = null;
-        for (NPC npcT : scene.getNpcs()) {
+        Npc npc = null;
+        for (Npc npcT : scene.getNpcs()) {
             if (npcT.getName().equals(temp[1])) {
                 npc = npcT;
             }
@@ -105,7 +118,7 @@ public class NpcService {
             userbag1.setId(UUID.randomUUID().toString());
             userbag1.setDurability(equipment.getDurability());
             userbag1.setName(user.getUsername());
-            userbag1.setTypeof(PGood.EQUIPMENT);
+            userbag1.setTypeof(BaseGood.EQUIPMENT);
             userbagCaculationService.addUserBagForUser(user, userbag1);
         }
     }

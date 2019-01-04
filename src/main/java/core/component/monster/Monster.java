@@ -1,42 +1,83 @@
 package core.component.monster;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Objects;
+/**
+ * @ClassName Monster
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class Monster {
+    /**
+     * 普通怪
+     */
     public static final String TYPEOFBOSS = "1";
-
+    /**
+     * boss怪
+     */
     public static final String TYPEOFCOMMONMONSTER = "0";
-//  怪物id
+    /**
+     * 怪物id
+     */
     private Integer id;
-//  怪物名称
+    /**
+     * 怪物名称
+     */
     private String name;
-//  怪物类别 boss还是普通怪
+    /**
+     * 怪物类别 boss还是普通怪
+     */
     private String type;
-//  生命值
+    /**
+     * 生命值
+     */
     private String valueOfLife;
-//  状态
+    /**
+     * 状态
+     */
     private String status;
-//  怪物技能
+    /**
+     * 怪物技能
+     */
     private List<MonsterSkill> monsterSkillList;
-//  怪物刷新的概率
+    /**
+     * 怪物刷新的概率
+     */
     private Integer probability;
-//  怪物技能id后面能转成上面的list
+    /**
+     * 怪物技能id后面能转成上面的list
+     */
     private String skillIds;
-//  怪物是否存在
+    /**
+     * 怪物是否存在
+     */
     private boolean ifExist;
-//  怪物所有buff
-    private Map<String,Integer> bufMap;
-//  怪物的位置
+    /**
+     * 怪物所有buff
+     */
+    private Map<String, Integer> bufMap;
+    /**
+     * 怪物的位置
+     */
     private String pos;
-//  怪物的奖励
+    /**
+     * 怪物的奖励
+     */
     private String reward;
-//  怪物的经验
+    /**
+     * 怪物的经验
+     */
     private Integer experience;
-//  攻击间隔时间
+    /**
+     * 攻击间隔时间
+     */
     private Long attackEndTime;
-//  buff刷新间隔时间
+    /**
+     *  buff刷新间隔时间
+     */
     private Long buffRefreshTime;
 
     public String getReward() {
@@ -119,7 +160,7 @@ public class Monster {
         this.status = status;
     }
 
-    public Monster(Integer id,String name, String type, String valueOfLife, List<MonsterSkill> monsterSkillList,String status) {
+    public Monster(Integer id, String name, String type, String valueOfLife, List<MonsterSkill> monsterSkillList, String status) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -128,7 +169,7 @@ public class Monster {
         this.status = status;
     }
 
-    public Monster(){
+    public Monster() {
 
     }
 
@@ -160,7 +201,7 @@ public class Monster {
         return valueOfLife;
     }
 
-    public synchronized void setValueOfLife(String valueOfLife) {
+    public void setValueOfLife(String valueOfLife) {
         this.valueOfLife = valueOfLife;
     }
 
@@ -172,10 +213,21 @@ public class Monster {
         this.monsterSkillList = monsterSkillList;
     }
 
-    public synchronized BigInteger subLife(BigInteger attackDamage) {
-        BigInteger monsterLife = new BigInteger(this.valueOfLife);
-        this.valueOfLife = monsterLife.subtract(attackDamage).toString();
-        return new BigInteger(this.valueOfLife);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Monster monster = (Monster) o;
+        return Objects.equals(id, monster.id) &&
+                Objects.equals(name, monster.name);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
     }
 }

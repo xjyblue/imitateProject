@@ -1,5 +1,6 @@
 package service.chatservice.service;
 
+import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
@@ -10,16 +11,23 @@ import utils.MessageUtil;
 import java.util.Map;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/11/23 9:30
- */
+ * @ClassName ChatService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class ChatService {
-
+    /**
+     * 全服大喇叭
+     * @param channel
+     * @param msg
+     */
     public void chatAll(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
-        String temp[] = msg.split("-");
-        if (temp.length != 2) {
+        String[] temp = msg.split("-");
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
@@ -34,10 +42,15 @@ public class ChatService {
         }
     }
 
+    /**
+     * 单人聊天
+     * @param channel
+     * @param msg
+     */
     public void chatOne(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
-        String temp[] = msg.split("-");
-        if (temp.length != 3) {
+        String[] temp = msg.split("-");
+        if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }

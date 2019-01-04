@@ -4,32 +4,43 @@ import core.component.good.CollectGood;
 import core.component.good.Equipment;
 import core.component.good.HpMedicine;
 import core.component.good.MpMedicine;
-import core.component.good.parent.PGood;
+import core.component.good.parent.BaseGood;
 import core.config.MessageConfig;
 import core.context.ProjectContext;
 import io.netty.channel.Channel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import packet.PacketType;
+import core.packet.PacketType;
 import pojo.User;
 import pojo.Userbag;
 import service.buffservice.entity.BuffConstant;
+import service.caculationservice.service.MpCaculationService;
 import utils.MessageUtil;
 
-import java.math.BigInteger;
 
 /**
- * Description ：nettySpringServer
- * Created by xiaojianyu on 2019/1/2 16:13
- */
+ * @ClassName UserbagService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class UserbagService {
+    @Autowired
+    private MpCaculationService mpCaculationService;
 
-    //  整理背包物品
+    /**
+     * 整理用户背包
+     *
+     * @param channel
+     * @param msg
+     */
     public void arrangeUserBag(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         for (Userbag userbag : user.getUserBag()) {
             for (Userbag userbag2 : user.getUserBag()) {
-                if (userbag != userbag2 && userbag.getWid() == userbag2.getWid() && !userbag.getTypeof().equals(PGood.EQUIPMENT)) {
+                if (userbag != userbag2 && userbag.getWid().equals(userbag2.getWid()) && !userbag.getTypeof().equals(BaseGood.EQUIPMENT)) {
 //                      相同物品不同格子叠加
                     userbag.setNum(userbag.getNum() + userbag2.getNum());
                 }
@@ -37,9 +48,14 @@ public class UserbagService {
         }
     }
 
-    //  使用背包物品
+    /**
+     * 使用用户背包
+     *
+     * @param channel
+     * @param msg
+     */
     public void useUserbag(Channel channel, String msg) {
-        String temp[] = msg.split("-");
+        String[] temp = msg.split("-");
         User user = ProjectContext.session2UserIds.get(channel);
         Integer key = Integer.parseInt(temp[1]);
 
@@ -53,18 +69,12 @@ public class UserbagService {
 
 //              处理用户背包
             sloveUserbag(user, channel, key);
-
+//          直接蓝药直接回复
             if (mpMedicine.isImmediate()) {
-                BigInteger userMp = new BigInteger(user.getMp());
-                userMp = userMp.add(new BigInteger(mpMedicine.getReplyValue()));
-                BigInteger maxMp = new BigInteger("10000");
-                if (userMp.compareTo(maxMp) >= 0) {
-                    user.setMp(maxMp.toString());
-                } else {
-                    user.addMp(mpMedicine.getReplyValue());
-                }
+                mpCaculationService.addUserMp(user, mpMedicine.getReplyValue());
             } else {
-                if (user.getBuffMap().get(BuffConstant.MPBUFF) == mpMedicine.getId()) {
+//              缓慢蓝药修改回蓝buff
+                if (user.getBuffMap().get(BuffConstant.MPBUFF).equals(mpMedicine.getId())) {
                     ProjectContext.userBuffEndTime.get(user).put(BuffConstant.MPBUFF, (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
                 } else {
                     user.getBuffMap().put(BuffConstant.MPBUFF, mpMedicine.getId());
@@ -89,6 +99,12 @@ public class UserbagService {
         }
     }
 
+    /**
+     * 检查背包是否有此物品
+     * @param user
+     * @param key
+     * @return
+     */
     private boolean checkGoodInUserbag(User user, Integer key) {
         for (Userbag userbag : user.getUserBag()) {
             if (userbag.getWid().equals(key)) {
@@ -97,6 +113,7 @@ public class UserbagService {
         }
         return false;
     }
+
 
     private void sloveUserbag(User user, Channel channel, Integer key) {
         Userbag userbagNow = null;
@@ -121,8 +138,14 @@ public class UserbagService {
         }
     }
 
-    //  根据用户背包id获得用户背包
-    public  Userbag getUserbagByUserbagId(User user, String userbagId) {
+    /**
+     * 根据用户背包id获取用户背包
+     *
+     * @param user
+     * @param userbagId
+     * @return
+     */
+    public Userbag getUserbagByUserbagId(User user, String userbagId) {
         for (Userbag userbag : user.getUserBag()) {
             if (userbag.getId().equals(userbagId)) {
                 return userbag;
@@ -131,14 +154,19 @@ public class UserbagService {
         return null;
     }
 
-    //  刷新用户背包
-    public void refreshUserbagInfo(Channel channel,String msg) {
+    /**
+     * 刷新用户背包
+     *
+     * @param channel
+     * @param msg
+     */
+    public void refreshUserbagInfo(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String bagResp = System.getProperty("line.separator")
                 + "按b-物品编号使用蓝药"
                 + "  按ww=物品编号装备武器";
         for (Userbag userbag : user.getUserBag()) {
-            if (userbag.getTypeof().equals(PGood.MPMEDICINE)) {
+            if (userbag.getTypeof().equals(BaseGood.MPMEDICINE)) {
                 MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
                 bagResp += System.getProperty("line.separator")
                         + "[格子id:" + userbag.getId()
@@ -150,7 +178,7 @@ public class UserbagService {
                 } else {
                     bagResp += " [即时回复]";
                 }
-            } else if (userbag.getTypeof().equals(PGood.EQUIPMENT)) {
+            } else if (userbag.getTypeof().equals(BaseGood.EQUIPMENT)) {
                 Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
                 bagResp += System.getProperty("line.separator")
                         + "[格子id:" + userbag.getId()
@@ -160,7 +188,7 @@ public class UserbagService {
                         + "] [武器攻击力加成" + equipment.getAddValue()
                         + "] [武器星级" + userbag.getStartlevel()
                         + "] [武器数量:" + userbag.getNum() + "]";
-            } else if (userbag.getTypeof().equals(PGood.HPMEDICINE)) {
+            } else if (userbag.getTypeof().equals(BaseGood.HPMEDICINE)) {
                 HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(userbag.getWid());
                 bagResp += System.getProperty("line.separator")
                         + "[格子id:" + userbag.getId()
@@ -169,7 +197,7 @@ public class UserbagService {
                         + "] [物品数量" + userbag.getNum()
                         + "] [物品恢复血量" + hpMedicine.getReplyValue()
                         + "] [物品cd" + hpMedicine.getCd() + "]";
-            } else if (userbag.getTypeof().equals(PGood.CHANGEGOOD)) {
+            } else if (userbag.getTypeof().equals(BaseGood.CHANGEGOOD)) {
                 CollectGood collectGood = ProjectContext.collectGoodMap.get(userbag.getWid());
                 bagResp += System.getProperty("line.separator")
                         + "[格子id:" + userbag.getId()

@@ -10,7 +10,7 @@ import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
 import core.context.ProjectContext;
-import order.Order;
+import core.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
@@ -23,7 +23,13 @@ import utils.MessageUtil;
 
 import java.util.List;
 import java.util.Map;
-
+/**
+ * @ClassName RegisterService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class RegisterService {
     @Autowired
@@ -37,18 +43,23 @@ public class RegisterService {
     @Autowired
     private SkillService skillService;
 
+    /**
+     * 注册
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "*")
     public void register(Channel channel, String msg) {
         String[] temp = msg.split("-");
-        if (temp.length != 4) {
+        if (temp.length != GrobalConfig.FOUR) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        if (!temp[1].equals(temp[2])) {
+        if (!temp[1].equals(temp[GrobalConfig.TWO])) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DOUBLEPASSWORDERROR));
             return;
         }
-        if (!ProjectContext.roleMap.containsKey(Integer.parseInt(temp[3]))) {
+        if (!ProjectContext.roleMap.containsKey(Integer.parseInt(temp[GrobalConfig.THREE]))) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOROLE));
             return;
         }

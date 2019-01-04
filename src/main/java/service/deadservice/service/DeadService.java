@@ -7,7 +7,7 @@ import core.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import core.context.ProjectContext;
-import order.Order;
+import core.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -16,9 +16,12 @@ import utils.MessageUtil;
 import service.userservice.service.UserService;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/11/26 12:11
- */
+ * @ClassName DeadService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class DeadService {
     @Autowired
@@ -28,16 +31,31 @@ public class DeadService {
     @Autowired
     private UserService userService;
 
+    /**
+     * 单人聊天
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "chat-")
     public void chatOne(Channel channel, String msg) {
         chatService.chatOne(channel, msg);
     }
 
+    /**
+     * 集体聊天
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "chatAll")
     public void chatAll(Channel channel,String msg){
         chatService.chatAll(channel,msg);
     }
 
+    /**
+     * 复活
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "y")
     public void reborn(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);

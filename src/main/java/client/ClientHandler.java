@@ -3,17 +3,22 @@ package client;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;
-import packet.PacketProto;
+import core.packet.PacketProto;
 import io.netty.handler.timeout.IdleStateEvent;
-import packet.PacketType;
+import core.packet.PacketType;
 
 import javax.swing.*;
 
-import static packet.PacketProto.Packet.newBuilder;
+import static core.packet.PacketProto.Packet.newBuilder;
 
 /**
- * @author server
- */
+ * @ClassName ClientHandler
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
+
 public class ClientHandler extends ChannelHandlerAdapter {
     private ClientConfig clientConfig;
     private ClientStart clientStart;
@@ -23,6 +28,7 @@ public class ClientHandler extends ChannelHandlerAdapter {
         this.clientStart = clientStart;
     }
 
+    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
 //      收到玩家消息的时候触发
@@ -102,12 +108,15 @@ public class ClientHandler extends ChannelHandlerAdapter {
     }
 
 
+    @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if (null != ctx) ctx.close();
+        if (null != ctx) {
+            ctx.close();
+        }
     }
 
 

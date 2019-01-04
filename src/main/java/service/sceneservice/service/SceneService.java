@@ -1,5 +1,6 @@
 package service.sceneservice.service;
 
+import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.context.ProjectContext;
 import io.netty.channel.Channel;
@@ -15,9 +16,12 @@ import utils.MessageUtil;
 import java.util.Map;
 
 /**
- * Description ：nettySpringServer
- * Created by xiaojianyu on 2019/1/2 17:32
- */
+ * @ClassName SceneService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class SceneService {
 
@@ -30,9 +34,14 @@ public class SceneService {
     @Autowired
     private SceneService sceneService;
 
+    /**
+     * 移动场景，线程切换
+     * @param channel
+     * @param msg
+     */
     public void moveScene(Channel channel, String msg) {
-        String temp[] = msg.split("-");
-        if (temp.length != 2) {
+        String[] temp = msg.split("-");
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
@@ -50,7 +59,7 @@ public class SceneService {
         }
 
 //      起始之地有特殊功效，能让人物的血量和蓝量回满
-        if (sceneTarget.getName().equals("起始之地")) {
+        if (GrobalConfig.RECOVER_SCENE.equals(sceneTarget.getName())) {
             userService.recoverUser(user);
         }
 
@@ -75,7 +84,11 @@ public class SceneService {
         channel.writeAndFlush(MessageUtil.turnToPacket("已移动到" + temp[1]));
     }
 
-
+    /**
+     * 通过场景名拿到场景
+     * @param areaName
+     * @return
+     */
     public Scene getSceneByName(String areaName) {
         for (Map.Entry<String, Scene> entry : ProjectContext.sceneMap.entrySet()) {
             if (areaName.equals(entry.getValue().getName())) {

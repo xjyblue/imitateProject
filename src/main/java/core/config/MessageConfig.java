@@ -1,9 +1,12 @@
 package core.config;
 
 /**
- * Description ：nettySpringServer 信息文字配置
- * Created by server on 2018/11/21 15:14
- */
+ * @ClassName GrobalConfig
+ * @Description 信息文字配置
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class MessageConfig {
     public static final String LOGINMESSAGE = "请输入：用户名-密码";
     public static final String REGISTERMESSAGE = "请输入：用户名-密码-确认密码-种族编号[1:星武 2:星魂 3:星法 4:星宠师]进行注册";

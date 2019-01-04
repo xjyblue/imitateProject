@@ -9,18 +9,21 @@ import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
-import packet.PacketProto;
-import utils.MessageUtil;
+import core.packet.PacketProto;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import static packet.PacketProto.Packet.newBuilder;
+import static core.packet.PacketProto.Packet.newBuilder;
 
 /**
- * @author server
- */
+ * @ClassName ClientConfig
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class ClientConfig {
     private int port;
     private String host;
@@ -110,6 +113,7 @@ public class ClientConfig {
         ChannelFuture future = bootstrap.connect("127.0.0.1", 8081);
 //      监听通道异步连接
         future.addListener(new ChannelFutureListener() {
+            @Override
             public void operationComplete(ChannelFuture futureListener) throws Exception {
                 if (futureListener.isSuccess()) {
                     channel = futureListener.channel();

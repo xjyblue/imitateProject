@@ -1,4 +1,4 @@
-package test;
+package utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +23,13 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * @ClassName ExcelUtil
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class ExcelUtil {
     private static final Logger logger=LoggerFactory.getLogger(ExcelUtil.class);
 
@@ -178,7 +184,12 @@ public class ExcelUtil {
             }
         }
     }
-    //判断是否为空，若为空设为""
+
+    /**
+     * 判断是否为空，若为空设为""
+     * @param object
+     * @return
+     */
     private static Object isNull(Object object){
         if(object!=null){
             return object;
@@ -224,7 +235,7 @@ public class ExcelUtil {
      * @return
      */
     private static Map<String,Integer> generateColumnPropertyMap(HSSFSheet sheet,LinkedHashMap<String,String> alias) {
-        Map<String,Integer> propertyMap=new HashMap<String,Integer>();
+        Map<String,Integer> propertyMap=new HashMap<String,Integer>(64);
 
         HSSFRow propertyRow = sheet.getRow(1);
         short firstCellNum = propertyRow.getFirstCellNum();

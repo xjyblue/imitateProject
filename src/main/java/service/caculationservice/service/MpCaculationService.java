@@ -3,22 +3,52 @@ package service.caculationservice.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
+import service.levelservice.service.LevelService;
 
 /**
- * Description ：nettySpringServer
- * Created by xiaojianyu on 2018/12/29 17:32
- */
+ * @ClassName MpCaculationService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class MpCaculationService {
 
-    private void subUserMp(User user, String subMp){
+    @Autowired
+    private LevelService levelService;
+
+    /**
+     * 扣蓝
+     * @param user
+     * @param subMp
+     */
+    public void subUserMp(User user, String subMp) {
         Integer userMp = Integer.parseInt(user.getMp());
-        Integer subMpI =Integer.parseInt(subMp);
+        Integer subMpI = Integer.parseInt(subMp);
         userMp -= subMpI;
-        if(userMp<0){
+        if (userMp < 0) {
             userMp = 0;
         }
         user.setMp(userMp.toString());
     }
+
+    /**
+     * 加蓝
+     * @param user
+     * @param addMp
+     */
+    public void addUserMp(User user, String addMp) {
+        Integer userMp = Integer.parseInt(user.getMp());
+        Integer addMpI = Integer.parseInt(addMp);
+        userMp += addMpI;
+        Integer maxMp = Integer.parseInt(levelService.getMaxMp(user));
+        if(userMp>maxMp){
+            user.setMp(maxMp.toString());
+        }else {
+            user.setMp(userMp.toString());
+        }
+    }
+
 
 }

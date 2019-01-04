@@ -9,10 +9,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 /**
- * 客户端主程序入口
- *
- * @author server
- */
+ * @ClassName ClientStart
+ * @Description 客户端主程序入口
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class ClientStart extends JFrame implements KeyListener {
     private JTextField txt;
 
@@ -306,6 +308,7 @@ public class ClientStart extends JFrame implements KeyListener {
         JButton b = new JButton("清屏");
         b.setBounds(100, 100, 65, 30);
         b.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 frm.jTextArea2.setText("");
                 frm.jTextArea3.setText("");
@@ -317,6 +320,7 @@ public class ClientStart extends JFrame implements KeyListener {
         JButton b2 = new JButton("stop");
         b2.setBounds(100, 100, 65, 30);
         b2.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 frm.flag = false;
             }
@@ -324,15 +328,19 @@ public class ClientStart extends JFrame implements KeyListener {
 
         JButton b3 = new JButton("continue");
         b3.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 frm.flag = true;
             }
         });
 
-//      设置布局
-        GridBagLayout gridBagLayout = new GridBagLayout(); //实例化布局对象
-        frm.setLayout(gridBagLayout);                     //jf窗体对象设置为GridBagLayout布局
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();//实例化这个对象用来对组件进行管理
+        //设置布局
+        //实例化布局对象
+        GridBagLayout gridBagLayout = new GridBagLayout();
+        //jf窗体对象设置为GridBagLayout布局
+        frm.setLayout(gridBagLayout);
+        //实例化这个对象用来对组件进行管理
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.fill = GridBagConstraints.BOTH;
 
         gridBagConstraints.gridx = 0;
@@ -502,9 +510,11 @@ public class ClientStart extends JFrame implements KeyListener {
         frm.bootstrap = new ClientConfig(8081, "127.0.0.1", frm);
     }
 
+    @Override
     public void keyPressed(KeyEvent e) {
         if (e.getSource() == txt) {
-            if (e.getKeyCode() == KeyEvent.VK_ENTER) //判断按下的键是否是回车键
+            //判断按下的键是否是回车键
+            if (e.getKeyCode() == KeyEvent.VK_ENTER)
             {
                 String req = txt.getText();
                 txt.setText("");
@@ -514,10 +524,12 @@ public class ClientStart extends JFrame implements KeyListener {
     }
 
 
+    @Override
     public void keyReleased(KeyEvent e) {
     }
 
 
+    @Override
     public void keyTyped(KeyEvent e) {
     }
 }

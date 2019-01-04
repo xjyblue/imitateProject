@@ -1,7 +1,7 @@
 package service.userservice.service;
 
 import core.component.monster.Monster;
-import service.npcservice.entity.NPC;
+import service.npcservice.entity.Npc;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
 import service.levelservice.service.LevelService;
@@ -15,14 +15,22 @@ import utils.SpringContextUtil;
 import java.util.Map;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/12/17 14:57
- */
+ * @ClassName UserService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class UserService {
     @Autowired
     private LevelService levelService;
 
+    /**
+     * aoi 方法
+     * @param channel
+     * @param msg
+     */
     public void aoiMethod(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String allStatus = System.getProperty("line.separator")
@@ -42,8 +50,8 @@ public class UserService {
                 allStatus += "其他玩家" + entry.getValue().getUsername() + "---" + entry.getValue().getStatus() + System.getProperty("line.separator");
             }
         }
-        for (NPC npc : ProjectContext.sceneMap.get(user.getPos()).getNpcs()) {
-            allStatus += "NPC:" + npc.getName() + " 状态[" + npc.getStatus() + "]" + System.getProperty("line.separator");
+        for (Npc npc : ProjectContext.sceneMap.get(user.getPos()).getNpcs()) {
+            allStatus += "Npc:" + npc.getName() + " 状态[" + npc.getStatus() + "]" + System.getProperty("line.separator");
         }
         for (Monster monster : ProjectContext.sceneMap.get(user.getPos()).getMonsters()) {
             allStatus += "怪物有" + monster.getName() + " 生命值[" + monster.getValueOfLife()
@@ -53,7 +61,12 @@ public class UserService {
         channel.writeAndFlush(MessageUtil.turnToPacket(allStatus));
     }
 
-    public User getUserByName(String s) {
+    /**
+     * 根据用户名获取用户
+     * @param s
+     * @return
+     */
+    public User getUserByNameFromSession(String s) {
         for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
             if (entry.getValue().getUsername().equals(s)) {
                 return entry.getValue();

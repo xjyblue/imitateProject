@@ -3,8 +3,8 @@ package service.achievementservice.service;
 import service.achievementservice.entity.Achievement;
 import core.component.good.Equipment;
 import core.component.monster.Monster;
-import service.npcservice.entity.NPC;
-import core.component.good.parent.PGood;
+import service.npcservice.entity.Npc;
+import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import mapper.AchievementprocessMapper;
 import core.context.ProjectContext;
@@ -22,9 +22,12 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/12/12 15:04
- */
+ * @ClassName AchievementService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class AchievementService {
 
@@ -33,9 +36,15 @@ public class AchievementService {
     @Autowired
     private LevelService levelService;
 
+    /**
+     * 杀怪任务
+     * @param user
+     * @param achievementprocess
+     * @param monsterId
+     */
     public void executeKillMonster(User user, Achievementprocess achievementprocess, Integer monsterId) {
         if (achievementprocess.getType().equals(Achievement.ATTACKMONSTER)) {
-            String temp[] = achievementprocess.getProcesss().split("-");
+            String[] temp = achievementprocess.getProcesss().split("-");
             String s = "";
             for (int i = 0; i < temp.length; i++) {
                 String temp1 = temp[i];
@@ -65,6 +74,11 @@ public class AchievementService {
         }
     }
 
+    /**
+     * 父任务
+     * @param user
+     * @param achievement
+     */
     private void sloveParentProcess(User user, Achievement achievement) {
         if (!achievement.getParent().equals(GrobalConfig.NULL)) {
             Achievement achievementParent = AchievementUtil.getAchievementById(Integer.parseInt(achievement.getParent()));
@@ -99,6 +113,12 @@ public class AchievementService {
         }
     }
 
+    /**
+     * 升级任务
+     * @param achievementprocess
+     * @param user
+     * @param achievement
+     */
     public void executeLevelUp(Achievementprocess achievementprocess, User user, Achievement achievement) {
         achievementprocess.setProcesss(levelService.getLevelByExperience(user.getExperience()) + "");
         if (Integer.parseInt(achievementprocess.getProcesss()) >= Integer.parseInt(achievement.getTarget())) {
@@ -108,7 +128,14 @@ public class AchievementService {
         AchievementUtil.refreshAchievementInfo(user);
     }
 
-    public void executeTalkNPC(Achievementprocess achievementprocess, User user, Achievement achievement, NPC npc) {
+    /**
+     * npc交流任务
+     * @param achievementprocess
+     * @param user
+     * @param achievement
+     * @param npc
+     */
+    public void executeTalkNPC(Achievementprocess achievementprocess, User user, Achievement achievement, Npc npc) {
         if (achievement.getTarget().equals(npc.getId() + "") && !achievementprocess.getIffinish()) {
             achievementprocess.setProcesss(achievement.getTarget());
             achievementprocess.setIffinish(true);
@@ -118,25 +145,37 @@ public class AchievementService {
         AchievementUtil.refreshAchievementInfo(user);
     }
 
+    /**
+     * 成就奖励
+     * @param achievement
+     * @param user
+     */
     private void sloveAchievementReward(Achievement achievement, User user) {
         if (!achievement.getReward().equals(GrobalConfig.NULL)) {
-            String reward[] = achievement.getReward().split("-");
+            String[] reward = achievement.getReward().split("-");
             for (String rewardT : reward) {
-                String rewardArr[] = rewardT.split(":");
+                String[] rewardArr = rewardT.split(":");
 //                  增加经验值
-                if(rewardArr[0].equals("1")){
+                if("1".equals(rewardArr[0])){
                     levelService.upUserLevel(user,rewardArr[1]);
                 }
             }
         }
     }
 
-    public void executeCollect(Achievementprocess achievementprocess, PGood PGood, User user, Achievement achievement) {
+    /**
+     * 收集任务
+     * @param achievementprocess
+     * @param baseGood
+     * @param user
+     * @param achievement
+     */
+    public void executeCollect(Achievementprocess achievementprocess, BaseGood baseGood, User user, Achievement achievement) {
         if (!achievementprocess.getIffinish()) {
-            if (PGood instanceof Equipment) {
-                Equipment equipment = (Equipment) PGood;
+            if (baseGood instanceof Equipment) {
+                Equipment equipment = (Equipment) baseGood;
 
-                String target[] = achievement.getTarget().split("-");
+                String[] target = achievement.getTarget().split("-");
                 Set<String> targetSet = new HashSet<>();
                 for (String targetTemp : target) {
                     targetSet.add(targetTemp);
@@ -148,7 +187,7 @@ public class AchievementService {
                         achievementprocess.setProcesss(equipment.getId() + "");
                     } else {
 //                       检查里面有没有该物品，没有再添加，添加完再校验
-                        String current[] = achievementprocess.getProcesss().split("-");
+                        String[] current = achievementprocess.getProcesss().split("-");
                         Set<String> currentSet = new HashSet<>();
                         for (String currentTemp : current) {
                             currentSet.add(currentTemp);
@@ -173,6 +212,13 @@ public class AchievementService {
         }
     }
 
+    /**
+     * boss挑战成功任务
+     * @param achievementprocess
+     * @param user
+     * @param achievement
+     * @param monster
+     */
     public void executeBossAttack(Achievementprocess achievementprocess, User user, Achievement achievement, Monster monster) {
         if (monster.getId().equals(Integer.parseInt(achievement.getTarget()))) {
 //          此任务比较特殊和队伍挂钩
@@ -183,6 +229,13 @@ public class AchievementService {
         AchievementUtil.refreshAchievementInfo(user);
     }
 
+    /**
+     * 第一朋友任务
+     * @param achievementprocess
+     * @param user
+     * @param userTarget
+     * @param fromUser
+     */
     public void executeAddFirstFriend(Achievementprocess achievementprocess, User user, User userTarget, String fromUser) {
 //      更新用户自己的
         Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
@@ -214,6 +267,10 @@ public class AchievementService {
         AchievementUtil.refreshAchievementInfo(user);
     }
 
+    /**
+     * 金钱达到某个数值任务
+     * @param user
+     */
     public void executeMoneyAchievement(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
             if (achievementprocessT.getType().equals(Achievement.MONEYFIRST)) {
@@ -231,7 +288,11 @@ public class AchievementService {
         AchievementUtil.refreshAchievementInfo(user);
     }
 
-
+    /**
+     * 第一次加入工会任务
+     * @param user
+     * @param username
+     */
     public void executeAddUnionFirst(User user, String username) {
         List<Achievementprocess> list = null;
         if (user != null) {
@@ -255,7 +316,11 @@ public class AchievementService {
         }
     }
 
-    //
+    /**
+     * 更新对方的任务
+     * @param user
+     * @param monster
+     */
     private void updateAchievementprocessWithOther(User user, Monster monster) {
         Team team = ProjectContext.teamMap.get(user.getTeamId());
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
@@ -271,7 +336,11 @@ public class AchievementService {
         }
     }
 
-
+    /**
+     * 第一次加入工会任务
+     * @param userStart
+     * @param userTo
+     */
     public void executeFirstTrade(User userStart, User userTo) {
 //      更新一方的交易成就
         updateFirstTradeOnOneUser(userStart);
@@ -281,6 +350,10 @@ public class AchievementService {
         AchievementUtil.refreshAchievementInfo(userTo);
     }
 
+    /**
+     * 更新对方的任务
+     * @param user
+     */
     private void updateFirstTradeOnOneUser(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
             Achievement achievement = ProjectContext.achievementMap.get(achievementprocessT.getAchievementid());
@@ -292,7 +365,10 @@ public class AchievementService {
         }
     }
 
-
+    /**
+     * 第一次组队任务
+     * @param user
+     */
     public void executeFirstAddTeam(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
             if (achievementprocessT.getType().equals(Achievement.TEAMFIRST) && !achievementprocessT.getIffinish()) {
@@ -303,6 +379,10 @@ public class AchievementService {
         AchievementUtil.refreshAchievementInfo(user);
     }
 
+    /**
+     * 第一次pk胜利任务
+     * @param user
+     */
     public void executeFirstPKWin(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
             if (achievementprocessT.getType().equals(Achievement.PKFIRST) && !achievementprocessT.getIffinish()) {
@@ -313,6 +393,10 @@ public class AchievementService {
         AchievementUtil.refreshAchievementInfo(user);
     }
 
+    /**
+     * 装备星级任务
+     * @param user
+     */
     public void executeEquipmentStartLevel(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
             if (achievementprocessT.getType().equals(Achievement.EQUIPMENTSTARTLEVEL) && !achievementprocessT.getIffinish()) {
@@ -326,6 +410,12 @@ public class AchievementService {
         AchievementUtil.refreshAchievementInfo(user);
     }
 
+    /**
+     * 校验装备等级总和
+     * @param user
+     * @param achievement
+     * @return
+     */
     private boolean checkUserWeaponStartLevel(User user, Achievement achievement) {
         Integer allLevel = 0;
         for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {

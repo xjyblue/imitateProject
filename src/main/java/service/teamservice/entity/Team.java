@@ -5,14 +5,24 @@ import pojo.User;
 import java.util.Map;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/11/19 14:13
- */
+ * @ClassName Team
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class Team {
+    /**
+     * 队伍id
+     */
     private String teamId;
-
+    /**
+     * 队伍中的用户
+     */
     private Map<String,User> userMap;
-
+    /**
+     * 队伍中的领导者
+     */
     private User leader;
 
     public String getTeamId() {

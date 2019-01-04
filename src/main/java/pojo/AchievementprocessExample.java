@@ -2,7 +2,13 @@ package pojo;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * @ClassName AchievementprocessExample
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class AchievementprocessExample {
     protected String orderByClause;
 

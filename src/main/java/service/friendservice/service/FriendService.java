@@ -1,5 +1,6 @@
 package service.friendservice.service;
 
+import core.config.GrobalConfig;
 import service.achievementservice.entity.Achievement;
 import service.achievementservice.service.AchievementService;
 import core.config.MessageConfig;
@@ -9,10 +10,10 @@ import mapper.FriendapplyinfoMapper;
 import mapper.FriendinfoMapper;
 import mapper.UserMapper;
 import core.context.ProjectContext;
-import order.Order;
+import core.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import packet.PacketType;
+import core.packet.PacketType;
 import pojo.*;
 import utils.MessageUtil;
 import service.userservice.service.UserService;
@@ -21,9 +22,12 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/12/13 17:04
- */
+ * @ClassName FriendService
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 @Component
 public class FriendService {
     @Autowired
@@ -37,27 +41,41 @@ public class FriendService {
     @Autowired
     private UserService userService;
 
-    @Order(orderMsg = "pe")
-    public void enterFriendView(Channel channel,String msg){
+    /**
+     * 进入朋友界面
+     * @param channel
+     * @param msg
+     */
+    public void enterFriendView(Channel channel, String msg) {
         ProjectContext.eventStatus.put(channel, ChannelStatus.FRIEND);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFRIENDVIEW));
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG, PacketType.FRIENDMSG));
         return;
     }
 
-    @Order(orderMsg = "q")
-    public void quitFriendView(Channel channel,String msg){
+    /**
+     * 退出朋友界面
+     * @param channel
+     * @param msg
+     */
+    @Order(orderMsg = "qt")
+    public void quitFriendView(Channel channel, String msg) {
         ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTFRIENDVIEW));
         channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.FRIENDMSG));
         return;
     }
 
+    /**
+     * 同意交友
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "ty=y")
     public void agreeApplyInfo(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         String[] temp = msg.split("=");
-        if (temp.length != 2) {
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
@@ -80,7 +98,7 @@ public class FriendService {
         friendapplyinfoMapper.updateByPrimaryKeySelective(friendapplyinfo);
 //      通知双方如果在线的话
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG + "你同意了" + friendapplyinfo.getFromuser() + "的好友申请", PacketType.FRIENDMSG));
-        User userTarget = userService.getUserByName(friendapplyinfo.getFromuser());
+        User userTarget = userService.getUserByNameFromSession(friendapplyinfo.getFromuser());
         if (userTarget != null) {
             Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
             channelTarget.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "同意了你的好友申请，你们现在是好友啦"));
@@ -89,12 +107,17 @@ public class FriendService {
 //      触发好友成就
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.FRIEND)) {
-                achievementService.executeAddFirstFriend(achievementprocess,user,userTarget,friendapplyinfo.getFromuser());
+                achievementService.executeAddFirstFriend(achievementprocess, user, userTarget, friendapplyinfo.getFromuser());
             }
         }
         return;
     }
 
+    /**
+     * 展示好友
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "lu")
     public void queryFriendToSelf(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
@@ -113,19 +136,24 @@ public class FriendService {
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG + resp, PacketType.FRIENDMSG));
     }
 
+    /**
+     * 申请好友
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "sq-")
     public void applyFriendToOther(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
-        String temp[] = msg.split("-");
-        if (temp.length != 2) {
+        String[] temp = msg.split("-");
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
         UserExample userExample = new UserExample();
         UserExample.Criteria criteria = userExample.createCriteria();
-        criteria.andUsernameEqualTo(temp[1]);
+        criteria.andUsernameEqualTo(temp[GrobalConfig.ONE]);
         List<User> list = userMapper.selectByExample(userExample);
-        if (list.size() == 0) {
+        if (list.size() == GrobalConfig.ZERO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG + MessageConfig.NOFOUNDMAN, PacketType.FRIENDMSG));
             return;
         } else {
@@ -139,8 +167,13 @@ public class FriendService {
         friendapplyinfoMapper.insertSelective(friendapplyinfo);
     }
 
+    /**
+     * 展示好友申请记录
+     * @param channel
+     * @param msg
+     */
     @Order(orderMsg = "ls")
-    public void queryApplyUserInfo(Channel channel,String msg) {
+    public void queryApplyUserInfo(Channel channel, String msg) {
         User user = ProjectContext.session2UserIds.get(channel);
         FriendapplyinfoExample friendapplyinfoExample = new FriendapplyinfoExample();
         FriendapplyinfoExample.Criteria criteria = friendapplyinfoExample.createCriteria();

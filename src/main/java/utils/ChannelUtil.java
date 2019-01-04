@@ -2,15 +2,22 @@ package utils;
 
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
-import packet.PacketProto;
+import core.packet.PacketProto;
 import pojo.User;
 
 /**
- * Description ：nettySpringServer 后面可扩展更多的功能
- * Created by server on 2018/12/18 11:48
- */
+ * @ClassName ChannelUtil
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class ChannelUtil {
-
+    /**
+     * 将消息添加到用户队列中
+     * @param channel
+     * @param packet
+     */
     public static void addPacketToUser(Channel channel, PacketProto.Packet packet) {
         User user = ProjectContext.session2UserIds.get(channel);
         user.getPacketsQueue().add(packet);

@@ -1,11 +1,16 @@
 package core.component.good;
 
-import core.component.good.parent.PGood;
-
-public class MpMedicine extends PGood {
+import core.component.good.parent.BaseGood;
+/**
+ * @ClassName MpMedicine
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
+public class MpMedicine extends BaseGood {
 
     public MpMedicine(){
-
     }
 
     public MpMedicine(Integer id,String replyValue, boolean immediate, String secondValue, Integer keepTime) {
@@ -15,14 +20,26 @@ public class MpMedicine extends PGood {
         this.secondValue = secondValue;
         this.keepTime = keepTime;
     }
+
+    /**
+     * 蓝药id
+     */
     private Integer id;
-//  总回复蓝量
+    /**
+     * 蓝药回复总量
+     */
     private String replyValue;
-//  是否为即时回复药品
+    /**
+     * 是否为即时回复的药品
+     */
     private boolean immediate;
-//  每秒增幅
+    /**
+     * 每秒增幅
+     */
     private String secondValue;
-//  持续时间
+    /**
+     * 持续的时间
+     */
     private Integer keepTime;
 
     public Integer getId() {

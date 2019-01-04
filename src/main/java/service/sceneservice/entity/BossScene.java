@@ -3,10 +3,10 @@ package service.sceneservice.entity;
 import core.component.boss.BossSceneConfig;
 import core.component.monster.Monster;
 import service.buffservice.entity.Buff;
-import service.caculationservice.service.AttackCaculationService;
+import service.caculationservice.service.AttackDamageCaculationService;
 import service.caculationservice.service.HpCaculationService;
 import com.google.common.collect.Lists;
-import service.sceneservice.entity.parent.PScene;
+import service.sceneservice.entity.parent.AbstractScene;
 import service.buffservice.entity.BuffConstant;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
@@ -15,7 +15,7 @@ import service.rewardservice.service.RewardService;
 import core.factory.MonsterFactory;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
-import packet.PacketType;
+import core.packet.PacketType;
 import pojo.User;
 import core.component.monster.MonsterSkill;
 import service.teamservice.entity.Team;
@@ -31,49 +31,88 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Description ：nettySpringServer
- * Created by server on 2018/11/19 16:24
- * 副本
- */
-public class BossScene extends PScene implements Runnable {
-//  id
+ * @ClassName BossScene
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
+public class BossScene extends AbstractScene implements Runnable {
+    /**
+     * id
+     */
     private String bossSceneId;
-//  关联队伍
+    /**
+     * 关联队伍
+     */
     private String teamId;
-//  名字
+    /**
+     * 名字
+     */
     private String name;
-//  boss副本名字
+    /**
+     * boss副本名字
+     */
     private String bossName;
-//  当前场景怪物集合
+    /**
+     * 当前场景怪物集合
+     */
     private Map<String, Monster> map;
-//  副本持续时间
+    /**
+     * 副本持续时间
+     */
     private Long keepTime;
-//  是否开打
+    /**
+     * 是否开打
+     */
     private volatile boolean isFight;
-    //  解决用户手动离线和副本场景线程自己关闭的线程安全问题 start
+    /**
+     * 副本结束的标识
+     */
     private boolean isEnd;
-
+    /**
+     * 解决用户手动离线和副本场景线程自己关闭的线程安全问题
+     */
     private Lock bossSceneLock = new ReentrantLock();
-//  解决用户手动离线和副本场景线程自己关闭的线程安全问题 end
-//  最终奖励
+    /**
+     * 最终奖励
+     */
     private String finalReward;
-//  boss关数
+    /**
+     * boss关数
+     */
     private List<String> sequence;
-//  注入共计计算
-    private AttackCaculationService attackCaculationService;
-//  场景用户
+    /**
+     * 注入共计计算
+     */
+    private AttackDamageCaculationService attackDamageCaculationService;
+    /**
+     * 场景用户
+     */
     private Map<String, User> userMap = new ConcurrentHashMap<>();
-//  场景所有怪物
+    /**
+     * 场景所有怪物
+     */
     private Map<String, Map<String, Monster>> monsters;
-//  停到线程用的
+    /**
+     * 停到线程用的
+     */
     private Map<String, Future> futureMap;
-//  注入奖励
+    /**
+     * 注入奖励
+     */
     private RewardService rewardService;
-//  注入血量计算
+    /**
+     * 注入血量计算
+     */
     private HpCaculationService hpCaculationService;
-//  注入怪物工厂
+    /**
+     * 注入怪物工厂
+     */
     private MonsterFactory monsterFactory;
-//  每个关卡是否要求组队
+    /**
+     * 每个关卡是否要求组队
+     */
     private Set<String> needMordMen;
 
     public Lock getBossSceneLock() {
@@ -210,12 +249,12 @@ public class BossScene extends PScene implements Runnable {
         this.teamId = teamId;
         this.bossSceneId = bossSceneId;
 //      填充boss副本配置
-        BossSceneConfig bossSceneConfig = ProjectContext.bossSceneConfigMap.get(bossSceneId);
+        BossSceneConfig bossSceneConfig = ProjectContext.bossSceneConfigMap.get(this.bossSceneId);
 //      填充时间
         this.keepTime = bossSceneConfig.getKeeptime();
 //      填充副本关数
         sequence = new ArrayList<>();
-        String sequences[] = bossSceneConfig.getSequences().split("-");
+        String[] sequences = bossSceneConfig.getSequences().split("-");
         monsters = new HashMap<>();
         for (String sequenceT : sequences) {
             sequence.add(sequenceT);
@@ -252,9 +291,13 @@ public class BossScene extends PScene implements Runnable {
         this.finalReward = bossSceneConfig.getFinalReward();
     }
 
+    /**
+     * 注入需要的bean
+     */
+    @Override
     public void preConstruct() {
-        AttackCaculationService attackCaculationService = SpringContextUtil.getBean("attackCaculationService");
-        this.attackCaculationService = attackCaculationService;
+        AttackDamageCaculationService attackDamageCaculationService = SpringContextUtil.getBean("attackDamageCaculationService");
+        this.attackDamageCaculationService = attackDamageCaculationService;
         HpCaculationService hpCaculationService = SpringContextUtil.getBean("hpCaculationService");
         this.hpCaculationService = hpCaculationService;
         RewardService rewardService = SpringContextUtil.getBean("rewardService");
@@ -263,7 +306,9 @@ public class BossScene extends PScene implements Runnable {
         this.monsterFactory = monsterFactory;
     }
 
-
+    /**
+     * 场景线程持续心跳
+     */
     @Override
     public void run() {
 //      场景内所有用户的频帧
@@ -274,20 +319,23 @@ public class BossScene extends PScene implements Runnable {
         }
     }
 
-    //  刷新怪物的buff
+    /**
+     * 刷新怪物buff
+     *
+     * @param monster
+     */
     private void monsterBuffRefresh(Monster monster) {
-        if (monster.getBuffRefreshTime() < System.currentTimeMillis()) {
+        if (monster != null && monster.getBuffRefreshTime() < System.currentTimeMillis()) {
             monster.setBuffRefreshTime(System.currentTimeMillis() + 1000);
         } else {
             return;
         }
 
-        if (monster != null && monster.getBufMap().containsKey(BuffConstant.POISONINGBUFF) && monster.getBufMap().get(BuffConstant.POISONINGBUFF) != 2000) {
+        if (monster.getBufMap().containsKey(BuffConstant.POISONINGBUFF) && monster.getBufMap().get(BuffConstant.POISONINGBUFF) != GrobalConfig.POISONINGBUFF_DEFAULTVALUE) {
             Long endTime = ProjectContext.monsterBuffEndTime.get(monster).get(BuffConstant.POISONINGBUFF);
             if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
                 Buff buff = ProjectContext.buffMap.get(monster.getBufMap().get(BuffConstant.POISONINGBUFF));
-
-                monster.subLife(new BigInteger(buff.getAddSecondValue()));
+                hpCaculationService.subMonsterHp(monster, buff.getAddSecondValue());
 //               处理中毒扣死
                 if (new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger(GrobalConfig.MINVALUE)) < 0) {
                     monster.setValueOfLife(GrobalConfig.MINVALUE);
@@ -296,11 +344,7 @@ public class BossScene extends PScene implements Runnable {
                 }
 
 //              怪物中毒将buff推送给所有玩家
-                if (monster.getType().equals(Monster.TYPEOFBOSS)) {
-                    sendMessageToAll("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG);
-                } else {
-                    sendMessageToAll("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG);
-                }
+                sendMessageToAll("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG);
             } else {
                 monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
             }
@@ -308,9 +352,11 @@ public class BossScene extends PScene implements Runnable {
 
     }
 
+    /**
+     * 消费用户命令包
+     */
     private void userFrequence() {
 //      持续触发玩家帧频
-
 //      解决玩家掉线线程回收问题
         if (userMap.size() == 0) {
             Future future = futureMap.remove(teamId);
@@ -322,7 +368,9 @@ public class BossScene extends PScene implements Runnable {
         }
     }
 
-    //      怪物帧频
+    /**
+     * 怪物帧频
+     */
     private void monsterFrequence() {
         Map<String, Monster> monsterMap = this.getMonsters().get(this.getSequence().get(0));
         try {
@@ -350,24 +398,24 @@ public class BossScene extends PScene implements Runnable {
 
 //          处理最后一名玩家退出,停掉线程
             if (!ProjectContext.bossAreaMap.containsKey(teamId)) {
-               try{
-                   bossSceneLock.lock();
-                   if(isEnd){
-                       return;
-                   }
-                   isEnd = true;
-                   Future future = futureMap.remove(teamId);
-                   future.cancel(true);
-                   ProjectContext.bossAreaMap.remove(teamId);
-                   return;
-               }finally {
-                   bossSceneLock.unlock();
-               }
+                try {
+                    bossSceneLock.lock();
+                    if (isEnd) {
+                        return;
+                    }
+                    isEnd = true;
+                    Future future = futureMap.remove(teamId);
+                    future.cancel(true);
+                    ProjectContext.bossAreaMap.remove(teamId);
+                    return;
+                } finally {
+                    bossSceneLock.unlock();
+                }
             }
 
             for (Map.Entry<String, Monster> monsterEntry : monsterMap.entrySet()) {
                 Monster monster = monsterEntry.getValue();
-
+//              刷新怪物的buff
                 monsterBuffRefresh(monster);
                 BossScene bossScene = ProjectContext.bossAreaMap.get(teamId);
                 User userTarget = getMaxDamageUser(bossScene);
@@ -611,7 +659,7 @@ public class BossScene extends PScene implements Runnable {
             }
 
 //          减伤buff处理
-            BigInteger monsterSkillDamage = attackCaculationService.dealDefenseBuff(monsterSkill, userTarget, entry.getValue());
+            BigInteger monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, userTarget, entry.getValue());
 
             if (entry.getValue().getUsername().equals(userTarget.getUsername())) {
 //              扣血
@@ -643,7 +691,7 @@ public class BossScene extends PScene implements Runnable {
     private void sleepAttack(List<User> listTarget, Monster monster, MonsterSkill monsterSkill, Integer buffId) {
         for (User user : listTarget) {
 //                      减伤buff处理
-            BigInteger monsterSkillDamage = attackCaculationService.dealDefenseBuff(monsterSkill, user, user);
+            BigInteger monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, user, user);
 //                      改变用户buff状态，设置用户buff时间
             Buff buff = ProjectContext.buffMap.get(buffId);
             user.getBuffMap().put(BuffConstant.SLEEPBUFF, 5001);
@@ -657,7 +705,7 @@ public class BossScene extends PScene implements Runnable {
     private void poisonAttack(List<User> listTarget, Monster monster, MonsterSkill monsterSkill, Integer buffId) {
         for (User user : listTarget) {
 //           减伤buff处理
-            BigInteger monsterSkillDamage = attackCaculationService.dealDefenseBuff(monsterSkill, user, user);
+            BigInteger monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, user, user);
 //           改变用户buff状态，设置用户buff时间
             Buff buff = ProjectContext.buffMap.get(buffId);
             user.getBuffMap().put(BuffConstant.POISONINGBUFF, 2001);
@@ -689,10 +737,16 @@ public class BossScene extends PScene implements Runnable {
         return selectMonsterSkill(monster, userTarget);
     }
 
-    //  普通攻击
+    /**
+     * 普通攻击
+     *
+     * @param list
+     * @param monster
+     * @param monsterSkill
+     */
     private void commonAttack(List<User> list, Monster monster, MonsterSkill monsterSkill) {
         for (User user : list) {
-            BigInteger monsterSkillDamage = attackCaculationService.dealDefenseBuff(monsterSkill, user, user);
+            BigInteger monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, user, user);
             Channel channelTemp = ProjectContext.userToChannelMap.get(user);
             hpCaculationService.subUserHp(user, monsterSkillDamage.toString());
             String resp = "怪物使用了全体攻击技能,对所有人造成攻击:"

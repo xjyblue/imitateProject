@@ -1,5 +1,11 @@
 package pojo;
-
+/**
+ * @ClassName Friendinfo
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class Friendinfo {
     private Integer id;
 

@@ -1,5 +1,11 @@
 package pojo;
-
+/**
+ * @ClassName Userbag
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class Userbag {
     private String id;
 

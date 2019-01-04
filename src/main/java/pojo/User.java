@@ -3,62 +3,117 @@ package pojo;
 import core.ServiceDistributor;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
-import packet.PacketProto;
-import service.buffservice.service.BuffTask;
+import core.packet.PacketProto;
+import service.buffservice.service.UserBuffService;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
+/**
+ * @ClassName User
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class User {
-//  用户名
+    /**
+     * 用户名
+     */
     private String username;
-//  密码
+    /**
+     * 密码
+     */
     private String password;
-//  用户状态
+    /**
+     * 用户状态
+     */
     private String status;
-//  用户位置
+    /**
+     * 用户位置
+     */
     private String pos;
-//  用户mp
+    /**
+     * 用户mp
+     */
     private String mp;
-//  用户hp
+    /**
+     * 用户hp
+     */
     private String hp;
-//  用户金钱
+    /**
+     * 用户金钱
+     */
     private String money;
-//  用户队伍
+    /**
+     * 用户队伍
+     */
     private String teamId;
-//  用户交易单
+    /**
+     * 用户队伍
+     */
     private String traceId;
-//  用户角色
+    /**
+     * 用户角色
+     */
     private Integer roleid;
-//  用户经验值
+    /**
+     * 用户经验值
+     */
     private Integer experience;
-//  用户工会id
+    /**
+     * 用户工会id
+     */
     private String unionid;
-//  用户的工会会员等级
+    /**
+     * 用户的工会会员等级
+     */
     private Integer unionlevel;
-//  用户背包
+    /**
+     * 用户背包
+     */
     private List<Userbag> userBag;
-//  用户武器栏
+    /**
+     * 用户武器栏
+     */
     private List<Weaponequipmentbar> weaponequipmentbars;
-//  用户buff
+    /**
+     * 用户buff
+     */
     private Map<String, Integer> buffMap;
-//  用户成就任务
+    /**
+     * 用户成就任务
+     */
     private List<Achievementprocess> achievementprocesses;
-//  用户是否交易
+    /**
+     * 用户是否交易
+     */
     private boolean ifTrade;
-//  事件分发器
+    /**
+     * 事件分发器
+     */
     private ServiceDistributor serviceDistributor;
-//  用户buff
-    private BuffTask buffTask;
-//  用户buff刷新时间
+    /**
+     * 用户buff
+     */
+    private UserBuffService userBuffService;
+    /**
+     * 用户buff刷新时间
+     */
     private Long buffRefreshTime;
-//  在线状态
+    /**
+     * 在线状态
+     */
     private boolean ifOnline;
-//  顶号转态处理
+    /**
+     * 顶号转态处理
+     */
     private boolean occupied;
-    //玩家的命令消费队列
+
+    /**
+     * 玩家的命令消费队列
+     */
     private ConcurrentLinkedQueue<PacketProto.Packet> packetsQueue = new ConcurrentLinkedQueue<>();
 
     public boolean isOccupied() {
@@ -85,12 +140,12 @@ public class User {
         this.buffRefreshTime = buffRefreshTime;
     }
 
-    public BuffTask getBuffTask() {
-        return buffTask;
+    public UserBuffService getUserBuffService() {
+        return userBuffService;
     }
 
-    public void setBuffTask(BuffTask buffTask) {
-        this.buffTask = buffTask;
+    public void setUserBuffService(UserBuffService userBuffService) {
+        this.userBuffService = userBuffService;
     }
 
     public ServiceDistributor getServiceDistributor() {
@@ -253,15 +308,6 @@ public class User {
         this.unionlevel = unionlevel;
     }
 
-
-    public synchronized void addMp(String changeNum) {
-        BigInteger userMp = new BigInteger(this.getMp());
-        BigInteger addMp = new BigInteger(changeNum);
-        userMp = userMp.add(addMp);
-        this.setMp(userMp.toString());
-    }
-
-
     public void keepCall() {
         if (this.isIfOnline()) {
 //      消费命令
@@ -273,13 +319,13 @@ public class User {
 
     private void buffRefresh() {
         if (buffRefreshTime < System.currentTimeMillis()) {
-            buffTask.refresh(this);
+            userBuffService.refreshUserBuff(this);
             buffRefreshTime = System.currentTimeMillis() + 1000;
         }
     }
 
     private void consumePacket() {
-        if(packetsQueue.peek() != null) {
+        if (packetsQueue.peek() != null) {
             PacketProto.Packet packet = packetsQueue.poll();
             Channel channel = ProjectContext.userToChannelMap.get(this);
             try {
@@ -288,5 +334,22 @@ public class User {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        User user = (User) o;
+        return Objects.equals(username, user.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username);
     }
 }

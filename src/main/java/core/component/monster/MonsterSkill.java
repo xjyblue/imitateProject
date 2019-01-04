@@ -1,7 +1,13 @@
 package core.component.monster;
 
 import java.util.Map;
-
+/**
+ * @ClassName MonsterSkill
+ * @Description TODO
+ * @Author xiaojianyu
+ * @Date 2019/1/4 11:11
+ * @Version 1.0
+ **/
 public class MonsterSkill {
     private Integer skillId;
 
