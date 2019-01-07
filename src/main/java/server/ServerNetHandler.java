@@ -69,19 +69,23 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
         Channel channel = ctx.channel();
         log.info("端口号为{}的渠道与服务器断开连接", channel.remoteAddress());
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
 //      已登录的情况下断开
         if (ProjectContext.session2UserIds.containsKey(ctx.channel())) {
             User user = ProjectContext.session2UserIds.get(ctx.channel());
 //          顶号关闭，更改渠道和用户的绑定和渠道的事件状态就OK
-            if (user != null && user.isOccupied()) {
+            if (user != null && user.isIfOnline()) {
                 ProjectContext.eventStatus.remove(ctx.channel());
                 ProjectContext.session2UserIds.remove(ctx.channel());
-                user.setOccupied(false);
             } else if (user != null) {
-                user.setIfOnline(false);
-//              移除队伍或者副本中玩家
+                //移除队伍或者副本中玩家
                 if (user.getTeamId() != null) {
                     teamService.handleUserOffline(user);
                 }

@@ -41,6 +41,7 @@ public class TeamService {
 
     /**
      * 查看队伍
+     *
      * @param channel
      * @param msg
      */
@@ -67,6 +68,7 @@ public class TeamService {
 
     /**
      * 创建队伍
+     *
      * @param channel
      * @param msg
      */
@@ -92,6 +94,7 @@ public class TeamService {
 
     /**
      * 解散队伍
+     *
      * @param channel
      * @param msg
      */
@@ -120,6 +123,7 @@ public class TeamService {
 
     /**
      * 退出队伍
+     *
      * @param channel
      * @param msg
      */
@@ -142,6 +146,7 @@ public class TeamService {
 
     /**
      * 加入队伍
+     *
      * @param channel
      * @param msg
      */
@@ -176,6 +181,7 @@ public class TeamService {
 
     /**
      * 同意加入队伍
+     *
      * @param channel
      * @param msg
      */
@@ -213,6 +219,7 @@ public class TeamService {
 
     /**
      * 展示队伍申请者信息
+     *
      * @param channel
      * @param msg
      */
@@ -238,6 +245,7 @@ public class TeamService {
 
     /**
      * 全队发送消息
+     *
      * @param user
      * @param team
      */
@@ -262,6 +270,7 @@ public class TeamService {
 
     /**
      * 获得用户所在的队伍
+     *
      * @param user
      * @return
      */
@@ -282,7 +291,6 @@ public class TeamService {
      * @param user
      */
     public void handleUserOffline(User user) {
-
         Map<String, User> userMap = ProjectContext.teamMap.get(user.getTeamId()).getUserMap();
         if (userMap.size() == 1) {
 //          普通的移除
@@ -290,25 +298,15 @@ public class TeamService {
                 ProjectContext.teamMap.remove(user.getTeamId());
                 return;
             }
-//          游戏副本的回收
+
+//          游戏副本特殊处理
             BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
-            try {
-                bossScene.getBossSceneLock().lock();
-                if (!bossScene.isEnd()) {
-                    bossScene.setEnd(true);
-                } else {
-                    return;
-                }
-            } finally {
-                bossScene.getBossSceneLock().unlock();
+            if (bossScene == null) {
+                return;
             }
             bossScene.getUserMap().remove(user.getUsername());
 //          移除该队伍
             ProjectContext.teamMap.remove(user.getTeamId());
-            if (ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
-//              移除玩家的boss副本
-                ProjectContext.bossAreaMap.remove(user.getTeamId());
-            }
             return;
         }
 
@@ -361,6 +359,7 @@ public class TeamService {
 
     /**
      * 退出队伍
+     *
      * @param channel
      * @param msg
      */

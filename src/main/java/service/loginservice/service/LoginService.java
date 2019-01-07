@@ -177,9 +177,6 @@ public class LoginService {
                 ProjectContext.session2UserIds.put(channel, user);
                 ProjectContext.userToChannelMap.put(user, channel);
                 ProjectContext.eventStatus.put(channel, ProjectContext.eventStatus.get(channelTarget));
-
-//              顶号标记
-                user.setOccupied(true);
                 channel.writeAndFlush(MessageUtil.turnToPacket("登录成功"));
                 channelTarget.writeAndFlush(MessageUtil.turnToPacket("不好意思,有人在别处登录你的游戏号，请选择重新登录或者修改密码", PacketType.CHANGECHANNEL));
                 channelTarget.close();

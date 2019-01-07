@@ -1,5 +1,6 @@
 package service.sceneservice.entity;
 
+import service.buffservice.service.MonsterBuffService;
 import service.caculationservice.service.HpCaculationService;
 import core.component.monster.Monster;
 import service.npcservice.entity.Npc;
@@ -78,6 +79,8 @@ public class Scene extends AbstractScene implements Runnable {
 
     private HpCaculationService hpCaculationService;
 
+    private MonsterBuffService monsterBuffService;
+
     /**
      * 注入一些要用的单例
      */
@@ -89,6 +92,8 @@ public class Scene extends AbstractScene implements Runnable {
         this.rewardService = rewardService;
         HpCaculationService hpCaculationService = SpringContextUtil.getBean("hpCaculationService");
         this.hpCaculationService = hpCaculationService;
+        MonsterBuffService monsterBuffService = SpringContextUtil.getBean("monsterBuffService");
+        this.monsterBuffService = monsterBuffService;
     }
 
     private Map<String, User> userMap = new ConcurrentHashMap<>();
@@ -215,14 +220,12 @@ public class Scene extends AbstractScene implements Runnable {
     }
 
     private void monsterFrequence() {
-//      推送战斗消息,触发处于战斗状态的用户
-
-//      场景内所有用户在战斗的怪物
+//      推送战斗消息,触发处于战斗状态的用户 场景内所有用户在战斗的怪物
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             User user = entry.getValue();
 
             Channel channel = ProjectContext.userToChannelMap.get(user);
-            if (user.isIfOnline() && ProjectContext.eventStatus.containsKey(channel) && ProjectContext.eventStatus.get(channel).equals(ChannelStatus.ATTACK)) {
+            if (ProjectContext.eventStatus.containsKey(channel) && ProjectContext.eventStatus.get(channel).equals(ChannelStatus.ATTACK)) {
                 try {
                     if (ProjectContext.userToMonsterMap.containsKey(user)) {
                         Monster monster = null;
@@ -230,7 +233,7 @@ public class Scene extends AbstractScene implements Runnable {
                             monster = monsterEntry.getValue();
                         }
 //                      怪物buff刷新
-                        monsterBuffRefresh(monster, channel);
+                        monsterBuffService.monsterBuffRefresh(monster, channel);
 //                      检查怪物是否死亡
                         if (checkMonsterStatus(channel, monster, user)) {
                             continue;
@@ -273,32 +276,6 @@ public class Scene extends AbstractScene implements Runnable {
                 }
             }
         }
-    }
-
-    private void monsterBuffRefresh(Monster monster, Channel channel) {
-        if (monster != null && monster.getBuffRefreshTime() < System.currentTimeMillis()) {
-            monster.setBuffRefreshTime(System.currentTimeMillis() + 1000);
-        } else {
-            return;
-        }
-
-        if (monster.getBufMap().containsKey(BuffConstant.POISONINGBUFF) && monster.getBufMap().get(BuffConstant.POISONINGBUFF) != GrobalConfig.POISONINGBUFF_DEFAULTVALUE) {
-            Long endTime = ProjectContext.monsterBuffEndTime.get(monster).get(BuffConstant.POISONINGBUFF);
-            if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
-                Buff buff = ProjectContext.buffMap.get(monster.getBufMap().get(BuffConstant.POISONINGBUFF));
-                hpCaculationService.subMonsterHp(monster, buff.getAddSecondValue());
-//               处理中毒扣死
-                if (new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger(GrobalConfig.MINVALUE)) < 0) {
-                    monster.setValueOfLife(GrobalConfig.MINVALUE);
-                    monster.setStatus(GrobalConfig.DEAD);
-                    monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
-                }
-                channel.writeAndFlush(MessageUtil.turnToPacket("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG));
-            } else {
-                monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
-            }
-        }
-
     }
 
 

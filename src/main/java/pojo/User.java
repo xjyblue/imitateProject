@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
 /**
  * @ClassName User
  * @Description TODO
@@ -107,22 +108,9 @@ public class User {
      */
     private boolean ifOnline;
     /**
-     * 顶号转态处理
-     */
-    private boolean occupied;
-
-    /**
      * 玩家的命令消费队列
      */
     private ConcurrentLinkedQueue<PacketProto.Packet> packetsQueue = new ConcurrentLinkedQueue<>();
-
-    public boolean isOccupied() {
-        return occupied;
-    }
-
-    public void setOccupied(boolean occupied) {
-        this.occupied = occupied;
-    }
 
     public boolean isIfOnline() {
         return ifOnline;
@@ -309,12 +297,10 @@ public class User {
     }
 
     public void keepCall() {
-        if (this.isIfOnline()) {
 //      消费命令
-            consumePacket();
+        consumePacket();
 //      buff更新
-            buffRefresh();
-        }
+        buffRefresh();
     }
 
     private void buffRefresh() {

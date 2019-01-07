@@ -515,7 +515,7 @@ public class AttackService {
     }
 
     /**
-     * 获取第一次攻击的怪物怪物
+     * 获取正在攻击的目标
      *
      * @param user
      * @param monsterName

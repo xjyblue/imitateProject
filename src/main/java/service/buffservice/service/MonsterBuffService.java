@@ -16,6 +16,7 @@ import service.caculationservice.service.HpCaculationService;
 import service.teamservice.entity.Team;
 import utils.MessageUtil;
 
+import java.math.BigInteger;
 import java.util.Map;
 
 /**
@@ -36,7 +37,7 @@ public class MonsterBuffService {
      *
      * @param monster
      */
-    public void monsterBuffRefresh(Monster monster, String teamId) {
+    public void bossBuffRefresh(Monster monster, String teamId) {
         if (monster != null && monster.getBuffRefreshTime() < System.currentTimeMillis()) {
             monster.setBuffRefreshTime(System.currentTimeMillis() + 1000);
         } else {
@@ -54,13 +55,38 @@ public class MonsterBuffService {
                     monster.setStatus(GrobalConfig.DEAD);
                     monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
                 }
-
 //              怪物中毒将buff推送给所有玩家
                 broadcastService.sendMessageToAll("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), teamId, PacketType.MONSTERBUFMSG);
             } else {
                 monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
             }
         }
+    }
+
+    public void monsterBuffRefresh(Monster monster, Channel channel) {
+        if (monster != null && monster.getBuffRefreshTime() < System.currentTimeMillis()) {
+            monster.setBuffRefreshTime(System.currentTimeMillis() + 1000);
+        } else {
+            return;
+        }
+
+        if (monster.getBufMap().containsKey(BuffConstant.POISONINGBUFF) && monster.getBufMap().get(BuffConstant.POISONINGBUFF) != GrobalConfig.POISONINGBUFF_DEFAULTVALUE) {
+            Long endTime = ProjectContext.monsterBuffEndTime.get(monster).get(BuffConstant.POISONINGBUFF);
+            if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
+                Buff buff = ProjectContext.buffMap.get(monster.getBufMap().get(BuffConstant.POISONINGBUFF));
+                hpCaculationService.subMonsterHp(monster, buff.getAddSecondValue());
+//               处理中毒扣死
+                if (new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger(GrobalConfig.MINVALUE)) < 0) {
+                    monster.setValueOfLife(GrobalConfig.MINVALUE);
+                    monster.setStatus(GrobalConfig.DEAD);
+                    monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
+                }
+                channel.writeAndFlush(MessageUtil.turnToPacket("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG));
+            } else {
+                monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
+            }
+        }
+
     }
 
 }
