@@ -32,10 +32,14 @@ import java.util.Map;
 public class AttackBuffService {
     @Autowired
     private HpCaculationService hpCaculationService;
-
-    public static final int ALL_ATTACK_FLAG = 1;
+    /**
+     * 特殊攻击，buff产生攻击效果，技能攻击不往下走
+     */
+    public static final int BUFF_ATTACK_FLAG = 1;
+    /**
+     * 普通攻击激活攻击buff效果，技能往下走
+     */
     public static final int COMMON_ATTACK_FLAG = 0;
-
     /**
      * 填充攻击时技能产生的所有buff
      *
@@ -112,7 +116,7 @@ public class AttackBuffService {
                 }
             }
         }
-        return ALL_ATTACK_FLAG;
+        return BUFF_ATTACK_FLAG;
     }
 
     /**

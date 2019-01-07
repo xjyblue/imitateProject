@@ -36,7 +36,8 @@ public class AttackDamageCaculationService {
      * @param attackDamage
      * @return
      */
-    public BigInteger caculate(User user, BigInteger attackDamage) {
+    public BigInteger caculate(User user, String attackDamageValue) {
+        BigInteger attackDamage = new BigInteger(attackDamageValue);
 //      单一装备加成处理
         if (user.getWeaponequipmentbars() != null) {
             for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {

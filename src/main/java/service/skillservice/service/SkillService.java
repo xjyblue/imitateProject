@@ -144,4 +144,22 @@ public class SkillService {
         }
         return list;
     }
+
+    /**
+     * 刷新用户技能cd
+     */
+    public void refreshUserSkillCd(UserSkill userSkill,Userskillrelation userskillrelation){
+        userskillrelation.setSkillcds(System.currentTimeMillis() + userSkill.getAttackCd());
+    }
+
+    /**
+     * 检查用户技能cd
+     */
+    public boolean checkUserSkillCd(Userskillrelation userskillrelation,Channel channel){
+        if (System.currentTimeMillis() < userskillrelation.getSkillcds()) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNSKILLCD));
+            return false;
+        }
+        return true;
+    }
 }

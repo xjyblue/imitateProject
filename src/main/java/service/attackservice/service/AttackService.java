@@ -1,14 +1,15 @@
 package service.attackservice.service;
 
+import service.buffservice.service.RestraintBuffService;
 import service.caculationservice.service.AttackDamageCaculationService;
 import service.caculationservice.service.HpCaculationService;
 import service.caculationservice.service.MpCaculationService;
 import service.sceneservice.entity.Scene;
 import service.sceneservice.entity.BossScene;
 import core.component.good.Equipment;
-import service.buffservice.entity.BuffConstant;
 import core.config.MessageConfig;
 import core.config.GrobalConfig;
+import service.skillservice.service.SkillService;
 import service.userbagservice.service.UserbagService;
 import service.weaponservice.service.Weaponservice;
 import utils.ReflectMethodUtil;
@@ -73,9 +74,14 @@ public class AttackService {
     private Weaponservice weaponservice;
     @Autowired
     private MpCaculationService mpCaculationService;
+    @Autowired
+    private RestraintBuffService restraintBuffService;
+    @Autowired
+    private SkillService skillService;
 
     /**
      * 一个人说话
+     *
      * @param channel
      * @param msg
      */
@@ -86,6 +92,7 @@ public class AttackService {
 
     /**
      * 大喇叭全服
+     *
      * @param channel
      * @param msg
      */
@@ -96,6 +103,7 @@ public class AttackService {
 
     /**
      * 展示商城
+     *
      * @param channel
      * @param msg
      */
@@ -106,6 +114,7 @@ public class AttackService {
 
     /**
      * 展示背包
+     *
      * @param channel
      * @param msg
      */
@@ -116,6 +125,7 @@ public class AttackService {
 
     /**
      * 退出战斗
+     *
      * @param channel
      * @param msg
      * @throws InvocationTargetException
@@ -124,11 +134,11 @@ public class AttackService {
     @Order(orderMsg = "qf")
     public void quitFight(Channel channel, String msg) throws InvocationTargetException, IllegalAccessException {
         User user = ProjectContext.session2UserIds.get(channel);
-//      boss的战斗中推出
+        //      boss的战斗中推出
         if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
             ReflectMethodUtil.reflectAnnotation(bossService, channel, msg);
         } else {
-//          普通战斗中退出
+            //          普通战斗中退出
             ProjectContext.userToMonsterMap.remove(ProjectContext.session2UserIds.get(channel));
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RETREATFIGHT));
             ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
@@ -138,6 +148,7 @@ public class AttackService {
 
     /**
      * 展示装备栏
+     *
      * @param channel
      * @param msg
      */
@@ -148,6 +159,7 @@ public class AttackService {
 
     /**
      * 修复武器
+     *
      * @param channel
      * @param msg
      */
@@ -158,6 +170,7 @@ public class AttackService {
 
     /**
      * 卸下武器
+     *
      * @param channel
      * @param msg
      */
@@ -168,6 +181,7 @@ public class AttackService {
 
     /**
      * 穿戴武器
+     *
      * @param channel
      * @param msg
      */
@@ -178,6 +192,7 @@ public class AttackService {
 
     /**
      * 展示背包
+     *
      * @param channel
      * @param msg
      */
@@ -188,6 +203,7 @@ public class AttackService {
 
     /**
      * 使用背包道具
+     *
      * @param channel
      * @param msg
      */
@@ -198,6 +214,7 @@ public class AttackService {
 
     /**
      * 随机键位攻击
+     *
      * @param channel
      * @param msg
      * @throws IOException
@@ -226,7 +243,7 @@ public class AttackService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-//      在副本中打
+        //      在副本中打
         if (ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
             BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
             Map<String, Monster> monsterMap = bossScene.getMonsters().get(bossScene.getSequence().get(0));
@@ -234,9 +251,9 @@ public class AttackService {
             for (Map.Entry<String, Monster> entry : monsterMap.entrySet()) {
                 if (temp[1].equals(entry.getValue().getName())) {
                     monster = entry.getValue();
-//                  填充怪物攻击对象
-                    AttackUtil.addMonsterToUserMonsterList(user,monster);
-//                  让副本继续处于战斗状态
+                    //                  填充怪物攻击对象
+                    AttackUtil.addMonsterToUserMonsterList(user, monster);
+                    //                  让副本继续处于战斗状态
                     if (!bossScene.isFight()) {
                         bossScene.setFight(true);
                     }
@@ -287,82 +304,53 @@ public class AttackService {
      */
     private void attackKeySolve(Channel channel, String msg) throws IOException {
         User user = ProjectContext.session2UserIds.get(channel);
+        //找到攻击的怪物
+        Monster monster = getTargetMonster(user);
+        if (monster == null) {
+            return;
+        }
+
+        //检查技能是否存在
         if (!ProjectContext.userskillrelationMap.get(user).containsKey(msg)) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
             return;
         }
-
         UserSkill userSkill = ProjectContext.skillMap.get(ProjectContext.userskillrelationMap.get(user).get(msg).getSkillid());
         Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(user).get(msg);
-//      找到刚刚锁定攻击的怪物
-        Monster monster = null;
-        if (!ProjectContext.userToMonsterMap.containsKey(user)) {
-            return;
-        }
-        for (Map.Entry<Integer, Monster> entry : ProjectContext.userToMonsterMap.get(user).entrySet()) {
-            monster = entry.getValue();
-        }
 
-//      人物蓝量检查
-        if (!checkUserMpEnough(user, userSkill)) {
+        //战斗前置检查，技能buff、mp值、是否被控等
+        if (preAttackCheck(channel, user, monster, userSkill, userskillrelation)) {
             return;
         }
 
-//      技能CD检查
-        if (System.currentTimeMillis() < userskillrelation.getSkillcds()) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNSKILLCD));
-            return;
-        }
-//      更新技能cd
-        userskillrelation.setSkillcds(System.currentTimeMillis() + userSkill.getAttackCd());
+        //红蓝计算，返回伤害
+        BigInteger attackDamage = attackCaculation(user, monster, userSkill);
 
-//      判断用户是否被眩晕,解除控制
-        if (user.getBuffMap().get(BuffConstant.SLEEPBUFF) != GrobalConfig.SLEEPBUFF_DEFAULTVALUE) {
-            if (userSkill.getBuffMap().containsKey(BuffConstant.RELIEVEBUFF)) {
-                attackBuffService.buffSolve(userskillrelation, userSkill, monster, user);
-            } else {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SLEEPMESSAGE));
-                return;
-            }
-        }
-
-//      技能buff处理
-        if (attackBuffService.buffSolve(userskillrelation, userSkill, monster, user) == AttackBuffService.ALL_ATTACK_FLAG) {
-            return;
-        }
-
-//      攻击逻辑,计算伤害
-        BigInteger attackDamage = new BigInteger(userSkill.getDamage());
-        attackDamage = attackDamageCaculationService.caculate(user, attackDamage);
-        hpCaculationService.subMonsterHp(monster, attackDamage.toString());
-
-//      蓝量计算
-        mpCaculationService.subUserMp(user, userSkill.getSkillMp());
-//      输出语句拼接
+        //输出语句拼接
         String resp = out(user, userSkill, monster, attackDamage.toString());
 
         if (monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
-//          通知玩家技能伤害情况
+            //通知玩家技能伤害情况
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
             monster.setStatus(GrobalConfig.DEAD);
 
-//          boss战斗场景
+            //boss战斗场景
             if (monster.getType().equals(Monster.TYPEOFBOSS)) {
                 BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
-//              更改用户攻击的boss
+                //清除用户攻击的boss，更改所有用户的攻击状态，准备对下一个boss发起攻击
                 AttackUtil.changeUserAttackMonster(user, bossScene, monster);
                 AttackUtil.killBossMessageToAll(user, monster);
-//              额外奖励最后一击的玩家
+                //额外奖励最后一击的玩家
                 if (monster.getPos().equals(bossScene.getFinalReward())) {
                     rewardService.extraBonus(user, channel);
                 }
             }
 
-//           普通战斗场景
+            //普通战斗场景
             if (monster.getType().equals(Monster.TYPEOFCOMMONMONSTER)) {
-//              移除死掉的怪物
+                //移除死掉的怪物
                 ProjectContext.sceneMap.get(user.getPos()).getMonsters().remove(monster);
-//              新增怪物
+                //新增怪物
                 Scene scene = ProjectContext.sceneMap.get(user.getPos());
                 List<Monster> monsters = monsterFactory.getMonsterByArea(user.getPos());
                 for (Monster monsterT : monsters) {
@@ -370,14 +358,62 @@ public class AttackService {
                 }
             }
         } else {
-//          通知玩家技能伤害情况
+            //通知玩家技能伤害情况
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
-//          如果是在副本中战斗更新用户总战斗伤害的值，仇恨值
+            //如果是在副本中战斗更新用户总战斗伤害的值，仇恨值
             if (user.getTeamId() != null && ProjectContext.bossAreaMap.get(user.getTeamId()) != null) {
                 refreshUserDamageInBossScene(user, attackDamage);
             }
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
         }
+    }
+
+    /**
+     * 战斗前置检查
+     *
+     * @param channel
+     * @param user
+     * @param monster
+     * @param userSkill
+     * @param userskillrelation
+     * @return
+     */
+    private boolean preAttackCheck(Channel channel, User user, Monster monster, UserSkill userSkill, Userskillrelation userskillrelation) {
+        //      人物蓝量检查
+        if (!mpCaculationService.checkUserMpEnough(user, userSkill)) {
+            return true;
+        }
+        //      技能CD检查
+        if (!skillService.checkUserSkillCd(userskillrelation, channel)) {
+            return true;
+        }
+        //      判断用户是否被技能控制，是否为解控技能解除控制
+        if (!restraintBuffService.restraintBuff(userSkill, user, userskillrelation, monster)) {
+            return true;
+        }
+        //      更新技能cd
+        skillService.refreshUserSkillCd(userSkill, userskillrelation);
+        //      技能buff处理
+        if (attackBuffService.buffSolve(userskillrelation, userSkill, monster, user) == AttackBuffService.BUFF_ATTACK_FLAG) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 拿到攻击的目标
+     *
+     * @param user
+     */
+    private Monster getTargetMonster(User user) {
+        if (!ProjectContext.userToMonsterMap.containsKey(user)) {
+            return null;
+        }
+        Monster monster = null;
+        for (Map.Entry<Integer, Monster> entry : ProjectContext.userToMonsterMap.get(user).entrySet()) {
+            monster = entry.getValue();
+        }
+        return monster;
     }
 
     /**
@@ -396,24 +432,6 @@ public class AttackService {
         }
     }
 
-    /**
-     * 校验用户的mp是否足够
-     *
-     * @param user
-     * @param userSkill
-     * @return
-     */
-    private boolean checkUserMpEnough(User user, UserSkill userSkill) {
-        Integer userMp = Integer.parseInt(user.getMp());
-        Integer skillMp = Integer.parseInt(userSkill.getSkillMp());
-        Channel channel = ProjectContext.userToChannelMap.get(user);
-        if (userMp < skillMp) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNENOUGHMP));
-            return false;
-        }
-        return true;
-    }
-
 
     /**
      * 对普通场景的怪物进行第一次攻击
@@ -425,89 +443,99 @@ public class AttackService {
     public void attackCommonSceneFirst(Channel channel, String msg) throws IOException {
         User user = ProjectContext.session2UserIds.get(channel);
         String[] temp = msg.split("-");
-        Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(user).get(temp[GrobalConfig.TWO]);
-        UserSkill userSkill = ProjectContext.skillMap.get(userskillrelation.getSkillid());
-//      输入的键位是否存在
+        //输入的怪物是否存在
+        Monster monster = getMonster(user, temp[1], Monster.TYPEOFCOMMONMONSTER);
+        if (monster == null) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDMONSTER));
+            return;
+        }
+        //输入的键位是否存在
         if (!(temp.length == GrobalConfig.THREE && ProjectContext.userskillrelationMap.get(user).containsKey(temp[GrobalConfig.TWO]))) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
             return;
         }
 
-//      输入的怪物是否存在
-        Monster monster = getMonster(user, temp[1]);
-        if (monster == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDMONSTER));
+        Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(user).get(temp[GrobalConfig.TWO]);
+        UserSkill userSkill = ProjectContext.skillMap.get(userskillrelation.getSkillid());
+
+        //战斗前置检查
+        if (preAttackCheck(channel, user, monster, userSkill, userskillrelation)) {
             return;
         }
+        //红、蓝计算
+        BigInteger attackDamage = attackCaculation(user, monster, userSkill);
 
-//      判断人物MP量是否足够
-        if (!checkUserMpEnough(user, userSkill)) {
-            return;
-        }
-
-//      判断技能冷却
-        if (System.currentTimeMillis() < userskillrelation.getSkillcds()) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNSKILLCD));
-            return;
-        }
-//      更新技能cd
-        userskillrelation.setSkillcds(System.currentTimeMillis() + userSkill.getAttackCd());
-
-//      蓝量计算
-        mpCaculationService.subUserMp(user, userSkill.getSkillMp());
-
-//      用户buff计算
-        attackBuffService.buffSolve(userskillrelation, userSkill, monster, user);
-
-//      攻击伤害计算
-        BigInteger attackDamage = new BigInteger(userSkill.getDamage());
-        attackDamage = attackDamageCaculationService.caculate(user, attackDamage);
-
-//      怪物掉血，生命值计算逻辑
-        hpCaculationService.subMonsterHp(monster, attackDamage.toString());
-//      输出语句拼接
+        //输出语句拼接
         String resp = out(user, userSkill, monster, attackDamage.toString());
 
         if (monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
             resp += System.getProperty("line.separator")
                     + "怪物已死亡";
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
-//          修改怪物状态
+            //修改怪物状态
             monster.setStatus(GrobalConfig.DEAD);
-//          爆装备
+            //爆装备
             rewardService.getGoods(channel, monster);
-//          移除死掉的怪物
+            //移除死掉的怪物
             ProjectContext.sceneMap.get(user.getPos()).getMonsters().remove(monster);
-//          生成新的怪物
+            //生成新的怪物
             Scene scene = ProjectContext.sceneMap.get(user.getPos());
             List<Monster> monsters = monsterFactory.getMonsterByArea(user.getPos());
             for (Monster monsterT : monsters) {
                 scene.getMonsters().add(monsterT);
             }
         } else {
-//          切换到攻击模式
+            //切换到攻击模式
             ProjectContext.eventStatus.put(channel, ChannelStatus.ATTACK);
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
-//          记录当前攻击的目标
+            //记录当前攻击的目标
             Map<Integer, Monster> monsterMap = new HashMap<>(64);
             monsterMap.put(monster.getId(), monster);
             ProjectContext.userToMonsterMap.put(user, monsterMap);
-//          提醒用户你已进入战斗模式
+            //提醒用户你已进入战斗模式
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFIGHT));
         }
     }
 
     /**
-     * 获取普通场景的怪物
+     * 攻击蓝量 血量的计算，返回攻击的伤害值
+     *
+     * @param user
+     * @param monster
+     * @param userSkill
+     * @return
+     */
+    private BigInteger attackCaculation(User user, Monster monster, UserSkill userSkill) {
+        //      蓝量计算
+        mpCaculationService.subUserMp(user, userSkill.getSkillMp());
+        //      攻击伤害计算    怪物掉血，生命值计算逻辑
+        BigInteger attackDamage = attackDamageCaculationService.caculate(user, userSkill.getDamage());
+        hpCaculationService.subMonsterHp(monster, attackDamage.toString());
+        return attackDamage;
+    }
+
+    /**
+     * 获取第一次攻击的怪物怪物
      *
      * @param user
      * @param monsterName
      * @return
      */
-    private Monster getMonster(User user, String monsterName) {
-        for (Monster monster : ProjectContext.sceneMap.get(user.getPos()).getMonsters()) {
-            if (monster.getName().equals(monsterName)) {
-                return monster;
+    private Monster getMonster(User user, String monsterName, String monsterType) {
+        if (monsterType.equals(Monster.TYPEOFCOMMONMONSTER)) {
+            for (Monster monster : ProjectContext.sceneMap.get(user.getPos()).getMonsters()) {
+                if (monster.getName().equals(monsterName)) {
+                    return monster;
+                }
+            }
+            return null;
+        } else if (monsterType.equals(Monster.TYPEOFBOSS)) {
+            BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+            Map<String, Monster> monsterMap = bossScene.getMonsters().get(bossScene.getSequence().get(0));
+            for (Map.Entry<String, Monster> entry : monsterMap.entrySet()) {
+                if (entry.getValue().getName().equals(monsterName) && !entry.getValue().getStatus().equals(GrobalConfig.DEAD)) {
+                    return entry.getValue();
+                }
             }
         }
         return null;
@@ -522,79 +550,56 @@ public class AttackService {
     public void bossSceneFirstAttack(Channel channel, String msg) {
         String[] temp = msg.split("-");
         User user = ProjectContext.session2UserIds.get(channel);
-//      键位校验
-        if (!(temp.length == GrobalConfig.THREE && ProjectContext.userskillrelationMap.get(user).containsKey(temp[GrobalConfig.TWO]))) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
-            return;
-        }
-//      锁定怪物  输入的怪物是否存在
-        Monster monster = null;
-        for (Map.Entry<String, Monster> entry : getMonsterMap(user).entrySet()) {
-            if (entry.getValue().getName().equals(temp[1]) && !entry.getValue().getStatus().equals(GrobalConfig.DEAD)) {
-                monster = entry.getValue();
-            }
-        }
+        //      锁定怪物  输入的怪物是否存在
+        Monster monster = getMonster(user, temp[1], Monster.TYPEOFBOSS);
         if (monster == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDMONSTER));
             return;
         }
-
+        //      键位校验
+        if (!(temp.length == GrobalConfig.THREE && ProjectContext.userskillrelationMap.get(user).containsKey(temp[GrobalConfig.TWO]))) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
+            return;
+        }
         Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(user).get(temp[2]);
         UserSkill userSkill = ProjectContext.skillMap.get(userskillrelation.getSkillid());
-//      判断人物MP量是否足够
-        if (!checkUserMpEnough(user, userSkill)) {
+
+        //      战斗前置检查
+        if (preAttackCheck(channel, user, monster, userSkill, userskillrelation)) {
             return;
         }
 
-//      技能冷却校验
-        if (System.currentTimeMillis() < userskillrelation.getSkillcds()) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNSKILLCD));
-            return;
-        }
-//      刷新技能时间
-        userskillrelation.setSkillcds(System.currentTimeMillis() + userSkill.getAttackCd());
-
-//      蓝量计算
-        mpCaculationService.subUserMp(user, userSkill.getSkillMp());
-
-//      技能buff处理
-        attackBuffService.buffSolve(userskillrelation, userSkill, monster, user);
+        //      蓝量计算
+        BigInteger attackDamage = attackCaculation(user, monster, userSkill);
 
         AttackUtil.addMonsterToUserMonsterList(user, monster);
 
-//      判断攻击完怪物是否死亡，生命值计算逻辑
-        BigInteger attackDamage = new BigInteger(userSkill.getDamage());
-//      攻击逻辑计算
-        attackDamage = attackDamageCaculationService.caculate(user, attackDamage);
-//      怪物掉血，生命值计算逻辑
-        hpCaculationService.subMonsterHp(monster, attackDamage.toString());
-
-//      记录伤害作为仇恨值
+        //      记录伤害作为仇恨值
         refreshUserDamageInBossScene(user, attackDamage);
-//      输出语句拼接
+        //      输出语句拼接
         String resp = out(user, userSkill, monster, attackDamage.toString());
 
         BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
         bossScene.setFight(true);
         if (monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
             resp += "怪物已死亡";
-//          修改怪物状态
+            //          修改怪物状态
             monster.setStatus(GrobalConfig.DEAD);
-//          更改用户攻击的boss
+            //          清除用户攻击的boss
             AttackUtil.changeUserAttackMonster(user, bossScene, monster);
-//          直接击杀广播消息提示
+            //          直接击杀广播消息提示
             AttackUtil.killBossMessageToAll(user, monster);
-//          检查是否为副本单一boss
+            //          检查是否为副本单一boss
             if (!checkBossAreaAllBoss(bossScene)) {
-//              开始副本计时
+                //              开始副本计时
                 ProjectContext.endBossAreaTime.put(user.getTeamId(), System.currentTimeMillis() + bossScene.getKeepTime() * 1000);
             } else {
-//              直接胜利不用倒计时副本
+                //              直接胜利不用倒计时副本
             }
         } else {
-//          切换到攻击模式
+            //          切换到攻击模式
             ProjectContext.eventStatus.put(channel, ChannelStatus.ATTACK);
-//          记录人物当前攻击的怪物
+            //          记录人物当前攻击的怪物
             AttackUtil.addMonsterToUserMonsterList(user, monster);
             ProjectContext.eventStatus.put(channel, ChannelStatus.ATTACK);
             ProjectContext.endBossAreaTime.put(user.getTeamId(), System.currentTimeMillis() + bossScene.getKeepTime() * 1000);
@@ -620,11 +625,6 @@ public class AttackService {
         return true;
     }
 
-
-    private Map<String, Monster> getMonsterMap(User user) {
-        BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
-        return bossScene.getMonsters().get(bossScene.getSequence().get(0));
-    }
 
     /**
      * 造成伤害和武器耐久度输出

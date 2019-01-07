@@ -76,7 +76,7 @@ public class PkService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
             return;
         }
-        BigInteger attackDamage = attackDamageCaculationService.caculate(user, new BigInteger(userSkill.getDamage()));
+        BigInteger attackDamage = attackDamageCaculationService.caculate(user, userSkill.getDamage());
 //      人物蓝量校验
         BigInteger userSkillMp = new BigInteger(userSkill.getSkillMp());
         BigInteger userMp = new BigInteger(user.getMp());

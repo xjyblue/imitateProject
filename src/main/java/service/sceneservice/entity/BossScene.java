@@ -2,7 +2,9 @@ package service.sceneservice.entity;
 
 import core.component.boss.BossSceneConfig;
 import core.component.monster.Monster;
+import service.broadcastservice.service.BroadcastService;
 import service.buffservice.entity.Buff;
+import service.buffservice.service.MonsterBuffService;
 import service.caculationservice.service.AttackDamageCaculationService;
 import service.caculationservice.service.HpCaculationService;
 import com.google.common.collect.Lists;
@@ -114,6 +116,17 @@ public class BossScene extends AbstractScene implements Runnable {
      * 每个关卡是否要求组队
      */
     private Set<String> needMordMen;
+    /**
+     * 怪物buff
+     */
+    private MonsterBuffService monsterBuffService;
+
+    /**
+     * 广播服务
+     *
+     * @return
+     */
+    private BroadcastService broadcastService;
 
     public Lock getBossSceneLock() {
         return bossSceneLock;
@@ -302,8 +315,12 @@ public class BossScene extends AbstractScene implements Runnable {
         this.hpCaculationService = hpCaculationService;
         RewardService rewardService = SpringContextUtil.getBean("rewardService");
         this.rewardService = rewardService;
+        MonsterBuffService monsterBuffService = SpringContextUtil.getBean("monsterBuffService");
+        this.monsterBuffService = monsterBuffService;
         MonsterFactory monsterFactory = SpringContextUtil.getBean("monsterFactory");
         this.monsterFactory = monsterFactory;
+        BroadcastService broadcastService = SpringContextUtil.getBean("broadcastService");
+        this.broadcastService = broadcastService;
     }
 
     /**
@@ -317,39 +334,6 @@ public class BossScene extends AbstractScene implements Runnable {
         if (this.isFight) {
             monsterFrequence();
         }
-    }
-
-    /**
-     * 刷新怪物buff
-     *
-     * @param monster
-     */
-    private void monsterBuffRefresh(Monster monster) {
-        if (monster != null && monster.getBuffRefreshTime() < System.currentTimeMillis()) {
-            monster.setBuffRefreshTime(System.currentTimeMillis() + 1000);
-        } else {
-            return;
-        }
-
-        if (monster.getBufMap().containsKey(BuffConstant.POISONINGBUFF) && monster.getBufMap().get(BuffConstant.POISONINGBUFF) != GrobalConfig.POISONINGBUFF_DEFAULTVALUE) {
-            Long endTime = ProjectContext.monsterBuffEndTime.get(monster).get(BuffConstant.POISONINGBUFF);
-            if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
-                Buff buff = ProjectContext.buffMap.get(monster.getBufMap().get(BuffConstant.POISONINGBUFF));
-                hpCaculationService.subMonsterHp(monster, buff.getAddSecondValue());
-//               处理中毒扣死
-                if (new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger(GrobalConfig.MINVALUE)) < 0) {
-                    monster.setValueOfLife(GrobalConfig.MINVALUE);
-                    monster.setStatus(GrobalConfig.DEAD);
-                    monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
-                }
-
-//              怪物中毒将buff推送给所有玩家
-                sendMessageToAll("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG);
-            } else {
-                monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
-            }
-        }
-
     }
 
     /**
@@ -375,91 +359,33 @@ public class BossScene extends AbstractScene implements Runnable {
         Map<String, Monster> monsterMap = this.getMonsters().get(this.getSequence().get(0));
         try {
 //          时间截止 战斗结束
-            if (System.currentTimeMillis() > ProjectContext.endBossAreaTime.get(teamId)) {
-                try {
-                    bossSceneLock.lock();
-//                  抢不到关闭
-                    if (isEnd) {
-                        return;
-                    }
-                    isEnd = true;
-                    ProjectContext.bossAreaMap.remove(teamId);
-                    sendTimeOutToAll(teamId, MessageConfig.BOSSAREATIMEOUT);
-                    Future future = futureMap.remove(teamId);
-                    future.cancel(true);
-                    moveAllUser();
-
-                } finally {
-                    bossSceneLock.unlock();
-                }
+            if (checkIfTimeOut()) {
                 return;
             }
 
-
 //          处理最后一名玩家退出,停掉线程
-            if (!ProjectContext.bossAreaMap.containsKey(teamId)) {
-                try {
-                    bossSceneLock.lock();
-                    if (isEnd) {
-                        return;
-                    }
-                    isEnd = true;
-                    Future future = futureMap.remove(teamId);
-                    future.cancel(true);
-                    ProjectContext.bossAreaMap.remove(teamId);
-                    return;
-                } finally {
-                    bossSceneLock.unlock();
-                }
+            if (checkBossSceneNoMan()) {
+                return;
             }
 
             for (Map.Entry<String, Monster> monsterEntry : monsterMap.entrySet()) {
                 Monster monster = monsterEntry.getValue();
 //              刷新怪物的buff
-                monsterBuffRefresh(monster);
-                BossScene bossScene = ProjectContext.bossAreaMap.get(teamId);
-                User userTarget = getMaxDamageUser(bossScene);
+                monsterBuffService.monsterBuffRefresh(monster, teamId);
+                User userTarget = getMaxDamageUser(this);
 //              判断某个场景的boss是否都死光，否则重新锁定boss
-                if (checkIfCheckArea(monsterMap, bossScene)) {
-                    if (bossScene.getSequence().size() > 1) {
-
+                if (checkIfCheckArea(monsterMap, this)) {
+                    if (this.getSequence().size() > 1) {
 //                      切换到下一场景的怪物群
-                        bossScene.getSequence().remove(0);
-                        monsterMap = bossScene.getMonsters().get(bossScene.getSequence().get(0));
-
-
-                        bossScene.setFight(false);
-                        String bossMessage = "出现新场景boss:";
-                        for (Map.Entry<String, Monster> entry : monsterMap.entrySet()) {
-                            if (entry.getValue().getStatus().equals(GrobalConfig.ALIVE)) {
-                                bossMessage += (entry.getValue().getName() + " ");
-//                              移除所有小组成员之前的目标monster
-                                removeMonster(teamId);
-                            }
-                        }
-                        sendMessageToAll(bossMessage, null);
-
+                        monsterMap = checkOutNewSceneMonsters();
 
 //                      判断下个场景boss检查挑战者是否为多人挑战，不为多人不生成boss
-                        for (Map.Entry<String, Monster> entry : monsterMap.entrySet()) {
-//                          检查怪物场景是否为要求多人场景
-                            if (this.needMordMen.contains(entry.getValue().getPos())) {
-                                if (ProjectContext.teamMap.get(teamId).getUserMap().size() == 1) {
-//                                  三层boss需组队人数不够告诉玩家不能继续下去了
-                                    Future future = futureMap.remove(teamId);
-                                    future.cancel(true);
-                                    Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
-                                    channelTarget.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMANTOFIGHT));
-                                    ProjectContext.bossAreaMap.remove(teamId);
-                                    moveAllUser();
-                                    return;
-                                }
-                            }
-                            break;
+                        if (checkIfMoreMen(monsterMap, userTarget)) {
+                            return;
                         }
                     } else {
 //                      boss场景只剩下一个并且场景下boss死光，游戏结束
-                        successMessToAll(bossScene, monster);
+                        successMessToAll(this, monster);
                         Future future = futureMap.remove(teamId);
                         future.cancel(true);
                         moveAllUser();
@@ -467,30 +393,8 @@ public class BossScene extends AbstractScene implements Runnable {
                     }
                 }
 
-//             全队人物死亡检查，排除死掉的玩家
-                for (Map.Entry<String, User> entry : userMap.entrySet()) {
-                    userTarget = entry.getValue();
-                    BigInteger userHp = new BigInteger(userTarget.getHp());
-                    Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
-                    if (userHp.compareTo(new BigInteger(GrobalConfig.MINVALUE)) <= 0) {
-                        userTarget.setHp(GrobalConfig.MINVALUE);
-                        userTarget.setStatus(GrobalConfig.DEAD);
-//                  移除怪物所针对的boss
-                        ProjectContext.userToMonsterMap.remove(userTarget);
-//                  人物战斗中死亡
-                        ProjectContext.eventStatus.put(channelTarget, ChannelStatus.DEADSCENE);
-                        channelTarget.writeAndFlush(MessageUtil.turnToPacket("你已死亡"));
-//                  把人物从战斗场景移除到初始场景
-                        Scene scene = ProjectContext.sceneMap.get(GrobalConfig.STARTSCENE);
-                        scene.getUserMap().put(userTarget.getUsername(), userTarget);
-//                  将人物的伤害置为0
-                        bossScene.getDamageAll().put(userTarget, GrobalConfig.MINVALUE);
-//                  人物死亡场景移除人物
-                        userMap.remove(userTarget.getUsername());
-//                  人物死亡全队提示
-                        oneDeadMessageToAll(bossScene, monster, userTarget);
-                    }
-                }
+//              解决死掉的某个玩家
+                solveOneDead(monster);
 
 //              全队死亡检查，是否副本失败
                 if (checkAllDead()) {
@@ -512,6 +416,149 @@ public class BossScene extends AbstractScene implements Runnable {
         }
     }
 
+    /**
+     * 解决死掉的某个玩家
+     * @param monster
+     */
+    private void solveOneDead(Monster monster) {
+        User userTarget;
+        for (Map.Entry<String, User> entry : userMap.entrySet()) {
+            userTarget = entry.getValue();
+            BigInteger userHp = new BigInteger(userTarget.getHp());
+            Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
+            if (userHp.compareTo(new BigInteger(GrobalConfig.MINVALUE)) <= 0) {
+                userTarget.setHp(GrobalConfig.MINVALUE);
+                userTarget.setStatus(GrobalConfig.DEAD);
+//                  移除怪物所针对的boss
+                ProjectContext.userToMonsterMap.remove(userTarget);
+//                  人物战斗中死亡
+                ProjectContext.eventStatus.put(channelTarget, ChannelStatus.DEADSCENE);
+                channelTarget.writeAndFlush(MessageUtil.turnToPacket("你已死亡"));
+//                  把人物从战斗场景移除到初始场景
+                Scene scene = ProjectContext.sceneMap.get(GrobalConfig.STARTSCENE);
+                scene.getUserMap().put(userTarget.getUsername(), userTarget);
+//                  将人物的伤害置为0
+                this.getDamageAll().put(userTarget, GrobalConfig.MINVALUE);
+//                  人物死亡场景移除人物
+                userMap.remove(userTarget.getUsername());
+//                  人物死亡全队提示
+                oneDeadMessageToAll(this, monster, userTarget);
+            }
+        }
+    }
+
+    /**
+     * 切换其他场景怪物群
+     * @return
+     */
+    private Map<String, Monster> checkOutNewSceneMonsters() {
+        Map<String, Monster> monsterMap;
+        this.getSequence().remove(0);
+        monsterMap = this.getMonsters().get(this.getSequence().get(0));
+        this.setFight(false);
+//                      获取新场景boss名字
+        String bossMessage = getNewBossName(monsterMap);
+        broadcastService.sendMessageToAll(bossMessage, teamId, null);
+        return monsterMap;
+    }
+
+    /**
+     * 检查副本是否需要多人挑战
+     * @param monsterMap
+     * @param userTarget
+     * @return
+     */
+    private boolean checkIfMoreMen(Map<String, Monster> monsterMap, User userTarget) {
+        for (Map.Entry<String, Monster> entry : monsterMap.entrySet()) {
+//          检查怪物场景是否为要求多人场景
+            if (this.needMordMen.contains(entry.getValue().getPos())) {
+                if (ProjectContext.teamMap.get(teamId).getUserMap().size() == 1) {
+//          人数不够告诉玩家不能继续下去了
+                    Future future = futureMap.remove(teamId);
+                    future.cancel(true);
+                    Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
+                    channelTarget.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMANTOFIGHT));
+                    ProjectContext.bossAreaMap.remove(teamId);
+                    moveAllUser();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 新生成怪物的怪物名
+     * @param monsterMap
+     * @return
+     */
+    private String getNewBossName(Map<String, Monster> monsterMap) {
+        String bossMessage = "出现新场景boss:";
+        for (Map.Entry<String, Monster> entry : monsterMap.entrySet()) {
+            if (entry.getValue().getStatus().equals(GrobalConfig.ALIVE)) {
+                bossMessage += (entry.getValue().getName() + " ");
+//              移除所有小组成员之前的目标monster
+                removeMonster();
+            }
+        }
+        return bossMessage;
+    }
+
+    /**
+     * 检查副本是否所有玩家退出
+     *
+     * @return
+     */
+    private boolean checkBossSceneNoMan() {
+        if (!ProjectContext.bossAreaMap.containsKey(teamId)) {
+            try {
+                bossSceneLock.lock();
+                if (isEnd) {
+                    return true;
+                }
+                isEnd = true;
+                Future future = futureMap.remove(teamId);
+                future.cancel(true);
+                ProjectContext.bossAreaMap.remove(teamId);
+                return true;
+            } finally {
+                bossSceneLock.unlock();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 检查副本是否超时
+     *
+     * @return
+     */
+    private boolean checkIfTimeOut() {
+        if (System.currentTimeMillis() > ProjectContext.endBossAreaTime.get(teamId)) {
+            try {
+                bossSceneLock.lock();
+//                  抢不到关闭
+                if (isEnd) {
+                    return true;
+                }
+                isEnd = true;
+                ProjectContext.bossAreaMap.remove(teamId);
+                sendTimeOutToAll(teamId, MessageConfig.BOSSAREATIMEOUT);
+                Future future = futureMap.remove(teamId);
+                future.cancel(true);
+                moveAllUser();
+
+            } finally {
+                bossSceneLock.unlock();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 移除副本中战斗的用户
+     */
     private void moveAllUser() {
         Iterator<Map.Entry<String, User>> it = userMap.entrySet().iterator();
         while (it.hasNext()) {
@@ -531,7 +578,6 @@ public class BossScene extends AbstractScene implements Runnable {
 //          移除该场景的用户
             it.remove();
         }
-
     }
 
 
@@ -544,27 +590,10 @@ public class BossScene extends AbstractScene implements Runnable {
         return true;
     }
 
-    private void removeMonster(String teamId) {
+    private void removeMonster() {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             if (ProjectContext.userToMonsterMap.containsKey(entry.getValue())) {
                 ProjectContext.userToMonsterMap.remove(entry.getValue());
-            }
-        }
-    }
-
-    private void sendMessageToAll(String msg, String type) {
-        Team team = ProjectContext.teamMap.get(teamId);
-        for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
-            User user = entry.getValue();
-            Channel channel = ProjectContext.userToChannelMap.get(user);
-            String userStatus = ProjectContext.eventStatus.get(channel);
-            if (userStatus.equals(ChannelStatus.BOSSSCENE) || userStatus.equals(ChannelStatus.DEADSCENE) || userStatus.equals(ChannelStatus.ATTACK)) {
-                Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
-                if (type == null) {
-                    channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
-                } else {
-                    channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg, type));
-                }
             }
         }
     }
@@ -620,7 +649,11 @@ public class BossScene extends AbstractScene implements Runnable {
         return true;
     }
 
-
+    /**
+     * 怪物攻击人
+     *
+     * @param monster
+     */
     private void attack(Monster monster) {
         BossScene bossScene = ProjectContext.bossAreaMap.get(teamId);
 //      锁定攻击目标
