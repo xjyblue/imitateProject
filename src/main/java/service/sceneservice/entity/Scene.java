@@ -234,6 +234,7 @@ public class Scene extends AbstractScene implements Runnable {
                         }
 //                      怪物buff刷新
                         monsterBuffService.monsterBuffRefresh(monster, channel);
+
 //                      检查怪物是否死亡
                         if (checkMonsterStatus(channel, monster, user)) {
                             continue;
@@ -266,7 +267,7 @@ public class Scene extends AbstractScene implements Runnable {
                                 + "-----怪物血量:" + monster.getValueOfLife();
                         channel.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ATTACKMSG));
                         if (user.getHp().equals(GrobalConfig.MINVALUE)) {
-                            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY, PacketType.ATTACKMSG));
+                            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY));
                             return;
                         }
                         ProjectContext.eventStatus.put(channel, ChannelStatus.ATTACK);

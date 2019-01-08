@@ -25,6 +25,7 @@ import utils.MessageUtil;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * @ClassName LoginService
  * @Description TODO
@@ -49,6 +50,7 @@ public class LoginService {
 
     /**
      * 登录逻辑
+     *
      * @param channel
      * @param msg
      */
@@ -75,10 +77,10 @@ public class LoginService {
             }
             Role role = ProjectContext.roleMap.get(user.getRoleid());
 //          初始化玩家的技能
-            initUserSkill(user,channel,role);
+            initUserSkill(user, channel, role);
 //          初始化玩家buff
             initUserBuffBegin(user);
-
+            user.setIfOccupy(false);
 //          将玩家放入场景队列中
             Scene scene = ProjectContext.sceneMap.get(user.getPos());
             scene.getUserMap().put(user.getUsername(), user);
@@ -98,11 +100,12 @@ public class LoginService {
 
     /**
      * 初始化人物技能
+     *
      * @param user
      * @param channel
      * @param role
      */
-    private void initUserSkill(User user,Channel channel,Role role) {
+    private void initUserSkill(User user, Channel channel, Role role) {
         UserskillrelationExample userskillrelationExample = new UserskillrelationExample();
         UserskillrelationExample.Criteria criteria = userskillrelationExample.createCriteria();
         criteria.andUsernameEqualTo(user.getUsername());
@@ -120,6 +123,7 @@ public class LoginService {
 
     /**
      * 初始人物buff
+     *
      * @param user
      */
     private void initUserBuffBegin(User user) {
@@ -149,7 +153,7 @@ public class LoginService {
 //          注入buff处理器，让用户去刷新自己的buff
         user.setUserBuffService(userBuffService);
         user.setBuffRefreshTime(0L);
-        user.setIfOnline(true);
+        user.setIfOccupy(true);
     }
 
     /**
@@ -174,6 +178,7 @@ public class LoginService {
             if (channelTarget != null) {
 //              切换渠道处理渠道消息
                 User user = ProjectContext.session2UserIds.get(channelTarget);
+                user.setIfOccupy(true);
                 ProjectContext.session2UserIds.put(channel, user);
                 ProjectContext.userToChannelMap.put(user, channel);
                 ProjectContext.eventStatus.put(channel, ProjectContext.eventStatus.get(channelTarget));

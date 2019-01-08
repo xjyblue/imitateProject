@@ -224,10 +224,8 @@ public class BossService {
     public void backBossArea(Channel channel, String msg) {
 //      退出副本，回收资源
         User user = ProjectContext.session2UserIds.get(channel);
-//      线程终止
+//      boss场景
         BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
-        Future future = bossScene.getFutureMap().remove(user.getTeamId());
-        future.cancel(true);
 //      场景还原
         bossScene.getUserMap().remove(user.getUsername());
         Scene sceneTarget = ProjectContext.sceneMap.get(user.getPos());

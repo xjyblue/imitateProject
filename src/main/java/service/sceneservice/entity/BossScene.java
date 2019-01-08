@@ -344,9 +344,7 @@ public class BossScene extends AbstractScene implements Runnable {
     private boolean userFrequence() {
 //      解决玩家为0时线程回收问题
         if (userMap.size() == 0) {
-            Future future = futureMap.remove(teamId);
-            future.cancel(true);
-            ProjectContext.bossAreaMap.remove(teamId);
+            stopBossScene();
             return false;
         }
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
@@ -384,8 +382,7 @@ public class BossScene extends AbstractScene implements Runnable {
                     } else {
 //                      boss场景只剩下一个并且场景下boss死光，游戏结束
                         successMessToAll(this, monster);
-                        Future future = futureMap.remove(teamId);
-                        future.cancel(true);
+                        stopBossScene();
                         moveAllUser();
                         return;
                     }
@@ -394,13 +391,11 @@ public class BossScene extends AbstractScene implements Runnable {
                 solveOneDead(monster);
 //              全队死亡检查，是否副本失败
                 if (checkAllDead()) {
-                    Future future = futureMap.remove(teamId);
-                    future.cancel(true);
-                    ProjectContext.bossAreaMap.remove(teamId);
+                    stopBossScene();
                     failMessageToAll();
                     return;
                 }
-//              怪物攻击
+//              怪物攻击,控制频率不要太高
                 if (!monster.getStatus().equals(GrobalConfig.DEAD) && monster.getAttackEndTime() < System.currentTimeMillis()) {
                     monster.setAttackEndTime(System.currentTimeMillis() + 1000);
                     attack(monster);
@@ -409,6 +404,16 @@ public class BossScene extends AbstractScene implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 停掉boss场景
+     */
+    private void stopBossScene() {
+        Future future = futureMap.remove(teamId);
+        future.cancel(true);
+        ProjectContext.bossAreaMap.remove(teamId);
+        ProjectContext.endBossAreaTime.remove(teamId);
     }
 
     /**
@@ -511,8 +516,7 @@ public class BossScene extends AbstractScene implements Runnable {
         if (System.currentTimeMillis() > ProjectContext.endBossAreaTime.get(teamId)) {
             ProjectContext.bossAreaMap.remove(teamId);
             sendTimeOutToAll(teamId, MessageConfig.BOSSAREATIMEOUT);
-            Future future = futureMap.remove(teamId);
-            future.cancel(true);
+            stopBossScene();
             moveAllUser();
             return true;
         }

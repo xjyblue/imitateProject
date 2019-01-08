@@ -16,6 +16,7 @@ import io.netty.channel.ChannelHandler.Sharable;
 import core.packet.PacketProto;
 import core.packet.PacketType;
 import pojo.User;
+import utils.ProjectContextUtil;
 
 
 import java.util.Map;
@@ -72,51 +73,16 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
         super.channelInactive(ctx);
         Channel channel = ctx.channel();
         log.info("端口号为{}的渠道与服务器断开连接", channel.remoteAddress());
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        super.exceptionCaught(ctx, cause);
-//      已登录的情况下断开
+        //      已登录的情况下断开
         if (ProjectContext.session2UserIds.containsKey(ctx.channel())) {
             User user = ProjectContext.session2UserIds.get(ctx.channel());
 //          顶号关闭，更改渠道和用户的绑定和渠道的事件状态就OK
-            if (user != null && user.isIfOnline()) {
+            if (user != null && user.isIfOccupy()) {
                 ProjectContext.eventStatus.remove(ctx.channel());
                 ProjectContext.session2UserIds.remove(ctx.channel());
+                user.setIfOccupy(false);
             } else if (user != null) {
-                //移除队伍或者副本中玩家
-                if (user.getTeamId() != null) {
-                    teamService.handleUserOffline(user);
-                }
-//              移除场景下的玩家
-                Scene scene = ProjectContext.sceneMap.get(user.getPos());
-                if (scene.getUserMap().containsKey(user.getUsername())) {
-                    scene.getUserMap().remove(user.getUsername());
-                }
-//              移除玩家的所有buff终止时间
-                if (ProjectContext.userBuffEndTime.containsKey(user)) {
-                    ProjectContext.userBuffEndTime.remove(user);
-                }
-//              移除怪物的buff终止时间
-                if (ProjectContext.userToMonsterMap.containsKey(user)) {
-                    ProjectContext.userToMonsterMap.remove(user);
-                }
-//              移除channel和用户的关联
-                if (ProjectContext.session2UserIds.containsKey(ctx.channel())) {
-                    ProjectContext.session2UserIds.remove(ctx.channel());
-                }
-                if (ProjectContext.userToChannelMap.containsKey(user)) {
-                    ProjectContext.userToChannelMap.remove(user);
-                }
-//              移除渠道状态
-                if (ProjectContext.eventStatus.containsKey(ctx.channel())) {
-                    ProjectContext.eventStatus.remove(ctx.channel());
-                }
-//              移除用户技能关联
-                if (ProjectContext.userskillrelationMap.containsKey(user)) {
-                    ProjectContext.userskillrelationMap.remove(user);
-                }
+                ProjectContextUtil.clearContextUserInfo(ctx, user);
             }
             HEART_COUNTS.remove(ctx.channel());
         } else {
@@ -125,6 +91,7 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
             HEART_COUNTS.remove(ctx.channel());
         }
     }
+
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {

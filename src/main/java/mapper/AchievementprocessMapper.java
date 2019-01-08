@@ -10,6 +10,11 @@ import pojo.AchievementprocessExample;
  * @Author: xiaojianyu
  */
 public interface AchievementprocessMapper {
+    /**
+     *
+     * @param example
+     * @return
+     */
     int countByExample(AchievementprocessExample example);
 
     int deleteByExample(AchievementprocessExample example);

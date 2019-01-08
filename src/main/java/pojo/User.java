@@ -104,20 +104,20 @@ public class User {
      */
     private Long buffRefreshTime;
     /**
-     * 在线状态
+     * 被顶号标识
      */
-    private boolean ifOnline;
+    private boolean ifOccupy;
     /**
      * 玩家的命令消费队列
      */
     private ConcurrentLinkedQueue<PacketProto.Packet> packetsQueue = new ConcurrentLinkedQueue<>();
 
-    public boolean isIfOnline() {
-        return ifOnline;
+    public boolean isIfOccupy() {
+        return ifOccupy;
     }
 
-    public void setIfOnline(boolean ifOnline) {
-        this.ifOnline = ifOnline;
+    public void setIfOccupy(boolean ifOccupy) {
+        this.ifOccupy = ifOccupy;
     }
 
     public Long getBuffRefreshTime() {
