@@ -11,7 +11,7 @@ import pojo.AchievementprocessExample;
  */
 public interface AchievementprocessMapper {
     /**
-     *
+     *..
      * @param example
      * @return
      */
