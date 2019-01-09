@@ -1,7 +1,6 @@
 package server;
 
 import core.config.GrobalConfig;
-import service.sceneservice.entity.Scene;
 import core.context.ProjectContext;
 import core.ChannelStatus;
 import service.teamservice.service.TeamService;
@@ -59,7 +58,7 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
         HEART_COUNTS.put(channel, 0);
 
 //      有渠道连接进来的时候
-        ProjectContext.eventStatus.put(channel, ChannelStatus.COMING);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.COMING);
         PacketProto.Packet.Builder builder = newBuilder();
         builder.setPacketType(PacketProto.Packet.PacketType.DATA);
         builder.setData("欢迎来到【星宇征服】,请按以下提示操作：d:登录 z:注册");
@@ -74,12 +73,12 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
         Channel channel = ctx.channel();
         log.info("端口号为{}的渠道与服务器断开连接", channel.remoteAddress());
         //      已登录的情况下断开
-        if (ProjectContext.session2UserIds.containsKey(ctx.channel())) {
-            User user = ProjectContext.session2UserIds.get(ctx.channel());
+        if (ProjectContext.channelToUserMap.containsKey(ctx.channel())) {
+            User user = ProjectContext.channelToUserMap.get(ctx.channel());
 //          顶号关闭，更改渠道和用户的绑定和渠道的事件状态就OK
             if (user != null && user.isIfOccupy()) {
-                ProjectContext.eventStatus.remove(ctx.channel());
-                ProjectContext.session2UserIds.remove(ctx.channel());
+                ProjectContext.channelStatus.remove(ctx.channel());
+                ProjectContext.channelToUserMap.remove(ctx.channel());
                 user.setIfOccupy(false);
             } else if (user != null) {
                 ProjectContextUtil.clearContextUserInfo(ctx, user);
@@ -87,7 +86,7 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
             HEART_COUNTS.remove(ctx.channel());
         } else {
 //          未登录的情况下断开
-            ProjectContext.eventStatus.remove(ctx.channel());
+            ProjectContext.channelStatus.remove(ctx.channel());
             HEART_COUNTS.remove(ctx.channel());
         }
     }

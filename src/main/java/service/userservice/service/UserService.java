@@ -28,11 +28,12 @@ public class UserService {
 
     /**
      * aoi 方法
+     *
      * @param channel
      * @param msg
      */
     public void aoiMethod(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String allStatus = System.getProperty("line.separator")
                 + "玩家[" + user.getUsername()
                 + "] 玩家的状态[" + user.getStatus()
@@ -45,7 +46,7 @@ public class UserService {
                 + "] 玩家的MP上限: [" + levelService.getMaxMp(user)
                 + "] 玩家的金币：[" + user.getMoney()
                 + "]" + System.getProperty("line.separator");
-        for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
+        for (Map.Entry<Channel, User> entry : ProjectContext.channelToUserMap.entrySet()) {
             if (!user.getUsername().equals(entry.getValue().getUsername()) && user.getPos().equals(entry.getValue().getPos())) {
                 allStatus += "其他玩家" + entry.getValue().getUsername() + "---" + entry.getValue().getStatus() + System.getProperty("line.separator");
             }
@@ -63,11 +64,12 @@ public class UserService {
 
     /**
      * 根据用户名获取用户
+     *
      * @param s
      * @return
      */
     public User getUserByNameFromSession(String s) {
-        for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
+        for (Map.Entry<Channel, User> entry : ProjectContext.channelToUserMap.entrySet()) {
             if (entry.getValue().getUsername().equals(s)) {
                 return entry.getValue();
             }
@@ -85,4 +87,20 @@ public class UserService {
         userMapper.updateByPrimaryKeySelective(user);
     }
 
+    public void sendMessageByUserName(String username, String msg) {
+        sendMessageByUserName(username, msg, null);
+    }
+
+    public void sendMessageByUserName(String username, String msg, String type) {
+        for (Map.Entry<User, Channel> entry : ProjectContext.userToChannelMap.entrySet()) {
+            if (entry.getKey().getUsername().equals(username)) {
+                Channel channel = entry.getValue();
+                if (type == null) {
+                    channel.writeAndFlush(MessageUtil.turnToPacket(msg));
+                } else {
+                    channel.writeAndFlush(MessageUtil.turnToPacket(msg, type));
+                }
+            }
+        }
+    }
 }

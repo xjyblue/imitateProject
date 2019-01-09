@@ -133,15 +133,15 @@ public class AttackService {
      */
     @Order(orderMsg = "qf")
     public void quitFight(Channel channel, String msg) throws InvocationTargetException, IllegalAccessException {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         //      boss的战斗中推出
         if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
             ReflectMethodUtil.reflectAnnotation(bossService, channel, msg);
         } else {
             //          普通战斗中退出
-            ProjectContext.userToMonsterMap.remove(ProjectContext.session2UserIds.get(channel));
+            ProjectContext.userToMonsterMap.remove(ProjectContext.channelToUserMap.get(channel));
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RETREATFIGHT));
-            ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
+            ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
             return;
         }
     }
@@ -233,7 +233,7 @@ public class AttackService {
      */
     @Order(orderMsg = "attack")
     public void changeTarget(Channel channel, String msg) throws IOException {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (msg == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -275,7 +275,7 @@ public class AttackService {
      */
     @Order(orderMsg = "recover")
     public void recoverUserHpAndMp(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getTeamId() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NORECOVERUSERHPANDMP));
             return;
@@ -303,7 +303,7 @@ public class AttackService {
      * @throws IOException
      */
     private void attackKeySolve(Channel channel, String msg) throws IOException {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         //找到攻击的怪物
         Monster monster = getTargetMonster(user);
         if (monster == null) {
@@ -441,7 +441,7 @@ public class AttackService {
      * @throws IOException
      */
     public void attackCommonSceneFirst(Channel channel, String msg) throws IOException {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("-");
         //输入的怪物是否存在
         Monster monster = getMonster(user, temp[1], Monster.TYPEOFCOMMONMONSTER);
@@ -486,7 +486,7 @@ public class AttackService {
             }
         } else {
             //切换到攻击模式
-            ProjectContext.eventStatus.put(channel, ChannelStatus.ATTACK);
+            ProjectContext.channelStatus.put(channel, ChannelStatus.ATTACK);
             channel.writeAndFlush(MessageUtil.turnToPacket(resp));
             //记录当前攻击的目标
             Map<Integer, Monster> monsterMap = new HashMap<>(64);
@@ -549,7 +549,7 @@ public class AttackService {
      */
     public void bossSceneFirstAttack(Channel channel, String msg) {
         String[] temp = msg.split("-");
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         //      锁定怪物  输入的怪物是否存在
         Monster monster = getMonster(user, temp[1], Monster.TYPEOFBOSS);
         if (monster == null) {
@@ -598,10 +598,10 @@ public class AttackService {
             }
         } else {
             //          切换到攻击模式
-            ProjectContext.eventStatus.put(channel, ChannelStatus.ATTACK);
+            ProjectContext.channelStatus.put(channel, ChannelStatus.ATTACK);
             //          记录人物当前攻击的怪物
             AttackUtil.addMonsterToUserMonsterList(user, monster);
-            ProjectContext.eventStatus.put(channel, ChannelStatus.ATTACK);
+            ProjectContext.channelStatus.put(channel, ChannelStatus.ATTACK);
             ProjectContext.endBossAreaTime.put(user.getTeamId(), System.currentTimeMillis() + bossScene.getKeepTime() * 1000);
         }
         channel.writeAndFlush(MessageUtil.turnToPacket(resp));

@@ -25,14 +25,14 @@ public class ChatService {
      * @param msg
      */
     public void chatAll(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("-");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
 //      广播一次全服大喇叭
-        for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
+        for (Map.Entry<Channel, User> entry : ProjectContext.channelToUserMap.entrySet()) {
             Channel channelTemp = entry.getKey();
             if (entry.getValue() == user) {
                 channelTemp.writeAndFlush(MessageUtil.turnToPacket("你发送了全服喇叭，消息为>>>>>" + temp[1] + "<<<<<"));
@@ -48,14 +48,14 @@ public class ChatService {
      * @param msg
      */
     public void chatOne(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("-");
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
 
-        for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
+        for (Map.Entry<Channel, User> entry : ProjectContext.channelToUserMap.entrySet()) {
             Channel channelTemp = entry.getKey();
             if(entry.getValue().getUsername().equals(temp[1])){
                 channelTemp.writeAndFlush(MessageUtil.turnToPacket("您收到来自" + user.getUsername() + "的私聊大喇叭:" + temp[2]));

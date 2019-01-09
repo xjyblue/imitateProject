@@ -59,7 +59,7 @@ public class BossService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
 //      10级以下无法进入副本
         if (levelService.getLevelByExperience(user.getExperience()) < GrobalConfig.MIN_ENTER_BOSSSCENE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOLEVELTOMOVE));
@@ -69,7 +69,7 @@ public class BossService {
 
 //      处理用户死亡后重连副本逻辑
         if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
-            ProjectContext.eventStatus.put(channel, ChannelStatus.BOSSSCENE);
+            ProjectContext.channelStatus.put(channel, ChannelStatus.BOSSSCENE);
 //          进入副本，用户场景线程转移
             BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
             bossScene.getUserMap().put(user.getUsername(), user);
@@ -223,7 +223,7 @@ public class BossService {
     @Order(orderMsg = "qf")
     public void backBossArea(Channel channel, String msg) {
 //      退出副本，回收资源
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
 //      boss场景
         BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
 //      场景还原
@@ -235,7 +235,7 @@ public class BossService {
 //      提示
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTBOSSAREA));
 //      渠道状态更新
-        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
     }
 
     /**
@@ -280,7 +280,7 @@ public class BossService {
 
 //          更新渠道的状态
             Channel channel = ProjectContext.userToChannelMap.get(entry.getValue());
-            ProjectContext.eventStatus.put(channel, ChannelStatus.BOSSSCENE);
+            ProjectContext.channelStatus.put(channel, ChannelStatus.BOSSSCENE);
 
             String resp = "进入" + bossScene.getBossName() + "副本,出现boss有：";
             for (Map.Entry<String, Monster> entryMonster : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {

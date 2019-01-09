@@ -42,11 +42,11 @@ public class NpcService {
      */
     public void talkMethod(Channel channel, String msg) {
         String[] temp = msg.split("-");
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
         } else {
-            List<Npc> npcs = ProjectContext.sceneMap.get(ProjectContext.session2UserIds.get(channel).getPos())
+            List<Npc> npcs = ProjectContext.sceneMap.get(ProjectContext.channelToUserMap.get(channel).getPos())
                     .getNpcs();
             for (Npc npc : npcs) {
                 if (npc.getName().equals(temp[1])) {
@@ -76,7 +76,7 @@ public class NpcService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         Scene scene = ProjectContext.sceneMap.get(user.getPos());
         Npc npc = null;
         for (Npc npcT : scene.getNpcs()) {

@@ -46,7 +46,7 @@ public class PkService {
      */
     public void pkOthers(Channel channel, String msg) {
         String[] temp = msg.split("-");
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -109,7 +109,7 @@ public class PkService {
 //          pk触发pk胜利成就
             achievementService.executeFirstPKWin(user);
 
-            ProjectContext.eventStatus.put(channelTarget, ChannelStatus.DEADSCENE);
+            ProjectContext.channelStatus.put(channelTarget, ChannelStatus.DEADSCENE);
             return;
         }
         String resp = "你受到来自：" + user.getUsername() + "的" + userSkill.getSkillName() + "的攻击，伤害为["

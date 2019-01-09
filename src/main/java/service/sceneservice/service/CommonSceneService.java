@@ -1,6 +1,7 @@
 package service.sceneservice.service;
 
 import service.attackservice.service.AttackService;
+import service.auctionservice.service.AuctionService;
 import service.labourunionservice.service.LabourUnionService;
 import service.npcservice.service.NpcService;
 import service.skillservice.service.SkillService;
@@ -66,7 +67,8 @@ public class CommonSceneService {
     private WeaponStartService weaponStartService;
     @Autowired
     private SkillService skillService;
-
+    @Autowired
+    private AuctionService auctionService;
     /**
      * 展示装备栏
      *
@@ -376,5 +378,14 @@ public class CommonSceneService {
         sceneService.moveScene(channel, msg);
     }
 
+    /**
+     * 进入拍卖行
+     * @param channel
+     * @param msg
+     */
+    @Order(orderMsg = "eau")
+    public void enterAuctionView(Channel channel,String msg){
+        auctionService.enterAuctionView(channel,msg);
+    }
 
 }

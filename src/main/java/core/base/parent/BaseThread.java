@@ -1,18 +1,17 @@
-package service.sceneservice.entity.parent;
+package core.base.parent;
 
 /**
- * @ClassName AbstractScene
+ * @ClassName BaseThread
  * @Description TODO
  * @Author xiaojianyu
  * @Date 2019/1/4 11:11
  * @Version 1.0
  **/
-public abstract class AbstractScene {
+public abstract class BaseThread {
     /**
      * 父类构造
      */
-    public AbstractScene() {
-//      子类自己的init方法
+    public BaseThread() {
         preConstruct();
     }
 

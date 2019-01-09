@@ -40,15 +40,15 @@ public class ProjectContextUtil {
             ProjectContext.userToMonsterMap.remove(user);
         }
 //              移除channel和用户的关联
-        if (ProjectContext.session2UserIds.containsKey(ctx.channel())) {
-            ProjectContext.session2UserIds.remove(ctx.channel());
+        if (ProjectContext.channelToUserMap.containsKey(ctx.channel())) {
+            ProjectContext.channelToUserMap.remove(ctx.channel());
         }
         if (ProjectContext.userToChannelMap.containsKey(user)) {
             ProjectContext.userToChannelMap.remove(user);
         }
 //              移除渠道状态
-        if (ProjectContext.eventStatus.containsKey(ctx.channel())) {
-            ProjectContext.eventStatus.remove(ctx.channel());
+        if (ProjectContext.channelStatus.containsKey(ctx.channel())) {
+            ProjectContext.channelStatus.remove(ctx.channel());
         }
 //              移除用户技能关联
         if (ProjectContext.userskillrelationMap.containsKey(user)) {

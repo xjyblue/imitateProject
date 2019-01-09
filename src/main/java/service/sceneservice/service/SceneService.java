@@ -46,7 +46,7 @@ public class SceneService {
             return;
         }
 
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (temp[1].equals(ProjectContext.sceneMap.get(user.getPos()).getName())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNMOVELOCAL));
             return;
@@ -80,7 +80,7 @@ public class SceneService {
         sceneTarget.getUserMap().put(user.getUsername(), user);
         user.setPos(sceneTarget.getId());
         userMapper.updateByPrimaryKeySelective(user);
-        ProjectContext.session2UserIds.put(channel, user);
+        ProjectContext.channelToUserMap.put(channel, user);
         channel.writeAndFlush(MessageUtil.turnToPacket("已移动到" + temp[1]));
     }
 

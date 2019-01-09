@@ -1,5 +1,7 @@
 package core.config;
 
+import io.netty.channel.Channel;
+
 /**
  * @ClassName GrobalConfig
  * @Description 全局配置
@@ -32,7 +34,10 @@ public class GrobalConfig {
      * 5,遵循阿里规范
      */
     public static final int FIVE = 5;
-
+    /**
+     * 6,遵循阿里规范
+     */
+    public static final int SIX = 6;
     /**
      * 人物死亡状态
      */
@@ -105,4 +110,12 @@ public class GrobalConfig {
      * 帽子的范围终点点
      */
     public static final int HAT_WEAPON_END = 3200;
+    /**
+     * 拍卖截止时间
+     */
+    public static final Long AUCTION_END_TIME = 360000L;
+    /**
+     * 系统邮件名称
+     */
+    public static final String SYSTEM_EMAIL = "系统邮件";
 }

@@ -113,6 +113,6 @@ public class RegisterService {
         }
 
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERSUCCESS));
-        ProjectContext.eventStatus.put(channel, ChannelStatus.LOGIN);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.LOGIN);
     }
 }

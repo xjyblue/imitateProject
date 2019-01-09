@@ -2,6 +2,7 @@ package core;
 
 
 import core.context.ProjectContext;
+import service.auctionservice.service.AuctionService;
 import service.labourunionservice.service.LabourUnionService;
 import service.sceneservice.service.CommonSceneService;
 import service.teamservice.service.TeamService;
@@ -57,8 +58,10 @@ public class ServiceDistributor {
     private FriendService friendService;
     @Autowired
     private TeamService teamService;
+    @Autowired
+    private AuctionService auctionService;
     public void distributeEvent(Channel ch, String msg) throws IOException, InvocationTargetException, IllegalAccessException {
-        String status = ProjectContext.eventStatus.get(ch);
+        String status = ProjectContext.channelStatus.get(ch);
         switch (status) {
             case ChannelStatus.COMING:
                 ReflectMethodUtil.reflectAnnotation(connectService,ch,msg);
@@ -96,6 +99,8 @@ public class ServiceDistributor {
             case ChannelStatus.TEAM:
                 ReflectMethodUtil.reflectAnnotation(teamService,ch,msg);
                 break;
+            case ChannelStatus.AUCTION:
+                ReflectMethodUtil.reflectAnnotation(auctionService,ch,msg);
              default:
 
         }

@@ -20,7 +20,6 @@ import core.packet.PacketType;
 import pojo.*;
 import utils.MessageUtil;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -135,7 +134,7 @@ public class LabourUnionService {
      */
     @Order(orderMsg = "jxjb")
     public void giveMoneyToUnion(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("-");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -162,7 +161,7 @@ public class LabourUnionService {
      */
     @Order(orderMsg = "hq")
     public void getUserbagFromUnion(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -196,7 +195,7 @@ public class LabourUnionService {
 
                 userbagCaculationService.addUserBagForUser(user, userbag);
 
-                String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + BaseGood.getGoodNameByUserbag(userbag);
+                String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + userbagService.getGoodNameByUserbag(userbag);
                 messageToAllInUnion(user.getUnionid(), resp);
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD, PacketType.UNIONINFO));
                 return;
@@ -226,7 +225,7 @@ public class LabourUnionService {
             userbagNew.setId(UUID.randomUUID().toString());
             userbagCaculationService.addUserBagForUser(user, userbagNew);
 
-            String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + BaseGood.getGoodNameByUserbag(userbagNew);
+            String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + userbagService.getGoodNameByUserbag(userbagNew);
             messageToAllInUnion(user.getUnionid(), resp);
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD, PacketType.UNIONINFO));
             return;
@@ -239,14 +238,14 @@ public class LabourUnionService {
     }
 
     /**
-     * 局限物品到工会
+     * 捐献物品到工会
      *
      * @param channel
      * @param msg
      */
     @Order(orderMsg = "jxwp")
     public void giveUserbagToUnion(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -272,7 +271,6 @@ public class LabourUnionService {
             userbag.setNum(userbag.getNum() - Integer.parseInt(temp[2]));
             if (userbag.getNum() == 0) {
                 user.getUserBag().remove(userbag);
-                userbag.setName(null);
                 userbagMapper.deleteByPrimaryKey(userbag.getId());
             }
         } else {
@@ -292,7 +290,7 @@ public class LabourUnionService {
             unionwarehouseMapper.insert(unionwarehouse);
             userbagMapper.updateByPrimaryKey(userbag);
 
-            String resp = "用户：" + user.getUsername() + "向工会捐献了" + BaseGood.getGoodNameByUserbag(userbag);
+            String resp = "用户：" + user.getUsername() + "向工会捐献了" + userbagService.getGoodNameByUserbag(userbag);
             messageToAllInUnion(user.getUnionid(), resp);
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION, PacketType.UNIONINFO));
             return;
@@ -324,7 +322,7 @@ public class LabourUnionService {
 
 
 //      广播
-        String resp = "用户：" + user.getUsername() + "向工会捐献了" + BaseGood.getGoodNameByUserbag(userbagNew);
+        String resp = "用户：" + user.getUsername() + "向工会捐献了" + userbagService.getGoodNameByUserbag(userbagNew);
         messageToAllInUnion(user.getUnionid(), resp);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION, PacketType.UNIONINFO));
         return;
@@ -338,7 +336,7 @@ public class LabourUnionService {
      */
     @Order(orderMsg = "zsck")
     public void showWarehouse(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
             return;
@@ -347,7 +345,7 @@ public class LabourUnionService {
         List<Userbag> list = userbagMapper.selectUserbagByWarehourseId(unioninfo.getUnionwarehourseid());
         String resp = "";
         for (Userbag userbag : list) {
-            resp += BaseGood.getGoodNameByUserbag(userbag) + System.getProperty("line.separator");
+            resp += userbagService.getGoodNameByUserbag(userbag) + System.getProperty("line.separator");
         }
         resp += "工会仓库金币数量为：" + unioninfo.getUnionmoney() + System.getProperty("line.separator");
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + resp, PacketType.UNIONINFO));
@@ -356,7 +354,7 @@ public class LabourUnionService {
 
     @Order(orderMsg = "t=")
     public void removeMember(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -422,7 +420,7 @@ public class LabourUnionService {
     @Order(orderMsg = "sj")
     public void memberLevelChange(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -458,7 +456,7 @@ public class LabourUnionService {
      */
     @Order(orderMsg = "zsry")
     public void queryUnionMemberInfo(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
             return;
@@ -525,7 +523,7 @@ public class LabourUnionService {
      */
     @Order(orderMsg = "lsu")
     public void queryApplyInfo(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
             return;
@@ -551,7 +549,7 @@ public class LabourUnionService {
      */
     @Order(orderMsg = "sq")
     public void applyUnion(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -592,7 +590,7 @@ public class LabourUnionService {
      */
     @Order(orderMsg = "tc")
     public void outUnion(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
             return;
@@ -620,7 +618,7 @@ public class LabourUnionService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getUnionid() != null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOCREATEUNION));
             return;
@@ -631,7 +629,7 @@ public class LabourUnionService {
         unioninfo.setUnionname(temp[1]);
         unioninfo.setUnionmoney(0);
         unioninfo.setUnionwarehourseid(UUID.randomUUID().toString());
-        User userTemp = ProjectContext.session2UserIds.get(channel);
+        User userTemp = ProjectContext.channelToUserMap.get(channel);
         userTemp.setUnionid(unioninfoId);
 
 
@@ -667,9 +665,9 @@ public class LabourUnionService {
      * @param msg
      */
     public void enterUnionView(Channel channel, String msg) {
-        ProjectContext.eventStatus.put(channel, ChannelStatus.LABOURUNION);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.LABOURUNION);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERLABOURVIEW));
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
         } else {
@@ -686,7 +684,7 @@ public class LabourUnionService {
      */
     @Order(orderMsg = "qt")
     public void outUnionView(Channel channel, String msg) {
-        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTLABOURVIEW));
         channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.UNIONINFO));
         return;
@@ -700,7 +698,7 @@ public class LabourUnionService {
      * @param msg
      */
     private void messageToAllInUnion(String unionId, String msg) {
-        for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
+        for (Map.Entry<Channel, User> entry : ProjectContext.channelToUserMap.entrySet()) {
             User userTemp = entry.getValue();
             if (userTemp.getUnionid() != null && userTemp.getUnionid().equals(unionId)) {
                 Channel channelTemp = entry.getKey();

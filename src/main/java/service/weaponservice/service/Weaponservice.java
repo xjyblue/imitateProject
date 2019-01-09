@@ -38,7 +38,7 @@ public class Weaponservice {
      * @param msg
      */
     public void queryEquipmentBar(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String wresp = "";
         wresp += System.getProperty("line.separator")
                 + "穿上装备按ww=背包id"
@@ -65,7 +65,7 @@ public class Weaponservice {
      * @param msg
      */
     public void fixEquipment(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("-");
         if (!ProjectContext.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
@@ -93,7 +93,7 @@ public class Weaponservice {
      * @param msg
      */
     public void quitEquipment(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("-");
         if (ProjectContext.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
             for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
@@ -126,7 +126,7 @@ public class Weaponservice {
      * @param msg
      */
     public void takeEquipment(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket("请按照ww=背包格子id"));

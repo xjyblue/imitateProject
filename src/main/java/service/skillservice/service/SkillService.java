@@ -39,7 +39,7 @@ public class SkillService {
      */
     @Order(orderMsg = "lookSkill")
     public void lookSkill(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String skillLook = "";
         channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
         Map<String, Userskillrelation> map = ProjectContext.userskillrelationMap.get(user);
@@ -62,7 +62,7 @@ public class SkillService {
      */
     @Order(orderMsg = "change")
     public void changeSkill(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("-");
         if (temp.length == GrobalConfig.THREE) {
             boolean flag = false;
@@ -101,9 +101,9 @@ public class SkillService {
      */
     @Order(orderMsg = "quitSkill")
     public void quitSkill(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         channel.writeAndFlush(MessageUtil.turnToPacket("您已退出技能管理模块，进入" + ProjectContext.sceneMap.get(user.getPos()).getName()));
-        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
     }
 
     /**
@@ -112,7 +112,7 @@ public class SkillService {
      * @param msg
      */
     public void enterSkillView(Channel channel, String msg) {
-        ProjectContext.eventStatus.put(channel, ChannelStatus.SKILLVIEW);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.SKILLVIEW);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SKILLVIEWMESG));
     }
 
@@ -123,7 +123,7 @@ public class SkillService {
      * @return
      */
     public UserSkill getUserSkillByKey(Channel channel, String key) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (!ProjectContext.userskillrelationMap.get(user).containsKey(key)) {
             return null;
         }

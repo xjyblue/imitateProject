@@ -192,7 +192,7 @@ public class TeamService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         Teamapplyinfo teamapplyinfo = teamapplyinfoMapper.selectByPrimaryKey(temp[2]);
         if (teamapplyinfo == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDTEAMAPPLYINFO));
@@ -226,7 +226,7 @@ public class TeamService {
     @Order(orderMsg = "t-lu")
     public void queryTeamApplyInfo(Channel channel, String msg) {
 //      展示申请者的信息
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getTeamId() == null || !ProjectContext.teamMap.containsKey(user.getTeamId())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTEAMMESSAGE));
             return;
@@ -282,7 +282,7 @@ public class TeamService {
     }
 
     private User getUser(Channel channel) {
-        return ProjectContext.session2UserIds.get(channel);
+        return ProjectContext.channelToUserMap.get(channel);
     }
 
     /**
@@ -353,7 +353,7 @@ public class TeamService {
 
 
     public void enterTeamView(Channel channel, String msg) {
-        ProjectContext.eventStatus.put(channel, ChannelStatus.TEAM);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.TEAM);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERTEAMMANAGERVIEW));
     }
 
@@ -365,7 +365,7 @@ public class TeamService {
      */
     @Order(orderMsg = "qt")
     public void outTeamView(Channel channel, String msg) {
-        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTTEAMVIEW));
     }
 }

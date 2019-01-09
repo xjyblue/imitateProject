@@ -19,7 +19,7 @@ import utils.MessageUtil;
 import java.math.BigInteger;
 /**
  * @ClassName AttackCaculationService
- * @Description TODO
+ * @Description 计算伤害 后期可以改成责任链模式
  * @Author xiaojianyu
  * @Date 2019/1/4 11:11
  * @Version 1.0
@@ -33,7 +33,7 @@ public class AttackDamageCaculationService {
      * 人物攻击加成
      *
      * @param user
-     * @param attackDamage
+     * @param
      * @return
      */
     public BigInteger caculate(User user, String attackDamageValue) {

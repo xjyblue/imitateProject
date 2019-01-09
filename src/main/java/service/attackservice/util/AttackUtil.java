@@ -32,8 +32,8 @@ public class AttackUtil {
 //      将所有用户弄为战斗状态
         for (Map.Entry<String, User> entry : bossScene.getUserMap().entrySet()) {
             Channel channelT = ProjectContext.userToChannelMap.get(entry.getValue());
-            if(!ProjectContext.eventStatus.get(channelT).equals(ChannelStatus.DEADSCENE)){
-                ProjectContext.eventStatus.put(channelT, ChannelStatus.ATTACK);
+            if(!ProjectContext.channelStatus.get(channelT).equals(ChannelStatus.DEADSCENE)){
+                ProjectContext.channelStatus.put(channelT, ChannelStatus.ATTACK);
             }
         }
 

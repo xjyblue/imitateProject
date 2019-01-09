@@ -19,7 +19,7 @@ public class ChannelUtil {
      * @param packet
      */
     public static void addPacketToUser(Channel channel, PacketProto.Packet packet) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         user.getPacketsQueue().add(packet);
     }
 

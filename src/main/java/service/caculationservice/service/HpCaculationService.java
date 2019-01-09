@@ -52,12 +52,12 @@ public class HpCaculationService {
         if (userHp < 0) {
             userHp = 0;
         }
-        if (ProjectContext.eventStatus.get(channel).equals(ChannelStatus.ATTACK) && userHp == 0 && user.getStatus().equals(GrobalConfig.ALIVE)) {
+        if (ProjectContext.channelStatus.get(channel).equals(ChannelStatus.ATTACK) && userHp == 0 && user.getStatus().equals(GrobalConfig.ALIVE)) {
             user.setHp(GrobalConfig.MINVALUE);
             user.setStatus(GrobalConfig.DEAD);
 //          移除用户所攻击的所有怪物
             ProjectContext.userToMonsterMap.remove(user);
-            ProjectContext.eventStatus.put(channel, ChannelStatus.DEADSCENE);
+            ProjectContext.channelStatus.put(channel, ChannelStatus.DEADSCENE);
         } else {
             user.setHp(userHp.toString());
         }

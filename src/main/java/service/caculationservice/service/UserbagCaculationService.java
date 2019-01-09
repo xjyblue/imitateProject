@@ -32,7 +32,8 @@ public class UserbagCaculationService {
     private UserbagService userbagService;
 
     /**
-     * 新增用户背包道具
+     * 新增用户背包道具,在线
+     *
      * @param user
      * @param value
      */
@@ -45,7 +46,7 @@ public class UserbagCaculationService {
             } else {
                 userbagMapper.insertSelective(value);
             }
-        } else if (value.getTypeof().equals(BaseGood.MPMEDICINE)||value.getTypeof().equals(BaseGood.HPMEDICINE)||value.getTypeof().equals(BaseGood.CHANGEGOOD)) {
+        } else if (value.getTypeof().equals(BaseGood.MPMEDICINE) || value.getTypeof().equals(BaseGood.HPMEDICINE) || value.getTypeof().equals(BaseGood.CHANGEGOOD)) {
             boolean flag = true;
             for (Userbag userbag : user.getUserBag()) {
                 if (userbag.getWid().equals(value.getWid())) {
@@ -55,7 +56,7 @@ public class UserbagCaculationService {
                     break;
                 }
             }
-            if(flag){
+            if (flag) {
                 user.getUserBag().add(value);
                 if (userbagMapper.selectByPrimaryKey(value.getId()) != null) {
                     userbagMapper.updateByPrimaryKeySelective(value);
@@ -66,7 +67,7 @@ public class UserbagCaculationService {
         }
 
 //      触发成就
-        if(value.getTypeof().equals(BaseGood.EQUIPMENT)){
+        if (value.getTypeof().equals(BaseGood.EQUIPMENT)) {
             Equipment equipment = ProjectContext.equipmentMap.get(value.getWid());
             for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
                 Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
@@ -76,11 +77,12 @@ public class UserbagCaculationService {
             }
         }
         Channel channel = ProjectContext.userToChannelMap.get(user);
-        userbagService.refreshUserbagInfo(channel,null);
+        userbagService.refreshUserbagInfo(channel, null);
     }
 
     /**
      * 移除用户背包道具
+     *
      * @param user
      * @param userbag
      * @param num
@@ -88,14 +90,13 @@ public class UserbagCaculationService {
     public void removeUserbagFromUser(User user, Userbag userbag, Integer num) {
         if (num.equals(userbag.getNum())) {
             user.getUserBag().remove(userbag);
-            userbag.setName(null);
             userbagMapper.updateByPrimaryKey(userbag);
         } else {
             userbag.setNum(userbag.getNum() - num);
             userbagMapper.updateByPrimaryKey(userbag);
         }
         Channel channel = ProjectContext.userToChannelMap.get(user);
-        userbagService.refreshUserbagInfo(channel,null);
+        userbagService.refreshUserbagInfo(channel, null);
     }
 
 }

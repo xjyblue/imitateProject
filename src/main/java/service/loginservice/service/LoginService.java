@@ -86,13 +86,13 @@ public class LoginService {
             scene.getUserMap().put(user.getUsername(), user);
 
 
-            ProjectContext.session2UserIds.put(channel, user);
+            ProjectContext.channelToUserMap.put(channel, user);
             ProjectContext.userToChannelMap.put(user, channel);
 //          展示成就信息
             AchievementUtil.refreshAchievementInfo(user);
 
             channel.writeAndFlush(MessageUtil.turnToPacket("登录成功"));
-            ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
+            ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         } finally {
             lock.unlock();
         }
@@ -168,7 +168,7 @@ public class LoginService {
             lock.lock();
             Channel channelTarget = null;
 //          找到之前的渠道，把之前渠道的信息全部转移到新的渠道
-            for (Map.Entry<Channel, User> entry : ProjectContext.session2UserIds.entrySet()) {
+            for (Map.Entry<Channel, User> entry : ProjectContext.channelToUserMap.entrySet()) {
                 if (entry.getValue().getUsername().equals(username)) {
                     channelTarget = entry.getKey();
                 }
@@ -177,11 +177,11 @@ public class LoginService {
 //          进行顶号处理,挂掉旧的渠道
             if (channelTarget != null) {
 //              切换渠道处理渠道消息
-                User user = ProjectContext.session2UserIds.get(channelTarget);
+                User user = ProjectContext.channelToUserMap.get(channelTarget);
                 user.setIfOccupy(true);
-                ProjectContext.session2UserIds.put(channel, user);
+                ProjectContext.channelToUserMap.put(channel, user);
                 ProjectContext.userToChannelMap.put(user, channel);
-                ProjectContext.eventStatus.put(channel, ProjectContext.eventStatus.get(channelTarget));
+                ProjectContext.channelStatus.put(channel, ProjectContext.channelStatus.get(channelTarget));
                 channel.writeAndFlush(MessageUtil.turnToPacket("登录成功"));
                 channelTarget.writeAndFlush(MessageUtil.turnToPacket("不好意思,有人在别处登录你的游戏号，请选择重新登录或者修改密码", PacketType.CHANGECHANNEL));
                 channelTarget.close();

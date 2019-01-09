@@ -145,4 +145,16 @@ public class MessageConfig {
     public static final String RECOVRESUCCESS = "人物的蓝量和血量恢复成功";
     public static final String MANDEAD = "人物已死亡，无法进行攻击";
     public static final String NOEXACHANGEFORNPC = "该npc无法进行交换物品";
+
+    public static final String ENTER_AUCTION_VIEW = "欢迎进入拍卖行,q-au 刷新拍卖行,qp=id=价格 编号参与拍卖（一口价商品直接拍下不用输入价格）," +
+            "sj=背包格子=数量=金钱=是否竞拍（1：否，2 是） 上架拍卖行,qt 退出拍卖，aoi 查看人物金钱信息 xj=拍卖行id 下架拍卖行";
+    public static final String OUT_AUCTION_VIEW = "你退出了拍卖行";
+    public static final String NOAUCTIONITEMS = "拍卖行无任何交易物品";
+    public static final String SUCCESS_UP_AUCTIONITEM = "成功上架物品";
+    public static final String NO_THIS_AUCTIONITEM = "拍卖行无此交易物品";
+    public static final String SUCCESS_BUY_GOOD_IMMEDIATE = "一口价竞拍成功，请在背包查看物品";
+    public static final String SUCCESS_BUY_GOOD_UP_PRICE = "成功竞价，拍卖结束后成功竞拍者可在仓库查看物品";
+    public static final String NO_ENOUGH_MONEY_FOR_AUCTION = "参与竞拍的价格不得低于竞拍单的现价";
+    public static final String AUCTION_IS_END = "拍卖结束";
+    public static final String NO_AUCTION_FOR_SELF = "用户不能拍卖自己的物品";
 }

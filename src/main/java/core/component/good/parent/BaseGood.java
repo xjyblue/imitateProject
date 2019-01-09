@@ -70,21 +70,4 @@ public class BaseGood {
     public void setName(String name) {
         this.name = name;
     }
-
-    public static String getGoodNameByUserbag(Userbag userbag) {
-        if (userbag.getTypeof().equals(BaseGood.MPMEDICINE)) {
-            MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
-            return "[蓝药--》] [物品id:" + userbag.getId() + "] [药品名称：" + mpMedicine.getName() + "]" + " [药品数量: " + userbag.getNum() + "]";
-        }
-        if (userbag.getTypeof().equals(BaseGood.EQUIPMENT)) {
-            Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
-            return "[武器--》] [物品id:" + userbag.getId() + "] [武器名称：" + equipment.getName() + "]" + " [武器耐久度：" + userbag.getDurability() + "]" + " [武器数量： " + userbag.getNum() + "]" + "[武器星级：]" + userbag.getStartlevel();
-        }
-        if (userbag.getTypeof().equals(BaseGood.HPMEDICINE)) {
-            HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(userbag.getWid());
-            return "[红药--》] [物品id:" + userbag.getId() + "] [药品名称：" + hpMedicine.getName() + "]" + " [武器数量： " + userbag.getNum() + "]";
-        }
-        return null;
-    }
-
 }

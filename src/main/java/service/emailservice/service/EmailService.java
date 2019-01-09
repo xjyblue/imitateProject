@@ -3,7 +3,11 @@ package service.emailservice.service;
 import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import pojo.Teamapplyinfo;
+import service.caculationservice.service.MoneyCaculationService;
+import service.caculationservice.service.UserbagCaculationService;
 import service.emailservice.entity.Mail;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
@@ -27,15 +31,20 @@ import java.util.UUID;
 public class EmailService {
     @Autowired
     private UserbagService userbagService;
+    @Autowired
+    private UserbagCaculationService userbagCaculationService;
+    @Autowired
+    private MoneyCaculationService moneyCaculationService;
 
     /**
      * 展示所有邮件
+     *
      * @param channel
      * @param msg
      */
     public void queryEmail(Channel channel, String msg) {
 //      展示用户的email信息
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         Map<String, Mail> emailMap = ProjectContext.userEmailMap.get(user.getUsername());
         if (emailMap.size() == 0) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.EMPTYEMAIL));
@@ -45,7 +54,7 @@ public class EmailService {
             Mail mailTemp = entry.getValue();
             if (mailTemp.isIfUserBag()) {
                 channel.writeAndFlush(MessageUtil.turnToPacket("您有一封来自" + mailTemp.getFromUser() + "的邮件,邮件编号为" + mailTemp.getEmailId()
-                        + ",邮件附件为" + BaseGood.getGoodNameByUserbag(mailTemp.getUserbag())
+                        + ",邮件附件为" + userbagService.getGoodNameByUserbag(mailTemp.getUserbag())
                         + ",邮件内容为[" + mailTemp.getEmailText() + "]"));
             } else {
                 channel.writeAndFlush(MessageUtil.turnToPacket("您有一封来自" + mailTemp.getFromUser() + "的邮件,邮件编号为" + mailTemp.getEmailId() + ",邮件内容为[" + mailTemp.getEmailText() + "]"));
@@ -55,27 +64,37 @@ public class EmailService {
 
     /**
      * 发送邮件
+     *
      * @param channel
      * @param msg
      */
     public void sendEmail(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (!ProjectContext.userEmailMap.containsKey(temp[GrobalConfig.TWO])) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEMAILUSER));
             return;
         }
         if (temp.length == GrobalConfig.FOUR) {
-            sendEmail(user, temp[GrobalConfig.TWO], temp[GrobalConfig.THREE], null);
+            send(user.getUsername(), temp[GrobalConfig.TWO], temp[GrobalConfig.THREE], null, null);
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSSENDEMIAL));
             return;
         }
-        if (temp.length == GrobalConfig.FIVE) {
-            Userbag userbag = sendEmail(user, temp[GrobalConfig.TWO], temp[GrobalConfig.THREE], temp[GrobalConfig.FOUR]);
+        if (temp.length == GrobalConfig.SIX) {
+            Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[GrobalConfig.FOUR]);
             if (userbag == null) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
                 return;
             }
+            if (!userbagService.checkUserbagNum(userbag, temp[GrobalConfig.FIVE])) {
+                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHCHANGEGOOD));
+                return;
+            }
+            Userbag userbagNew = new Userbag();
+            BeanUtils.copyProperties(userbag, userbagNew);
+            userbagNew.setNum(Integer.parseInt(temp[5]));
+            userbagCaculationService.removeUserbagFromUser(user, userbag, Integer.parseInt(temp[5]));
+            send(user.getUsername(), temp[GrobalConfig.TWO], temp[GrobalConfig.THREE], userbagNew, null);
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSSENDEMIAL));
             channel.writeAndFlush("邮件携带了附件:" + userbag.getName());
             return;
@@ -84,60 +103,61 @@ public class EmailService {
 
     /**
      * 接收邮件
+     *
      * @param channel
      * @param msg
      */
     public void receiveEmail(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        if (ProjectContext.userEmailMap.get(user.getUsername()).containsKey(temp[GrobalConfig.TWO])) {
-            Mail mail = ProjectContext.userEmailMap.get(user.getUsername()).get(temp[GrobalConfig.TWO]);
-            if (mail.isIfUserBag()) {
-                mail.getUserbag().setName(user.getUsername());
-                user.getUserBag().add(mail.getUserbag());
-                ProjectContext.userEmailMap.get(user.getUsername()).remove(temp[GrobalConfig.TWO]);
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILSUCCESS));
-                return;
-            } else {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NORECEIVEEMAIL));
-            }
-        } else {
+        if (!ProjectContext.userEmailMap.get(user.getUsername()).containsKey(temp[GrobalConfig.TWO])) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILFAIL));
             return;
         }
+        Mail mail = ProjectContext.userEmailMap.get(user.getUsername()).get(temp[GrobalConfig.TWO]);
+        if (mail.isIfUserBag()) {
+            userbagCaculationService.addUserBagForUser(user, mail.getUserbag());
+        }
+        if (mail.getMoney() != null) {
+            moneyCaculationService.addMoneyToUser(user, mail.getMoney().toString());
+        }
+        ProjectContext.userEmailMap.get(user.getUsername()).remove(temp[GrobalConfig.TWO]);
+        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILSUCCESS));
+    }
+
+    /**
+     * 系统邮件
+     */
+    public void systemSendMail(String toUser, String text, Userbag userbag, Integer money) {
+        send(GrobalConfig.SYSTEM_EMAIL, toUser, text, userbag, money);
     }
 
     /**
      * 具体发邮件逻辑
-     * @param user
+     *
+     * @param
      * @param toUser
      * @param text
-     * @param userbagId
      * @return
      */
-    private Userbag sendEmail(User user, String toUser, String text, String userbagId) {
+    private void send(String username, String toUser, String text, Userbag userbag, Integer money) {
         Mail mail = new Mail();
         mail.setEmailId(UUID.randomUUID().toString());
-        mail.setFromUser(user.getUsername());
+        mail.setFromUser(username);
         mail.setToUser(toUser);
         mail.setEmailText(text);
-        Userbag userbagTemp = null;
-        if (userbagId != null) {
+        if (userbag != null) {
             mail.setIfUserBag(true);
-            userbagTemp = userbagService.getUserbagByUserbagId(user, userbagId);
-            if (userbagTemp == null) {
-                return userbagTemp;
-            }
-            mail.setUserbag(userbagTemp);
-            user.getUserBag().remove(userbagTemp);
+            mail.setUserbag(userbag);
+        }
+        if (money != null) {
+            mail.setMoney(money);
         }
 //      存到全局中
         ProjectContext.userEmailMap.get(toUser).put(mail.getEmailId(), mail);
-        return userbagTemp;
     }
-
 }

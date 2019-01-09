@@ -85,7 +85,7 @@ public class ShopService {
      * @param msg
      */
     public void buyShopGood(Channel channel,String msg){
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("-");
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -162,7 +162,7 @@ public class ShopService {
 
 
     private boolean checkUserMoneyEnough(String num, String s, Channel channel) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         BigInteger userMoney = new BigInteger(user.getMoney());
         BigInteger goodMoney = new BigInteger(GrobalConfig.MINVALUE);
         if (ProjectContext.equipmentMap.containsKey(Integer.parseInt(s))) {

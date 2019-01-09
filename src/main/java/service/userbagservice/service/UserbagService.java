@@ -37,7 +37,7 @@ public class UserbagService {
      * @param msg
      */
     public void arrangeUserBag(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         for (Userbag userbag : user.getUserBag()) {
             for (Userbag userbag2 : user.getUserBag()) {
                 if (userbag != userbag2 && userbag.getWid().equals(userbag2.getWid()) && !userbag.getTypeof().equals(BaseGood.EQUIPMENT)) {
@@ -56,7 +56,7 @@ public class UserbagService {
      */
     public void useUserbag(Channel channel, String msg) {
         String[] temp = msg.split("-");
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         Integer key = Integer.parseInt(temp[1]);
 
         if (!checkGoodInUserbag(user, key)) {
@@ -101,6 +101,7 @@ public class UserbagService {
 
     /**
      * 检查背包是否有此物品
+     *
      * @param user
      * @param key
      * @return
@@ -161,52 +162,97 @@ public class UserbagService {
      * @param msg
      */
     public void refreshUserbagInfo(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String bagResp = System.getProperty("line.separator")
                 + "按b-物品编号使用蓝药"
                 + "  按ww=物品编号装备武器";
         for (Userbag userbag : user.getUserBag()) {
-            if (userbag.getTypeof().equals(BaseGood.MPMEDICINE)) {
-                MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
-                bagResp += System.getProperty("line.separator")
-                        + "[格子id:" + userbag.getId()
-                        + "] [物品id:" + mpMedicine.getId();
-                bagResp += "] [数量:" + userbag.getNum() + "]";
-                bagResp += " [名字:" + mpMedicine.getName() + "]";
-                if (!mpMedicine.isImmediate()) {
-                    bagResp += " [每秒恢复" + mpMedicine.getSecondValue() + "] [持续" + mpMedicine.getKeepTime() + "秒]";
-                } else {
-                    bagResp += " [即时回复]";
-                }
-            } else if (userbag.getTypeof().equals(BaseGood.EQUIPMENT)) {
-                Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
-                bagResp += System.getProperty("line.separator")
-                        + "[格子id:" + userbag.getId()
-                        + "] [物品id:" + equipment.getId()
-                        + "] [武器当前耐久度:" + userbag.getDurability()
-                        + "] [武器名称:" + equipment.getName()
-                        + "] [武器攻击力加成" + equipment.getAddValue()
-                        + "] [武器星级" + userbag.getStartlevel()
-                        + "] [武器数量:" + userbag.getNum() + "]";
-            } else if (userbag.getTypeof().equals(BaseGood.HPMEDICINE)) {
-                HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(userbag.getWid());
-                bagResp += System.getProperty("line.separator")
-                        + "[格子id:" + userbag.getId()
-                        + "] [物品id:" + hpMedicine.getId()
-                        + "] [物品名称" + hpMedicine.getName()
-                        + "] [物品数量" + userbag.getNum()
-                        + "] [物品恢复血量" + hpMedicine.getReplyValue()
-                        + "] [物品cd" + hpMedicine.getCd() + "]";
-            } else if (userbag.getTypeof().equals(BaseGood.CHANGEGOOD)) {
-                CollectGood collectGood = ProjectContext.collectGoodMap.get(userbag.getWid());
-                bagResp += System.getProperty("line.separator")
-                        + "[格子id:" + userbag.getId()
-                        + "] [物品id:" + collectGood.getId()
-                        + "] [物品名称:" + collectGood.getName()
-                        + "] [物品数量:" + userbag.getNum()
-                        + "] [物品描述:" + collectGood.getDesc() + "]";
-            }
+            bagResp = showUserBagInfo(bagResp, userbag);
         }
         channel.writeAndFlush(MessageUtil.turnToPacket(bagResp, PacketType.USERBAGMSG));
+    }
+
+    public String showUserBagInfo(String bagResp, Userbag userbag) {
+        if (userbag.getTypeof().equals(BaseGood.MPMEDICINE)) {
+            MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
+            bagResp += System.getProperty("line.separator")
+                    + "[格子id:" + userbag.getId()
+                    + "] [物品id:" + mpMedicine.getId();
+            bagResp += "] [数量:" + userbag.getNum() + "]";
+            bagResp += " [名字:" + mpMedicine.getName() + "]";
+            if (!mpMedicine.isImmediate()) {
+                bagResp += " [每秒恢复" + mpMedicine.getSecondValue() + "] [持续" + mpMedicine.getKeepTime() + "秒]";
+            } else {
+                bagResp += " [即时回复]";
+            }
+        } else if (userbag.getTypeof().equals(BaseGood.EQUIPMENT)) {
+            Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
+            bagResp += System.getProperty("line.separator")
+                    + "[格子id:" + userbag.getId()
+                    + "] [物品id:" + equipment.getId()
+                    + "] [武器当前耐久度:" + userbag.getDurability()
+                    + "] [武器名称:" + equipment.getName()
+                    + "] [武器攻击力加成" + equipment.getAddValue()
+                    + "] [武器星级" + userbag.getStartlevel()
+                    + "] [武器数量:" + userbag.getNum() + "]";
+        } else if (userbag.getTypeof().equals(BaseGood.HPMEDICINE)) {
+            HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(userbag.getWid());
+            bagResp += System.getProperty("line.separator")
+                    + "[格子id:" + userbag.getId()
+                    + "] [物品id:" + hpMedicine.getId()
+                    + "] [物品名称" + hpMedicine.getName()
+                    + "] [物品数量" + userbag.getNum()
+                    + "] [物品恢复血量" + hpMedicine.getReplyValue()
+                    + "] [物品cd" + hpMedicine.getCd() + "]";
+        } else if (userbag.getTypeof().equals(BaseGood.CHANGEGOOD)) {
+            CollectGood collectGood = ProjectContext.collectGoodMap.get(userbag.getWid());
+            bagResp += System.getProperty("line.separator")
+                    + "[格子id:" + userbag.getId()
+                    + "] [物品id:" + collectGood.getId()
+                    + "] [物品名称:" + collectGood.getName()
+                    + "] [物品数量:" + userbag.getNum()
+                    + "] [物品描述:" + collectGood.getDesc() + "]";
+        }
+        return bagResp;
+    }
+
+    /**
+     * 根据userbag拿物品的名字
+     * @param userbag
+     * @return
+     */
+    public String getGoodNameByUserbag(Userbag userbag) {
+        if (userbag.getTypeof().equals(BaseGood.MPMEDICINE)) {
+            MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
+            return "[蓝药--》] [物品id:" + userbag.getId() + "] [药品名称：" + mpMedicine.getName() + "]" + " [药品数量: " + userbag.getNum() + "]";
+        }
+        if (userbag.getTypeof().equals(BaseGood.EQUIPMENT)) {
+            Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
+            return "[武器--》] [物品id:" + userbag.getId() + "] [武器名称：" + equipment.getName() + "]" + " [武器耐久度：" + userbag.getDurability() + "]" + " [武器数量： " + userbag.getNum() + "]" + "[武器星级：]" + userbag.getStartlevel();
+        }
+        if (userbag.getTypeof().equals(BaseGood.HPMEDICINE)) {
+            HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(userbag.getWid());
+            return "[红药--》] [物品id:" + userbag.getId() + "] [药品名称：" + hpMedicine.getName() + "]" + " [武器数量： " + userbag.getNum() + "]";
+        }
+        return null;
+    }
+
+
+    /**
+     * 校验物品数量是否足够
+     *
+     * @param userbag
+     * @param num
+     * @return
+     */
+    public boolean checkUserbagNum(Userbag userbag, String num) {
+        if (userbag.getNum() == null) {
+            return false;
+        }
+        if (userbag.getNum() >= Integer.parseInt(num)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

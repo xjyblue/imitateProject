@@ -6,6 +6,7 @@ import core.component.good.Equipment;
 import core.component.good.HpMedicine;
 import core.component.good.MpMedicine;
 import core.component.monster.Monster;
+import service.auctionservice.period.AuctionPeriodTask;
 import service.npcservice.entity.Npc;
 import service.sceneservice.entity.Scene;
 import service.achievementservice.entity.Achievement;
@@ -131,9 +132,9 @@ public class ServerConfig {
         initBuff();
 
         initRole();
-        
+
         initMonsterSkill();
-        
+
         initUserSkill();
 
         initNpc();
@@ -145,6 +146,12 @@ public class ServerConfig {
         initBossSceneConfig();
 
         initScene();
+
+        initCommonPreiodTask();
+    }
+
+    private void initCommonPreiodTask() {
+        ProjectContext.periodThreadPool.execute(new AuctionPeriodTask());
     }
 
     private void initScene() throws IOException {

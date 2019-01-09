@@ -10,6 +10,7 @@ import core.component.good.Equipment;
 import core.component.good.HpMedicine;
 import core.component.good.MpMedicine;
 import core.component.monster.Monster;
+import service.auctionservice.entity.AuctionItem;
 import service.npcservice.entity.Npc;
 import service.sceneservice.entity.BossScene;
 import service.sceneservice.entity.Scene;
@@ -43,7 +44,7 @@ public class ProjectContext {
     /**
      * 缓存通信上下文环境对应的登录用户
      */
-    public final static Map<Channel, User> session2UserIds = Maps.newConcurrentMap();
+    public final static Map<Channel, User> channelToUserMap = Maps.newConcurrentMap();
     /**
      * 根据用户拿去对应的渠道
      */
@@ -55,7 +56,7 @@ public class ProjectContext {
     /**
      * 信道所处事件的装填
      */
-    public final static Map<Channel, String> eventStatus = Maps.newConcurrentMap();
+    public final static Map<Channel, String> channelStatus = Maps.newConcurrentMap();
     /**
      * 地图缓存到内存中
      */
@@ -160,4 +161,12 @@ public class ProjectContext {
      * 红药恢复的时间
      */
     public final static Map<Integer, HpMedicine> hpMedicineMap = Maps.newHashMap();
+    /**
+     * 拍卖物品
+     */
+    public final static Map<String, AuctionItem> auctionItemMap = Maps.newConcurrentMap();
+    /**
+     * 公共周期线程池，清除过期任务，只用于公共场合
+     */
+    public final static ExecutorService periodThreadPool = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), namedThreadFactory);
 }

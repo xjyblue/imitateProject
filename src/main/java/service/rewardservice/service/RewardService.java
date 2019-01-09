@@ -142,7 +142,7 @@ public class RewardService {
     }
 
     private User getUser(Channel channel) {
-        return ProjectContext.session2UserIds.get(channel);
+        return ProjectContext.channelToUserMap.get(channel);
     }
 
     public void extraBonus(User user, Channel channel) {

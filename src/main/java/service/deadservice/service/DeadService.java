@@ -58,7 +58,7 @@ public class DeadService {
      */
     @Order(orderMsg = "y")
     public void reborn(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         if (!user.getPos().equals(GrobalConfig.STARTSCENE)) {
             Scene scene = ProjectContext.sceneMap.get(user.getPos());
 //          这句是为了解决普通场景复活和怪物副本复活的bug
@@ -75,7 +75,7 @@ public class DeadService {
         userService.recoverUser(user);
         userMapper.updateByPrimaryKeySelective(user);
 
-        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LIVEINSTART));
 
     }

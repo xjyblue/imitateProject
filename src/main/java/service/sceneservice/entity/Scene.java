@@ -6,7 +6,7 @@ import core.component.monster.Monster;
 import service.npcservice.entity.Npc;
 import service.buffservice.entity.Buff;
 
-import service.sceneservice.entity.parent.AbstractScene;
+import core.base.parent.BaseThread;
 import service.buffservice.entity.BuffConstant;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date 2019/1/4 11:11
  * @Version 1.0
  **/
-public class Scene extends AbstractScene implements Runnable {
+public class Scene extends BaseThread implements Runnable {
     /**
      * 场景的id
      */
@@ -225,7 +225,7 @@ public class Scene extends AbstractScene implements Runnable {
             User user = entry.getValue();
 
             Channel channel = ProjectContext.userToChannelMap.get(user);
-            if (ProjectContext.eventStatus.containsKey(channel) && ProjectContext.eventStatus.get(channel).equals(ChannelStatus.ATTACK)) {
+            if (ProjectContext.channelStatus.containsKey(channel) && ProjectContext.channelStatus.get(channel).equals(ChannelStatus.ATTACK)) {
                 try {
                     if (ProjectContext.userToMonsterMap.containsKey(user)) {
                         Monster monster = null;
@@ -270,7 +270,7 @@ public class Scene extends AbstractScene implements Runnable {
                             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY));
                             return;
                         }
-                        ProjectContext.eventStatus.put(channel, ChannelStatus.ATTACK);
+                        ProjectContext.channelStatus.put(channel, ChannelStatus.ATTACK);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -293,7 +293,7 @@ public class Scene extends AbstractScene implements Runnable {
             MonsterFactory monsterFactory = SpringContextUtil.getBean("monsterFactory");
             monsters.add(monsterFactory.getMonster(Integer.parseInt(ProjectContext.sceneMap.get(user.getPos() + "").getMonsterS())));
 
-            ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
+            ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
             rewardService.getGoods(channel, monster);
             return true;
         }

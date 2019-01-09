@@ -25,7 +25,7 @@ public class BroadcastService {
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             User user = entry.getValue();
             Channel channel = ProjectContext.userToChannelMap.get(user);
-            String userStatus = ProjectContext.eventStatus.get(channel);
+            String userStatus = ProjectContext.channelStatus.get(channel);
             if (userStatus.equals(ChannelStatus.BOSSSCENE) || userStatus.equals(ChannelStatus.DEADSCENE) || userStatus.equals(ChannelStatus.ATTACK)) {
                 Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
                 if (type == null) {

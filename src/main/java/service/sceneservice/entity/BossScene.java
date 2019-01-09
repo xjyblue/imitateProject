@@ -8,7 +8,7 @@ import service.buffservice.service.MonsterBuffService;
 import service.caculationservice.service.AttackDamageCaculationService;
 import service.caculationservice.service.HpCaculationService;
 import com.google.common.collect.Lists;
-import service.sceneservice.entity.parent.AbstractScene;
+import core.base.parent.BaseThread;
 import service.buffservice.entity.BuffConstant;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
@@ -39,7 +39,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Date 2019/1/4 11:11
  * @Version 1.0
  **/
-public class BossScene extends AbstractScene implements Runnable {
+public class BossScene extends BaseThread implements Runnable {
     /**
      * id
      */
@@ -432,7 +432,7 @@ public class BossScene extends AbstractScene implements Runnable {
 //                  移除怪物所针对的boss
                 ProjectContext.userToMonsterMap.remove(userTarget);
 //                  人物战斗中死亡
-                ProjectContext.eventStatus.put(channelTarget, ChannelStatus.DEADSCENE);
+                ProjectContext.channelStatus.put(channelTarget, ChannelStatus.DEADSCENE);
                 channelTarget.writeAndFlush(MessageUtil.turnToPacket("你已死亡"));
 //                  把人物从战斗场景移除到初始场景
                 Scene scene = ProjectContext.sceneMap.get(GrobalConfig.STARTSCENE);
@@ -541,7 +541,7 @@ public class BossScene extends AbstractScene implements Runnable {
             scene.getUserMap().put(user.getUsername(), user);
 //          改变用户渠道转态
             Channel channelT = ProjectContext.userToChannelMap.get(user);
-            ProjectContext.eventStatus.put(channelT, ChannelStatus.COMMONSCENE);
+            ProjectContext.channelStatus.put(channelT, ChannelStatus.COMMONSCENE);
 //          移除该场景的用户
             it.remove();
         }
@@ -569,8 +569,8 @@ public class BossScene extends AbstractScene implements Runnable {
         Map<String, User> map = ProjectContext.teamMap.get(teamId).getUserMap();
         for (Map.Entry<String, User> entry : map.entrySet()) {
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
-            if (!ProjectContext.eventStatus.get(channelTemp).equals(ChannelStatus.DEADSCENE)) {
-                ProjectContext.eventStatus.put(channelTemp, ChannelStatus.COMMONSCENE);
+            if (!ProjectContext.channelStatus.get(channelTemp).equals(ChannelStatus.DEADSCENE)) {
+                ProjectContext.channelStatus.put(channelTemp, ChannelStatus.COMMONSCENE);
             }
             channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
         }
@@ -581,7 +581,7 @@ public class BossScene extends AbstractScene implements Runnable {
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
             channelTemp.writeAndFlush(MessageUtil.turnToPacket(bossScene.getBossName() + "副本攻略成功，热烈庆祝各位参与的小伙伴"));
-            ProjectContext.eventStatus.put(channelTemp, ChannelStatus.COMMONSCENE);
+            ProjectContext.channelStatus.put(channelTemp, ChannelStatus.COMMONSCENE);
             if (ProjectContext.userToMonsterMap.containsKey(entry.getValue())) {
                 ProjectContext.userToMonsterMap.remove(entry.getValue());
             }
@@ -602,7 +602,7 @@ public class BossScene extends AbstractScene implements Runnable {
         Team team = ProjectContext.teamMap.get(teamId);
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
-            ProjectContext.eventStatus.put(channelTemp, ChannelStatus.DEADSCENE);
+            ProjectContext.channelStatus.put(channelTemp, ChannelStatus.DEADSCENE);
             channelTemp.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.BOSSFAIL));
         }
     }
@@ -630,7 +630,7 @@ public class BossScene extends AbstractScene implements Runnable {
 
         for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(teamId).getUserMap().entrySet()) {
             String resp = null;
-            if (ProjectContext.eventStatus.get(ProjectContext.userToChannelMap.get(entry.getValue())).equals(ChannelStatus.COMMONSCENE)) {
+            if (ProjectContext.channelStatus.get(ProjectContext.userToChannelMap.get(entry.getValue())).equals(ChannelStatus.COMMONSCENE)) {
                 continue;
             }
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
@@ -671,7 +671,7 @@ public class BossScene extends AbstractScene implements Runnable {
                         + "-----你的剩余血:" + userTarget.getHp()
                         + "-----你的蓝量" + userTarget.getMp()
                         + "-----怪物血量:" + monster.getValueOfLife()
-                        + "----你处于[" + ProjectContext.eventStatus.get(channelTemp) + "]状态";
+                        + "----你处于[" + ProjectContext.channelStatus.get(channelTemp) + "]状态";
             } else {
                 resp = "怪物名称:" + monster.getName()
                         + "-----怪物技能:" + monsterSkill.getSkillName()
@@ -680,7 +680,7 @@ public class BossScene extends AbstractScene implements Runnable {
                         + "-----你的剩余血:" + entry.getValue().getHp()
                         + "-----你的蓝量" + entry.getValue().getMp()
                         + "-----怪物血量:" + monster.getValueOfLife()
-                        + "----你处于[" + ProjectContext.eventStatus.get(channelTemp) + "]状态";
+                        + "----你处于[" + ProjectContext.channelStatus.get(channelTemp) + "]状态";
             }
             channelTemp.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ATTACKMSG));
         }

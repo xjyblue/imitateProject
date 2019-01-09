@@ -47,7 +47,7 @@ public class FriendService {
      * @param msg
      */
     public void enterFriendView(Channel channel, String msg) {
-        ProjectContext.eventStatus.put(channel, ChannelStatus.FRIEND);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.FRIEND);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFRIENDVIEW));
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FRIENDMSG, PacketType.FRIENDMSG));
         return;
@@ -60,7 +60,7 @@ public class FriendService {
      */
     @Order(orderMsg = "qt")
     public void quitFriendView(Channel channel, String msg) {
-        ProjectContext.eventStatus.put(channel, ChannelStatus.COMMONSCENE);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTFRIENDVIEW));
         channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.FRIENDMSG));
         return;
@@ -73,7 +73,7 @@ public class FriendService {
      */
     @Order(orderMsg = "ty=y")
     public void agreeApplyInfo(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -120,7 +120,7 @@ public class FriendService {
      */
     @Order(orderMsg = "lu")
     public void queryFriendToSelf(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         FriendinfoExample friendinfoExample = new FriendinfoExample();
         FriendinfoExample.Criteria criteria = friendinfoExample.createCriteria();
         criteria.andUsernameEqualTo(user.getUsername());
@@ -143,7 +143,7 @@ public class FriendService {
      */
     @Order(orderMsg = "sq-")
     public void applyFriendToOther(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("-");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -174,7 +174,7 @@ public class FriendService {
      */
     @Order(orderMsg = "ls")
     public void queryApplyUserInfo(Channel channel, String msg) {
-        User user = ProjectContext.session2UserIds.get(channel);
+        User user = ProjectContext.channelToUserMap.get(channel);
         FriendapplyinfoExample friendapplyinfoExample = new FriendapplyinfoExample();
         FriendapplyinfoExample.Criteria criteria = friendapplyinfoExample.createCriteria();
         criteria.andTouserEqualTo(user.getUsername());

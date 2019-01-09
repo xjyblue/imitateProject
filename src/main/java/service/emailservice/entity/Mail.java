@@ -34,6 +34,20 @@ public class Mail {
      * 附带的物品
      */
     private Userbag userbag;
+    /**
+     * 附带的金币
+     *
+     * @return
+     */
+    private Integer money;
+
+    public Integer getMoney() {
+        return money;
+    }
+
+    public void setMoney(Integer money) {
+        this.money = money;
+    }
 
     public boolean isIfUserBag() {
         return ifUserBag;

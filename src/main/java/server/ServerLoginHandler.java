@@ -26,7 +26,7 @@ public class ServerLoginHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if(!ProjectContext.session2UserIds.containsKey(ctx.channel())){
+        if(!ProjectContext.channelToUserMap.containsKey(ctx.channel())){
 //          没登录走这里
             if (msg instanceof PacketProto.Packet) {
                 PacketProto.Packet packet = (PacketProto.Packet) msg;

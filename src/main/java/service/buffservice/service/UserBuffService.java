@@ -1,9 +1,7 @@
 package service.buffservice.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.logging.LogFactory;
 import service.caculationservice.service.HpCaculationService;
-import service.sceneservice.entity.BossScene;
 import core.component.good.HpMedicine;
 import core.component.good.MpMedicine;
 import service.buffservice.entity.BuffConstant;
@@ -64,7 +62,7 @@ public class UserBuffService {
             Map<String, Integer> bufferMap = user.getBuffMap();
             for (Map.Entry<String, Integer> entrySecond : bufferMap.entrySet()) {
 //              战斗的buff只在战斗中更新
-                if (ProjectContext.eventStatus.get(channel).equals(ChannelStatus.ATTACK) || ProjectContext.eventStatus.get(channel).equals(ChannelStatus.BOSSSCENE)) {
+                if (ProjectContext.channelStatus.get(channel).equals(ChannelStatus.ATTACK) || ProjectContext.channelStatus.get(channel).equals(ChannelStatus.BOSSSCENE)) {
 //              更新用户防御buff
                     if (entrySecond.getKey().equals(BuffConstant.DEFENSEBUFF) && entrySecond.getValue() != 3000) {
                         refreshUserDefenseBuff(user);

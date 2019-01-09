@@ -24,7 +24,7 @@ public class ConnectService {
      */
     @Order(orderMsg = "d")
     public void connect(Channel channel, String msg) {
-        ProjectContext.eventStatus.put(channel, ChannelStatus.LOGIN);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.LOGIN);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LOGINMESSAGE));
     }
 
@@ -35,7 +35,7 @@ public class ConnectService {
      */
     @Order(orderMsg = "z")
     public void register(Channel channel, String msg) {
-        ProjectContext.eventStatus.put(channel, ChannelStatus.REGISTER);
+        ProjectContext.channelStatus.put(channel, ChannelStatus.REGISTER);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERMESSAGE));
     }
 

@@ -20,4 +20,5 @@ public class ChannelStatus {
 	public static final String LABOURUNION = "LabourUnion";
 	public static final String FRIEND = "friend";
 	public static final String TEAM = "team";
+	public static final String AUCTION = "auction";
 }
