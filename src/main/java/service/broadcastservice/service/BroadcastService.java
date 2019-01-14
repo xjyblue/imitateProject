@@ -1,6 +1,6 @@
 package service.broadcastservice.service;
 
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import org.springframework.stereotype.Component;

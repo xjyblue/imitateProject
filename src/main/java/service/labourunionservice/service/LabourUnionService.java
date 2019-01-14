@@ -1,5 +1,6 @@
 package service.labourunionservice.service;
 
+import core.annotation.Region;
 import core.config.GrobalConfig;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
@@ -8,12 +9,11 @@ import core.component.good.parent.BaseGood;
 import core.config.MessageConfig;
 import service.userbagservice.service.UserbagService;
 import service.userservice.service.UserService;
-import service.weaponservice.service.Weaponservice;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.*;
 import core.context.ProjectContext;
-import core.order.Order;
+import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import core.packet.PacketType;
@@ -34,6 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Version 1.0
  **/
 @Component
+@Region
 public class LabourUnionService {
     @Autowired
     private UnioninfoMapper unioninfoMapper;
@@ -54,77 +55,9 @@ public class LabourUnionService {
     @Autowired
     private UserbagService userbagService;
     @Autowired
-    private Weaponservice weaponservice;
-    @Autowired
     private UserService userService;
 
     private Lock lock = new ReentrantLock();
-
-    /**
-     * 展示武器栏
-     *
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "qw")
-    public void showUserWeapon(Channel channel, String msg) {
-        weaponservice.queryEquipmentBar(channel, msg);
-    }
-
-    /**
-     * 修复武器
-     *
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "fix")
-    public void fixWeapon(Channel channel, String msg) {
-        weaponservice.fixEquipment(channel, msg);
-    }
-
-    /**
-     * 卸下武器
-     *
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "wq")
-    public void takeOffWeapon(Channel channel, String msg) {
-        weaponservice.quitEquipment(channel, msg);
-    }
-
-    /**
-     * 装备武器
-     *
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "ww")
-    public void takeInWeapon(Channel channel, String msg) {
-        weaponservice.takeEquipment(channel, msg);
-    }
-
-    /**
-     * 展示背包
-     *
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "qb")
-    public void showUserbag(Channel channel, String msg) {
-        userbagService.refreshUserbagInfo(channel, msg);
-    }
-
-    /**
-     * 使用背包物品
-     *
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "ub-")
-    public void useUserbag(Channel channel, String msg) {
-        userbagService.useUserbag(channel, msg);
-    }
 
     /**
      * 捐献金币到工会
@@ -132,10 +65,10 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jxjb")
+    @Order(orderMsg = "jxjb",status = {ChannelStatus.LABOURUNION})
     public void giveMoneyToUnion(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -159,7 +92,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "hq")
+    @Order(orderMsg = "hq",status = {ChannelStatus.LABOURUNION})
     public void getUserbagFromUnion(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
@@ -243,7 +176,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jxwp")
+    @Order(orderMsg = "jxwp",status = {ChannelStatus.LABOURUNION})
     public void giveUserbagToUnion(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
@@ -334,7 +267,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "zsck")
+    @Order(orderMsg = "zsck",status = {ChannelStatus.LABOURUNION})
     public void showWarehouse(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
@@ -352,7 +285,7 @@ public class LabourUnionService {
         return;
     }
 
-    @Order(orderMsg = "t=")
+    @Order(orderMsg = "tg",status = {ChannelStatus.LABOURUNION})
     public void removeMember(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
@@ -393,14 +326,14 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ls=n")
+    @Order(orderMsg = "gn",status = {ChannelStatus.LABOURUNION})
     public void disagreeApplyInfo(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        if (temp.length != GrobalConfig.THREE) {
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        Applyunioninfo applyunioninfo = applyunioninfoMapper.selectByPrimaryKey(temp[2]);
+        Applyunioninfo applyunioninfo = applyunioninfoMapper.selectByPrimaryKey(temp[1]);
         if (applyunioninfo == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOAPPLYINFO));
             return;
@@ -417,7 +350,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "sj")
+    @Order(orderMsg = "sjg",status = {ChannelStatus.LABOURUNION})
     public void memberLevelChange(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ProjectContext.channelToUserMap.get(channel);
@@ -454,7 +387,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "zsry")
+    @Order(orderMsg = "zsry",status = {ChannelStatus.LABOURUNION})
     public void queryUnionMemberInfo(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
@@ -477,14 +410,14 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ls=y")
+    @Order(orderMsg = "gy",status = {ChannelStatus.LABOURUNION})
     public void agreeApplyInfo(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        if (temp.length != GrobalConfig.THREE) {
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        Applyunioninfo applyunioninfo = applyunioninfoMapper.selectByPrimaryKey(temp[2]);
+        Applyunioninfo applyunioninfo = applyunioninfoMapper.selectByPrimaryKey(temp[1]);
         if (applyunioninfo == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOAPPLYINFO));
             return;
@@ -521,7 +454,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "lsu")
+    @Order(orderMsg = "lsg",status = {ChannelStatus.LABOURUNION})
     public void queryApplyInfo(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
@@ -547,7 +480,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "sq")
+    @Order(orderMsg = "sqg",status = {ChannelStatus.LABOURUNION})
     public void applyUnion(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
@@ -588,7 +521,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tc")
+    @Order(orderMsg = "backg",status = {ChannelStatus.LABOURUNION})
     public void outUnion(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
@@ -611,9 +544,9 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "cu")
+    @Order(orderMsg = "cgu",status = {ChannelStatus.LABOURUNION})
     public void createUnion(Channel channel, String msg) {
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -646,7 +579,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "lu")
+    @Order(orderMsg = "lgu",status = {ChannelStatus.LABOURUNION})
     public void queryUnion(Channel channel, String msg) {
         UnioninfoExample unioninfoExample = new UnioninfoExample();
         List<Unioninfo> list = unioninfoMapper.selectByExample(unioninfoExample);
@@ -664,6 +597,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "eg",status = {ChannelStatus.COMMONSCENE})
     public void enterUnionView(Channel channel, String msg) {
         ProjectContext.channelStatus.put(channel, ChannelStatus.LABOURUNION);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERLABOURVIEW));
@@ -682,7 +616,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qt")
+    @Order(orderMsg = "qtg",status = {ChannelStatus.LABOURUNION})
     public void outUnionView(Channel channel, String msg) {
         ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTLABOURVIEW));

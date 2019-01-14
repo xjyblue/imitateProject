@@ -1,22 +1,19 @@
 package service.bossservice.service;
 
-import service.attackservice.service.AttackService;
+import core.annotation.Region;
+import core.context.ThreadContext;
 import service.sceneservice.entity.BossScene;
 import core.component.monster.Monster;
 import service.sceneservice.entity.Scene;
 import core.config.MessageConfig;
 import core.config.GrobalConfig;
-import service.userbagservice.service.UserbagService;
-import service.weaponservice.service.Weaponservice;
-import core.ChannelStatus;
-import service.shopservice.service.ShopService;
+import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
-import core.order.Order;
+import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
-import service.chatservice.service.ChatService;
 import service.teamservice.entity.Team;
 import service.levelservice.service.LevelService;
 import utils.MessageUtil;
@@ -33,28 +30,20 @@ import java.util.concurrent.TimeUnit;
  * @Version 1.0
  **/
 @Component
+@Region
 public class BossService {
     @Autowired
-    private ShopService shopService;
-    @Autowired
-    private ChatService chatService;
-    @Autowired
     private LevelService levelService;
-    @Autowired
-    private UserbagService userbagService;
-    @Autowired
-    private Weaponservice weaponservice;
-    @Autowired
-    private AttackService attackService;
 
     /**
      * 进入boss副本
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ef")
+    @Order(orderMsg = "ef",status = {ChannelStatus.COMMONSCENE})
     public void enterBossArea(Channel channel, String msg) {
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -107,7 +96,7 @@ public class BossService {
         BossScene bossScene = new BossScene(user.getTeamId(), temp[1]);
         ProjectContext.bossAreaMap.put(team.getTeamId(), bossScene);
 //      开启副本场景帧频线程
-        Future future = ProjectContext.bossAreaThreadPool.scheduleAtFixedRate(bossScene, 0, 30, TimeUnit.MILLISECONDS);
+        Future future = ThreadContext.BOSS_AREA_THREAD_POOL.scheduleAtFixedRate(bossScene, 0, 30, TimeUnit.MILLISECONDS);
         ProjectContext.futureMap.put(bossScene.getTeamId(), future);
         bossScene.setFutureMap(ProjectContext.futureMap);
 
@@ -115,138 +104,6 @@ public class BossService {
         changeChannelStatus(team, bossScene);
     }
 
-    /**
-     * 单人交流
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "chat-")
-    public void chatOne(Channel channel, String msg) {
-        chatService.chatOne(channel, msg);
-    }
-
-    /**
-     * 集体交流
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "chatAll")
-    public void chatAll(Channel channel, String msg) {
-        chatService.chatAll(channel, msg);
-    }
-
-    /**
-     * 购买物品
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "bg")
-    public void buyShopGood(Channel channel, String msg) {
-        shopService.buyShopGood(channel, msg);
-    }
-
-    /**
-     * 展示商城
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "qs")
-    public void queryShopGood(Channel channel, String msg) {
-        shopService.queryShopGood(channel, msg);
-    }
-
-    /**
-     * 展示装备栏
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "qw")
-    public void showUserWeapon(Channel channel, String msg) {
-        weaponservice.queryEquipmentBar(channel, msg);
-    }
-
-    /**
-     * 修复武器
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "fix")
-    public void fixWeapon(Channel channel, String msg) {
-        weaponservice.fixEquipment(channel, msg);
-    }
-
-    /**
-     * 卸下武器
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "wq")
-    public void takeOffWeapon(Channel channel, String msg) {
-        weaponservice.quitEquipment(channel, msg);
-    }
-
-    /**
-     * 穿戴武器
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "ww")
-    public void takeInWeapon(Channel channel, String msg) {
-        weaponservice.takeEquipment(channel, msg);
-    }
-
-    /**
-     * 展示背包
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "qb")
-    public void showUserbag(Channel channel, String msg) {
-        userbagService.refreshUserbagInfo(channel, msg);
-    }
-
-    /**
-     * 使用道具
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "ub-")
-    public void useUserbag(Channel channel, String msg) {
-        userbagService.useUserbag(channel, msg);
-    }
-
-    /**
-     * 退出副本
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "qf")
-    public void backBossArea(Channel channel, String msg) {
-//      退出副本，回收资源
-        User user = ProjectContext.channelToUserMap.get(channel);
-//      boss场景
-        BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
-//      场景还原
-        bossScene.getUserMap().remove(user.getUsername());
-        Scene sceneTarget = ProjectContext.sceneMap.get(user.getPos());
-        sceneTarget.getUserMap().put(user.getUsername(), user);
-//      上下文回收
-        ProjectContext.bossAreaMap.remove(user.getTeamId());
-//      提示
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTBOSSAREA));
-//      渠道状态更新
-        ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
-    }
-
-    /**
-     * 第一次攻击
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "attack")
-    public void attack(Channel channel, String msg) {
-        attackService.bossSceneFirstAttack(channel, msg);
-    }
 
     /**
      * 检查是否有人活着

@@ -1,17 +1,17 @@
 package service.deadservice.service;
 
+import core.annotation.Region;
 import service.sceneservice.entity.Scene;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import core.context.ProjectContext;
-import core.order.Order;
+import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
-import service.chatservice.service.ChatService;
 import utils.MessageUtil;
 import service.userservice.service.UserService;
 
@@ -23,40 +23,21 @@ import service.userservice.service.UserService;
  * @Version 1.0
  **/
 @Component
+@Region
 public class DeadService {
-    @Autowired
-    private ChatService chatService;
     @Autowired
     private UserMapper userMapper;
     @Autowired
     private UserService userService;
 
-    /**
-     * 单人聊天
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "chat-")
-    public void chatOne(Channel channel, String msg) {
-        chatService.chatOne(channel, msg);
-    }
-
-    /**
-     * 集体聊天
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "chatAll")
-    public void chatAll(Channel channel,String msg){
-        chatService.chatAll(channel,msg);
-    }
 
     /**
      * 复活
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "y")
+    @Order(orderMsg = "y", status = {ChannelStatus.DEADSCENE})
     public void reborn(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         if (!user.getPos().equals(GrobalConfig.STARTSCENE)) {

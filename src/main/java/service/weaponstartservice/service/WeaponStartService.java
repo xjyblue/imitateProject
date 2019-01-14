@@ -1,5 +1,8 @@
 package service.weaponstartservice.service;
 
+import core.channel.ChannelStatus;
+import core.annotation.Order;
+import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.context.ProjectContext;
@@ -21,6 +24,7 @@ import utils.MessageUtil;
  * @Version 1.0
  **/
 @Component
+@Region
 public class WeaponStartService {
 
     @Autowired
@@ -36,6 +40,7 @@ public class WeaponStartService {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "iu",status = {ChannelStatus.COMMONSCENE})
     public void upEquipmentStartlevel(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {

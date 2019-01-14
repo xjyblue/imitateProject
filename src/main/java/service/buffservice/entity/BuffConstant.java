@@ -40,4 +40,8 @@ public class BuffConstant {
      * 反制眩晕
      */
     public static final String RELIEVEBUFF = "relieveBuff";
+    /**
+     * 嘲讽
+     */
+    public static final String TAUNTBUFF = "tauntBuff";
 }

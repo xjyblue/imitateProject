@@ -1,6 +1,11 @@
 package service.userservice.service;
 
+import com.google.common.collect.Maps;
+import core.channel.ChannelStatus;
+import core.annotation.Order;
+import core.annotation.Region;
 import core.component.monster.Monster;
+import service.buffservice.entity.BuffConstant;
 import service.npcservice.entity.Npc;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
@@ -22,6 +27,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 @Component
+@Region
 public class UserService {
     @Autowired
     private LevelService levelService;
@@ -32,6 +38,7 @@ public class UserService {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "aoi", status = {ChannelStatus.COMMONSCENE})
     public void aoiMethod(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         String allStatus = System.getProperty("line.separator")
@@ -102,5 +109,56 @@ public class UserService {
                 }
             }
         }
+    }
+
+    /**
+     * 初始人物buff,玩家buff恢复默认值
+     *
+     * @param user
+     */
+    public void initUserBuff(User user) {
+//     第一次登陆
+        if (user.getBuffMap() == null) {
+            Map<String, Integer> map = Maps.newConcurrentMap();
+            map.put(BuffConstant.MPBUFF, 1000);
+            map.put(BuffConstant.POISONINGBUFF, 2000);
+            map.put(BuffConstant.DEFENSEBUFF, 3000);
+            map.put(BuffConstant.SLEEPBUFF, 5000);
+            map.put(BuffConstant.TREATMENTBUFF, 6000);
+            map.put(BuffConstant.ALLPERSON, 4000);
+            map.put(BuffConstant.BABYBUF, 7000);
+            map.put(BuffConstant.TAUNTBUFF, 9000);
+            user.setBuffMap(map);
+            Map<String, Long> mapSecond = Maps.newConcurrentMap();
+            mapSecond.put(BuffConstant.MPBUFF, 1000L);
+            mapSecond.put(BuffConstant.POISONINGBUFF, 2000L);
+            mapSecond.put(BuffConstant.DEFENSEBUFF, 3000L);
+            mapSecond.put(BuffConstant.SLEEPBUFF, 1000L);
+            mapSecond.put(BuffConstant.TREATMENTBUFF, 1000L);
+            mapSecond.put(BuffConstant.ALLPERSON, 1000L);
+            mapSecond.put(BuffConstant.BABYBUF, 1000L);
+            mapSecond.put(BuffConstant.TAUNTBUFF, 1000L);
+            user.setUserBuffEndTimeMap(mapSecond);
+        } else {
+//         后续初始化buff
+            user.getBuffMap().put(BuffConstant.MPBUFF, 1000);
+            user.getBuffMap().put(BuffConstant.POISONINGBUFF, 2000);
+            user.getBuffMap().put(BuffConstant.DEFENSEBUFF, 3000);
+            user.getBuffMap().put(BuffConstant.SLEEPBUFF, 5000);
+            user.getBuffMap().put(BuffConstant.TREATMENTBUFF, 6000);
+            user.getBuffMap().put(BuffConstant.ALLPERSON, 4000);
+            user.getBuffMap().put(BuffConstant.BABYBUF, 7000);
+            user.getBuffMap().put(BuffConstant.TAUNTBUFF, 9000);
+//          时间
+            user.getUserBuffEndTimeMap().put(BuffConstant.MPBUFF, 1000L);
+            user.getUserBuffEndTimeMap().put(BuffConstant.POISONINGBUFF, 2000L);
+            user.getUserBuffEndTimeMap().put(BuffConstant.DEFENSEBUFF, 3000L);
+            user.getUserBuffEndTimeMap().put(BuffConstant.SLEEPBUFF, 1000L);
+            user.getUserBuffEndTimeMap().put(BuffConstant.TREATMENTBUFF, 1000L);
+            user.getUserBuffEndTimeMap().put(BuffConstant.ALLPERSON, 1000L);
+            user.getUserBuffEndTimeMap().put(BuffConstant.BABYBUF, 1000L);
+            user.getUserBuffEndTimeMap().put(BuffConstant.TAUNTBUFF, 1000L);
+        }
+//      初始化每个用户buff的终止时间
     }
 }

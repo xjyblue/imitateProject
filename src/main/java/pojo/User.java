@@ -1,10 +1,13 @@
 package pojo;
 
+import com.google.common.collect.Maps;
 import core.ServiceDistributor;
+import core.component.monster.Monster;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
 import core.packet.PacketProto;
 import service.buffservice.service.UserBuffService;
+import service.petservice.service.entity.Pet;
 
 import java.util.List;
 import java.util.Map;
@@ -84,9 +87,21 @@ public class User {
      */
     private Map<String, Integer> buffMap;
     /**
+     * 用户技能关联
+     */
+    private Map<String, Userskillrelation> userskillrelationMap = Maps.newHashMap();
+    /**
+     * 初始化Buff的截止时间
+     */
+    public Map<String, Long> userBuffEndTimeMap = Maps.newConcurrentMap();
+    /**
      * 用户成就任务
      */
     private List<Achievementprocess> achievementprocesses;
+    /**
+     * 缓存用户所攻击的怪兽
+     */
+    public Map<Integer, Monster> userToMonsterMap = Maps.newConcurrentMap();
     /**
      * 用户是否交易
      */
@@ -104,6 +119,10 @@ public class User {
      */
     private Long buffRefreshTime;
     /**
+     * 玩家宠物
+     */
+    private Pet pet;
+    /**
      * 被顶号标识
      */
     private boolean ifOccupy;
@@ -111,6 +130,30 @@ public class User {
      * 玩家的命令消费队列
      */
     private ConcurrentLinkedQueue<PacketProto.Packet> packetsQueue = new ConcurrentLinkedQueue<>();
+
+    public Map<Integer, Monster> getUserToMonsterMap() {
+        return userToMonsterMap;
+    }
+
+    public void setUserToMonsterMap(Map<Integer, Monster> userToMonsterMap) {
+        this.userToMonsterMap = userToMonsterMap;
+    }
+
+    public Map<String, Long> getUserBuffEndTimeMap() {
+        return userBuffEndTimeMap;
+    }
+
+    public void setUserBuffEndTimeMap(Map<String, Long> userBuffEndTimeMap) {
+        this.userBuffEndTimeMap = userBuffEndTimeMap;
+    }
+
+    public Pet getPet() {
+        return pet;
+    }
+
+    public void setPet(Pet pet) {
+        this.pet = pet;
+    }
 
     public boolean isIfOccupy() {
         return ifOccupy;
@@ -142,6 +185,14 @@ public class User {
 
     public void setServiceDistributor(ServiceDistributor serviceDistributor) {
         this.serviceDistributor = serviceDistributor;
+    }
+
+    public Map<String, Userskillrelation> getUserskillrelationMap() {
+        return userskillrelationMap;
+    }
+
+    public void setUserskillrelationMap(Map<String, Userskillrelation> userskillrelationMap) {
+        this.userskillrelationMap = userskillrelationMap;
     }
 
     public ConcurrentLinkedQueue<PacketProto.Packet> getPacketsQueue() {

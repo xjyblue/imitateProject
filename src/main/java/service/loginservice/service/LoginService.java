@@ -1,17 +1,21 @@
 package service.loginservice.service;
 
+import core.annotation.Region;
+import core.channel.ChannelUserInfo;
 import core.config.GrobalConfig;
+import org.springframework.beans.BeanUtils;
+import service.petservice.service.entity.Pet;
+import service.petservice.service.entity.PetSkillConfig;
 import service.sceneservice.entity.Scene;
-import service.buffservice.entity.BuffConstant;
 import core.config.MessageConfig;
 import core.ServiceDistributor;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
 import core.context.ProjectContext;
-import core.order.Order;
+import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import core.packet.PacketType;
@@ -20,6 +24,8 @@ import core.component.role.Role;
 import service.skillservice.entity.UserSkill;
 import service.buffservice.service.UserBuffService;
 import service.achievementservice.util.AchievementUtil;
+import service.userservice.service.UserService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.*;
@@ -35,6 +41,7 @@ import java.util.concurrent.locks.ReentrantLock;
  **/
 @Component
 @Slf4j
+@Region
 public class LoginService {
 
     @Autowired
@@ -45,6 +52,8 @@ public class LoginService {
     private ServiceDistributor serviceDistributor;
     @Autowired
     private UserBuffService userBuffService;
+    @Autowired
+    private UserService userService;
 
     private Lock lock = new ReentrantLock();
 
@@ -54,20 +63,19 @@ public class LoginService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "*")
+    @Order(orderMsg = "login", status = {ChannelStatus.LOGIN})
     public void login(Channel channel, String msg) {
-        String[] temp = msg.split("-");
-        log.info("用户登录开始----------账户{},用户密码{}", temp[0], temp[1]);
-        if (temp.length != GrobalConfig.TWO) {
+        String[] temp = msg.split("=");
+        if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User user = userMapper.getUser(temp[0], temp[1]);
+        User user = userMapper.getUser(temp[1], temp[2]);
         if (user == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORPASSWORD));
             return;
         }
-
+        log.info("用户登录开始----------账户{},用户密码{}", temp[1], temp[2]);
 //      登录逻辑
         try {
             lock.lock();
@@ -78,14 +86,24 @@ public class LoginService {
             Role role = ProjectContext.roleMap.get(user.getRoleid());
 //          初始化玩家的技能
             initUserSkill(user, channel, role);
+//          初始化玩家宠物
+            if (user.getRoleid().equals(GrobalConfig.FOUR)) {
+                initUserPet(user);
+            }
 //          初始化玩家buff
-            initUserBuffBegin(user);
+            userService.initUserBuff(user);
+//      这里注入事件处理器是为了让玩家自己心跳去消费命令，执行任务
+            user.setServiceDistributor(serviceDistributor);
+//      注入buff处理器，让用户去刷新自己的buff
+            user.setUserBuffService(userBuffService);
+            user.setBuffRefreshTime(0L);
+            user.setIfOccupy(true);
             user.setIfOccupy(false);
 //          将玩家放入场景队列中
             Scene scene = ProjectContext.sceneMap.get(user.getPos());
             scene.getUserMap().put(user.getUsername(), user);
 
-
+            ChannelUtil.setUserInfoToChannel(channel, user);
             ProjectContext.channelToUserMap.put(channel, user);
             ProjectContext.userToChannelMap.put(user, channel);
 //          展示成就信息
@@ -96,6 +114,16 @@ public class LoginService {
         } finally {
             lock.unlock();
         }
+    }
+
+    private void initUserPet(User user) {
+        Pet pet = new Pet();
+        BeanUtils.copyProperties(ProjectContext.petConfigMap.get("1"), pet);
+        for (Map.Entry<String, PetSkillConfig> entry : ProjectContext.petSkillConfigMap.entrySet()) {
+            PetSkillConfig petSkillConfig = entry.getValue();
+            pet.getSkillList().add(petSkillConfig);
+        }
+        user.setPet(pet);
     }
 
     /**
@@ -110,50 +138,14 @@ public class LoginService {
         UserskillrelationExample.Criteria criteria = userskillrelationExample.createCriteria();
         criteria.andUsernameEqualTo(user.getUsername());
         List<Userskillrelation> userskillrelations = userskillrelationMapper.selectByExample(userskillrelationExample);
-        Map<String, Userskillrelation> userskillrelationMap = new HashMap<>(64);
+        Map<String, Userskillrelation> userskillrelationMap = user.getUserskillrelationMap();
         String skillLook = "";
         for (Userskillrelation userskillrelation : userskillrelations) {
             UserSkill userSkill = ProjectContext.skillMap.get(userskillrelation.getSkillid());
             userskillrelationMap.put(userskillrelation.getKeypos(), userskillrelation);
             skillLook += "[键位-" + userskillrelation.getKeypos() + "-技能名称-" + userSkill.getSkillName() + "-技能伤害-" + userSkill.getDamage() + "技能cd" + userSkill.getAttackCd() + "] ";
         }
-        ProjectContext.userskillrelationMap.put(user, userskillrelationMap);
         channel.writeAndFlush(MessageUtil.turnToPacket("   " + user.getUsername() + "    职业为:" + role.getName() + "] " + skillLook, PacketType.USERINFO));
-    }
-
-    /**
-     * 初始人物buff
-     *
-     * @param user
-     */
-    private void initUserBuffBegin(User user) {
-        //          初始化玩家的各种buffer
-        Map<String, Integer> map = new HashMap<>(64);
-        map.put(BuffConstant.MPBUFF, 1000);
-        map.put(BuffConstant.POISONINGBUFF, 2000);
-        map.put(BuffConstant.DEFENSEBUFF, 3000);
-        map.put(BuffConstant.SLEEPBUFF, 5000);
-        map.put(BuffConstant.TREATMENTBUFF, 6000);
-        map.put(BuffConstant.ALLPERSON, 4000);
-        map.put(BuffConstant.BABYBUF, 7000);
-        user.setBuffMap(map);
-//          初始化每个用户buff的终止时间
-        Map<String, Long> mapSecond = new HashMap<>(64);
-        mapSecond.put(BuffConstant.MPBUFF, 1000L);
-        mapSecond.put(BuffConstant.POISONINGBUFF, 2000L);
-        mapSecond.put(BuffConstant.DEFENSEBUFF, 3000L);
-        mapSecond.put(BuffConstant.SLEEPBUFF, 1000L);
-        mapSecond.put(BuffConstant.TREATMENTBUFF, 1000L);
-        mapSecond.put(BuffConstant.ALLPERSON, 1000L);
-        mapSecond.put(BuffConstant.BABYBUF, 1000L);
-        ProjectContext.userBuffEndTime.put(user, mapSecond);
-
-//          这里注入事件处理器是为了让玩家自己心跳去消费命令，执行任务
-        user.setServiceDistributor(serviceDistributor);
-//          注入buff处理器，让用户去刷新自己的buff
-        user.setUserBuffService(userBuffService);
-        user.setBuffRefreshTime(0L);
-        user.setIfOccupy(true);
     }
 
     /**

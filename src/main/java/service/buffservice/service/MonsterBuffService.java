@@ -1,6 +1,5 @@
 package service.buffservice.service;
 
-import core.ChannelStatus;
 import core.component.monster.Monster;
 import core.config.GrobalConfig;
 import core.context.ProjectContext;
@@ -8,16 +7,13 @@ import core.packet.PacketType;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pojo.User;
 import service.broadcastservice.service.BroadcastService;
 import service.buffservice.entity.Buff;
 import service.buffservice.entity.BuffConstant;
 import service.caculationservice.service.HpCaculationService;
-import service.teamservice.entity.Team;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
-import java.util.Map;
 
 /**
  * @ClassName MonsterBuffService
@@ -32,6 +28,7 @@ public class MonsterBuffService {
     private HpCaculationService hpCaculationService;
     @Autowired
     private BroadcastService broadcastService;
+
     /**
      * 刷新怪物buff
      *
@@ -45,7 +42,7 @@ public class MonsterBuffService {
         }
 
         if (monster.getBufMap().containsKey(BuffConstant.POISONINGBUFF) && monster.getBufMap().get(BuffConstant.POISONINGBUFF) != GrobalConfig.POISONINGBUFF_DEFAULTVALUE) {
-            Long endTime = ProjectContext.monsterBuffEndTime.get(monster).get(BuffConstant.POISONINGBUFF);
+            Long endTime = monster.getMonsterBuffEndTimeMap().get(BuffConstant.POISONINGBUFF);
             if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
                 Buff buff = ProjectContext.buffMap.get(monster.getBufMap().get(BuffConstant.POISONINGBUFF));
                 hpCaculationService.subMonsterHp(monster, buff.getAddSecondValue());
@@ -71,7 +68,7 @@ public class MonsterBuffService {
         }
 
         if (monster.getBufMap().containsKey(BuffConstant.POISONINGBUFF) && monster.getBufMap().get(BuffConstant.POISONINGBUFF) != GrobalConfig.POISONINGBUFF_DEFAULTVALUE) {
-            Long endTime = ProjectContext.monsterBuffEndTime.get(monster).get(BuffConstant.POISONINGBUFF);
+            Long endTime = monster.getMonsterBuffEndTimeMap().get(BuffConstant.POISONINGBUFF);
             if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
                 Buff buff = ProjectContext.buffMap.get(monster.getBufMap().get(BuffConstant.POISONINGBUFF));
                 hpCaculationService.subMonsterHp(monster, buff.getAddSecondValue());

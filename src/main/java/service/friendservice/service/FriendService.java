@@ -1,16 +1,17 @@
 package service.friendservice.service;
 
+import core.annotation.Region;
 import core.config.GrobalConfig;
 import service.achievementservice.entity.Achievement;
 import service.achievementservice.service.AchievementService;
 import core.config.MessageConfig;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.FriendapplyinfoMapper;
 import mapper.FriendinfoMapper;
 import mapper.UserMapper;
 import core.context.ProjectContext;
-import core.order.Order;
+import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import core.packet.PacketType;
@@ -29,6 +30,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
+@Region
 public class FriendService {
     @Autowired
     private FriendapplyinfoMapper friendapplyinfoMapper;
@@ -43,9 +45,11 @@ public class FriendService {
 
     /**
      * 进入朋友界面
+     *
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "efriend",status = {ChannelStatus.COMMONSCENE})
     public void enterFriendView(Channel channel, String msg) {
         ProjectContext.channelStatus.put(channel, ChannelStatus.FRIEND);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFRIENDVIEW));
@@ -55,10 +59,11 @@ public class FriendService {
 
     /**
      * 退出朋友界面
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qt")
+    @Order(orderMsg = "qfriend",status = {ChannelStatus.FRIEND})
     public void quitFriendView(Channel channel, String msg) {
         ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTFRIENDVIEW));
@@ -68,10 +73,11 @@ public class FriendService {
 
     /**
      * 同意交友
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ty=y")
+    @Order(orderMsg = "tyf",status = {ChannelStatus.FRIEND})
     public void agreeApplyInfo(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
@@ -115,10 +121,11 @@ public class FriendService {
 
     /**
      * 展示好友
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "lu")
+    @Order(orderMsg = "lufriend",status = {ChannelStatus.FRIEND})
     public void queryFriendToSelf(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         FriendinfoExample friendinfoExample = new FriendinfoExample();
@@ -138,13 +145,14 @@ public class FriendService {
 
     /**
      * 申请好友
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "sq-")
+    @Order(orderMsg = "sqfriend",status = {ChannelStatus.FRIEND})
     public void applyFriendToOther(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -169,10 +177,11 @@ public class FriendService {
 
     /**
      * 展示好友申请记录
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ls")
+    @Order(orderMsg = "lsfriend",status = {ChannelStatus.FRIEND})
     public void queryApplyUserInfo(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         FriendapplyinfoExample friendapplyinfoExample = new FriendapplyinfoExample();

@@ -2,24 +2,12 @@ package core;
 
 
 import core.context.ProjectContext;
-import service.auctionservice.service.AuctionService;
-import service.labourunionservice.service.LabourUnionService;
-import service.sceneservice.service.CommonSceneService;
-import service.teamservice.service.TeamService;
-import utils.ReflectMethodUtil;
-import service.attackservice.service.AttackService;
-import service.bossservice.service.BossService;
-import service.connectservice.service.ConnectService;
-import service.deadservice.service.DeadService;
-import service.friendservice.service.FriendService;
-import service.loginservice.service.LoginService;
-import org.springframework.beans.factory.annotation.Autowired;
+import core.reflect.InvokeMethod;
 import org.springframework.stereotype.Component;
 
 import io.netty.channel.Channel;
-import service.registerservice.service.RegisterService;
-import service.skillservice.service.SkillService;
-import service.transactionservice.service.TransactionService;
+import pojo.User;
+import utils.ChannelUtil;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -34,75 +22,22 @@ import java.lang.reflect.InvocationTargetException;
 
 @Component
 public class ServiceDistributor {
-    @Autowired
-    private LoginService loginService;
-    @Autowired
-    private RegisterService registerService;
-    @Autowired
-    private CommonSceneService commonSceneService;
-    @Autowired
-    private SkillService skillService;
-    @Autowired
-    private AttackService attackService;
-    @Autowired
-    private BossService bossService;
-    @Autowired
-    private ConnectService connectService;
-    @Autowired
-    private DeadService deadService;
-    @Autowired
-    private TransactionService transactionService;
-    @Autowired
-    private LabourUnionService labourUnionService;
-    @Autowired
-    private FriendService friendService;
-    @Autowired
-    private TeamService teamService;
-    @Autowired
-    private AuctionService auctionService;
+    /**
+     * 通过注解，调用相对应的方法
+     * @param ch
+     * @param msg
+     * @throws IOException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
     public void distributeEvent(Channel ch, String msg) throws IOException, InvocationTargetException, IllegalAccessException {
-        String status = ProjectContext.channelStatus.get(ch);
-        switch (status) {
-            case ChannelStatus.COMING:
-                ReflectMethodUtil.reflectAnnotation(connectService,ch,msg);
-                break;
-            case ChannelStatus.LOGIN:
-                ReflectMethodUtil.reflectAnnotation(loginService,ch,msg);
-                break;
-            case ChannelStatus.REGISTER:
-                ReflectMethodUtil.reflectAnnotation(registerService,ch,msg);
-                break;
-            case ChannelStatus.COMMONSCENE:
-                ReflectMethodUtil.reflectAnnotation(commonSceneService,ch,msg);
-                break;
-            case ChannelStatus.SKILLVIEW:
-                ReflectMethodUtil.reflectAnnotation(skillService,ch,msg);
-                break;
-            case ChannelStatus.ATTACK:
-                ReflectMethodUtil.reflectAnnotation(attackService,ch,msg);
-                break;
-            case ChannelStatus.BOSSSCENE:
-                ReflectMethodUtil.reflectAnnotation(bossService,ch,msg);
-                break;
-            case ChannelStatus.TRADE:
-                ReflectMethodUtil.reflectAnnotation(transactionService,ch,msg);
-                break;
-            case ChannelStatus.DEADSCENE:
-                ReflectMethodUtil.reflectAnnotation(deadService,ch,msg);
-                break;
-            case ChannelStatus.LABOURUNION:
-                ReflectMethodUtil.reflectAnnotation(labourUnionService,ch,msg);
-                break;
-            case ChannelStatus.FRIEND:
-                ReflectMethodUtil.reflectAnnotation(friendService,ch,msg);
-                break;
-            case ChannelStatus.TEAM:
-                ReflectMethodUtil.reflectAnnotation(teamService,ch,msg);
-                break;
-            case ChannelStatus.AUCTION:
-                ReflectMethodUtil.reflectAnnotation(auctionService,ch,msg);
-             default:
-
+        String[] temp = msg.split("=");
+        if (ProjectContext.methodMap.containsKey(temp[0])) {
+            String chStatus = ProjectContext.channelStatus.get(ch);
+            if (ProjectContext.orderStatusMap.get(temp[0]).contains(chStatus)) {
+                InvokeMethod invokeMethod = ProjectContext.methodMap.get(temp[0]);
+                invokeMethod.getMethod().invoke(invokeMethod.getObject(), ch, msg);
+            }
         }
     }
 

@@ -1,16 +1,17 @@
 package service.registerservice.service;
 
+import core.annotation.Region;
 import service.achievementservice.entity.Achievement;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import service.levelservice.entity.Level;
 import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
 import core.context.ProjectContext;
-import core.order.Order;
+import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
@@ -23,6 +24,7 @@ import utils.MessageUtil;
 
 import java.util.List;
 import java.util.Map;
+
 /**
  * @ClassName RegisterService
  * @Description TODO
@@ -31,6 +33,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 @Component
+@Region
 public class RegisterService {
     @Autowired
     private UserMapper userMapper;
@@ -45,32 +48,33 @@ public class RegisterService {
 
     /**
      * 注册
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "*")
+    @Order(orderMsg = "register", status = {ChannelStatus.REGISTER})
     public void register(Channel channel, String msg) {
-        String[] temp = msg.split("-");
-        if (temp.length != GrobalConfig.FOUR) {
+        String[] temp = msg.split("=");
+        if (temp.length != GrobalConfig.FIVE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        if (!temp[1].equals(temp[GrobalConfig.TWO])) {
+        if (!temp[GrobalConfig.TWO].equals(temp[GrobalConfig.THREE])) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DOUBLEPASSWORDERROR));
             return;
         }
-        if (!ProjectContext.roleMap.containsKey(Integer.parseInt(temp[GrobalConfig.THREE]))) {
+        if (!ProjectContext.roleMap.containsKey(Integer.parseInt(temp[GrobalConfig.FOUR]))) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOROLE));
             return;
         }
 //      设置用户基本信息
         User user = new User();
-        user.setUsername(temp[0]);
-        user.setPassword(temp[1]);
+        user.setUsername(temp[1]);
+        user.setPassword(temp[2]);
         user.setStatus(GrobalConfig.ALIVE);
         user.setPos(GrobalConfig.MINVALUE);
         user.setMoney("10000");
-        user.setRoleid(Integer.parseInt(temp[3]));
+        user.setRoleid(Integer.parseInt(temp[4]));
 //      设置用户1级血量和1级的经验值
         user.setExperience(1);
         Level level = ProjectContext.levelMap.get(1);
@@ -82,11 +86,11 @@ public class RegisterService {
         List<UserSkill> list = skillService.getUserSkillByUserRole(user.getRoleid());
 //      键位初始值，我们统一在注册时初始键位，后期玩家自己去调整自己想要的键位
         int count = 1;
-        for(UserSkill userSkill : list){
+        for (UserSkill userSkill : list) {
             Userskillrelation userskillrelation = new Userskillrelation();
             userskillrelation.setSkillcds(System.currentTimeMillis());
             userskillrelation.setSkillid(userSkill.getSkillId());
-            userskillrelation.setKeypos((count++)+"");
+            userskillrelation.setKeypos((count++) + "");
             userskillrelation.setUsername(user.getUsername());
             userskillrelationMapper.insert(userskillrelation);
         }

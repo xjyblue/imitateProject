@@ -1,6 +1,8 @@
-package core.order;
+package core.annotation;
 
 import java.lang.annotation.*;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @ClassName Order
@@ -15,8 +17,11 @@ import java.lang.annotation.*;
 @Documented//说明该注解将被包含在javadoc中
 public @interface Order {
 
-    String orderMsg()default "";
+    String orderMsg() default "";
 
-    String desc()default "";
+    String desc() default "";
 
+    boolean ifRandomkey() default false;
+
+    String[] status();
 }

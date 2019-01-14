@@ -1,5 +1,6 @@
 package service.transactionservice.service;
 
+import core.annotation.Region;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
@@ -9,11 +10,10 @@ import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import service.userbagservice.service.UserbagService;
-import service.weaponservice.service.Weaponservice;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
-import core.order.Order;
+import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import core.packet.PacketType;
@@ -38,6 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Version 1.0
  **/
 @Component
+@Region
 public class TransactionService {
 
     private Lock lock = new ReentrantLock();
@@ -53,14 +54,14 @@ public class TransactionService {
     private UserService userService;
     @Autowired
     private UserbagService userbagService;
-    @Autowired
-    private Weaponservice weaponservice;
+
     /**
      * 不同意交易
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ntrade")
+    @Order(orderMsg = "ntrade", status = {ChannelStatus.COMMONSCENE})
     public void cancelTrade(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         if (user.getTraceId() == null || !ProjectContext.tradeMap.containsKey(user.getTraceId())) {
@@ -89,10 +90,11 @@ public class TransactionService {
 
     /**
      * 同意交易
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ytrade")
+    @Order(orderMsg = "ytrade", status = {ChannelStatus.COMMONSCENE})
     public void agreeTrade(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ProjectContext.channelToUserMap.get(channel);
@@ -143,12 +145,13 @@ public class TransactionService {
 
     /**
      * 请求交易
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "iftrade")
+    @Order(orderMsg = "iftrade", status = {ChannelStatus.COMMONSCENE})
     public void createTrade(Channel channel, String msg) {
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         User user = ProjectContext.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -195,10 +198,11 @@ public class TransactionService {
 
     /**
      * 取消交易
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jy=q")
+    @Order(orderMsg = "jyq",status = {ChannelStatus.TRADE})
     public void quitTrade(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
@@ -240,10 +244,11 @@ public class TransactionService {
 
     /**
      * 同意交易的物品
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jy=y")
+    @Order(orderMsg = "jyy",status = {ChannelStatus.TRADE})
     public void trading(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
@@ -328,10 +333,11 @@ public class TransactionService {
 
     /**
      * 金币交易减少
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "xjbjy")
+    @Order(orderMsg = "xjbjy",status = {ChannelStatus.TRADE})
     public void reduceMoney(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
@@ -370,10 +376,11 @@ public class TransactionService {
 
     /**
      * 金币交易增加
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jbjy")
+    @Order(orderMsg = "jbjy",status = {ChannelStatus.TRADE})
     public void addMoney(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
@@ -403,71 +410,12 @@ public class TransactionService {
     }
 
     /**
-     * 展示装备
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "qw")
-    public void showUserWeapon(Channel channel, String msg) {
-        weaponservice.queryEquipmentBar(channel, msg);
-    }
-
-    /**
-     * 修复武器
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "fix")
-    public void fixWeapon(Channel channel, String msg) {
-        weaponservice.fixEquipment(channel, msg);
-    }
-
-    /**
-     * 退下装备
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "wq")
-    public void takeOffWeapon(Channel channel, String msg) {
-        weaponservice.quitEquipment(channel, msg);
-    }
-
-    /**
-     * 穿上装备
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "ww")
-    public void takeInWeapon(Channel channel, String msg) {
-        weaponservice.takeEquipment(channel, msg);
-    }
-
-    /**
-     * 展示背包
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "qb")
-    public void showUserbag(Channel channel, String msg) {
-        userbagService.refreshUserbagInfo(channel, msg);
-    }
-
-    /**
-     * 使用背包
-     * @param channel
-     * @param msg
-     */
-    @Order(orderMsg = "ub-")
-    public void useUserbag(Channel channel, String msg) {
-        userbagService.useUserbag(channel, msg);
-    }
-
-    /**
      * 添加交易物品
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jyg=")
+    @Order(orderMsg = "jyg",status = {ChannelStatus.TRADE})
     public void addGood(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
@@ -479,7 +427,7 @@ public class TransactionService {
             return;
         }
 //          移除背包给子物品到交易单
-        Userbag userbag =userbagService.getUserbagByUserbagId(user, temp[1]);
+        Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
             return;
@@ -502,10 +450,11 @@ public class TransactionService {
 
     /**
      * 取消交易物品
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "xjyg=")
+    @Order(orderMsg = "xjyg",status = {ChannelStatus.TRADE})
     public void reduceGood(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
@@ -539,7 +488,8 @@ public class TransactionService {
     }
 
     /**
-     * 移动
+     * 移动到交易单
+     *
      * @param userbag
      * @param user
      * @param userBag
@@ -574,6 +524,13 @@ public class TransactionService {
         }
     }
 
+    /**
+     * 移动到用户背包
+     * @param user
+     * @param startUserBag
+     * @param userbag
+     * @param num
+     */
     private void moveToUserTrade(User user, Map<String, Userbag> startUserBag, Userbag userbag, String num) {
         if (Integer.parseInt(num) == userbag.getNum()) {
             startUserBag.put(userbag.getId(), userbag);
@@ -592,6 +549,7 @@ public class TransactionService {
 
     /**
      * 输出信息
+     *
      * @param trade
      * @return
      */
@@ -616,6 +574,7 @@ public class TransactionService {
 
     /**
      * 获取物品名字
+     *
      * @param userbag
      * @return
      */

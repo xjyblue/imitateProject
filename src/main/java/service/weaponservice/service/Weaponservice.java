@@ -1,5 +1,8 @@
 package service.weaponservice.service;
 
+import core.channel.ChannelStatus;
+import core.annotation.Order;
+import core.annotation.Region;
 import core.component.good.Equipment;
 import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
@@ -25,6 +28,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
+@Region
 public class Weaponservice {
     @Autowired
     private AchievementService achievementService;
@@ -37,12 +41,13 @@ public class Weaponservice {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "qw", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
     public void queryEquipmentBar(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         String wresp = "";
         wresp += System.getProperty("line.separator")
                 + "穿上装备按ww=背包id"
-                + "卸下按装备wq-装备编号"
+                + "卸下按装备wq=装备编号"
                 + System.getProperty("line.separator");
         for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
             Equipment equipment = ProjectContext.equipmentMap.get(weaponequipmentbar.getWid());
@@ -64,9 +69,10 @@ public class Weaponservice {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "fix", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
     public void fixEquipment(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         if (!ProjectContext.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
             return;
@@ -92,9 +98,14 @@ public class Weaponservice {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "wq", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
     public void quitEquipment(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
+        if (temp.length != GrobalConfig.TWO) {
+            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            return;
+        }
         if (ProjectContext.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
             for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
                 if (weaponequipmentbar.getWid() == Integer.parseInt(temp[1])) {
@@ -125,6 +136,7 @@ public class Weaponservice {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "ww", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
     public void takeEquipment(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");

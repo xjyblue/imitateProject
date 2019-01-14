@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import core.reflect.InvokeMethod;
 import core.component.boss.BossSceneConfig;
 import core.component.good.CollectGood;
 import core.component.good.Equipment;
@@ -12,6 +13,8 @@ import core.component.good.MpMedicine;
 import core.component.monster.Monster;
 import service.auctionservice.entity.AuctionItem;
 import service.npcservice.entity.Npc;
+import service.petservice.service.entity.PetConfig;
+import service.petservice.service.entity.PetSkillConfig;
 import service.sceneservice.entity.BossScene;
 import service.sceneservice.entity.Scene;
 import service.achievementservice.entity.Achievement;
@@ -23,7 +26,6 @@ import service.buffservice.entity.Buff;
 import service.emailservice.entity.Mail;
 import io.netty.channel.Channel;
 import pojo.User;
-import pojo.Userskillrelation;
 import core.component.monster.MonsterSkill;
 import service.skillservice.entity.UserSkill;
 import service.teamservice.entity.Team;
@@ -37,10 +39,6 @@ import service.transactionservice.entity.Trade;
  * @Version 1.0
  **/
 public class ProjectContext {
-    /**
-     * 初始化普通线程池工厂
-     */
-    public final static ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("thread-call-scene-runner-%d").build();
     /**
      * 缓存通信上下文环境对应的登录用户
      */
@@ -70,26 +68,6 @@ public class ProjectContext {
      */
     public final static Set<String> sceneSet = Sets.newHashSet();
     /**
-     * 初始化 地图线程池
-     **/
-    public final static ExecutorService sceneThreadPool = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), namedThreadFactory);
-    /**
-     * 初始化玩家技能
-     */
-    public final static Map<User, Map<String, Userskillrelation>> userskillrelationMap = Maps.newConcurrentMap();
-    /**
-     * 缓存用户所攻击的怪兽
-     */
-    public final static Map<User, Map<Integer, Monster>> userToMonsterMap = Maps.newConcurrentMap();
-    /**
-     * 初始化Buff的截止时间
-     */
-    public final static Map<User, Map<String, Long>> userBuffEndTime = Maps.newConcurrentMap();
-    /**
-     * 初始化怪物Buff的截止时间
-     */
-    public final static Map<Monster, Map<String, Long>> monsterBuffEndTime = Maps.newConcurrentMap();
-    /**
      * 初始化药物属性
      */
     public final static Map<Integer, MpMedicine> mpMedicineMap = Maps.newHashMap();
@@ -113,10 +91,6 @@ public class ProjectContext {
      * 记录每个队伍挑战副本的截止时间，超过时间就GG
      */
     public final static Map<String, Long> endBossAreaTime = Maps.newConcurrentMap();
-    /**
-     * 副本boss攻击线程池
-     */
-    public final static ScheduledExecutorService bossAreaThreadPool = new ScheduledThreadPoolExecutor(5, namedThreadFactory);
     /**
      * 缓存副本的配置，为生成副本而用
      */
@@ -166,7 +140,19 @@ public class ProjectContext {
      */
     public final static Map<String, AuctionItem> auctionItemMap = Maps.newConcurrentMap();
     /**
-     * 公共周期线程池，清除过期任务，只用于公共场合
+     * 宠物配置
      */
-    public final static ExecutorService periodThreadPool = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), namedThreadFactory);
+    public final static Map<String, PetConfig> petConfigMap = Maps.newHashMap();
+    /**
+     * 宠物技能配置
+     */
+    public final static Map<String, PetSkillConfig> petSkillConfigMap = Maps.newHashMap();
+    /**
+     * 指令-方法
+     */
+    public final static Map<String, InvokeMethod> methodMap = Maps.newHashMap();
+    /**
+     * 指令-状态
+     */
+    public final static Map<String, Set<String>> orderStatusMap = Maps.newHashMap();
 }

@@ -6,8 +6,11 @@ import core.component.good.Equipment;
 import core.component.good.HpMedicine;
 import core.component.good.MpMedicine;
 import core.component.monster.Monster;
+import core.context.ThreadContext;
 import service.auctionservice.period.AuctionPeriodTask;
 import service.npcservice.entity.Npc;
+import service.petservice.service.entity.PetConfig;
+import service.petservice.service.entity.PetSkillConfig;
 import service.sceneservice.entity.Scene;
 import service.achievementservice.entity.Achievement;
 import core.config.GrobalConfig;
@@ -39,11 +42,11 @@ import core.packet.PacketProto;
 import core.component.monster.MonsterSkill;
 import service.skillservice.entity.UserSkill;
 import utils.ExcelUtil;
+import utils.ReflectMethodUtil;
 
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,7 +119,9 @@ public class ServerConfig {
 
 
     public void initServer() throws IOException {
-
+        /**
+         * 初始化所有属性
+         */
         initAchievement();
 
         initHpMedicine();
@@ -148,11 +153,57 @@ public class ServerConfig {
         initScene();
 
         initCommonPreiodTask();
+
+        initPetSkillConfig();
+
+        initPetConfig();
+
+        initMethod();
     }
 
-    private void initCommonPreiodTask() {
-        ProjectContext.periodThreadPool.execute(new AuctionPeriodTask());
+    /**
+     * 注解扫描
+     */
+    private void initMethod() {
+        ReflectMethodUtil.scanRegionAnno();
     }
+
+
+    private void initCommonPreiodTask() {
+        ThreadContext.PERIOD_THREAD_POOL.execute(new AuctionPeriodTask());
+    }
+
+    private void initPetSkillConfig() throws IOException {
+        FileInputStream petConfigfis = new FileInputStream(new File("src/main/resources/PetSkillConfig.xls"));
+        LinkedHashMap<String, String> petSkillConfigAlias = new LinkedHashMap<>();
+        petSkillConfigAlias.put("技能名", "skillName");
+        petSkillConfigAlias.put("技能的id", "id");
+        petSkillConfigAlias.put("技能所属宠物", "petId");
+        petSkillConfigAlias.put("技能伤害", "damage");
+        List<PetSkillConfig> petSkillConfigList = ExcelUtil.excel2Pojo(petConfigfis, PetSkillConfig.class, petSkillConfigAlias);
+        for (PetSkillConfig petSkillConfig : petSkillConfigList) {
+            ProjectContext.petSkillConfigMap.put(petSkillConfig.getId(), petSkillConfig);
+        }
+    }
+
+    private void initPetConfig() throws IOException {
+        FileInputStream petConfigfis = new FileInputStream(new File("src/main/resources/PetConfig.xls"));
+        LinkedHashMap<String, String> petConfigAlias = new LinkedHashMap<>();
+        petConfigAlias.put("宠物名", "name");
+        petConfigAlias.put("宠物的id", "id");
+        petConfigAlias.put("宠物的技能", "skills");
+        List<PetConfig> petConfigList = ExcelUtil.excel2Pojo(petConfigfis, PetConfig.class, petConfigAlias);
+        for (PetConfig petConfig : petConfigList) {
+            for (Map.Entry<String, PetSkillConfig> entry : ProjectContext.petSkillConfigMap.entrySet()) {
+                PetSkillConfig petSkillConfig = entry.getValue();
+                if (petSkillConfig.getPetId().equals(petConfig.getId())) {
+                    petConfig.getPetSkillConfigMap().put(petSkillConfig.getId(), petSkillConfig);
+                }
+            }
+            ProjectContext.petConfigMap.put(petConfig.getId(), petConfig);
+        }
+    }
+
 
     private void initScene() throws IOException {
         //      初始化场景start
@@ -186,7 +237,7 @@ public class ServerConfig {
             scene.setSceneSet(areaSet);
             ProjectContext.sceneMap.put(scene.getId(), scene);
             ProjectContext.sceneSet.add(scene.getName());
-            ProjectContext.sceneThreadPool.execute(scene);
+            ThreadContext.SCENE_THREAD_POOL.execute(scene);
         }
 //      初始化场景end
     }

@@ -11,13 +11,14 @@ import service.buffservice.entity.BuffConstant;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import service.buffservice.service.AttackBuffService;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import service.rewardservice.service.RewardService;
 import core.factory.MonsterFactory;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
 import core.packet.PacketType;
 import pojo.User;
+import service.userservice.service.UserService;
 import utils.MessageUtil;
 import utils.SpringContextUtil;
 
@@ -81,19 +82,18 @@ public class Scene extends BaseThread implements Runnable {
 
     private MonsterBuffService monsterBuffService;
 
+    private UserService userService;
+
     /**
      * 注入一些要用的单例
      */
     @Override
     public void preConstruct() {
-        AttackBuffService attackBuffService = SpringContextUtil.getBean("attackBuffService");
-        this.attackBuffService = attackBuffService;
-        RewardService rewardService = SpringContextUtil.getBean("rewardService");
-        this.rewardService = rewardService;
-        HpCaculationService hpCaculationService = SpringContextUtil.getBean("hpCaculationService");
-        this.hpCaculationService = hpCaculationService;
-        MonsterBuffService monsterBuffService = SpringContextUtil.getBean("monsterBuffService");
-        this.monsterBuffService = monsterBuffService;
+        this.attackBuffService = SpringContextUtil.getBean("attackBuffService");
+        this.rewardService = SpringContextUtil.getBean("rewardService");
+        this.hpCaculationService = SpringContextUtil.getBean("hpCaculationService");
+        this.monsterBuffService = SpringContextUtil.getBean("monsterBuffService");
+        this.userService = SpringContextUtil.getBean("userService");
     }
 
     private Map<String, User> userMap = new ConcurrentHashMap<>();
@@ -227,9 +227,9 @@ public class Scene extends BaseThread implements Runnable {
             Channel channel = ProjectContext.userToChannelMap.get(user);
             if (ProjectContext.channelStatus.containsKey(channel) && ProjectContext.channelStatus.get(channel).equals(ChannelStatus.ATTACK)) {
                 try {
-                    if (ProjectContext.userToMonsterMap.containsKey(user)) {
+                    if (user.getUserToMonsterMap().size() > 0) {
                         Monster monster = null;
-                        for (Map.Entry<Integer, Monster> monsterEntry : ProjectContext.userToMonsterMap.get(user).entrySet()) {
+                        for (Map.Entry<Integer, Monster> monsterEntry : user.getUserToMonsterMap().entrySet()) {
                             monster = monsterEntry.getValue();
                         }
 //                      怪物buff刷新
@@ -267,6 +267,8 @@ public class Scene extends BaseThread implements Runnable {
                                 + "-----怪物血量:" + monster.getValueOfLife();
                         channel.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ATTACKMSG));
                         if (user.getHp().equals(GrobalConfig.MINVALUE)) {
+//                          人物死亡初始化人物buff
+                            userService.initUserBuff(user);
                             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY));
                             return;
                         }
@@ -284,7 +286,7 @@ public class Scene extends BaseThread implements Runnable {
         if (monster != null && new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger(GrobalConfig.MINVALUE)) <= 0) {
             monster.setValueOfLife(GrobalConfig.MINVALUE);
             monster.setStatus(GrobalConfig.DEAD);
-            ProjectContext.userToMonsterMap.remove(user);
+            user.getUserToMonsterMap().remove(monster.getId());
             broadcastMessage(monster.getName() + "已死亡", null);
             channel.writeAndFlush(MessageUtil.turnToPacket("怪物已死亡", PacketType.ATTACKMSG));
             List<Monster> monsters = ProjectContext.sceneMap.get(user.getPos()).monsters;
@@ -292,8 +294,9 @@ public class Scene extends BaseThread implements Runnable {
 //          填充因buff中毒而死的怪物
             MonsterFactory monsterFactory = SpringContextUtil.getBean("monsterFactory");
             monsters.add(monsterFactory.getMonster(Integer.parseInt(ProjectContext.sceneMap.get(user.getPos() + "").getMonsterS())));
-
+//          退出战斗模式初始化人物buff
             ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
+            userService.initUserBuff(user);
             rewardService.getGoods(channel, monster);
             return true;
         }

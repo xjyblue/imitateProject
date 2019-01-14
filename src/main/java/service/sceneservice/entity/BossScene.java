@@ -2,6 +2,7 @@ package service.sceneservice.entity;
 
 import core.component.boss.BossSceneConfig;
 import core.component.monster.Monster;
+import service.attackservice.util.AttackUtil;
 import service.broadcastservice.service.BroadcastService;
 import service.buffservice.entity.Buff;
 import service.buffservice.service.MonsterBuffService;
@@ -12,7 +13,7 @@ import core.base.parent.BaseThread;
 import service.buffservice.entity.BuffConstant;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import service.rewardservice.service.RewardService;
 import core.factory.MonsterFactory;
 import io.netty.channel.Channel;
@@ -21,6 +22,7 @@ import core.packet.PacketType;
 import pojo.User;
 import core.component.monster.MonsterSkill;
 import service.teamservice.entity.Team;
+import service.userservice.service.UserService;
 import utils.MessageUtil;
 import utils.SpringContextUtil;
 
@@ -127,6 +129,10 @@ public class BossScene extends BaseThread implements Runnable {
      * @return
      */
     private BroadcastService broadcastService;
+    /**
+     * 用户服务
+     */
+    private UserService userService;
 
     public Lock getBossSceneLock() {
         return bossSceneLock;
@@ -309,18 +315,13 @@ public class BossScene extends BaseThread implements Runnable {
      */
     @Override
     public void preConstruct() {
-        AttackDamageCaculationService attackDamageCaculationService = SpringContextUtil.getBean("attackDamageCaculationService");
-        this.attackDamageCaculationService = attackDamageCaculationService;
-        HpCaculationService hpCaculationService = SpringContextUtil.getBean("hpCaculationService");
-        this.hpCaculationService = hpCaculationService;
-        RewardService rewardService = SpringContextUtil.getBean("rewardService");
-        this.rewardService = rewardService;
-        MonsterBuffService monsterBuffService = SpringContextUtil.getBean("monsterBuffService");
-        this.monsterBuffService = monsterBuffService;
-        MonsterFactory monsterFactory = SpringContextUtil.getBean("monsterFactory");
-        this.monsterFactory = monsterFactory;
-        BroadcastService broadcastService = SpringContextUtil.getBean("broadcastService");
-        this.broadcastService = broadcastService;
+        this.attackDamageCaculationService = SpringContextUtil.getBean("attackDamageCaculationService");
+        this.hpCaculationService = SpringContextUtil.getBean("hpCaculationService");
+        this.rewardService = SpringContextUtil.getBean("rewardService");
+        this.monsterBuffService = SpringContextUtil.getBean("monsterBuffService");
+        this.monsterFactory = SpringContextUtil.getBean("monsterFactory");
+        this.userService = SpringContextUtil.getBean("userService");
+        this.broadcastService = SpringContextUtil.getBean("broadcastService");
     }
 
     /**
@@ -429,8 +430,10 @@ public class BossScene extends BaseThread implements Runnable {
             if (userHp.compareTo(new BigInteger(GrobalConfig.MINVALUE)) <= 0) {
                 userTarget.setHp(GrobalConfig.MINVALUE);
                 userTarget.setStatus(GrobalConfig.DEAD);
+//                  初始化死亡人物的buff
+                userService.initUserBuff(userTarget);
 //                  移除怪物所针对的boss
-                ProjectContext.userToMonsterMap.remove(userTarget);
+                AttackUtil.removeAllMonster(userTarget);
 //                  人物战斗中死亡
                 ProjectContext.channelStatus.put(channelTarget, ChannelStatus.DEADSCENE);
                 channelTarget.writeAndFlush(MessageUtil.turnToPacket("你已死亡"));
@@ -475,7 +478,7 @@ public class BossScene extends BaseThread implements Runnable {
 //          检查怪物场景是否为要求多人场景
             if (this.needMordMen.contains(entry.getValue().getPos())) {
                 if (ProjectContext.teamMap.get(teamId).getUserMap().size() == 1) {
-//          人数不够告诉玩家不能继续下去了
+//                  人数不够告诉玩家不能继续下去了
                     Future future = futureMap.remove(teamId);
                     future.cancel(true);
                     Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
@@ -532,7 +535,7 @@ public class BossScene extends BaseThread implements Runnable {
             Map.Entry<String, User> entry = it.next();
             User user = entry.getValue();
 //          移除该用户所有的战斗怪物信息
-            ProjectContext.userToMonsterMap.remove(user);
+            AttackUtil.removeAllMonster(user);
             if (user.getStatus().equals(GrobalConfig.DEAD)) {
                 continue;
             }
@@ -559,16 +562,23 @@ public class BossScene extends BaseThread implements Runnable {
 
     private void removeMonster() {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
-            if (ProjectContext.userToMonsterMap.containsKey(entry.getValue())) {
-                ProjectContext.userToMonsterMap.remove(entry.getValue());
-            }
+            AttackUtil.removeAllMonster(entry.getValue());
         }
     }
 
+    /**
+     * 战斗时间结束
+     *
+     * @param teamId
+     * @param msg
+     */
     private void sendTimeOutToAll(String teamId, String msg) {
         Map<String, User> map = ProjectContext.teamMap.get(teamId).getUserMap();
         for (Map.Entry<String, User> entry : map.entrySet()) {
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
+//          战斗时间结束初始化所有人的buff
+            User userTemp = entry.getValue();
+            userService.initUserBuff(userTemp);
             if (!ProjectContext.channelStatus.get(channelTemp).equals(ChannelStatus.DEADSCENE)) {
                 ProjectContext.channelStatus.put(channelTemp, ChannelStatus.COMMONSCENE);
             }
@@ -576,15 +586,22 @@ public class BossScene extends BaseThread implements Runnable {
         }
     }
 
+    /**
+     * 战斗胜利
+     *
+     * @param bossScene
+     * @param monster
+     */
     private void successMessToAll(BossScene bossScene, Monster monster) {
         Team team = ProjectContext.teamMap.get(bossScene.getTeamId());
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
             channelTemp.writeAndFlush(MessageUtil.turnToPacket(bossScene.getBossName() + "副本攻略成功，热烈庆祝各位参与的小伙伴"));
             ProjectContext.channelStatus.put(channelTemp, ChannelStatus.COMMONSCENE);
-            if (ProjectContext.userToMonsterMap.containsKey(entry.getValue())) {
-                ProjectContext.userToMonsterMap.remove(entry.getValue());
-            }
+//          初始化所有人的buff
+            User userTemp = entry.getValue();
+            userService.initUserBuff(userTemp);
+            AttackUtil.removeAllMonster(entry.getValue());
             rewardService.getGoods(channelTemp, monster);
         }
         ProjectContext.bossAreaMap.remove(team.getTeamId());
@@ -608,6 +625,9 @@ public class BossScene extends BaseThread implements Runnable {
     }
 
     private boolean checkAllDead() {
+        if (userMap.size() == 0) {
+            return false;
+        }
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             if (entry.getValue().getStatus().equals(GrobalConfig.ALIVE)) {
                 return false;
@@ -625,7 +645,7 @@ public class BossScene extends BaseThread implements Runnable {
         BossScene bossScene = ProjectContext.bossAreaMap.get(teamId);
 //      锁定攻击目标
         User userTarget = getMaxDamageUser(bossScene);
-        //      不断随机合适的boss技能
+//      不断随机合适的boss技能
         MonsterSkill monsterSkill = selectMonsterSkill(monster, userTarget);
 
         for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(teamId).getUserMap().entrySet()) {
@@ -695,7 +715,7 @@ public class BossScene extends BaseThread implements Runnable {
 //                      改变用户buff状态，设置用户buff时间
             Buff buff = ProjectContext.buffMap.get(buffId);
             user.getBuffMap().put(BuffConstant.SLEEPBUFF, 5001);
-            ProjectContext.userBuffEndTime.get(user).put(BuffConstant.SLEEPBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
+            user.getUserBuffEndTimeMap().put(BuffConstant.SLEEPBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
             hpCaculationService.subUserHp(user, monsterSkillDamage.toString());
             Channel channelTarget = ProjectContext.userToChannelMap.get(user);
             channelTarget.writeAndFlush(MessageUtil.turnToPacket("您收到怪物boss击打晕效果,无法使用技能,人物受到" + monsterSkillDamage.toString() + "伤害", PacketType.ATTACKMSG));
@@ -709,7 +729,7 @@ public class BossScene extends BaseThread implements Runnable {
 //           改变用户buff状态，设置用户buff时间
             Buff buff = ProjectContext.buffMap.get(buffId);
             user.getBuffMap().put(BuffConstant.POISONINGBUFF, 2001);
-            ProjectContext.userBuffEndTime.get(user).put(BuffConstant.POISONINGBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
+            user.getUserBuffEndTimeMap().put(BuffConstant.POISONINGBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
             hpCaculationService.subUserHp(user, monsterSkillDamage.toString());
             Channel channelTarget = ProjectContext.userToChannelMap.get(user);
             channelTarget.writeAndFlush(MessageUtil.turnToPacket("怪物boss使用中毒绝技,你会持续掉血，人物受到" + monsterSkillDamage.toString() + "伤害", PacketType.ATTACKMSG));
@@ -760,6 +780,13 @@ public class BossScene extends BaseThread implements Runnable {
     }
 
     private User getMaxDamageUser(BossScene bossScene) {
+//      选取嘲讽对象
+        for (Map.Entry<String, User> entry : userMap.entrySet()) {
+            if (entry.getValue().getBuffMap().get(BuffConstant.TAUNTBUFF) != GrobalConfig.TAUNT_DEFAULTVALUE) {
+                return entry.getValue();
+            }
+        }
+//      无嘲讽对象选取最大伤害
         BigInteger max = new BigInteger(GrobalConfig.MINVALUE);
         User userTarget = null;
         for (Map.Entry<User, String> entry : bossScene.getDamageAll().entrySet()) {

@@ -1,5 +1,8 @@
 package service.sceneservice.service;
 
+import core.channel.ChannelStatus;
+import core.annotation.Order;
+import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.context.ProjectContext;
@@ -23,6 +26,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 @Component
+@Region
 public class SceneService {
 
     @Autowired
@@ -36,11 +40,13 @@ public class SceneService {
 
     /**
      * 移动场景，线程切换
+     *
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "move",status = {ChannelStatus.COMMONSCENE})
     public void moveScene(Channel channel, String msg) {
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -86,6 +92,7 @@ public class SceneService {
 
     /**
      * 通过场景名拿到场景
+     *
      * @param areaName
      * @return
      */

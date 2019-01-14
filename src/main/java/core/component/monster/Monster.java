@@ -1,8 +1,11 @@
 package core.component.monster;
 
+import com.google.common.collect.Maps;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 /**
  * @ClassName Monster
  * @Description TODO
@@ -76,9 +79,22 @@ public class Monster {
      */
     private Long attackEndTime;
     /**
-     *  buff刷新间隔时间
+     * buff刷新间隔时间
      */
     private Long buffRefreshTime;
+
+    /**
+     * 初始化怪物Buff的截止时间
+     */
+    private Map<String, Long> monsterBuffEndTimeMap = Maps.newConcurrentMap();
+
+    public Map<String, Long> getMonsterBuffEndTimeMap() {
+        return monsterBuffEndTimeMap;
+    }
+
+    public void setMonsterBuffEndTimeMap(Map<String, Long> monsterBuffEndTimeMap) {
+        this.monsterBuffEndTimeMap = monsterBuffEndTimeMap;
+    }
 
     public String getReward() {
         return reward;

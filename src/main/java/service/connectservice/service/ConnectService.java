@@ -1,10 +1,11 @@
 package service.connectservice.service;
 
+import core.annotation.Region;
 import core.config.MessageConfig;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
-import core.order.Order;
+import core.annotation.Order;
 import org.springframework.stereotype.Component;
 import utils.MessageUtil;
 
@@ -16,13 +17,15 @@ import utils.MessageUtil;
  * @Version 1.0
  **/
 @Component
+@Region
 public class ConnectService {
     /**
      * 登录
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "d")
+    @Order(orderMsg = "dl", status = {ChannelStatus.COMING})
     public void connect(Channel channel, String msg) {
         ProjectContext.channelStatus.put(channel, ChannelStatus.LOGIN);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LOGINMESSAGE));
@@ -30,10 +33,11 @@ public class ConnectService {
 
     /**
      * 注册
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "z")
+    @Order(orderMsg = "zc", status = {ChannelStatus.COMING})
     public void register(Channel channel, String msg) {
         ProjectContext.channelStatus.put(channel, ChannelStatus.REGISTER);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERMESSAGE));

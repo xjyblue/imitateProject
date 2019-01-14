@@ -1,10 +1,14 @@
 package service.userbagservice.service;
 
+import core.channel.ChannelStatus;
+import core.annotation.Order;
+import core.annotation.Region;
 import core.component.good.CollectGood;
 import core.component.good.Equipment;
 import core.component.good.HpMedicine;
 import core.component.good.MpMedicine;
 import core.component.good.parent.BaseGood;
+import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.context.ProjectContext;
 import io.netty.channel.Channel;
@@ -26,6 +30,7 @@ import utils.MessageUtil;
  * @Version 1.0
  **/
 @Component
+@Region
 public class UserbagService {
     @Autowired
     private MpCaculationService mpCaculationService;
@@ -54,11 +59,15 @@ public class UserbagService {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "ub", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE
+            , ChannelStatus.TRADE, ChannelStatus.TEAM, ChannelStatus.LABOURUNION})
     public void useUserbag(Channel channel, String msg) {
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
+        if (temp.length != GrobalConfig.TWO) {
+            return;
+        }
         User user = ProjectContext.channelToUserMap.get(channel);
         Integer key = Integer.parseInt(temp[1]);
-
         if (!checkGoodInUserbag(user, key)) {
             channel.writeAndFlush(MessageUtil.turnToPacket("背包中无此物品"));
             return;
@@ -75,17 +84,17 @@ public class UserbagService {
             } else {
 //              缓慢蓝药修改回蓝buff
                 if (user.getBuffMap().get(BuffConstant.MPBUFF).equals(mpMedicine.getId())) {
-                    ProjectContext.userBuffEndTime.get(user).put(BuffConstant.MPBUFF, (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
+                    user.getUserBuffEndTimeMap().put(BuffConstant.MPBUFF, (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
                 } else {
                     user.getBuffMap().put(BuffConstant.MPBUFF, mpMedicine.getId());
-                    ProjectContext.userBuffEndTime.get(user).put(BuffConstant.MPBUFF, (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
+                    user.getUserBuffEndTimeMap().put(BuffConstant.MPBUFF, (System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000));
                 }
                 user.getBuffMap().put(BuffConstant.MPBUFF, mpMedicine.getId());
             }
         } else if (ProjectContext.hpMedicineMap.containsKey(key)) {
 //              处理使用红药的过程
             HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(key);
-            if (ProjectContext.userBuffEndTime.get(user).get(BuffConstant.TREATMENTBUFF) < System.currentTimeMillis()) {
+            if (user.getUserBuffEndTimeMap().get(BuffConstant.TREATMENTBUFF) < System.currentTimeMillis()) {
                 user.getBuffMap().put(BuffConstant.TREATMENTBUFF, hpMedicine.getId());
                 channel.writeAndFlush(MessageUtil.turnToPacket("你使用了" + hpMedicine.getName() + "回复红量：" + hpMedicine.getReplyValue()));
 //                  处理用户背包
@@ -161,6 +170,8 @@ public class UserbagService {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "qb", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE
+            , ChannelStatus.TRADE, ChannelStatus.TEAM, ChannelStatus.LABOURUNION})
     public void refreshUserbagInfo(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         String bagResp = System.getProperty("line.separator")
@@ -172,7 +183,7 @@ public class UserbagService {
         channel.writeAndFlush(MessageUtil.turnToPacket(bagResp, PacketType.USERBAGMSG));
     }
 
-    public String showUserBagInfo(String bagResp, Userbag userbag) {
+    private String showUserBagInfo(String bagResp, Userbag userbag) {
         if (userbag.getTypeof().equals(BaseGood.MPMEDICINE)) {
             MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
             bagResp += System.getProperty("line.separator")
@@ -218,6 +229,7 @@ public class UserbagService {
 
     /**
      * 根据userbag拿物品的名字
+     *
      * @param userbag
      * @return
      */

@@ -1,11 +1,13 @@
 package service.pkservice.service;
 
+import core.annotation.Order;
+import core.annotation.Region;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.AttackDamageCaculationService;
 import service.caculationservice.service.HpCaculationService;
 import core.config.MessageConfig;
 import core.config.GrobalConfig;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ import java.math.BigInteger;
  * @Version 1.0
  **/
 @Component
+@Region
 public class PkService {
     @Autowired
     private AttackDamageCaculationService attackDamageCaculationService;
@@ -41,11 +44,13 @@ public class PkService {
 
     /**
      * 和他人PK
+     *
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "pk", status = {ChannelStatus.COMMONSCENE})
     public void pkOthers(Channel channel, String msg) {
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         User user = ProjectContext.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -86,7 +91,7 @@ public class PkService {
             return;
         }
 //      人物cd校验
-        Userskillrelation userskillrelation = ProjectContext.userskillrelationMap.get(user).get(temp[2]);
+        Userskillrelation userskillrelation = user.getUserskillrelationMap().get(temp[2]);
         if (System.currentTimeMillis() < userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNSKILLCD));
             return;

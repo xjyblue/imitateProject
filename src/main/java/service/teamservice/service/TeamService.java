@@ -1,6 +1,7 @@
 package service.teamservice.service;
 
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
+import core.annotation.Region;
 import core.config.GrobalConfig;
 import service.achievementservice.service.AchievementService;
 import service.sceneservice.entity.BossScene;
@@ -8,7 +9,7 @@ import core.config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.TeamapplyinfoMapper;
 import core.context.ProjectContext;
-import core.order.Order;
+import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Teamapplyinfo;
@@ -31,6 +32,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
+@Region
 public class TeamService {
     @Autowired
     private TeamapplyinfoMapper teamapplyinfoMapper;
@@ -45,7 +47,7 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "team")
+    @Order(orderMsg = "team",status = {ChannelStatus.TEAM})
     public void queryTeamInfo(Channel channel, String msg) {
         if (getUser(channel).getTeamId() == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTEAMMESSAGE));
@@ -72,7 +74,7 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "t-create")
+    @Order(orderMsg = "tcreate",status = {ChannelStatus.TEAM})
     public void createTeam(Channel channel, String msg) {
         User user = getUser(channel);
         if (getUser(channel).getTeamId() != null && getTeam(getUser(channel)) != null) {
@@ -98,7 +100,7 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "t-remove")
+    @Order(orderMsg = "tremove",status = {ChannelStatus.TEAM})
     public void removeTeam(Channel channel, String msg) {
         User user = getUser(channel);
         Team team = getTeam(getUser(channel));
@@ -127,7 +129,7 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "t-back")
+    @Order(orderMsg = "tback",status = {ChannelStatus.TEAM})
     public void teamAllRemove(Channel channel, String msg) {
         User user = getUser(channel);
         Team team = getTeam(getUser(channel));
@@ -150,15 +152,15 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "t-add")
+    @Order(orderMsg = "tadd",status = {ChannelStatus.TEAM})
     public void addTeam(Channel channel, String msg) {
         User user = getUser(channel);
         if (user.getTeamId() != null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.YOUARENINTEAM));
             return;
         }
-        String[] temp = msg.split("-");
-        User userLeader = userService.getUserByNameFromSession(temp[2]);
+        String[] temp = msg.split("=");
+        User userLeader = userService.getUserByNameFromSession(temp[1]);
         if (userLeader == null || getTeam(userLeader) == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDTEAM));
             return;
@@ -185,15 +187,15 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "t=y")
+    @Order(orderMsg = "ty",status = {ChannelStatus.TEAM})
     public void agreeEnterTeam(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        if (temp.length != GrobalConfig.THREE) {
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
         User user = ProjectContext.channelToUserMap.get(channel);
-        Teamapplyinfo teamapplyinfo = teamapplyinfoMapper.selectByPrimaryKey(temp[2]);
+        Teamapplyinfo teamapplyinfo = teamapplyinfoMapper.selectByPrimaryKey(temp[1]);
         if (teamapplyinfo == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDTEAMAPPLYINFO));
             return;
@@ -223,7 +225,7 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "t-lu")
+    @Order(orderMsg = "tlu",status = {ChannelStatus.TEAM})
     public void queryTeamApplyInfo(Channel channel, String msg) {
 //      展示申请者的信息
         User user = ProjectContext.channelToUserMap.get(channel);
@@ -351,7 +353,7 @@ public class TeamService {
         ProjectContext.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
     }
 
-
+    @Order(orderMsg = "eteam",status = {ChannelStatus.COMMONSCENE})
     public void enterTeamView(Channel channel, String msg) {
         ProjectContext.channelStatus.put(channel, ChannelStatus.TEAM);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERTEAMMANAGERVIEW));
@@ -363,7 +365,7 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qt")
+    @Order(orderMsg = "qteam",status = {ChannelStatus.TEAM})
     public void outTeamView(Channel channel, String msg) {
         ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTTEAMVIEW));

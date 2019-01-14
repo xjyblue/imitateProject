@@ -2,7 +2,7 @@ package server;
 
 import core.config.GrobalConfig;
 import core.context.ProjectContext;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import service.teamservice.service.TeamService;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerAdapter;
@@ -61,7 +61,7 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
         ProjectContext.channelStatus.put(channel, ChannelStatus.COMING);
         PacketProto.Packet.Builder builder = newBuilder();
         builder.setPacketType(PacketProto.Packet.PacketType.DATA);
-        builder.setData("欢迎来到【星宇征服】,请按以下提示操作：d:登录 z:注册");
+        builder.setData("欢迎来到【星宇征服】,请按以下提示操作：dl:登录 zc:注册");
         builder.setType(PacketType.NORMALMSG);
         PacketProto.Packet packetResp = builder.build();
         ctx.writeAndFlush(packetResp);

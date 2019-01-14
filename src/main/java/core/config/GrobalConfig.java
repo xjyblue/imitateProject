@@ -39,6 +39,10 @@ public class GrobalConfig {
      */
     public static final int SIX = 6;
     /**
+     * 10 遵循阿里规范
+     */
+    public static final int TEN = 10;
+    /**
      * 人物死亡状态
      */
     public static final String DEAD = "0";
@@ -95,6 +99,10 @@ public class GrobalConfig {
      */
     public static final int MP_DEFAULTVALUE = 1000;
     /**
+     * 嘲讽 buff初始值
+     */
+    public static final int TAUNT_DEFAULTVALUE = 9000;
+    /**
      * 武器的范围起点
      */
     public static final int EQUIPMENT_WEAPON_START = 3000;
@@ -118,4 +126,8 @@ public class GrobalConfig {
      * 系统邮件名称
      */
     public static final String SYSTEM_EMAIL = "系统邮件";
+    /**
+     * 系统默认宠物
+     */
+    public static final String DEFAULT_PET = "1";
 }

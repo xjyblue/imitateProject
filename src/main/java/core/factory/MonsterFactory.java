@@ -1,7 +1,6 @@
 package core.factory;
 
 import core.component.monster.Monster;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import service.buffservice.entity.BuffConstant;
 import core.context.ProjectContext;
@@ -82,10 +81,9 @@ public class MonsterFactory {
         monster.setBufMap(map);
 //      初始化每个怪物buff的终止时间
         Map<String, Long> mapSecond = new HashMap<>(64);
-        mapSecond.put(BuffConstant.MPBUFF, 1000L);
-        mapSecond.put(BuffConstant.POISONINGBUFF, 2000L);
-        mapSecond.put(BuffConstant.DEFENSEBUFF, 3000L);
-        ProjectContext.monsterBuffEndTime.put(monster, mapSecond);
+        monster.getMonsterBuffEndTimeMap().put(BuffConstant.MPBUFF, 1000L);
+        monster.getMonsterBuffEndTimeMap().put(BuffConstant.POISONINGBUFF, 2000L);
+        monster.getMonsterBuffEndTimeMap().put(BuffConstant.DEFENSEBUFF, 3000L);
 //      怪物buff初始化结束
 
 //      初始化怪物技能

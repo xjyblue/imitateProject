@@ -31,14 +31,6 @@ public class ProjectContextUtil {
         if (scene.getUserMap().containsKey(user.getUsername())) {
             scene.getUserMap().remove(user.getUsername());
         }
-//              移除玩家的所有buff终止时间
-        if (ProjectContext.userBuffEndTime.containsKey(user)) {
-            ProjectContext.userBuffEndTime.remove(user);
-        }
-//              移除怪物的buff终止时间
-        if (ProjectContext.userToMonsterMap.containsKey(user)) {
-            ProjectContext.userToMonsterMap.remove(user);
-        }
 //              移除channel和用户的关联
         if (ProjectContext.channelToUserMap.containsKey(ctx.channel())) {
             ProjectContext.channelToUserMap.remove(ctx.channel());
@@ -49,10 +41,6 @@ public class ProjectContextUtil {
 //              移除渠道状态
         if (ProjectContext.channelStatus.containsKey(ctx.channel())) {
             ProjectContext.channelStatus.remove(ctx.channel());
-        }
-//              移除用户技能关联
-        if (ProjectContext.userskillrelationMap.containsKey(user)) {
-            ProjectContext.userskillrelationMap.remove(user);
         }
     }
 }

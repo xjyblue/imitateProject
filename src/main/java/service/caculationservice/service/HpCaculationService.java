@@ -2,13 +2,15 @@ package service.caculationservice.service;
 
 import core.component.monster.Monster;
 import core.config.GrobalConfig;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
+import service.attackservice.util.AttackUtil;
 import service.levelservice.service.LevelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
+import service.userservice.service.UserService;
 
 /**
  * @ClassName HpCaculationService
@@ -21,9 +23,12 @@ import pojo.User;
 public class HpCaculationService {
     @Autowired
     private LevelService levelService;
+    @Autowired
+    private UserService userService;
 
     /**
      * 用户加血
+     *
      * @param user
      * @param recoverValue
      */
@@ -41,6 +46,7 @@ public class HpCaculationService {
 
     /**
      * 用户扣血
+     *
      * @param user
      * @param reduceValue
      */
@@ -53,10 +59,13 @@ public class HpCaculationService {
             userHp = 0;
         }
         if (ProjectContext.channelStatus.get(channel).equals(ChannelStatus.ATTACK) && userHp == 0 && user.getStatus().equals(GrobalConfig.ALIVE)) {
+//          人物设置为死亡
             user.setHp(GrobalConfig.MINVALUE);
             user.setStatus(GrobalConfig.DEAD);
 //          移除用户所攻击的所有怪物
-            ProjectContext.userToMonsterMap.remove(user);
+            AttackUtil.removeAllMonster(user);
+//          初始化人物buff
+            userService.initUserBuff(user);
             ProjectContext.channelStatus.put(channel, ChannelStatus.DEADSCENE);
         } else {
             user.setHp(userHp.toString());
@@ -65,6 +74,7 @@ public class HpCaculationService {
 
     /**
      * 怪物扣血
+     *
      * @param monster
      * @param subValue
      */
@@ -74,6 +84,7 @@ public class HpCaculationService {
         monsterHp -= subHp;
         if (monsterHp < 0) {
             monster.setValueOfLife(GrobalConfig.MINVALUE);
+            monster.setStatus(GrobalConfig.DEAD);
         } else {
             monster.setValueOfLife(monsterHp.toString());
         }

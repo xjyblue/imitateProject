@@ -1,11 +1,12 @@
 package service.emailservice.service;
 
-import core.component.good.parent.BaseGood;
+import core.channel.ChannelStatus;
+import core.annotation.Order;
+import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import pojo.Teamapplyinfo;
 import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
 import service.emailservice.entity.Mail;
@@ -28,6 +29,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
+@Region
 public class EmailService {
     @Autowired
     private UserbagService userbagService;
@@ -42,6 +44,7 @@ public class EmailService {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "qmail", status = {ChannelStatus.COMMONSCENE})
     public void queryEmail(Channel channel, String msg) {
 //      展示用户的email信息
         User user = ProjectContext.channelToUserMap.get(channel);
@@ -68,33 +71,34 @@ public class EmailService {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "sendmail", status = {ChannelStatus.COMMONSCENE})
     public void sendEmail(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
-        if (!ProjectContext.userEmailMap.containsKey(temp[GrobalConfig.TWO])) {
+        if (!ProjectContext.userEmailMap.containsKey(temp[GrobalConfig.ONE])) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEMAILUSER));
             return;
         }
-        if (temp.length == GrobalConfig.FOUR) {
-            send(user.getUsername(), temp[GrobalConfig.TWO], temp[GrobalConfig.THREE], null, null);
+        if (temp.length == GrobalConfig.THREE) {
+            send(user.getUsername(), temp[GrobalConfig.ONE], temp[GrobalConfig.TWO], null, null);
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSSENDEMIAL));
             return;
         }
-        if (temp.length == GrobalConfig.SIX) {
-            Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[GrobalConfig.FOUR]);
+        if (temp.length == GrobalConfig.FIVE) {
+            Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[GrobalConfig.THREE]);
             if (userbag == null) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
                 return;
             }
-            if (!userbagService.checkUserbagNum(userbag, temp[GrobalConfig.FIVE])) {
+            if (!userbagService.checkUserbagNum(userbag, temp[GrobalConfig.FOUR])) {
                 channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHCHANGEGOOD));
                 return;
             }
             Userbag userbagNew = new Userbag();
             BeanUtils.copyProperties(userbag, userbagNew);
-            userbagNew.setNum(Integer.parseInt(temp[5]));
-            userbagCaculationService.removeUserbagFromUser(user, userbag, Integer.parseInt(temp[5]));
-            send(user.getUsername(), temp[GrobalConfig.TWO], temp[GrobalConfig.THREE], userbagNew, null);
+            userbagNew.setNum(Integer.parseInt(temp[4]));
+            userbagCaculationService.removeUserbagFromUser(user, userbag, Integer.parseInt(temp[4]));
+            send(user.getUsername(), temp[GrobalConfig.ONE], temp[GrobalConfig.TWO], userbagNew, null);
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSSENDEMIAL));
             channel.writeAndFlush("邮件携带了附件:" + userbag.getName());
             return;
@@ -107,25 +111,26 @@ public class EmailService {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "receivemail", status = {ChannelStatus.COMMONSCENE})
     public void receiveEmail(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
-        if (temp.length != GrobalConfig.THREE) {
+        if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        if (!ProjectContext.userEmailMap.get(user.getUsername()).containsKey(temp[GrobalConfig.TWO])) {
+        if (!ProjectContext.userEmailMap.get(user.getUsername()).containsKey(temp[GrobalConfig.ONE])) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILFAIL));
             return;
         }
-        Mail mail = ProjectContext.userEmailMap.get(user.getUsername()).get(temp[GrobalConfig.TWO]);
+        Mail mail = ProjectContext.userEmailMap.get(user.getUsername()).get(temp[GrobalConfig.ONE]);
         if (mail.isIfUserBag()) {
             userbagCaculationService.addUserBagForUser(user, mail.getUserbag());
         }
         if (mail.getMoney() != null) {
             moneyCaculationService.addMoneyToUser(user, mail.getMoney().toString());
         }
-        ProjectContext.userEmailMap.get(user.getUsername()).remove(temp[GrobalConfig.TWO]);
+        ProjectContext.userEmailMap.get(user.getUsername()).remove(temp[GrobalConfig.ONE]);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILSUCCESS));
     }
 

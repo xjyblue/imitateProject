@@ -1,10 +1,11 @@
 package service.auctionservice.service;
 
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
+import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.context.ProjectContext;
-import core.order.Order;
+import core.annotation.Order;
 import io.netty.channel.Channel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
+@Region
 public class AuctionService {
     @Autowired
     private UserbagService userbagService;
@@ -49,6 +51,7 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "eau",status = {ChannelStatus.COMMONSCENE})
     public void enterAuctionView(Channel channel, String msg) {
         ProjectContext.channelStatus.put(channel, ChannelStatus.AUCTION);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTER_AUCTION_VIEW));
@@ -60,26 +63,10 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qt")
+    @Order(orderMsg = "qau",status = {ChannelStatus.AUCTION})
     public void outAuctionView(Channel channel, String msg) {
         ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUT_AUCTION_VIEW));
-    }
-
-    /**
-     * aoi
-     */
-    @Order(orderMsg = "aoi")
-    public void aoiMethod(Channel channel, String msg) {
-        userService.aoiMethod(channel, msg);
-    }
-
-    /**
-     * 展示背包物品
-     */
-    @Order(orderMsg = "qb")
-    public void queryUserbagInfo(Channel channel, String msg) {
-        userbagService.refreshUserbagInfo(channel, msg);
     }
 
     /**
@@ -88,7 +75,7 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "q-au")
+    @Order(orderMsg = "queryau",status = {ChannelStatus.AUCTION})
     public void queryAuctionItems(Channel channel, String msg) {
         refreshAuctionItems(channel);
     }
@@ -99,7 +86,7 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "sj=")
+    @Order(orderMsg = "sj=",status = {ChannelStatus.AUCTION})
     public void upAuctionItem(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ProjectContext.channelToUserMap.get(channel);
@@ -142,7 +129,7 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qp=")
+    @Order(orderMsg = "qp=",status = {ChannelStatus.AUCTION})
     public void getAuctionItem(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ProjectContext.channelToUserMap.get(channel);
@@ -191,12 +178,12 @@ public class AuctionService {
                     return;
                 }
 //              用户金币校验
-                if (!moneyCaculationService.checkUserHasEnoughMoney(user, temp[2])) {
+                if (!moneyCaculationService.checkUserHasEnoughMoney(user, temp[GrobalConfig.TWO])) {
                     channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMONEYTOGIVE));
                     return;
                 }
 //              参加竞拍价格和物品价格校验
-                if (Integer.parseInt(temp[2]) < auctionItem.getBuyMoney() + 1) {
+                if (Integer.parseInt(temp[GrobalConfig.TWO]) < auctionItem.getBuyMoney() + 1) {
                     channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NO_ENOUGH_MONEY_FOR_AUCTION));
                     return;
                 }

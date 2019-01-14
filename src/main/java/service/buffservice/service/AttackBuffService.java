@@ -40,6 +40,7 @@ public class AttackBuffService {
      * 普通攻击激活攻击buff效果，技能往下走
      */
     public static final int COMMON_ATTACK_FLAG = 0;
+
     /**
      * 填充攻击时技能产生的所有buff
      *
@@ -51,7 +52,6 @@ public class AttackBuffService {
      */
     public int buffSolve(Userskillrelation userskillrelation, UserSkill userSkill, Monster monster, User user) {
         for (Map.Entry<String, Integer> entry : userSkill.getBuffMap().entrySet()) {
-
 //          处理怪物中毒类型的buff,人物让怪物中毒
             if (entry.getKey().equals(BuffConstant.POISONINGBUFF)) {
                 poisoningBuffSolve(monster, entry.getKey(), entry.getValue());
@@ -71,19 +71,28 @@ public class AttackBuffService {
             if (entry.getKey().equals(BuffConstant.ALLPERSON)) {
                 return allPersonBuffSolve(user, userskillrelation, userSkill);
             }
-
-//          召唤使用召唤技能，召唤出怪物产生召唤buff，代表召唤怪在战斗中出现的时间
-            if (entry.getKey().equals(BuffConstant.BABYBUF)) {
-                babyBuffSolve(user, entry.getValue());
-            }
-
 //          集体解除控制
             if (entry.getKey().equals(BuffConstant.RELIEVEBUFF)) {
                 relieveBuffSolve(user);
             }
+//          嘲讽
+            if (entry.getKey().equals(BuffConstant.TAUNTBUFF)) {
+                tauntBuffSolve(user, entry.getValue());
+            }
         }
 
         return COMMON_ATTACK_FLAG;
+    }
+
+    /**
+     * 处理嘲讽buff
+     *
+     * @param user
+     */
+    private void tauntBuffSolve(User user, Integer buffValue) {
+        Buff buff = ProjectContext.buffMap.get(buffValue);
+        user.getBuffMap().put(BuffConstant.TAUNTBUFF, buff.getBufferId());
+        user.getUserBuffEndTimeMap().put(BuffConstant.TAUNTBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
     }
 
     /**
@@ -141,18 +150,6 @@ public class AttackBuffService {
     }
 
     /**
-     * 星宠师宠物buff激活
-     *
-     * @param user
-     * @param buffValue
-     */
-    private void babyBuffSolve(User user, Integer buffValue) {
-        Buff buff = ProjectContext.buffMap.get(buffValue);
-        user.getBuffMap().put(BuffConstant.BABYBUF, buff.getBufferId());
-        ProjectContext.userBuffEndTime.get(user).put(BuffConstant.BABYBUF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
-    }
-
-    /**
      * 人技能治疗buff激活
      *
      * @param user
@@ -161,7 +158,7 @@ public class AttackBuffService {
     private void treatBuffSolve(User user, Integer buffValue) {
         Buff buff = ProjectContext.buffMap.get(buffValue);
         user.getBuffMap().put(BuffConstant.TREATMENTBUFF, buff.getBufferId());
-        ProjectContext.userBuffEndTime.get(user).put(BuffConstant.TREATMENTBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
+        user.getUserBuffEndTimeMap().put(BuffConstant.TREATMENTBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
     }
 
     /**
@@ -173,7 +170,7 @@ public class AttackBuffService {
     private void defendBuffSolve(User user, Integer buffValue) {
         Buff buff = ProjectContext.buffMap.get(buffValue);
         user.getBuffMap().put(BuffConstant.DEFENSEBUFF, buff.getBufferId());
-        ProjectContext.userBuffEndTime.get(user).put(BuffConstant.DEFENSEBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
+        user.getUserBuffEndTimeMap().put(BuffConstant.DEFENSEBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
     }
 
     /**
@@ -187,8 +184,7 @@ public class AttackBuffService {
         Buff buff = ProjectContext.buffMap.get(buffValue);
         monster.getBufMap().put(buffName, buffValue);
         Map<String, Long> tempMap = new HashMap<>(64);
-        tempMap.put(BuffConstant.POISONINGBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
-        ProjectContext.monsterBuffEndTime.put(monster, tempMap);
+        monster.getMonsterBuffEndTimeMap().put(BuffConstant.POISONINGBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
     }
 
     /**

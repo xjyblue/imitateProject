@@ -2,8 +2,7 @@ package service.attackservice.util;
 
 import service.sceneservice.entity.BossScene;
 import core.component.monster.Monster;
-import service.buffservice.entity.BuffConstant;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import service.rewardservice.service.RewardService;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
@@ -12,8 +11,9 @@ import service.teamservice.entity.Team;
 import utils.MessageUtil;
 import utils.SpringContextUtil;
 
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @ClassName AttackUtil
@@ -26,42 +26,19 @@ public class AttackUtil {
 
     public static void changeUserAttackMonster(User user, BossScene bossScene, Monster monster) {
 //      清除所有玩家对刚刚boss的战斗，如果某些玩家在战斗的话
-        if(ProjectContext.userToMonsterMap.containsKey(user)){
-            ProjectContext.userToMonsterMap.get(user).remove(monster.getId());
-        }
+        user.getUserToMonsterMap().remove(monster.getId());
 //      将所有用户弄为战斗状态
         for (Map.Entry<String, User> entry : bossScene.getUserMap().entrySet()) {
             Channel channelT = ProjectContext.userToChannelMap.get(entry.getValue());
-            if(!ProjectContext.channelStatus.get(channelT).equals(ChannelStatus.DEADSCENE)){
+            if (!ProjectContext.channelStatus.get(channelT).equals(ChannelStatus.DEADSCENE)) {
                 ProjectContext.channelStatus.put(channelT, ChannelStatus.ATTACK);
             }
         }
-
-//      刷新所有玩家的buff
-//      更新用户buff初始值
-        Map<String, Integer> map = new HashMap<>(64);
-        map.put(BuffConstant.MPBUFF, 1000);
-        map.put(BuffConstant.POISONINGBUFF, 2000);
-        map.put(BuffConstant.DEFENSEBUFF, 3000);
-        map.put(BuffConstant.SLEEPBUFF, 5000);
-        map.put(BuffConstant.TREATMENTBUFF, 6000);
-        map.put(BuffConstant.ALLPERSON, 4000);
-        map.put(BuffConstant.BABYBUF, 7000);
-        user.setBuffMap(map);
-//      buff终止时间
-        Map<String, Long> mapSecond = new HashMap<>(64);
-        mapSecond.put(BuffConstant.MPBUFF, 1000L);
-        mapSecond.put(BuffConstant.POISONINGBUFF, 2000L);
-        mapSecond.put(BuffConstant.DEFENSEBUFF, 3000L);
-        mapSecond.put(BuffConstant.SLEEPBUFF, 1000L);
-        mapSecond.put(BuffConstant.TREATMENTBUFF, 1000L);
-        mapSecond.put(BuffConstant.ALLPERSON, 1000L);
-        mapSecond.put(BuffConstant.BABYBUF, 1000L);
-        ProjectContext.userBuffEndTime.put(user, mapSecond);
     }
 
     /**
      * 战胜提示
+     *
      * @param user
      * @param monster
      */
@@ -77,16 +54,20 @@ public class AttackUtil {
 
     /**
      * 为用户添加战斗的怪物
+     *
      * @param user
      * @param monster
      */
     public static void addMonsterToUserMonsterList(User user, Monster monster) {
-        if (ProjectContext.userToMonsterMap.containsKey(user)) {
-            ProjectContext.userToMonsterMap.get(user).put(monster.getId(), monster);
-        } else {
-            Map<Integer, Monster> map = new HashMap<>(64);
-            map.put(monster.getId(), monster);
-            ProjectContext.userToMonsterMap.put(user, map);
+        user.getUserToMonsterMap().put(monster.getId(), monster);
+    }
+
+    public static void removeAllMonster(User userTarget) {
+        Set<Map.Entry<Integer, Monster>> entries = userTarget.getUserToMonsterMap().entrySet();
+        Iterator<Map.Entry<Integer, Monster>> iteratorMap = entries.iterator();
+        while (iteratorMap.hasNext()) {
+            Map.Entry<Integer, Monster> next = iteratorMap.next();
+            userTarget.getUserToMonsterMap().remove(next.getKey());
         }
     }
 }

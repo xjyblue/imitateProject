@@ -6,7 +6,7 @@ import core.component.good.HpMedicine;
 import core.component.good.MpMedicine;
 import service.buffservice.entity.BuffConstant;
 import core.config.GrobalConfig;
-import core.ChannelStatus;
+import core.channel.ChannelStatus;
 import core.component.monster.Monster;
 import io.netty.channel.Channel;
 import core.context.ProjectContext;
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 import core.packet.PacketType;
 import pojo.User;
 import service.buffservice.entity.Buff;
+import service.petservice.service.PetService;
 import service.teamservice.entity.Team;
-import service.attackservice.util.AttackUtil;
 import service.levelservice.service.LevelService;
 import utils.MessageUtil;
 
@@ -35,6 +35,8 @@ import java.util.Map;
 public class UserBuffService {
     @Autowired
     private LevelService levelService;
+    @Autowired
+    private PetService petService;
 
     private BigInteger add = new BigInteger(GrobalConfig.MPSECONDVALUE);
 
@@ -46,14 +48,15 @@ public class UserBuffService {
 
     /**
      * 刷新用户buff
+     *
      * @param user
      */
     public void refreshUserBuff(User user) {
         try {
             Channel channel = ProjectContext.userToChannelMap.get(user);
             Monster monster = null;
-            if (ProjectContext.userToMonsterMap.containsKey(user)) {
-                for (Map.Entry<Integer, Monster> monsterEntry : ProjectContext.userToMonsterMap.get(user).entrySet()) {
+            if (user.getUserToMonsterMap().size() > 0) {
+                for (Map.Entry<Integer, Monster> monsterEntry : user.getUserToMonsterMap().entrySet()) {
                     monster = monsterEntry.getValue();
                 }
             }
@@ -80,6 +83,10 @@ public class UserBuffService {
                     if (entrySecond.getKey().equals(BuffConstant.BABYBUF) && entrySecond.getValue() != 7000) {
                         refreshUserBabyBuff(user, monster, entrySecond.getValue());
                     }
+//                更新用户嘲讽buff
+                    if (entrySecond.getKey().equals(BuffConstant.TAUNTBUFF) && entrySecond.getValue() != 9000) {
+                        refreshUserTauntBuff(user);
+                    }
                 }
 //               非战斗的buff随时随地都要更新
 //               更新用户回血buff
@@ -96,12 +103,20 @@ public class UserBuffService {
         }
     }
 
+    private void refreshUserTauntBuff(User user) {
+        Long endTime = user.getUserBuffEndTimeMap().get(BuffConstant.TAUNTBUFF);
+        if (System.currentTimeMillis() > endTime) {
+            user.getBuffMap().put(BuffConstant.TAUNTBUFF, 9000);
+        }
+    }
+
     /**
      * 刷新用户mpbuff
+     *
      * @param user
      */
     private void refreshUserMpBuff(User user) {
-        //                 自动回蓝
+//      自动回蓝
         BigInteger userMp = new BigInteger(user.getMp());
         BigInteger maxMp = new BigInteger(levelService.getMaxHp(user));
         if (userMp.compareTo(maxMp) < 0) {
@@ -109,14 +124,8 @@ public class UserBuffService {
                 userMp = userMp.add(add);
                 user.setMp(userMp.toString());
             } else {
-                Long endTime = null;
+                Long endTime = user.getUserBuffEndTimeMap().get(BuffConstant.MPBUFF);
                 MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(user.getBuffMap().get(BuffConstant.MPBUFF));
-                if (!ProjectContext.userBuffEndTime.containsKey(user)) {
-                    endTime = System.currentTimeMillis() + mpMedicine.getKeepTime() * 1000;
-                    ProjectContext.userBuffEndTime.get(user).put(BuffConstant.MPBUFF, endTime);
-                } else {
-                    endTime = ProjectContext.userBuffEndTime.get(user).get(BuffConstant.MPBUFF);
-                }
                 Long currentTime = System.currentTimeMillis();
                 if (endTime > currentTime) {
                     userMp = userMp.add(new BigInteger(mpMedicine.getSecondValue()));
@@ -150,7 +159,7 @@ public class UserBuffService {
             HpMedicine hpMedicine = ProjectContext.hpMedicineMap.get(buffValue);
             if (hpMedicine.isImmediate()) {
                 Long endTime = hpMedicine.getCd() * 1000 + System.currentTimeMillis();
-                ProjectContext.userBuffEndTime.get(user).put(BuffConstant.TREATMENTBUFF, endTime);
+                user.getUserBuffEndTimeMap().put(BuffConstant.TREATMENTBUFF, endTime);
                 hpCaculationService.addUserHp(user, hpMedicine.getReplyValue());
                 user.getBuffMap().put(BuffConstant.TREATMENTBUFF, 6000);
             }
@@ -184,25 +193,11 @@ public class UserBuffService {
     private void refreshUserBabyBuff(User user, Monster monster, Integer buffValue) {
         Buff buff = ProjectContext.buffMap.get(buffValue);
         Channel channel = ProjectContext.userToChannelMap.get(user);
-        Long endTime = ProjectContext.userBuffEndTime.get(user).get(BuffConstant.BABYBUF);
-        if (System.currentTimeMillis() > endTime) {
-            user.getBuffMap().put(BuffConstant.BABYBUF, 7000);
-        } else {
-            if (ProjectContext.userToMonsterMap.containsKey(user)) {
-                for (Map.Entry<Integer, Monster> monsterEntry : ProjectContext.userToMonsterMap.get(user).entrySet()) {
-                    monster = monsterEntry.getValue();
-                }
-
-                hpCaculationService.subMonsterHp(monster, buff.getAddSecondValue());
-                if (monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
-                    monster.setStatus(GrobalConfig.DEAD);
-                    user.getBuffMap().put(BuffConstant.BABYBUF, 7000);
-                    if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
-                        AttackUtil.killBossMessageToAll(user, monster);
-                    }
-                }
-                channel.writeAndFlush(MessageUtil.turnToPacket("你的召唤兽[" + buff.getName() + "]正在对" + monster.getName() + "造成" + buff.getAddSecondValue() + "点攻击", PacketType.ATTACKMSG));
+        if (user.getUserToMonsterMap().size() > 0) {
+            for (Map.Entry<Integer, Monster> monsterEntry : user.getUserToMonsterMap().entrySet()) {
+                monster = monsterEntry.getValue();
             }
+            petService.attackMonster(monster, channel);
         }
     }
 
@@ -213,7 +208,7 @@ public class UserBuffService {
      * @param buffValue
      */
     private void refreshUserPoisoningBuff(User user, Integer buffValue) {
-        Long endTime = ProjectContext.userBuffEndTime.get(user).get(BuffConstant.POISONINGBUFF);
+        Long endTime = user.getUserBuffEndTimeMap().get(BuffConstant.POISONINGBUFF);
         Channel channel = ProjectContext.userToChannelMap.get(user);
         if (System.currentTimeMillis() > endTime) {
             user.getBuffMap().put(BuffConstant.POISONINGBUFF, 2000);
@@ -229,7 +224,7 @@ public class UserBuffService {
      * @param user
      */
     private void refreshUserSleepBuff(User user) {
-        Long endTime = ProjectContext.userBuffEndTime.get(user).get(BuffConstant.SLEEPBUFF);
+        Long endTime = user.getUserBuffEndTimeMap().get(BuffConstant.SLEEPBUFF);
         if (System.currentTimeMillis() > endTime) {
             user.getBuffMap().put(BuffConstant.SLEEPBUFF, 5000);
         }
@@ -241,7 +236,7 @@ public class UserBuffService {
      * @param user
      */
     private void refreshUserDefenseBuff(User user) {
-        Long endTime = ProjectContext.userBuffEndTime.get(user).get(BuffConstant.DEFENSEBUFF);
+        Long endTime = user.getUserBuffEndTimeMap().get(BuffConstant.DEFENSEBUFF);
         if (System.currentTimeMillis() > endTime) {
             user.getBuffMap().put(BuffConstant.DEFENSEBUFF, 3000);
         }

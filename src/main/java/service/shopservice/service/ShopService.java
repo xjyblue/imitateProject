@@ -1,5 +1,8 @@
 package service.shopservice.service;
 
+import core.channel.ChannelStatus;
+import core.annotation.Order;
+import core.annotation.Region;
 import service.caculationservice.service.UserbagCaculationService;
 import core.component.good.Equipment;
 import core.component.good.HpMedicine;
@@ -27,6 +30,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
+@Region
 public class ShopService {
     @Autowired
     private UserbagCaculationService userbagCaculationService;
@@ -36,6 +40,8 @@ public class ShopService {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "qshop",status = {ChannelStatus.COMMONSCENE,ChannelStatus.ATTACK,ChannelStatus.LABOURUNION,
+            ChannelStatus.TRADE,ChannelStatus.BOSSSCENE,ChannelStatus.AUCTION})
     public void queryShopGood(Channel channel,String msg){
         String resp = System.getProperty("line.separator")
                 + MessageConfig.MESSAGESTART
@@ -84,9 +90,11 @@ public class ShopService {
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "bshop",status = {ChannelStatus.COMMONSCENE,ChannelStatus.ATTACK,ChannelStatus.LABOURUNION,
+            ChannelStatus.TRADE,ChannelStatus.BOSSSCENE,ChannelStatus.AUCTION})
     public void buyShopGood(Channel channel,String msg){
         User user = ProjectContext.channelToUserMap.get(channel);
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;

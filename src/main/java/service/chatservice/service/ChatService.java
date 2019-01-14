@@ -1,5 +1,8 @@
 package service.chatservice.service;
 
+import core.channel.ChannelStatus;
+import core.annotation.Order;
+import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import io.netty.channel.Channel;
@@ -18,15 +21,18 @@ import java.util.Map;
  * @Version 1.0
  **/
 @Component
+@Region
 public class ChatService {
     /**
      * 全服大喇叭
+     *
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "chatAll", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE,ChannelStatus.DEADSCENE})
     public void chatAll(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -44,12 +50,14 @@ public class ChatService {
 
     /**
      * 单人聊天
+     *
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "chatOne",status = {ChannelStatus.COMMONSCENE,ChannelStatus.ATTACK,ChannelStatus.BOSSSCENE,ChannelStatus.DEADSCENE})
     public void chatOne(Channel channel, String msg) {
         User user = ProjectContext.channelToUserMap.get(channel);
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -57,7 +65,7 @@ public class ChatService {
 
         for (Map.Entry<Channel, User> entry : ProjectContext.channelToUserMap.entrySet()) {
             Channel channelTemp = entry.getKey();
-            if(entry.getValue().getUsername().equals(temp[1])){
+            if (entry.getValue().getUsername().equals(temp[1])) {
                 channelTemp.writeAndFlush(MessageUtil.turnToPacket("您收到来自" + user.getUsername() + "的私聊大喇叭:" + temp[2]));
                 return;
             }

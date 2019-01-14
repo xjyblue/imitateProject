@@ -1,18 +1,16 @@
 package service.petservice.service.entity;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * @ClassName Pet
+ * @ClassName PetConfig
  * @Description TODO
  * @Author xiaojianyu
- * @Date 2019/1/10 12:22
+ * @Date 2019/1/9 10:35
  * @Version 1.0
  **/
-public class Pet {
+public class PetConfig {
     /**
      * 宠物的id
      */
@@ -28,14 +26,14 @@ public class Pet {
     /**
      * 宠物技能取出
      */
-    private List<PetSkillConfig> skillList = new ArrayList<>();
+    private Map<String,PetSkillConfig> petSkillConfigMap = new HashMap<>();
 
-    public String getId() {
-        return id;
+    public Map<String, PetSkillConfig> getPetSkillConfigMap() {
+        return petSkillConfigMap;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setPetSkillConfigMap(Map<String, PetSkillConfig> petSkillConfigMap) {
+        this.petSkillConfigMap = petSkillConfigMap;
     }
 
     public String getName() {
@@ -54,11 +52,11 @@ public class Pet {
         this.skills = skills;
     }
 
-    public List<PetSkillConfig> getSkillList() {
-        return skillList;
+    public String getId() {
+        return id;
     }
 
-    public void setSkillList(List<PetSkillConfig> skillList) {
-        this.skillList = skillList;
+    public void setId(String id) {
+        this.id = id;
     }
 }

@@ -1,5 +1,8 @@
 package service.npcservice.service;
 
+import core.channel.ChannelStatus;
+import core.annotation.Order;
+import core.annotation.Region;
 import core.component.good.Equipment;
 import core.component.good.parent.BaseGood;
 import service.npcservice.entity.Npc;
@@ -29,6 +32,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
+@Region
 public class NpcService {
     @Autowired
     private AchievementService achievementService;
@@ -37,11 +41,13 @@ public class NpcService {
 
     /**
      * 和npc交流
+     *
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "npcTalk",status = {ChannelStatus.COMMONSCENE})
     public void talkMethod(Channel channel, String msg) {
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         User user = ProjectContext.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -67,11 +73,13 @@ public class NpcService {
 
     /**
      * 向npc兑换装备
+     *
      * @param channel
      * @param msg
      */
+    @Order(orderMsg = "npcGet",status = {ChannelStatus.COMMONSCENE})
     public void getEquipFromNpc(Channel channel, String msg) {
-        String[] temp = msg.split("-");
+        String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -109,7 +117,7 @@ public class NpcService {
 
 //        新增武器
         String[] getGoods = npc.getGetGoods().split("-");
-        for(String getGood : getGoods){
+        for (String getGood : getGoods) {
             Equipment equipment = ProjectContext.equipmentMap.get(Integer.parseInt(getGood));
             Userbag userbag1 = new Userbag();
             userbag1.setWid(equipment.getId());
