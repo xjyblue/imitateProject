@@ -1,7 +1,10 @@
 package service.bossservice.service;
 
+import config.impl.excel.BossSceneConfigResourceLoad;
+import config.impl.excel.SceneResourceLoad;
+import config.impl.thread.ThreadPeriodTaskLoad;
 import core.annotation.Region;
-import core.context.ThreadContext;
+import core.context.ProjectContext;
 import service.sceneservice.entity.BossScene;
 import core.component.monster.Monster;
 import service.sceneservice.entity.Scene;
@@ -9,13 +12,13 @@ import core.config.MessageConfig;
 import core.config.GrobalConfig;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
 import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import service.teamservice.entity.Team;
 import service.levelservice.service.LevelService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.*;
@@ -48,7 +51,7 @@ public class BossService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
 //      10级以下无法进入副本
         if (levelService.getLevelByExperience(user.getExperience()) < GrobalConfig.MIN_ENTER_BOSSSCENE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOLEVELTOMOVE));
@@ -57,13 +60,13 @@ public class BossService {
         Team team = null;
 
 //      处理用户死亡后重连副本逻辑
-        if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
-            ProjectContext.channelStatus.put(channel, ChannelStatus.BOSSSCENE);
+        if (user.getTeamId() != null && BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
+            ChannelUtil.channelStatus.put(channel, ChannelStatus.BOSSSCENE);
 //          进入副本，用户场景线程转移
-            BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+            BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
             bossScene.getUserMap().put(user.getUsername(), user);
 
-            Scene scene = ProjectContext.sceneMap.get(user.getPos());
+            Scene scene = SceneResourceLoad.sceneMap.get(user.getPos());
             scene.getUserMap().remove(user.getUsername());
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REBRORNANDCONNECTBOSSAREA));
             return;
@@ -94,11 +97,11 @@ public class BossService {
         }
 //      生成新副本
         BossScene bossScene = new BossScene(user.getTeamId(), temp[1]);
-        ProjectContext.bossAreaMap.put(team.getTeamId(), bossScene);
+        BossSceneConfigResourceLoad.bossAreaMap.put(team.getTeamId(), bossScene);
 //      开启副本场景帧频线程
-        Future future = ThreadContext.BOSS_AREA_THREAD_POOL.scheduleAtFixedRate(bossScene, 0, 30, TimeUnit.MILLISECONDS);
-        ProjectContext.futureMap.put(bossScene.getTeamId(), future);
-        bossScene.setFutureMap(ProjectContext.futureMap);
+        Future future = ThreadPeriodTaskLoad.BOSS_AREA_THREAD_POOL.scheduleAtFixedRate(bossScene, 0, 30, TimeUnit.MILLISECONDS);
+        ThreadPeriodTaskLoad.futureMap.put(bossScene.getTeamId(), future);
+        bossScene.setFutureMap(ThreadPeriodTaskLoad.futureMap);
 
 //      改变用户渠道状态
         changeChannelStatus(team, bossScene);
@@ -130,14 +133,14 @@ public class BossService {
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
 //          移除之前场景线程的用户
             User user = entry.getValue();
-            Scene sceneOld = ProjectContext.sceneMap.get(user.getPos());
+            Scene sceneOld = SceneResourceLoad.sceneMap.get(user.getPos());
             sceneOld.getUserMap().remove(user.getUsername());
 //          新场景添加用户
             bossScene.getUserMap().put(user.getUsername(), user);
 
 //          更新渠道的状态
-            Channel channel = ProjectContext.userToChannelMap.get(entry.getValue());
-            ProjectContext.channelStatus.put(channel, ChannelStatus.BOSSSCENE);
+            Channel channel = ChannelUtil.userToChannelMap.get(entry.getValue());
+            ChannelUtil.channelStatus.put(channel, ChannelStatus.BOSSSCENE);
 
             String resp = "进入" + bossScene.getBossName() + "副本,出现boss有：";
             for (Map.Entry<String, Monster> entryMonster : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {

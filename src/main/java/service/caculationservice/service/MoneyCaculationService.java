@@ -2,15 +2,13 @@ package service.caculationservice.service;
 
 import service.achievementservice.service.AchievementService;
 import core.config.MessageConfig;
-import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
+import utils.ChannelUtil;
 import utils.MessageUtil;
-
-import java.math.BigInteger;
 
 /**
  * @ClassName MoneyCaculationService
@@ -51,7 +49,7 @@ public class MoneyCaculationService {
         int usermoney = Integer.parseInt(user.getMoney());
         int removemoney = Integer.parseInt(money);
         if (removemoney > usermoney) {
-            Channel channelT = ProjectContext.userToChannelMap.get(user);
+            Channel channelT = ChannelUtil.userToChannelMap.get(user);
             channelT.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMONEYTOGIVE));
             return;
         }

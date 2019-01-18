@@ -1,5 +1,7 @@
 package core.annotation;
 
+import org.springframework.stereotype.Component;
+
 import java.lang.annotation.*;
 
 /**
@@ -12,6 +14,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})//定义注解的作用目标**作用范围字段、枚举的常量/方法
 @Documented//说明该注解将被包含在javadoc中
+@Component
 public @interface Region {
 
 }

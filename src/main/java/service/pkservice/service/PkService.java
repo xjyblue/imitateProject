@@ -9,13 +9,13 @@ import core.config.MessageConfig;
 import core.config.GrobalConfig;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userskillrelation;
 import service.skillservice.entity.UserSkill;
 import service.skillservice.service.SkillService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 import service.userservice.service.UserService;
 
@@ -51,13 +51,13 @@ public class PkService {
     @Order(orderMsg = "pk", status = {ChannelStatus.COMMONSCENE})
     public void pkOthers(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
         User userTarget = userService.getUserByNameFromSession(temp[1]);
-        Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
+        Channel channelTarget = ChannelUtil.userToChannelMap.get(userTarget);
 //       解决夸场景pk禁止
         if (userTarget != null && user != null && !user.getPos().equals(userTarget.getPos())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOSUPPORTREMOTEPK));
@@ -114,7 +114,7 @@ public class PkService {
 //          pk触发pk胜利成就
             achievementService.executeFirstPKWin(user);
 
-            ProjectContext.channelStatus.put(channelTarget, ChannelStatus.DEADSCENE);
+            ChannelUtil.channelStatus.put(channelTarget, ChannelStatus.DEADSCENE);
             return;
         }
         String resp = "你受到来自：" + user.getUsername() + "的" + userSkill.getSkillName() + "的攻击，伤害为["

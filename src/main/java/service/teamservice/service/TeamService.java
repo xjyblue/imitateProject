@@ -1,14 +1,15 @@
 package service.teamservice.service;
 
+import config.impl.excel.BossSceneConfigResourceLoad;
 import core.channel.ChannelStatus;
 import core.annotation.Region;
 import core.config.GrobalConfig;
+import core.context.ProjectContext;
 import service.achievementservice.service.AchievementService;
 import service.sceneservice.entity.BossScene;
 import core.config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.TeamapplyinfoMapper;
-import core.context.ProjectContext;
 import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import pojo.Teamapplyinfo;
 import pojo.TeamapplyinfoExample;
 import pojo.User;
 import service.teamservice.entity.Team;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 import service.userservice.service.UserService;
 
@@ -34,12 +36,13 @@ import java.util.UUID;
 @Component
 @Region
 public class TeamService {
-    @Autowired
-    private TeamapplyinfoMapper teamapplyinfoMapper;
+
     @Autowired
     private AchievementService achievementService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private TeamapplyinfoMapper teamapplyinfoMapper;
 
     /**
      * 查看队伍
@@ -194,7 +197,7 @@ public class TeamService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         Teamapplyinfo teamapplyinfo = teamapplyinfoMapper.selectByPrimaryKey(temp[1]);
         if (teamapplyinfo == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDTEAMAPPLYINFO));
@@ -205,7 +208,7 @@ public class TeamService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.USERNOONLINETOADDTEAM));
             return;
         }
-        Channel channelTarget = ProjectContext.userToChannelMap.get(userTarget);
+        Channel channelTarget = ChannelUtil.userToChannelMap.get(userTarget);
         Team team = ProjectContext.teamMap.get(user.getTeamId());
 //          加入队伍
         team.getUserMap().put(userTarget.getUsername(), userTarget);
@@ -228,7 +231,7 @@ public class TeamService {
     @Order(orderMsg = "tlu",status = {ChannelStatus.TEAM})
     public void queryTeamApplyInfo(Channel channel, String msg) {
 //      展示申请者的信息
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getTeamId() == null || !ProjectContext.teamMap.containsKey(user.getTeamId())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTEAMMESSAGE));
             return;
@@ -254,7 +257,7 @@ public class TeamService {
     private void sendMessageToAll(User user, Team team) {
         boolean flag = true;
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
-            Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
+            Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
             if (entry.getValue() == user) {
                 channelTemp.writeAndFlush(MessageUtil.turnToPacket("你已离开队伍"));
                 entry.getValue().setTeamId(null);
@@ -284,7 +287,7 @@ public class TeamService {
     }
 
     private User getUser(Channel channel) {
-        return ProjectContext.channelToUserMap.get(channel);
+        return ChannelUtil.channelToUserMap.get(channel);
     }
 
     /**
@@ -296,13 +299,13 @@ public class TeamService {
         Map<String, User> userMap = ProjectContext.teamMap.get(user.getTeamId()).getUserMap();
         if (userMap.size() == 1) {
 //          普通的移除
-            if (!ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
+            if (!BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
                 ProjectContext.teamMap.remove(user.getTeamId());
                 return;
             }
 
 //          游戏副本特殊处理
-            BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+            BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
             if (bossScene == null) {
                 return;
             }
@@ -317,7 +320,7 @@ public class TeamService {
         if (user == team.getLeader()) {
             boolean flag = true;
             for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
-                Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
+                Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
                 if (entry.getValue() != user) {
                     channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "已离线退出队伍"));
                     if (flag) {
@@ -328,34 +331,34 @@ public class TeamService {
                 }
             }
             team.getUserMap().remove(user.getUsername());
-            if (!ProjectContext.bossAreaMap.containsKey(team.getTeamId())) {
+            if (!BossSceneConfigResourceLoad.bossAreaMap.containsKey(team.getTeamId())) {
                 return;
             }
-            BossScene bossScene = ProjectContext.bossAreaMap.get(team.getTeamId());
+            BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(team.getTeamId());
             bossScene.getDamageAll().remove(user);
-            ProjectContext.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
+            BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
             return;
         }
 
 //      普通玩家掉线
         for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
-            Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
+            Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
             channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "已离线退出队伍"));
         }
         //    处理玩家打副本
-        if (ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
-            BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+        if (BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
+            BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
 //          移除玩家的伤害统计
             bossScene.getDamageAll().remove(user);
         }
 
         ProjectContext.teamMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
-        ProjectContext.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
+        BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
     }
 
     @Order(orderMsg = "eteam",status = {ChannelStatus.COMMONSCENE})
     public void enterTeamView(Channel channel, String msg) {
-        ProjectContext.channelStatus.put(channel, ChannelStatus.TEAM);
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.TEAM);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERTEAMMANAGERVIEW));
     }
 
@@ -367,7 +370,7 @@ public class TeamService {
      */
     @Order(orderMsg = "qteam",status = {ChannelStatus.TEAM})
     public void outTeamView(Channel channel, String msg) {
-        ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTTEAMVIEW));
     }
 }

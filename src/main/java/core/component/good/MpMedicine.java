@@ -1,6 +1,10 @@
 package core.component.good;
 
+import com.google.common.collect.Maps;
 import core.component.good.parent.BaseGood;
+
+import java.util.Map;
+
 /**
  * @ClassName MpMedicine
  * @Description TODO

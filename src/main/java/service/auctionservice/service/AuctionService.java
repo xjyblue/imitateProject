@@ -18,6 +18,7 @@ import service.caculationservice.service.UserbagCaculationService;
 import service.emailservice.service.EmailService;
 import service.userbagservice.service.UserbagService;
 import service.userservice.service.UserService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.Map;
@@ -53,7 +54,7 @@ public class AuctionService {
      */
     @Order(orderMsg = "eau",status = {ChannelStatus.COMMONSCENE})
     public void enterAuctionView(Channel channel, String msg) {
-        ProjectContext.channelStatus.put(channel, ChannelStatus.AUCTION);
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.AUCTION);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTER_AUCTION_VIEW));
     }
 
@@ -65,7 +66,7 @@ public class AuctionService {
      */
     @Order(orderMsg = "qau",status = {ChannelStatus.AUCTION})
     public void outAuctionView(Channel channel, String msg) {
-        ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUT_AUCTION_VIEW));
     }
 
@@ -89,7 +90,7 @@ public class AuctionService {
     @Order(orderMsg = "sj=",status = {ChannelStatus.AUCTION})
     public void upAuctionItem(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.FIVE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -132,7 +133,7 @@ public class AuctionService {
     @Order(orderMsg = "qp=",status = {ChannelStatus.AUCTION})
     public void getAuctionItem(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
 //      拍卖物品校验
         if (!ProjectContext.auctionItemMap.containsKey(temp[GrobalConfig.ONE])) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NO_THIS_AUCTIONITEM));

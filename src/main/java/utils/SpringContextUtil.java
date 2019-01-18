@@ -2,6 +2,7 @@ package utils;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 /**
  * @ClassName SpringContextUtil
@@ -10,6 +11,7 @@ import org.springframework.context.ApplicationContextAware;
  * @Date 2019/1/4 11:11
  * @Version 1.0
  **/
+@Component
 public class SpringContextUtil implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;

@@ -1,6 +1,6 @@
 package utils;
 
-import core.context.ProjectContext;
+import config.impl.excel.SceneResourceLoad;
 import io.netty.channel.ChannelHandlerContext;
 import pojo.User;
 import service.sceneservice.entity.Scene;
@@ -27,20 +27,20 @@ public class ProjectContextUtil {
             teamService.handleUserOffline(user);
         }
 //      移除场景下的玩家
-        Scene scene = ProjectContext.sceneMap.get(user.getPos());
+        Scene scene = SceneResourceLoad.sceneMap.get(user.getPos());
         if (scene.getUserMap().containsKey(user.getUsername())) {
             scene.getUserMap().remove(user.getUsername());
         }
 //              移除channel和用户的关联
-        if (ProjectContext.channelToUserMap.containsKey(ctx.channel())) {
-            ProjectContext.channelToUserMap.remove(ctx.channel());
+        if (ChannelUtil.channelToUserMap.containsKey(ctx.channel())) {
+            ChannelUtil.channelToUserMap.remove(ctx.channel());
         }
-        if (ProjectContext.userToChannelMap.containsKey(user)) {
-            ProjectContext.userToChannelMap.remove(user);
+        if (ChannelUtil.userToChannelMap.containsKey(user)) {
+            ChannelUtil.userToChannelMap.remove(user);
         }
 //              移除渠道状态
-        if (ProjectContext.channelStatus.containsKey(ctx.channel())) {
-            ProjectContext.channelStatus.remove(ctx.channel());
+        if (ChannelUtil.channelStatus.containsKey(ctx.channel())) {
+            ChannelUtil.channelStatus.remove(ctx.channel());
         }
     }
 }

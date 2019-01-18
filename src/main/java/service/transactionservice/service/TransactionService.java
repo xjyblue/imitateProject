@@ -1,6 +1,9 @@
 package service.transactionservice.service;
 
+import config.impl.excel.EquipmentResourceLoad;
+import config.impl.excel.MpMedicineResourceLoad;
 import core.annotation.Region;
+import core.packet.PacketType;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
@@ -16,10 +19,10 @@ import core.context.ProjectContext;
 import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import core.packet.PacketType;
 import pojo.User;
 import pojo.Userbag;
 import service.transactionservice.entity.Trade;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 import service.userservice.service.UserService;
 
@@ -63,7 +66,7 @@ public class TransactionService {
      */
     @Order(orderMsg = "ntrade", status = {ChannelStatus.COMMONSCENE})
     public void cancelTrade(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getTraceId() == null || !ProjectContext.tradeMap.containsKey(user.getTraceId())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOCREATETRADE));
             return;
@@ -97,7 +100,7 @@ public class TransactionService {
     @Order(orderMsg = "ytrade", status = {ChannelStatus.COMMONSCENE})
     public void agreeTrade(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
@@ -131,9 +134,9 @@ public class TransactionService {
 //      把用户和另外一个用户设置成交易状态
 //      处理建立交易的逻辑
         user.setTraceId(userStart.getTraceId());
-        ProjectContext.channelStatus.put(channel, ChannelStatus.TRADE);
-        Channel channelStart = ProjectContext.userToChannelMap.get(userStart);
-        ProjectContext.channelStatus.put(channelStart, ChannelStatus.TRADE);
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.TRADE);
+        Channel channelStart = ChannelUtil.userToChannelMap.get(userStart);
+        ChannelUtil.channelStatus.put(channelStart, ChannelStatus.TRADE);
         trade.setUserTo(user);
         trade.setEndTime(System.currentTimeMillis() + 500000);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSCREATETRADE));
@@ -152,17 +155,17 @@ public class TransactionService {
     @Order(orderMsg = "iftrade", status = {ChannelStatus.COMMONSCENE})
     public void createTrade(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        Channel channelTarget = ProjectContext.userToChannelMap.get(userService.getUserByNameFromSession(temp[1]));
+        Channel channelTarget = ChannelUtil.userToChannelMap.get(userService.getUserByNameFromSession(temp[1]));
         if (channelTarget == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTRACEUSER));
             return;
         }
-        User userTarget = ProjectContext.channelToUserMap.get(channelTarget);
+        User userTarget = ChannelUtil.channelToUserMap.get(channelTarget);
         if (user.getTraceId() != null && ProjectContext.tradeMap.containsKey(user.getTraceId())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.MANISINGTRADING));
             return;
@@ -204,10 +207,10 @@ public class TransactionService {
      */
     @Order(orderMsg = "jyq",status = {ChannelStatus.TRADE})
     public void quitTrade(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
-        Channel channelStart = ProjectContext.userToChannelMap.get(trade.getUserStart());
-        Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
+        Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
+        Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         try {
             agreelock.lock();
             trade.setIfexe(false);
@@ -232,8 +235,8 @@ public class TransactionService {
 //           内存交易单移除
         ProjectContext.tradeMap.remove(trade.getTradeId());
 //          渠道状态还原
-        ProjectContext.channelStatus.put(channelStart, ChannelStatus.COMMONSCENE);
-        ProjectContext.channelStatus.put(channelEnd, ChannelStatus.COMMONSCENE);
+        ChannelUtil.channelStatus.put(channelStart, ChannelStatus.COMMONSCENE);
+        ChannelUtil.channelStatus.put(channelEnd, ChannelStatus.COMMONSCENE);
 //          人物tradeid移除
         trade.getUserStart().setTraceId(null);
         trade.getUserTo().setTraceId(null);
@@ -250,10 +253,10 @@ public class TransactionService {
      */
     @Order(orderMsg = "jyy",status = {ChannelStatus.TRADE})
     public void trading(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
-        Channel channelStart = ProjectContext.userToChannelMap.get(trade.getUserStart());
-        Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
+        Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
+        Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         try {
             agreelock.lock();
             if (!trade.isIfexe()) {
@@ -305,8 +308,8 @@ public class TransactionService {
 //           内存交易单移除
         ProjectContext.tradeMap.remove(trade.getTradeId());
 //          渠道状态还原
-        ProjectContext.channelStatus.put(channelStart, ChannelStatus.COMMONSCENE);
-        ProjectContext.channelStatus.put(channelEnd, ChannelStatus.COMMONSCENE);
+        ChannelUtil.channelStatus.put(channelStart, ChannelStatus.COMMONSCENE);
+        ChannelUtil.channelStatus.put(channelEnd, ChannelStatus.COMMONSCENE);
 //          人物tradeid移除
         trade.getUserStart().setTraceId(null);
         trade.getUserTo().setTraceId(null);
@@ -314,8 +317,8 @@ public class TransactionService {
         trade.getUserTo().setIfTrade(false);
         trade.getUserStart().setIfTrade(false);
 
-        userbagService.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserTo()), null);
-        userbagService.refreshUserbagInfo(ProjectContext.userToChannelMap.get(trade.getUserStart()), null);
+        userbagService.refreshUserbagInfo(ChannelUtil.userToChannelMap.get(trade.getUserTo()), null);
+        userbagService.refreshUserbagInfo(ChannelUtil.userToChannelMap.get(trade.getUserStart()), null);
 
 //          第一次成功交易触发任务
         achievementService.executeFirstTrade(trade.getUserStart(), trade.getUserTo());
@@ -339,10 +342,10 @@ public class TransactionService {
      */
     @Order(orderMsg = "xjbjy",status = {ChannelStatus.TRADE})
     public void reduceMoney(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
-        Channel channelStart = ProjectContext.userToChannelMap.get(trade.getUserStart());
-        Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
+        Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
+        Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -382,10 +385,10 @@ public class TransactionService {
      */
     @Order(orderMsg = "jbjy",status = {ChannelStatus.TRADE})
     public void addMoney(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
-        Channel channelStart = ProjectContext.userToChannelMap.get(trade.getUserStart());
-        Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
+        Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
+        Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -417,10 +420,10 @@ public class TransactionService {
      */
     @Order(orderMsg = "jyg",status = {ChannelStatus.TRADE})
     public void addGood(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
-        Channel channelStart = ProjectContext.userToChannelMap.get(trade.getUserStart());
-        Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
+        Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
+        Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
@@ -456,10 +459,10 @@ public class TransactionService {
      */
     @Order(orderMsg = "xjyg",status = {ChannelStatus.TRADE})
     public void reduceGood(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
-        Channel channelStart = ProjectContext.userToChannelMap.get(trade.getUserStart());
-        Channel channelEnd = ProjectContext.userToChannelMap.get(trade.getUserTo());
+        Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
+        Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
 //      移除交易单号武平到背包格子
         if (temp.length != GrobalConfig.THREE) {
@@ -580,11 +583,11 @@ public class TransactionService {
      */
     private String getUserbagInfoByUserbag(Userbag userbag) {
         if (userbag.getTypeof().equals(BaseGood.MPMEDICINE)) {
-            MpMedicine mpMedicine = ProjectContext.mpMedicineMap.get(userbag.getWid());
+            MpMedicine mpMedicine = MpMedicineResourceLoad.mpMedicineMap.get(userbag.getWid());
             return mpMedicine.getName();
         }
         if (userbag.getTypeof().equals(BaseGood.EQUIPMENT)) {
-            Equipment equipment = ProjectContext.equipmentMap.get(userbag.getWid());
+            Equipment equipment = EquipmentResourceLoad.equipmentMap.get(userbag.getWid());
             return equipment.getName();
         }
         return null;

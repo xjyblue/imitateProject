@@ -1,14 +1,19 @@
-package utils;
+package config.impl.reflect;
 
+import com.google.common.collect.Maps;
+import config.interf.IResourceLoad;
 import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.reflect.InvokeMethod;
-import core.context.ProjectContext;
 import core.annotation.Order;
+import org.springframework.stereotype.Component;
+import utils.SpringContextUtil;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @ClassName ReflectMethodUtil
@@ -17,20 +22,40 @@ import java.util.Map;
  * @Date 2019/1/4 11:11
  * @Version 1.0
  **/
-public class ReflectMethodUtil {
+@Component
+public class ReflectMethodLoad implements IResourceLoad {
 
+    /**
+     * 指令-方法
+     */
+    public final static Map<String, InvokeMethod> methodMap = Maps.newHashMap();
+    /**
+     * 指令-状态
+     */
+    public final static Map<String, Set<String>> orderStatusMap = Maps.newHashMap();
 
-    public static void scanRegionAnno(){
+    @PostConstruct
+    @Override
+    public void load() {
+        scanRegionAnno();
+    }
+
+    /**
+     * 找到领域注解
+     */
+    public void scanRegionAnno() {
         Map<String, Object> map = SpringContextUtil.getApplicationContext().getBeansWithAnnotation(Region.class);
         for (Map.Entry<String, Object> entry : map.entrySet()) {
-           scanOrderAnno(entry.getValue());
+            scanOrderAnno(entry.getValue());
         }
     }
+
     /**
      * 反射
+     *
      * @param o
      */
-    public static void scanOrderAnno(Object o) {
+    public void scanOrderAnno(Object o) {
         Class<?> t = o.getClass();
         Method[] method = t.getMethods();
         for (Method m : method) {
@@ -45,21 +70,21 @@ public class ReflectMethodUtil {
                 if (!order.ifRandomkey()) {
 //                  加载命令方法
                     invokeMethod.setOrder(orderMsg);
-                    ProjectContext.methodMap.put(invokeMethod.getOrder(), invokeMethod);
-                    ProjectContext.orderStatusMap.put(invokeMethod.getOrder(), new HashSet<String>());
+                    methodMap.put(invokeMethod.getOrder(), invokeMethod);
+                    orderStatusMap.put(invokeMethod.getOrder(), new HashSet<String>());
 //                  加载命令状态
                     for (String statusT : status) {
-                        ProjectContext.orderStatusMap.get(invokeMethod.getOrder()).add(statusT);
+                        orderStatusMap.get(invokeMethod.getOrder()).add(statusT);
                     }
                 } else {
 //                  加载特殊键位
                     int count = 1;
                     while (count < GrobalConfig.TEN) {
                         invokeMethod.setOrder(count + "");
-                        ProjectContext.methodMap.put(invokeMethod.getOrder(), invokeMethod);
-                        ProjectContext.orderStatusMap.put(invokeMethod.getOrder(), new HashSet<String>());
+                        methodMap.put(invokeMethod.getOrder(), invokeMethod);
+                        orderStatusMap.put(invokeMethod.getOrder(), new HashSet<String>());
                         for (String statusT : status) {
-                            ProjectContext.orderStatusMap.get(invokeMethod.getOrder()).add(statusT);
+                            orderStatusMap.get(invokeMethod.getOrder()).add(statusT);
                         }
                         count++;
                     }
@@ -67,5 +92,4 @@ public class ReflectMethodUtil {
             }
         }
     }
-
 }

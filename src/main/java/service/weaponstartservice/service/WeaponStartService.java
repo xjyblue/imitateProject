@@ -5,7 +5,6 @@ import core.annotation.Order;
 import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
-import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import mapper.UserbagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import pojo.User;
 import pojo.Userbag;
 import service.caculationservice.service.MoneyCaculationService;
 import service.userbagservice.service.UserbagService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 /**
@@ -47,7 +47,7 @@ public class WeaponStartService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXISTBAG));

@@ -108,13 +108,13 @@
         </if>
     </delete>
     <insert id="insert" parameterType="pojo.User">
-    insert into user (username, password, status, 
-      pos, mp, hp, money, 
-      roleId, experience, unionId, 
+    insert into user (username, password, status,
+      pos, mp, hp, money,
+      roleId, experience, unionId,
       unionLevel)
-    values (#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, 
-      #{pos,jdbcType=VARCHAR}, #{mp,jdbcType=VARCHAR}, #{hp,jdbcType=VARCHAR}, #{money,jdbcType=VARCHAR}, 
-      #{roleid,jdbcType=INTEGER}, #{experience,jdbcType=INTEGER}, #{unionid,jdbcType=VARCHAR}, 
+    values (#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR},
+      #{pos,jdbcType=VARCHAR}, #{mp,jdbcType=VARCHAR}, #{hp,jdbcType=VARCHAR}, #{money,jdbcType=VARCHAR},
+      #{roleid,jdbcType=INTEGER}, #{experience,jdbcType=INTEGER}, #{unionid,jdbcType=VARCHAR},
       #{unionlevel,jdbcType=INTEGER})
   </insert>
     <insert id="insertSelective" parameterType="pojo.User">

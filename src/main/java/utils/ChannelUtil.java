@@ -1,12 +1,13 @@
 package utils;
 
-import core.channel.ChannelUserInfo;
+import com.google.common.collect.Maps;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
-import core.packet.PacketProto;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import pojo.User;
+
+import java.util.Map;
 
 /**
  * @ClassName ChannelUtil
@@ -16,39 +17,33 @@ import pojo.User;
  * @Version 1.0
  **/
 public class ChannelUtil {
-
-    public static final AttributeKey<ChannelUserInfo> CHANNEL_TO_USER_KEY = AttributeKey.valueOf("channelToUserKey");
-
     /**
-     * 给channel的attribute添加用户属性
-     * @param channel
-     * @param user
+     * 全局渠道
      */
-    public static void setUserInfoToChannel(Channel channel, User user) {
-        Attribute<ChannelUserInfo> attr = channel.attr(CHANNEL_TO_USER_KEY);
-        ChannelUserInfo channelUserInfo = new ChannelUserInfo(user.getUsername(), user);
-        attr.set(channelUserInfo);
-    }
-
+    public static ChannelGroup group = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     /**
-     * 从channel中获取用户信息
-     * @param channel
+     * 信道所处事件的装填
      */
-    public static User getUserInfoFromChannel(Channel channel) {
-        Attribute<ChannelUserInfo> attr = channel.attr(CHANNEL_TO_USER_KEY);
-        ChannelUserInfo channelUserInfo = attr.get();
-        return channelUserInfo.getUser();
-    }
+    public final static Map<Channel, String> channelStatus = Maps.newConcurrentMap();
+    /**
+     * 根据用户拿去对应的渠道
+     */
+    public final static Map<User, Channel> userToChannelMap = Maps.newConcurrentMap();
+    /**
+     * 缓存通信上下文环境对应的登录用户
+     */
+    public final static Map<Channel, User> channelToUserMap = Maps.newConcurrentMap();
+
+
 
     /**
      * 将消息添加到用户队列中
      *
      * @param channel
-     * @param packet
      */
-    public static void addPacketToUser(Channel channel, PacketProto.Packet packet) {
-        User user = ProjectContext.channelToUserMap.get(channel);
-        user.getPacketsQueue().add(packet);
+    public static void addPacketToUser(Channel channel, Object o) {
+        User user = channelToUserMap.get(channel);
+        user.getPacketsQueue().add(o);
     }
 
 

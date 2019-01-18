@@ -6,6 +6,7 @@ import io.netty.channel.Channel;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import service.teamservice.entity.Team;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.Map;
@@ -24,10 +25,10 @@ public class BroadcastService {
         Team team = ProjectContext.teamMap.get(teamId);
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             User user = entry.getValue();
-            Channel channel = ProjectContext.userToChannelMap.get(user);
-            String userStatus = ProjectContext.channelStatus.get(channel);
+            Channel channel = ChannelUtil.userToChannelMap.get(user);
+            String userStatus = ChannelUtil.channelStatus.get(channel);
             if (userStatus.equals(ChannelStatus.BOSSSCENE) || userStatus.equals(ChannelStatus.DEADSCENE) || userStatus.equals(ChannelStatus.ATTACK)) {
-                Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
+                Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
                 if (type == null) {
                     channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
                 } else {

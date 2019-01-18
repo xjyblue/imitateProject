@@ -130,4 +130,8 @@ public class GrobalConfig {
      * 系统默认宠物
      */
     public static final String DEFAULT_PET = "1";
+    /**
+     * 登陆线程数
+     */
+    public static final int LOGIN_THEAD_NUM = 10;
 }

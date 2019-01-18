@@ -23,7 +23,7 @@ public final class PacketProto {
     /**
      * <code>required .Packet.PacketType packetType = 1;</code>
      */
-    PacketProto.Packet.PacketType getPacketType();
+    Packet.PacketType getPacketType();
 
     /**
      * <code>optional string data = 2;</code>
@@ -102,7 +102,7 @@ public final class PacketProto {
             case 8: {
               int rawValue = input.readEnum();
                 @SuppressWarnings("deprecation")
-              PacketProto.Packet.PacketType value = PacketProto.Packet.PacketType.valueOf(rawValue);
+              PacketType value = PacketType.valueOf(rawValue);
               if (value == null) {
                 unknownFields.mergeVarintField(1, rawValue);
               } else {
@@ -148,11 +148,11 @@ public final class PacketProto {
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
       return PacketProto.internal_static_Packet_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              PacketProto.Packet.class, PacketProto.Packet.Builder.class);
+              Packet.class, Builder.class);
     }
 
     /**
@@ -226,7 +226,7 @@ public final class PacketProto {
       }
       public static final com.google.protobuf.Descriptors.EnumDescriptor
           getDescriptor() {
-        return PacketProto.Packet.getDescriptor().getEnumTypes().get(0);
+        return Packet.getDescriptor().getEnumTypes().get(0);
       }
 
       private static final PacketType[] VALUES = values();
@@ -263,10 +263,10 @@ public final class PacketProto {
      * <code>required .Packet.PacketType packetType = 1;</code>
      */
     @Override
-    public PacketProto.Packet.PacketType getPacketType() {
+    public PacketType getPacketType() {
       @SuppressWarnings("deprecation")
-      PacketProto.Packet.PacketType result = PacketProto.Packet.PacketType.valueOf(packetType_);
-      return result == null ? PacketProto.Packet.PacketType.HEARTBEAT : result;
+      PacketType result = PacketType.valueOf(packetType_);
+      return result == null ? PacketType.HEARTBEAT : result;
     }
 
     public static final int DATA_FIELD_NUMBER = 2;
@@ -421,10 +421,10 @@ public final class PacketProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof PacketProto.Packet)) {
+      if (!(obj instanceof Packet)) {
         return super.equals(obj);
       }
-      PacketProto.Packet other = (PacketProto.Packet) obj;
+      Packet other = (Packet) obj;
 
       boolean result = true;
       result = result && (hasPacketType() == other.hasPacketType());
@@ -469,69 +469,69 @@ public final class PacketProto {
       return hash;
     }
 
-    public static PacketProto.Packet parseFrom(
+    public static Packet parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static PacketProto.Packet parseFrom(
+    public static Packet parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static PacketProto.Packet parseFrom(
+    public static Packet parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static PacketProto.Packet parseFrom(
+    public static Packet parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static PacketProto.Packet parseFrom(byte[] data)
+    public static Packet parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static PacketProto.Packet parseFrom(
+    public static Packet parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static PacketProto.Packet parseFrom(java.io.InputStream input)
+    public static Packet parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static PacketProto.Packet parseFrom(
+    public static Packet parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static PacketProto.Packet parseDelimitedFrom(java.io.InputStream input)
+    public static Packet parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static PacketProto.Packet parseDelimitedFrom(
+    public static Packet parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static PacketProto.Packet parseFrom(
+    public static Packet parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static PacketProto.Packet parseFrom(
+    public static Packet parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -544,7 +544,7 @@ public final class PacketProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(PacketProto.Packet prototype) {
+    public static Builder newBuilder(Packet prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -555,7 +555,7 @@ public final class PacketProto {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -565,18 +565,18 @@ public final class PacketProto {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:Packet)
-        PacketProto.PacketOrBuilder {
+        PacketOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return PacketProto.internal_static_Packet_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
         return PacketProto.internal_static_Packet_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                PacketProto.Packet.class, PacketProto.Packet.Builder.class);
+                Packet.class, Builder.class);
       }
 
       /**
@@ -587,7 +587,7 @@ public final class PacketProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -615,13 +615,13 @@ public final class PacketProto {
       }
 
       @Override
-      public PacketProto.Packet getDefaultInstanceForType() {
-        return PacketProto.Packet.getDefaultInstance();
+      public Packet getDefaultInstanceForType() {
+        return Packet.getDefaultInstance();
       }
 
       @Override
-      public PacketProto.Packet build() {
-        PacketProto.Packet result = buildPartial();
+      public Packet build() {
+        Packet result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -629,8 +629,8 @@ public final class PacketProto {
       }
 
       @Override
-      public PacketProto.Packet buildPartial() {
-        PacketProto.Packet result = new PacketProto.Packet(this);
+      public Packet buildPartial() {
+        Packet result = new Packet(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -684,16 +684,16 @@ public final class PacketProto {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof PacketProto.Packet) {
-          return mergeFrom((PacketProto.Packet)other);
+        if (other instanceof Packet) {
+          return mergeFrom((Packet)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(PacketProto.Packet other) {
-        if (other == PacketProto.Packet.getDefaultInstance()) {
+      public Builder mergeFrom(Packet other) {
+        if (other == Packet.getDefaultInstance()) {
           return this;
         }
         if (other.hasPacketType()) {
@@ -727,11 +727,11 @@ public final class PacketProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        PacketProto.Packet parsedMessage = null;
+        Packet parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (PacketProto.Packet) e.getUnfinishedMessage();
+          parsedMessage = (Packet) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -754,15 +754,15 @@ public final class PacketProto {
        * <code>required .Packet.PacketType packetType = 1;</code>
        */
       @Override
-      public PacketProto.Packet.PacketType getPacketType() {
+      public PacketType getPacketType() {
         @SuppressWarnings("deprecation")
-        PacketProto.Packet.PacketType result = PacketProto.Packet.PacketType.valueOf(packetType_);
-        return result == null ? PacketProto.Packet.PacketType.HEARTBEAT : result;
+        PacketType result = PacketType.valueOf(packetType_);
+        return result == null ? PacketType.HEARTBEAT : result;
       }
       /**
        * <code>required .Packet.PacketType packetType = 1;</code>
        */
-      public Builder setPacketType(PacketProto.Packet.PacketType value) {
+      public Builder setPacketType(PacketType value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -957,12 +957,12 @@ public final class PacketProto {
     /**
      * // @@protoc_insertion_point(class_scope:Packet)
      */
-    private static final PacketProto.Packet DEFAULT_INSTANCE;
+    private static final Packet DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new PacketProto.Packet();
+      DEFAULT_INSTANCE = new Packet();
     }
 
-    public static PacketProto.Packet getDefaultInstance() {
+    public static Packet getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -987,7 +987,7 @@ public final class PacketProto {
     }
 
     @Override
-    public PacketProto.Packet getDefaultInstanceForType() {
+    public Packet getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 

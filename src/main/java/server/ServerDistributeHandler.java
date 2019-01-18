@@ -1,12 +1,14 @@
 package server;
 
+import com.google.protobuf.MessageLite;
+import core.packet.ProtoBufEnum;
+import io.netty.channel.Channel;
 import org.springframework.stereotype.Service;
 
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.ReferenceCountUtil;
-import core.packet.PacketProto;
 import utils.ChannelUtil;
 
 import java.io.IOException;
@@ -21,7 +23,6 @@ import java.io.IOException;
 @Sharable
 @Service("serverDistributeHandler")
 public class ServerDistributeHandler extends SimpleChannelInboundHandler<String> {
-
 
     /**
      * Channel注册到EventLoop
@@ -43,24 +44,13 @@ public class ServerDistributeHandler extends SimpleChannelInboundHandler<String>
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        try {
-            if (msg instanceof PacketProto.Packet) {
-                PacketProto.Packet packet = (PacketProto.Packet) msg;
-                handleData(ctx, packet);
-            }
-        } finally {
-            ReferenceCountUtil.release(msg);
+        if(ProtoBufEnum.protoIndexOfMessage((MessageLite) msg) == ProtoBufEnum.CLIENT_PACKET_NORMALREQ.getiValue()){
+            ChannelUtil.addPacketToUser(ctx.channel(),msg);
         }
     }
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, String msg) throws Exception {
-
     }
-
-    private void handleData(ChannelHandlerContext ctx, PacketProto.Packet packet) throws IOException {
-        ChannelUtil.addPacketToUser(ctx.channel(), packet);
-    }
-
 
 }

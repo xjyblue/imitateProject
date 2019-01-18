@@ -4,13 +4,13 @@ import core.component.monster.Monster;
 import core.config.GrobalConfig;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
 import service.attackservice.util.AttackUtil;
 import service.levelservice.service.LevelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import service.userservice.service.UserService;
+import utils.ChannelUtil;
 
 /**
  * @ClassName HpCaculationService
@@ -51,14 +51,14 @@ public class HpCaculationService {
      * @param reduceValue
      */
     public void subUserHp(User user, String reduceValue) {
-        Channel channel = ProjectContext.userToChannelMap.get(user);
+        Channel channel = ChannelUtil.userToChannelMap.get(user);
         Integer reduceValueB = Integer.parseInt(reduceValue);
         Integer userHp = Integer.parseInt(user.getHp());
         userHp -= reduceValueB;
         if (userHp < 0) {
             userHp = 0;
         }
-        if (ProjectContext.channelStatus.get(channel).equals(ChannelStatus.ATTACK) && userHp == 0 && user.getStatus().equals(GrobalConfig.ALIVE)) {
+        if (ChannelUtil.channelStatus.get(channel).equals(ChannelStatus.ATTACK) && userHp == 0 && user.getStatus().equals(GrobalConfig.ALIVE)) {
 //          人物设置为死亡
             user.setHp(GrobalConfig.MINVALUE);
             user.setStatus(GrobalConfig.DEAD);
@@ -66,7 +66,7 @@ public class HpCaculationService {
             AttackUtil.removeAllMonster(user);
 //          初始化人物buff
             userService.initUserBuff(user);
-            ProjectContext.channelStatus.put(channel, ChannelStatus.DEADSCENE);
+            ChannelUtil.channelStatus.put(channel, ChannelStatus.DEADSCENE);
         } else {
             user.setHp(userHp.toString());
         }

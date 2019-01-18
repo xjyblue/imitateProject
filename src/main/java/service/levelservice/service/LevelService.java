@@ -1,16 +1,19 @@
 package service.levelservice.service;
 
+import config.impl.excel.AchievementResourceLoad;
+import config.impl.excel.EquipmentResourceLoad;
+import config.impl.excel.LevelResourceLoad;
 import service.achievementservice.entity.Achievement;
 import service.achievementservice.service.AchievementService;
 import core.component.good.Equipment;
 import io.netty.channel.Channel;
 import service.levelservice.entity.Level;
-import core.context.ProjectContext;
 import mapper.UserMapper;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
 import pojo.User;
 import pojo.Weaponequipmentbar;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 import utils.SpringContextUtil;
 
@@ -32,7 +35,7 @@ public class LevelService {
      * @return
      */
     public int getLevelByExperience(int experience) {
-        for (Map.Entry<Integer, Level> entry : ProjectContext.levelMap.entrySet()) {
+        for (Map.Entry<Integer, Level> entry : LevelResourceLoad.levelMap.entrySet()) {
             if (entry.getValue().getExperienceDown() <= experience && entry.getValue().getExperienceUp() >= experience) {
                 return entry.getKey();
             }
@@ -47,7 +50,7 @@ public class LevelService {
      * @return
      */
     public String getMaxHp(User user) {
-        Level level = ProjectContext.levelMap.get(getLevelByExperience(user.getExperience()));
+        Level level = LevelResourceLoad.levelMap.get(getLevelByExperience(user.getExperience()));
 //      这里可以附加装备属性
         int addValue = 0;
 //      职业因子计算
@@ -56,7 +59,7 @@ public class LevelService {
         addValue *= factor;
 //      装备加成
         for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
-            Equipment equipment = ProjectContext.equipmentMap.get(weaponequipmentbar.getWid());
+            Equipment equipment = EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid());
             if (equipment.getLifeValue() != 0) {
                 addValue += equipment.getLifeValue();
             }
@@ -76,10 +79,10 @@ public class LevelService {
         user.setExperience(newE);
         if (getLevelByExperience(user.getExperience()) > oleL) {
 //            提示人物升级信息
-            Channel channelTarget = ProjectContext.userToChannelMap.get(user);
+            Channel channelTarget = ChannelUtil.userToChannelMap.get(user);
             channelTarget.writeAndFlush(MessageUtil.turnToPacket(">>>>>>>>>>>>>>恭喜您升到了万众瞩目的" + getLevelByExperience(user.getExperience()) + "级<<<<<<<<<<<<<<<"));
         } else {
-            Channel channelTarget = ProjectContext.userToChannelMap.get(user);
+            Channel channelTarget = ChannelUtil.userToChannelMap.get(user);
             channelTarget.writeAndFlush(MessageUtil.turnToPacket("您当前经验值增长了" + value + ",你目前的经验值为：" + user.getExperience()));
         }
         UserMapper userMapper = SpringContextUtil.getBean("userMapper");
@@ -91,7 +94,7 @@ public class LevelService {
         AchievementService achievementService = SpringContextUtil.getBean("achievementService");
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.UPLEVEL)) {
-                Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
+                Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
                 achievementService.executeLevelUp(achievementprocess, user, achievement);
             }
         }
@@ -104,7 +107,7 @@ public class LevelService {
      * @return
      */
     public String getMaxMp(User user) {
-        Level level = ProjectContext.levelMap.get(getLevelByExperience(user.getExperience()));
+        Level level = LevelResourceLoad.levelMap.get(getLevelByExperience(user.getExperience()));
         int addValue = 0;
 //      职业因子计算
         addValue += Integer.parseInt(level.getMaxMp());

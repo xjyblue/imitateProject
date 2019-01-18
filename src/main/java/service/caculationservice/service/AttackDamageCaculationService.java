@@ -1,19 +1,22 @@
 package service.caculationservice.service;
 
+import config.impl.excel.BuffResourceLoad;
+import config.impl.excel.EquipmentResourceLoad;
+import config.impl.excel.LevelResourceLoad;
 import core.config.GrobalConfig;
+import core.packet.PacketType;
 import service.buffservice.entity.Buff;
 import core.component.good.Equipment;
 import service.buffservice.entity.BuffConstant;
-import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import service.levelservice.entity.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import core.packet.PacketType;
 import pojo.User;
 import pojo.Weaponequipmentbar;
 import core.component.monster.MonsterSkill;
 import service.levelservice.service.LevelService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
@@ -41,7 +44,7 @@ public class AttackDamageCaculationService {
 //      单一装备加成处理
         if (user.getWeaponequipmentbars() != null) {
             for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
-                Equipment equipment = ProjectContext.equipmentMap.get(weaponequipmentbar.getWid());
+                Equipment equipment = EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid());
                 if (weaponequipmentbar.getDurability() > 0) {
                     attackDamage = attackDamage.add(new BigInteger(equipment.getAddValue() + ""));
                     weaponequipmentbar.setDurability(weaponequipmentbar.getDurability() - 1);
@@ -50,7 +53,7 @@ public class AttackDamageCaculationService {
         }
 
 //      等级加成处理
-        Level level = ProjectContext.levelMap.get(levelService.getLevelByExperience(user.getExperience()));
+        Level level = LevelResourceLoad.levelMap.get(levelService.getLevelByExperience(user.getExperience()));
         BigInteger levelUp = new BigInteger(level.getUpAttack() + "");
         attackDamage = attackDamage.add(levelUp);
 
@@ -68,11 +71,11 @@ public class AttackDamageCaculationService {
      */
     public BigInteger dealDefenseBuff(MonsterSkill monsterSkill, User user, User target) {
         if (user.getBuffMap().get(BuffConstant.DEFENSEBUFF) != GrobalConfig.DEFENSEBUFF_DEFAULTVALUE && user == target) {
-            Buff buff = ProjectContext.buffMap.get(user.getBuffMap().get(BuffConstant.DEFENSEBUFF));
+            Buff buff = BuffResourceLoad.buffMap.get(user.getBuffMap().get(BuffConstant.DEFENSEBUFF));
             BigInteger mosterSkillDamage = new BigInteger(monsterSkill.getDamage());
             BigInteger buffDefenceDamage = new BigInteger(buff.getInjurySecondValue());
             mosterSkillDamage = mosterSkillDamage.subtract(buffDefenceDamage);
-            Channel channelTemp = ProjectContext.userToChannelMap.get(user);
+            Channel channelTemp = ChannelUtil.userToChannelMap.get(user);
             channelTemp.writeAndFlush(MessageUtil.turnToPacket("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp(), PacketType.USERBUFMSG));
             return mosterSkillDamage;
         }

@@ -1,6 +1,10 @@
 package service.registerservice.service;
 
+import config.impl.excel.AchievementResourceLoad;
+import config.impl.excel.LevelResourceLoad;
+import config.impl.excel.RoleResourceLoad;
 import core.annotation.Region;
+import lombok.extern.slf4j.Slf4j;
 import service.achievementservice.entity.Achievement;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
@@ -10,7 +14,6 @@ import service.levelservice.entity.Level;
 import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
-import core.context.ProjectContext;
 import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,10 +23,12 @@ import pojo.Userskillrelation;
 import service.skillservice.entity.UserSkill;
 import service.levelservice.service.LevelService;
 import service.skillservice.service.SkillService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.RunnableFuture;
 
 /**
  * @ClassName RegisterService
@@ -34,6 +39,7 @@ import java.util.Map;
  **/
 @Component
 @Region
+@Slf4j
 public class RegisterService {
     @Autowired
     private UserMapper userMapper;
@@ -63,7 +69,7 @@ public class RegisterService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DOUBLEPASSWORDERROR));
             return;
         }
-        if (!ProjectContext.roleMap.containsKey(Integer.parseInt(temp[GrobalConfig.FOUR]))) {
+        if (!RoleResourceLoad.roleMap.containsKey(Integer.parseInt(temp[GrobalConfig.FOUR]))) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOROLE));
             return;
         }
@@ -77,10 +83,21 @@ public class RegisterService {
         user.setRoleid(Integer.parseInt(temp[4]));
 //      设置用户1级血量和1级的经验值
         user.setExperience(1);
-        Level level = ProjectContext.levelMap.get(1);
+        Level level = LevelResourceLoad.levelMap.get(1);
         user.setMp(level.getMaxMp());
         user.setHp(level.getMaxHp());
+
+        long time = System.currentTimeMillis();
+
         userMapper.insertSelective(user);
+
+//        try {
+//            Thread.sleep(50000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+        System.out.println(System.currentTimeMillis() - time);
 
 //      根据用户种族填充初始技能信息
         List<UserSkill> list = skillService.getUserSkillByUserRole(user.getRoleid());
@@ -97,7 +114,7 @@ public class RegisterService {
 
 
 //      为用户新增任务进程
-        for (Map.Entry<Integer, Achievement> entry : ProjectContext.achievementMap.entrySet()) {
+        for (Map.Entry<Integer, Achievement> entry : AchievementResourceLoad.achievementMap.entrySet()) {
             Achievementprocess achievementprocess = new Achievementprocess();
             achievementprocess.setIffinish(false);
             achievementprocess.setType(entry.getValue().getType());
@@ -117,6 +134,6 @@ public class RegisterService {
         }
 
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERSUCCESS));
-        ProjectContext.channelStatus.put(channel, ChannelStatus.LOGIN);
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.LOGIN);
     }
 }

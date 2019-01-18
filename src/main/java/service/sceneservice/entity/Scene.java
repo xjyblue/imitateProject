@@ -1,5 +1,9 @@
 package service.sceneservice.entity;
 
+import config.impl.excel.BuffResourceLoad;
+import config.impl.excel.SceneResourceLoad;
+import core.packet.PacketType;
+import core.packet.ProtoBufEnum;
 import service.buffservice.service.MonsterBuffService;
 import service.caculationservice.service.HpCaculationService;
 import core.component.monster.Monster;
@@ -15,10 +19,9 @@ import core.channel.ChannelStatus;
 import service.rewardservice.service.RewardService;
 import core.factory.MonsterFactory;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
-import core.packet.PacketType;
 import pojo.User;
 import service.userservice.service.UserService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 import utils.SpringContextUtil;
 
@@ -84,16 +87,8 @@ public class Scene extends BaseThread implements Runnable {
 
     private UserService userService;
 
-    /**
-     * 注入一些要用的单例
-     */
     @Override
     public void preConstruct() {
-        this.attackBuffService = SpringContextUtil.getBean("attackBuffService");
-        this.rewardService = SpringContextUtil.getBean("rewardService");
-        this.hpCaculationService = SpringContextUtil.getBean("hpCaculationService");
-        this.monsterBuffService = SpringContextUtil.getBean("monsterBuffService");
-        this.userService = SpringContextUtil.getBean("userService");
     }
 
     private Map<String, User> userMap = new ConcurrentHashMap<>();
@@ -202,6 +197,29 @@ public class Scene extends BaseThread implements Runnable {
         this.sceneSet = sceneSet;
     }
 
+    public RewardService getRewardService() {
+        return rewardService;
+    }
+
+    public void setRewardService(RewardService rewardService) {
+        this.rewardService = rewardService;
+    }
+
+    public MonsterBuffService getMonsterBuffService() {
+        return monsterBuffService;
+    }
+
+    public void setMonsterBuffService(MonsterBuffService monsterBuffService) {
+        this.monsterBuffService = monsterBuffService;
+    }
+
+    public UserService getUserService() {
+        return userService;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public void run() {
@@ -224,8 +242,8 @@ public class Scene extends BaseThread implements Runnable {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             User user = entry.getValue();
 
-            Channel channel = ProjectContext.userToChannelMap.get(user);
-            if (ProjectContext.channelStatus.containsKey(channel) && ProjectContext.channelStatus.get(channel).equals(ChannelStatus.ATTACK)) {
+            Channel channel = ChannelUtil.userToChannelMap.get(user);
+            if (ChannelUtil.channelStatus.containsKey(channel) && ChannelUtil.channelStatus.get(channel).equals(ChannelStatus.ATTACK)) {
                 try {
                     if (user.getUserToMonsterMap().size() > 0) {
                         Monster monster = null;
@@ -250,7 +268,7 @@ public class Scene extends BaseThread implements Runnable {
                         BigInteger monsterDamage = new BigInteger(monster.getMonsterSkillList().get(0).getDamage());
 //                      怪物攻击对人物造成伤害处理buff处理
                         monsterDamage = attackBuffService.monsterAttackDefendBuff(monsterDamage, user);
-                        Buff buff = ProjectContext.buffMap.get(user.getBuffMap().get(BuffConstant.DEFENSEBUFF));
+                        Buff buff = BuffResourceLoad.buffMap.get(user.getBuffMap().get(BuffConstant.DEFENSEBUFF));
                         if (user.getBuffMap().get(BuffConstant.DEFENSEBUFF) != 3000) {
                             channel.writeAndFlush(MessageUtil.turnToPacket("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp(), PacketType.USERBUFMSG));
                         }
@@ -272,7 +290,7 @@ public class Scene extends BaseThread implements Runnable {
                             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY));
                             return;
                         }
-                        ProjectContext.channelStatus.put(channel, ChannelStatus.ATTACK);
+                        ChannelUtil.channelStatus.put(channel, ChannelStatus.ATTACK);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -289,13 +307,13 @@ public class Scene extends BaseThread implements Runnable {
             user.getUserToMonsterMap().remove(monster.getId());
             broadcastMessage(monster.getName() + "已死亡", null);
             channel.writeAndFlush(MessageUtil.turnToPacket("怪物已死亡", PacketType.ATTACKMSG));
-            List<Monster> monsters = ProjectContext.sceneMap.get(user.getPos()).monsters;
+            List<Monster> monsters = SceneResourceLoad.sceneMap.get(user.getPos()).monsters;
             monsters.remove(monster);
 //          填充因buff中毒而死的怪物
             MonsterFactory monsterFactory = SpringContextUtil.getBean("monsterFactory");
-            monsters.add(monsterFactory.getMonster(Integer.parseInt(ProjectContext.sceneMap.get(user.getPos() + "").getMonsterS())));
+            monsters.add(monsterFactory.getMonster(Integer.parseInt(SceneResourceLoad.sceneMap.get(user.getPos() + "").getMonsterS())));
 //          退出战斗模式初始化人物buff
-            ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
+            ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
             userService.initUserBuff(user);
             rewardService.getGoods(channel, monster);
             return true;
@@ -319,7 +337,7 @@ public class Scene extends BaseThread implements Runnable {
      */
     private void broadcastMessage(String msg, String packetType) {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
-            Channel channelT = ProjectContext.userToChannelMap.get(entry.getValue());
+            Channel channelT = ChannelUtil.userToChannelMap.get(entry.getValue());
             if (packetType == null) {
                 channelT.writeAndFlush(MessageUtil.turnToPacket(msg));
             } else {

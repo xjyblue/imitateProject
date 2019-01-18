@@ -1,8 +1,8 @@
 package service.petservice.service;
 
+import config.impl.excel.PetResourceLoad;
 import core.component.monster.Monster;
 import core.config.GrobalConfig;
-import core.context.ProjectContext;
 import core.packet.PacketType;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +11,7 @@ import pojo.User;
 import service.caculationservice.service.HpCaculationService;
 import service.petservice.service.entity.PetConfig;
 import service.petservice.service.entity.PetSkillConfig;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.Random;
@@ -47,8 +48,8 @@ public class PetService {
      * @param channel
      */
     public void attackMonster(Monster monster, Channel channel) {
-        User user = ProjectContext.channelToUserMap.get(channel);
-        PetConfig petConfig = ProjectContext.petConfigMap.get(GrobalConfig.DEFAULT_PET);
+        User user = ChannelUtil.channelToUserMap.get(channel);
+        PetConfig petConfig = PetResourceLoad.petConfigMap.get(GrobalConfig.DEFAULT_PET);
         PetSkillConfig petSkillConfig = getPetSkill(user);
 //      这里可以附加宠物技能伤害，比如根据宠物等级等
         hpCaculationService.subMonsterHp(monster, petSkillConfig.getDamage().toString());

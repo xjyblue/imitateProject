@@ -1,12 +1,13 @@
 package service.skillservice.service;
 
+import config.impl.excel.SceneResourceLoad;
+import config.impl.excel.UserSkillResourceLoad;
 import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.UserskillrelationMapper;
-import core.context.ProjectContext;
 import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import pojo.User;
 import pojo.Userskillrelation;
 import pojo.UserskillrelationExample;
 import service.skillservice.entity.UserSkill;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.ArrayList;
@@ -41,12 +43,12 @@ public class SkillService {
      */
     @Order(orderMsg = "lookSkill",status = {ChannelStatus.SKILLVIEW})
     public void lookSkill(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         String skillLook = "";
         channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
         Map<String, Userskillrelation> map = user.getUserskillrelationMap();
         for (Map.Entry<String, Userskillrelation> entry : map.entrySet()) {
-            UserSkill userSkill = ProjectContext.skillMap.get(entry.getValue().getSkillid());
+            UserSkill userSkill = UserSkillResourceLoad.skillMap.get(entry.getValue().getSkillid());
             skillLook += "键位:" + entry.getKey()
                     + "----技能名称:" + userSkill.getSkillName()
                     + "----技能伤害:" + userSkill.getDamage()
@@ -64,13 +66,13 @@ public class SkillService {
      */
     @Order(orderMsg = "change",status = {ChannelStatus.SKILLVIEW})
     public void changeSkill(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length == GrobalConfig.THREE) {
             boolean flag = false;
             Map<String, Userskillrelation> map = user.getUserskillrelationMap();
             for (Map.Entry<String, Userskillrelation> entry : map.entrySet()) {
-                UserSkill userSkill = ProjectContext.skillMap.get(entry.getValue().getSkillid());
+                UserSkill userSkill = UserSkillResourceLoad.skillMap.get(entry.getValue().getSkillid());
                 if (userSkill.getSkillName().equals(temp[1])) {
                     flag = true;
                     Userskillrelation userskillrelation = entry.getValue();
@@ -103,9 +105,9 @@ public class SkillService {
      */
     @Order(orderMsg = "quitSkill",status = {ChannelStatus.SKILLVIEW})
     public void quitSkill(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
-        channel.writeAndFlush(MessageUtil.turnToPacket("您已退出技能管理模块，进入" + ProjectContext.sceneMap.get(user.getPos()).getName()));
-        ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
+        User user = ChannelUtil.channelToUserMap.get(channel);
+        channel.writeAndFlush(MessageUtil.turnToPacket("您已退出技能管理模块，进入" + SceneResourceLoad.sceneMap.get(user.getPos()).getName()));
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
     }
 
     /**
@@ -116,7 +118,7 @@ public class SkillService {
      */
     @Order(orderMsg = "viewSkill",status = {ChannelStatus.COMMONSCENE})
     public void enterSkillView(Channel channel, String msg) {
-        ProjectContext.channelStatus.put(channel, ChannelStatus.SKILLVIEW);
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.SKILLVIEW);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SKILLVIEWMESG));
     }
 
@@ -128,11 +130,11 @@ public class SkillService {
      * @return
      */
     public UserSkill getUserSkillByKey(Channel channel, String key) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         if (!user.getUserskillrelationMap().containsKey(key)) {
             return null;
         }
-        return ProjectContext.skillMap.get(user.getUserskillrelationMap().get(key).getSkillid());
+        return UserSkillResourceLoad.skillMap.get(user.getUserskillrelationMap().get(key).getSkillid());
     }
 
     /**
@@ -143,7 +145,7 @@ public class SkillService {
      */
     public List<UserSkill> getUserSkillByUserRole(int roleid) {
         List<UserSkill> list = new ArrayList<>();
-        for (Map.Entry<Integer, UserSkill> entry : ProjectContext.skillMap.entrySet()) {
+        for (Map.Entry<Integer, UserSkill> entry : UserSkillResourceLoad.skillMap.entrySet()) {
             if (roleid == entry.getValue().getRoleSkill()) {
                 list.add(entry.getValue());
             }

@@ -1,11 +1,11 @@
 package service.sceneservice.service;
 
+import config.impl.excel.SceneResourceLoad;
 import core.channel.ChannelStatus;
 import core.annotation.Order;
 import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
-import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,7 @@ import pojo.User;
 import service.levelservice.service.LevelService;
 import service.sceneservice.entity.Scene;
 import service.userservice.service.UserService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.Map;
@@ -52,13 +53,13 @@ public class SceneService {
             return;
         }
 
-        User user = ProjectContext.channelToUserMap.get(channel);
-        if (temp[1].equals(ProjectContext.sceneMap.get(user.getPos()).getName())) {
+        User user = ChannelUtil.channelToUserMap.get(channel);
+        if (temp[1].equals(SceneResourceLoad.sceneMap.get(user.getPos()).getName())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNMOVELOCAL));
             return;
         }
 
-        Scene sceneTarget = ProjectContext.sceneMap.get(sceneService.getSceneByName(temp[1]).getId());
+        Scene sceneTarget = SceneResourceLoad.sceneMap.get(sceneService.getSceneByName(temp[1]).getId());
         if (levelService.getLevelByExperience(user.getExperience()) < Integer.parseInt(sceneTarget.getNeedLevel())) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOLEVELTOMOVE));
             return;
@@ -70,13 +71,13 @@ public class SceneService {
         }
 
 //      场景的移动切换用户到不同的场景线程
-        Scene scene = ProjectContext.sceneMap.get(user.getPos());
-        if (!ProjectContext.sceneSet.contains(temp[1])) {
+        Scene scene = SceneResourceLoad.sceneMap.get(user.getPos());
+        if (!SceneResourceLoad.sceneSet.contains(temp[1])) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTARGETTOMOVE));
             return;
         }
 
-        if (!ProjectContext.sceneMap.get(user.getPos()).getSceneSet().contains(temp[1])) {
+        if (!SceneResourceLoad.sceneMap.get(user.getPos()).getSceneSet().contains(temp[1])) {
 //           场景切换
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REMOTEMOVEMESSAGE));
             return;
@@ -86,7 +87,7 @@ public class SceneService {
         sceneTarget.getUserMap().put(user.getUsername(), user);
         user.setPos(sceneTarget.getId());
         userMapper.updateByPrimaryKeySelective(user);
-        ProjectContext.channelToUserMap.put(channel, user);
+        ChannelUtil.channelToUserMap.put(channel, user);
         channel.writeAndFlush(MessageUtil.turnToPacket("已移动到" + temp[1]));
     }
 
@@ -97,7 +98,7 @@ public class SceneService {
      * @return
      */
     public Scene getSceneByName(String areaName) {
-        for (Map.Entry<String, Scene> entry : ProjectContext.sceneMap.entrySet()) {
+        for (Map.Entry<String, Scene> entry : SceneResourceLoad.sceneMap.entrySet()) {
             if (areaName.equals(entry.getValue().getName())) {
                 return entry.getValue();
             }

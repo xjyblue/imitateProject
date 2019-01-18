@@ -1,9 +1,9 @@
 package utils;
 
-import core.packet.PacketProto;
-import core.packet.PacketType;
+import core.packet.ProtoBufEnum;
+import core.packet.client_packet;
+import core.packet.server_packet;
 
-import static core.packet.PacketProto.Packet.newBuilder;
 /**
  * @ClassName MessageUtil
  * @Description TODO
@@ -13,21 +13,28 @@ import static core.packet.PacketProto.Packet.newBuilder;
  **/
 public class MessageUtil {
 
-	public static PacketProto.Packet turnToPacket(String data){
+	public static Object turnToPacket(String data){
 		return turnToPacket(data,null);
 	}
 
-    public static PacketProto.Packet turnToPacket(String data,String type) {
-		PacketProto.Packet.Builder builder = newBuilder();
-		builder.setPacketType(PacketProto.Packet.PacketType.DATA);
-		builder.setData(data);
+    public static Object turnToPacket(String data,String type) {
 		if(type == null){
-			builder.setType(PacketType.NORMALMSG);
+			int nType = ProtoBufEnum.SERVER_PACKET_NORMALRESP.getiValue();
+			return ProtoBufEnum.buildPacket(data,nType);
 		}else {
-			builder.setType(type);
+//			return ProtoBufEnum.buildPacket(data,type);
 		}
-		PacketProto.Packet packetResp = builder.build();
-		return packetResp;
+//		PacketProto.Packet.Builder builder = newBuilder();
+//		builder.setPacketType(PacketProto.Packet.PacketType.DATA);
+//		builder.setData(data);
+//		if(type == null){
+//			builder.setType(PacketType.NORMALMSG);
+//		}else {
+//			builder.setType(type);
+//		}
+//		PacketProto.Packet packetResp = builder.build();
+//		return packetResp;
+		return null;
 	}
 
 }

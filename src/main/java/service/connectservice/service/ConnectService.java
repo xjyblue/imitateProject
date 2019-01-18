@@ -4,9 +4,9 @@ import core.annotation.Region;
 import core.config.MessageConfig;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
 import core.annotation.Order;
 import org.springframework.stereotype.Component;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 /**
@@ -27,7 +27,7 @@ public class ConnectService {
      */
     @Order(orderMsg = "dl", status = {ChannelStatus.COMING})
     public void connect(Channel channel, String msg) {
-        ProjectContext.channelStatus.put(channel, ChannelStatus.LOGIN);
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.LOGIN);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LOGINMESSAGE));
     }
 
@@ -39,7 +39,7 @@ public class ConnectService {
      */
     @Order(orderMsg = "zc", status = {ChannelStatus.COMING})
     public void register(Channel channel, String msg) {
-        ProjectContext.channelStatus.put(channel, ChannelStatus.REGISTER);
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.REGISTER);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERMESSAGE));
     }
 

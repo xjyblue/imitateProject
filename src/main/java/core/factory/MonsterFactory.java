@@ -1,9 +1,10 @@
 package core.factory;
 
+import config.impl.excel.MonsterResourceLoad;
+import config.impl.excel.MonsterSkillResourceLoad;
 import core.component.monster.Monster;
 import org.springframework.beans.BeanUtils;
 import service.buffservice.entity.BuffConstant;
-import core.context.ProjectContext;
 import org.springframework.stereotype.Component;
 import core.component.monster.MonsterSkill;
 
@@ -28,7 +29,7 @@ public class MonsterFactory {
      */
     public List<Monster> getMonsterByArea(String areaId) throws IOException {
         List<Monster> newMonsterList = new ArrayList<>();
-        for (Map.Entry<Integer, Monster> entry : ProjectContext.monsterMap.entrySet()) {
+        for (Map.Entry<Integer, Monster> entry : MonsterResourceLoad.monsterMap.entrySet()) {
             if (entry.getValue().getPos().equals(areaId)) {
                 Monster monster = new Monster();
                 try {
@@ -52,7 +53,7 @@ public class MonsterFactory {
      * @throws IOException
      */
     public Monster getMonster(Integer monsterId) throws IOException {
-        for (Map.Entry<Integer, Monster> entry : ProjectContext.monsterMap.entrySet()) {
+        for (Map.Entry<Integer, Monster> entry : MonsterResourceLoad.monsterMap.entrySet()) {
             if (entry.getValue().getId().equals(monsterId)) {
 //              生成怪物
                 Monster monster = new Monster();
@@ -90,7 +91,7 @@ public class MonsterFactory {
         String[] s = monster.getSkillIds().split("-");
         List<MonsterSkill> list = new ArrayList<>();
         for (int i = 0; i < s.length; i++) {
-            list.add(ProjectContext.monsterSkillMap.get(Integer.parseInt(s[i])));
+            list.add(MonsterSkillResourceLoad.monsterSkillMap.get(Integer.parseInt(s[i])));
         }
 //              初始化怪物buff刷新时间间隔
         monster.setBuffRefreshTime(0L);

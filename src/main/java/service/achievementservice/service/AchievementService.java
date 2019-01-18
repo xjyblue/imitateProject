@@ -1,5 +1,7 @@
 package service.achievementservice.service;
 
+import config.impl.excel.AchievementResourceLoad;
+import core.context.ProjectContext;
 import service.achievementservice.entity.Achievement;
 import core.component.good.Equipment;
 import core.component.monster.Monster;
@@ -7,7 +9,6 @@ import service.npcservice.entity.Npc;
 import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import mapper.AchievementprocessMapper;
-import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
@@ -58,7 +59,7 @@ public class AchievementService {
                     s += "-";
                 }
             }
-            Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
+            Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
             achievementprocess.setProcesss(s);
             if (achievementprocess.getProcesss().equals(achievement.getTarget())) {
                 achievementprocess.setIffinish(true);
@@ -238,7 +239,7 @@ public class AchievementService {
      */
     public void executeAddFirstFriend(Achievementprocess achievementprocess, User user, User userTarget, String fromUser) {
 //      更新用户自己的
-        Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
+        Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
         if (!achievementprocess.getIffinish()) {
             achievementprocess.setProcesss(achievement.getTarget());
             achievementprocess.setIffinish(true);
@@ -274,7 +275,7 @@ public class AchievementService {
     public void executeMoneyAchievement(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
             if (achievementprocessT.getType().equals(Achievement.MONEYFIRST)) {
-                Achievement achievement = ProjectContext.achievementMap.get(achievementprocessT.getAchievementid());
+                Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocessT.getAchievementid());
                 BigInteger targetMoney = new BigInteger(achievement.getTarget());
                 BigInteger userMoney = new BigInteger(user.getMoney());
                 if (userMoney.compareTo(targetMoney) >= 0) {
@@ -305,7 +306,7 @@ public class AchievementService {
         }
         for (Achievementprocess achievementprocess : list) {
             if (achievementprocess.getType().equals(Achievement.UNIONFIRST) && !achievementprocess.getIffinish()) {
-                Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
+                Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
                 achievementprocess.setIffinish(true);
                 achievementprocess.setProcesss(achievement.getTarget());
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
@@ -326,7 +327,7 @@ public class AchievementService {
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             User userT = entry.getValue();
             for (Achievementprocess achievementprocess : userT.getAchievementprocesses()) {
-                Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
+                Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
                 if (achievementprocess.getType().equals(Achievement.FINISHBOSSAREA) && monster.getId().equals(Integer.parseInt(achievement.getTarget()))) {
 //                  此任务比较特殊和队伍挂钩
                     achievementprocess.setIffinish(true);
@@ -356,7 +357,7 @@ public class AchievementService {
      */
     private void updateFirstTradeOnOneUser(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
-            Achievement achievement = ProjectContext.achievementMap.get(achievementprocessT.getAchievementid());
+            Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocessT.getAchievementid());
             if (!achievementprocessT.getIffinish() && achievementprocessT.getType().equals(Achievement.TRADEFIRST)) {
                 achievementprocessT.setProcesss(achievement.getTarget());
                 achievementprocessT.setIffinish(true);
@@ -400,7 +401,7 @@ public class AchievementService {
     public void executeEquipmentStartLevel(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
             if (achievementprocessT.getType().equals(Achievement.EQUIPMENTSTARTLEVEL) && !achievementprocessT.getIffinish()) {
-                Achievement achievement = ProjectContext.achievementMap.get(achievementprocessT.getAchievementid());
+                Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocessT.getAchievementid());
                 if (checkUserWeaponStartLevel(user, achievement)) {
                     achievementprocessT.setIffinish(true);
                     achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);

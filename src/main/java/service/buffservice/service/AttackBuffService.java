@@ -1,5 +1,8 @@
 package service.buffservice.service;
 
+import config.impl.excel.BossSceneConfigResourceLoad;
+import config.impl.excel.BuffResourceLoad;
+import config.impl.excel.SceneResourceLoad;
 import org.springframework.beans.factory.annotation.Autowired;
 import service.buffservice.entity.Buff;
 import com.google.common.collect.Lists;
@@ -9,11 +12,11 @@ import core.component.monster.Monster;
 import service.buffservice.entity.BuffConstant;
 import core.config.GrobalConfig;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userskillrelation;
 import service.skillservice.entity.UserSkill;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
@@ -90,7 +93,7 @@ public class AttackBuffService {
      * @param user
      */
     private void tauntBuffSolve(User user, Integer buffValue) {
-        Buff buff = ProjectContext.buffMap.get(buffValue);
+        Buff buff = BuffResourceLoad.buffMap.get(buffValue);
         user.getBuffMap().put(BuffConstant.TAUNTBUFF, buff.getBufferId());
         user.getUserBuffEndTimeMap().put(BuffConstant.TAUNTBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
     }
@@ -104,11 +107,11 @@ public class AttackBuffService {
      * @return
      */
     private int allPersonBuffSolve(User user, Userskillrelation userskillrelation, UserSkill userSkill) {
-        Channel channelTemp = ProjectContext.userToChannelMap.get(user);
+        Channel channelTemp = ChannelUtil.userToChannelMap.get(user);
         userskillrelation.setSkillcds(userSkill.getAttackCd() + System.currentTimeMillis());
-        if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
+        if (user.getTeamId() != null && BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
             channelTemp.writeAndFlush(MessageUtil.turnToPacket("你使用了" + userSkill.getSkillName() + "对怪物造成了集体伤害" + userSkill.getDamage()));
-            BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+            BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
             for (Map.Entry<String, Monster> monsterEntry : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {
                 hpCaculationService.subMonsterHp(monsterEntry.getValue(), userSkill.getDamage());
                 BigInteger monsterLife = new BigInteger(monsterEntry.getValue().getValueOfLife());
@@ -119,7 +122,7 @@ public class AttackBuffService {
                 }
             }
         } else {
-            for (Monster monsterTemp : ProjectContext.sceneMap.get(user.getPos()).getMonsters()) {
+            for (Monster monsterTemp : SceneResourceLoad.sceneMap.get(user.getPos()).getMonsters()) {
                 if (monsterTemp.getStatus().equals(GrobalConfig.ALIVE)) {
                     hpCaculationService.subMonsterHp(monsterTemp, userSkill.getDamage());
                 }
@@ -135,8 +138,8 @@ public class AttackBuffService {
      */
     private void relieveBuffSolve(User user) {
         List<User> userTarget = null;
-        if (user.getTeamId() != null && ProjectContext.bossAreaMap.containsKey(user.getTeamId())) {
-            BossScene bossScene = ProjectContext.bossAreaMap.get(user.getTeamId());
+        if (user.getTeamId() != null && BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
+            BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
             userTarget = Lists.newArrayList(bossScene.getUserMap().values());
         } else {
             userTarget = Lists.newArrayList();
@@ -144,7 +147,7 @@ public class AttackBuffService {
         }
         for (User userT : userTarget) {
             userT.getBuffMap().put(BuffConstant.SLEEPBUFF, 5000);
-            Channel channelT = ProjectContext.userToChannelMap.get(user);
+            Channel channelT = ChannelUtil.userToChannelMap.get(user);
             channelT.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "解除了怪物的眩晕效果"));
         }
     }
@@ -156,7 +159,7 @@ public class AttackBuffService {
      * @param buffValue
      */
     private void treatBuffSolve(User user, Integer buffValue) {
-        Buff buff = ProjectContext.buffMap.get(buffValue);
+        Buff buff = BuffResourceLoad.buffMap.get(buffValue);
         user.getBuffMap().put(BuffConstant.TREATMENTBUFF, buff.getBufferId());
         user.getUserBuffEndTimeMap().put(BuffConstant.TREATMENTBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
     }
@@ -168,7 +171,7 @@ public class AttackBuffService {
      * @param buffValue
      */
     private void defendBuffSolve(User user, Integer buffValue) {
-        Buff buff = ProjectContext.buffMap.get(buffValue);
+        Buff buff = BuffResourceLoad.buffMap.get(buffValue);
         user.getBuffMap().put(BuffConstant.DEFENSEBUFF, buff.getBufferId());
         user.getUserBuffEndTimeMap().put(BuffConstant.DEFENSEBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
     }
@@ -181,7 +184,7 @@ public class AttackBuffService {
      * @param buffValue
      */
     private void poisoningBuffSolve(Monster monster, String buffName, Integer buffValue) {
-        Buff buff = ProjectContext.buffMap.get(buffValue);
+        Buff buff = BuffResourceLoad.buffMap.get(buffValue);
         monster.getBufMap().put(buffName, buffValue);
         Map<String, Long> tempMap = new HashMap<>(64);
         monster.getMonsterBuffEndTimeMap().put(BuffConstant.POISONINGBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
@@ -195,8 +198,8 @@ public class AttackBuffService {
      * @return
      */
     public BigInteger monsterAttackDefendBuff(BigInteger monsterDamage, User user) {
-        if (ProjectContext.buffMap.containsKey(user.getBuffMap().get(BuffConstant.DEFENSEBUFF))) {
-            Buff buff = ProjectContext.buffMap.get(user.getBuffMap().get(BuffConstant.DEFENSEBUFF));
+        if (BuffResourceLoad.buffMap.containsKey(user.getBuffMap().get(BuffConstant.DEFENSEBUFF))) {
+            Buff buff = BuffResourceLoad.buffMap.get(user.getBuffMap().get(BuffConstant.DEFENSEBUFF));
             if (monsterDamage.compareTo(new BigInteger(buff.getInjurySecondValue())) <= 0) {
 //              相当于没有攻击
                 return new BigInteger(GrobalConfig.MINVALUE);

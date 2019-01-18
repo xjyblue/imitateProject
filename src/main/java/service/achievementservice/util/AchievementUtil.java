@@ -1,12 +1,15 @@
 package service.achievementservice.util;
 
+import config.impl.excel.AchievementResourceLoad;
+import config.impl.excel.EquipmentResourceLoad;
+import config.impl.excel.NpcResourceLoad;
+import core.packet.PacketType;
 import service.achievementservice.entity.Achievement;
 import core.config.GrobalConfig;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
-import core.packet.PacketType;
 import pojo.Achievementprocess;
 import pojo.User;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.Map;
@@ -27,7 +30,7 @@ public class AchievementUtil {
     public static void refreshAchievementInfo(User user) {
         String resp = "";
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
-            Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
+            Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
             if (achievementprocess.getType() == Achievement.ATTACKMONSTER) {
                 String taskName = achievement.getName();
                 String killNum = achievementprocess.getProcesss().split(":")[1];
@@ -48,7 +51,7 @@ public class AchievementUtil {
             }
             if (achievementprocess.getType() == Achievement.TALKTONPC) {
                 String taskName = achievement.getName();
-                String npcName = ProjectContext.npcMap.get(Integer.parseInt(achievement.getTarget())).getName();
+                String npcName = NpcResourceLoad.npcMap.get(Integer.parseInt(achievement.getTarget())).getName();
                 if (achievementprocess.getIffinish()) {
                     resp += "[任务名:" + taskName + " ]" + " [进度: 已经和" + npcName + "交流,完成任务****]" + System.getProperty("line.separator");
                 } else {
@@ -147,7 +150,7 @@ public class AchievementUtil {
                 }
             }
         }
-        Channel channel = ProjectContext.userToChannelMap.get(user);
+        Channel channel = ChannelUtil.userToChannelMap.get(user);
         channel.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ACHIEVEMENT));
     }
 
@@ -158,7 +161,7 @@ public class AchievementUtil {
         String[] proArr = process.split("-");
         String resp = "";
         for (String proT : proArr) {
-            resp += ProjectContext.achievementMap.get(Integer.parseInt(proT)).getName() + "-";
+            resp += AchievementResourceLoad.achievementMap.get(Integer.parseInt(proT)).getName() + "-";
         }
         resp = resp.substring(0,resp.length()-1);
         return resp;
@@ -166,7 +169,7 @@ public class AchievementUtil {
 
 
     public static Achievement getAchievementById(Integer id) {
-        for (Map.Entry<Integer, Achievement> entry : ProjectContext.achievementMap.entrySet()) {
+        for (Map.Entry<Integer, Achievement> entry : AchievementResourceLoad.achievementMap.entrySet()) {
             if (entry.getValue().getAchievementId().equals(id)) {
                 return entry.getValue();
             }
@@ -181,7 +184,7 @@ public class AchievementUtil {
         String[] goodId = process.split("-");
         String resp = "";
         for (int i = 0; i < goodId.length; i++) {
-            resp += ProjectContext.equipmentMap.get(Integer.parseInt(goodId[i])).getName();
+            resp += EquipmentResourceLoad.equipmentMap.get(Integer.parseInt(goodId[i])).getName();
             if (i != goodId.length - 1) {
                 resp += "-";
             }

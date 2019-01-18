@@ -1,14 +1,17 @@
 package server;
 
 
+import com.google.protobuf.MessageLite;
 import core.ServiceDistributor;
+import core.packet.PacketProto;
+import core.packet.ProtoBufEnum;
+import core.packet.client_packet;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
-import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import core.packet.PacketProto;
+import utils.ChannelUtil;
 
 /**
  * @ClassName ServerLoginHandler
@@ -26,14 +29,15 @@ public class ServerLoginHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if(!ProjectContext.channelToUserMap.containsKey(ctx.channel())){
-//          没登录走这里
-            if (msg instanceof PacketProto.Packet) {
-                PacketProto.Packet packet = (PacketProto.Packet) msg;
-                serviceDistributor.distributeEvent(ctx.channel(),packet.getData());
+        if (ProtoBufEnum.protoIndexOfMessage((MessageLite) msg) == ProtoBufEnum.CLIENT_PACKET_NORMALREQ.getiValue()) {
+            if (!ChannelUtil.channelToUserMap.containsKey(ctx.channel())) {
+                String data = ((client_packet.client_packet_normalreq) msg).getData();
+                serviceDistributor.distributeService(ctx.channel(), data);
+            } else {
+                ctx.fireChannelRead(msg);
             }
         }else {
-            ctx.fireChannelRead(msg);
+//          无法处理该协议包，做处理，返回404啊什么的
         }
     }
 }

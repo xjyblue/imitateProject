@@ -1,18 +1,20 @@
 package service.caculationservice.service;
 
+import config.impl.excel.AchievementResourceLoad;
+import config.impl.excel.EquipmentResourceLoad;
 import service.achievementservice.entity.Achievement;
 import service.achievementservice.service.AchievementService;
 import core.component.good.Equipment;
 import core.component.good.parent.BaseGood;
 import io.netty.channel.Channel;
 import mapper.UserbagMapper;
-import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
 import pojo.User;
 import pojo.Userbag;
 import service.userbagservice.service.UserbagService;
+import utils.ChannelUtil;
 
 
 /**
@@ -68,15 +70,15 @@ public class UserbagCaculationService {
 
 //      触发成就
         if (value.getTypeof().equals(BaseGood.EQUIPMENT)) {
-            Equipment equipment = ProjectContext.equipmentMap.get(value.getWid());
+            Equipment equipment = EquipmentResourceLoad.equipmentMap.get(value.getWid());
             for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
-                Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
+                Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
                 if (achievementprocess.getType().equals(Achievement.COLLECT)) {
                     achievementService.executeCollect(achievementprocess, equipment, user, achievement);
                 }
             }
         }
-        Channel channel = ProjectContext.userToChannelMap.get(user);
+        Channel channel = ChannelUtil.userToChannelMap.get(user);
         userbagService.refreshUserbagInfo(channel, null);
     }
 
@@ -95,7 +97,7 @@ public class UserbagCaculationService {
             userbag.setNum(userbag.getNum() - num);
             userbagMapper.updateByPrimaryKey(userbag);
         }
-        Channel channel = ProjectContext.userToChannelMap.get(user);
+        Channel channel = ChannelUtil.userToChannelMap.get(user);
         userbagService.refreshUserbagInfo(channel, null);
     }
 

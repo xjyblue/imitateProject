@@ -3,11 +3,11 @@ package pojo;
 import com.google.common.collect.Maps;
 import core.ServiceDistributor;
 import core.component.monster.Monster;
+import core.packet.client_packet;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
-import core.packet.PacketProto;
 import service.buffservice.service.UserBuffService;
 import service.petservice.service.entity.Pet;
+import utils.ChannelUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -129,7 +129,7 @@ public class User {
     /**
      * 玩家的命令消费队列
      */
-    private ConcurrentLinkedQueue<PacketProto.Packet> packetsQueue = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<Object> packetsQueue = new ConcurrentLinkedQueue<>();
 
     public Map<Integer, Monster> getUserToMonsterMap() {
         return userToMonsterMap;
@@ -195,11 +195,11 @@ public class User {
         this.userskillrelationMap = userskillrelationMap;
     }
 
-    public ConcurrentLinkedQueue<PacketProto.Packet> getPacketsQueue() {
+    public ConcurrentLinkedQueue<Object> getPacketsQueue() {
         return packetsQueue;
     }
 
-    public void setPacketsQueue(ConcurrentLinkedQueue<PacketProto.Packet> packetsQueue) {
+    public void setPacketsQueue(ConcurrentLinkedQueue<Object> packetsQueue) {
         this.packetsQueue = packetsQueue;
     }
 
@@ -363,10 +363,11 @@ public class User {
 
     private void consumePacket() {
         if (packetsQueue.peek() != null) {
-            PacketProto.Packet packet = packetsQueue.poll();
-            Channel channel = ProjectContext.userToChannelMap.get(this);
+            Object o = packetsQueue.poll();
+            client_packet.client_packet_normalreq normalreq = (client_packet.client_packet_normalreq) o;
+            Channel channel = ChannelUtil.userToChannelMap.get(this);
             try {
-                serviceDistributor.distributeEvent(channel, packet.getData());
+                serviceDistributor.distributeService(channel, normalreq.getData());
             } catch (Exception e) {
                 e.printStackTrace();
             }

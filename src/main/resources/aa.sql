@@ -2,7 +2,8 @@
 SQLyog Ultimate v8.32 
 MySQL - 5.5.23 : Database - nettyserver
 *********************************************************************
-*/
+*/
+
 
 /*!40101 SET NAMES utf8 */;
 
@@ -127,7 +128,7 @@ DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `username` varchar(255) NOT NULL,
   `password` varchar(255) DEFAULT NULL,
-  `status` varchar(2) DEFAULT NULL,
+  `channelStatus` varchar(2) DEFAULT NULL,
   `pos` varchar(10) DEFAULT NULL,
   `mp` varchar(20) DEFAULT NULL,
   `hp` varchar(20) DEFAULT NULL,
@@ -141,7 +142,7 @@ CREATE TABLE `user` (
 
 /*Data for the table `user` */
 
-insert  into `user`(`username`,`password`,`status`,`pos`,`mp`,`hp`,`money`,`roleId`,`experience`,`unionId`,`unionLevel`) values ('e','ee','1','0','8690','586250','418450600',3,6601,NULL,NULL),('f','ff','1','0','10000','700000','40100000',2,901,NULL,NULL),('k','kk','1','1','8630','9800','119998',1,59,NULL,NULL),('q','qq','1','0','10000','700000','60949900',4,901,'388f708e-dfe0-445d-8af3-64a053783248',2),('w','ww','1','1','4500','54500','3210000',1,101,NULL,NULL),('y','yy','1','1','8640','26400','22757200',1,551,'388f708e-dfe0-445d-8af3-64a053783248',4),('z','zz','1','0','1450','499170','533503102',1,19161,'388f708e-dfe0-445d-8af3-64a053783248',1);
+insert  into `user`(`username`,`password`,`channelStatus`,`pos`,`mp`,`hp`,`money`,`roleId`,`experience`,`unionId`,`unionLevel`) values ('e','ee','1','0','8690','586250','418450600',3,6601,NULL,NULL),('f','ff','1','0','10000','700000','40100000',2,901,NULL,NULL),('k','kk','1','1','8630','9800','119998',1,59,NULL,NULL),('q','qq','1','0','10000','700000','60949900',4,901,'388f708e-dfe0-445d-8af3-64a053783248',2),('w','ww','1','1','4500','54500','3210000',1,101,NULL,NULL),('y','yy','1','1','8640','26400','22757200',1,551,'388f708e-dfe0-445d-8af3-64a053783248',4),('z','zz','1','0','1450','499170','533503102',1,19161,'388f708e-dfe0-445d-8af3-64a053783248',1);
 
 /*Table structure for table `userbag` */
 
@@ -149,7 +150,7 @@ DROP TABLE IF EXISTS `userbag`;
 
 CREATE TABLE `userbag` (
   `id` varchar(50) NOT NULL,
-  `name` varchar(20) DEFAULT NULL,
+  `username` varchar(20) DEFAULT NULL,
   `wid` int(10) DEFAULT NULL,
   `num` int(10) DEFAULT NULL,
   `typeOf` varchar(10) DEFAULT NULL COMMENT '物品所属的种类',
@@ -160,7 +161,7 @@ CREATE TABLE `userbag` (
 
 /*Data for the table `userbag` */
 
-insert  into `userbag`(`id`,`name`,`wid`,`num`,`typeOf`,`durability`,`startLevel`) values ('031d8227-841b-4017-9044-18bf60dcf21f',NULL,1001,1,'1',NULL,NULL),('14b1c8e7-41f0-47a4-b81a-0773c2c5688b','k',1500,2,'2',NULL,NULL),('1fa24fa3-21f5-49a2-9733-b10faf83bd16','y',3009,1,'3',50,1),('24c417dd-4aed-4d48-bea6-6adebc202543','e',3007,1,'3',10,1),('2a053d10-ec48-4b21-bae7-8f9825d4e75c','y',3006,1,'3',20,2),('314eb818-0fd6-49e7-9482-a6a61c048ecb','y',3008,1,'3',50,1),('3de18db9-021b-45a6-a9d1-8fdce4e96380','e',1500,2,'2',0,1),('483ef3f6-4f4b-4466-9555-30bdb8402a59','e',3100,1,'3',0,4),('62fdec11-7f6a-46f5-9764-2c50b4bd6ec1',NULL,1001,5,'1',NULL,NULL),('8340638c-7293-4248-b2d5-1f2a64c46dd2',NULL,3006,1,'3',20,7),('9007418b-9bb4-489d-8a7e-cc3a59298b2e','y',3010,1,'3',50,4),('aa72866b-43ac-4baf-be9b-a566539eb8d8','z',3007,1,'3',10,3),('b0a25d3c-889f-45eb-bd7f-8f0dc34e0f57','z',1001,16,'1',NULL,NULL),('d5df41af-8f3b-403e-8960-5fe38091cd1d','z',1501,1,'2',NULL,NULL),('ebaf1306-bd04-48bb-8ead-d575a94e6df3','y',1001,1,'1',NULL,NULL),('ee4797bc-df79-484d-b06d-a9065964b235','z',1500,10,'2',0,1),('fbc4e909-3dcd-4501-81c0-325f027b4ec6','z',3006,1,'3',20,1);
+insert  into `userbag`(`id`,`username`,`wid`,`num`,`typeOf`,`durability`,`startLevel`) values ('031d8227-841b-4017-9044-18bf60dcf21f',NULL,1001,1,'1',NULL,NULL),('14b1c8e7-41f0-47a4-b81a-0773c2c5688b','k',1500,2,'2',NULL,NULL),('1fa24fa3-21f5-49a2-9733-b10faf83bd16','y',3009,1,'3',50,1),('24c417dd-4aed-4d48-bea6-6adebc202543','e',3007,1,'3',10,1),('2a053d10-ec48-4b21-bae7-8f9825d4e75c','y',3006,1,'3',20,2),('314eb818-0fd6-49e7-9482-a6a61c048ecb','y',3008,1,'3',50,1),('3de18db9-021b-45a6-a9d1-8fdce4e96380','e',1500,2,'2',0,1),('483ef3f6-4f4b-4466-9555-30bdb8402a59','e',3100,1,'3',0,4),('62fdec11-7f6a-46f5-9764-2c50b4bd6ec1',NULL,1001,5,'1',NULL,NULL),('8340638c-7293-4248-b2d5-1f2a64c46dd2',NULL,3006,1,'3',20,7),('9007418b-9bb4-489d-8a7e-cc3a59298b2e','y',3010,1,'3',50,4),('aa72866b-43ac-4baf-be9b-a566539eb8d8','z',3007,1,'3',10,3),('b0a25d3c-889f-45eb-bd7f-8f0dc34e0f57','z',1001,16,'1',NULL,NULL),('d5df41af-8f3b-403e-8960-5fe38091cd1d','z',1501,1,'2',NULL,NULL),('ebaf1306-bd04-48bb-8ead-d575a94e6df3','y',1001,1,'1',NULL,NULL),('ee4797bc-df79-484d-b06d-a9065964b235','z',1500,10,'2',0,1),('fbc4e909-3dcd-4501-81c0-325f027b4ec6','z',3006,1,'3',20,1);
 
 /*Table structure for table `userskillrelation` */
 

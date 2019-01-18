@@ -1,5 +1,8 @@
 package service.npcservice.service;
 
+import config.impl.excel.AchievementResourceLoad;
+import config.impl.excel.EquipmentResourceLoad;
+import config.impl.excel.SceneResourceLoad;
 import core.channel.ChannelStatus;
 import core.annotation.Order;
 import core.annotation.Region;
@@ -9,7 +12,6 @@ import service.npcservice.entity.Npc;
 import service.sceneservice.entity.Scene;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
-import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,7 @@ import pojo.Userbag;
 import service.achievementservice.entity.Achievement;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.UserbagCaculationService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.List;
@@ -48,18 +51,18 @@ public class NpcService {
     @Order(orderMsg = "npcTalk",status = {ChannelStatus.COMMONSCENE})
     public void talkMethod(Channel channel, String msg) {
         String[] temp = msg.split("=");
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
         } else {
-            List<Npc> npcs = ProjectContext.sceneMap.get(ProjectContext.channelToUserMap.get(channel).getPos())
+            List<Npc> npcs = SceneResourceLoad.sceneMap.get(ChannelUtil.channelToUserMap.get(channel).getPos())
                     .getNpcs();
             for (Npc npc : npcs) {
                 if (npc.getName().equals(temp[1])) {
                     channel.writeAndFlush(MessageUtil.turnToPacket(npc.getTalk()));
 //                      人物任务触发
                     for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
-                        Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
+                        Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
                         if (achievementprocess.getType().equals(Achievement.TALKTONPC)) {
                             achievementService.executeTalkNPC(achievementprocess, user, achievement, npc);
                         }
@@ -84,8 +87,8 @@ public class NpcService {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        User user = ProjectContext.channelToUserMap.get(channel);
-        Scene scene = ProjectContext.sceneMap.get(user.getPos());
+        User user = ChannelUtil.channelToUserMap.get(channel);
+        Scene scene = SceneResourceLoad.sceneMap.get(user.getPos());
         Npc npc = null;
         for (Npc npcT : scene.getNpcs()) {
             if (npcT.getName().equals(temp[1])) {
@@ -118,7 +121,7 @@ public class NpcService {
 //        新增武器
         String[] getGoods = npc.getGetGoods().split("-");
         for (String getGood : getGoods) {
-            Equipment equipment = ProjectContext.equipmentMap.get(Integer.parseInt(getGood));
+            Equipment equipment = EquipmentResourceLoad.equipmentMap.get(Integer.parseInt(getGood));
             Userbag userbag1 = new Userbag();
             userbag1.setWid(equipment.getId());
             userbag1.setNum(1);

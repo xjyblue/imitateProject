@@ -1,5 +1,6 @@
 package service.deadservice.service;
 
+import config.impl.excel.SceneResourceLoad;
 import core.annotation.Region;
 import service.sceneservice.entity.Scene;
 import core.config.GrobalConfig;
@@ -7,11 +8,11 @@ import core.config.MessageConfig;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
-import core.context.ProjectContext;
 import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 import service.userservice.service.UserService;
 
@@ -39,16 +40,16 @@ public class DeadService {
      */
     @Order(orderMsg = "y", status = {ChannelStatus.DEADSCENE})
     public void reborn(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         if (!user.getPos().equals(GrobalConfig.STARTSCENE)) {
-            Scene scene = ProjectContext.sceneMap.get(user.getPos());
+            Scene scene = SceneResourceLoad.sceneMap.get(user.getPos());
 //          这句是为了解决普通场景复活和怪物副本复活的bug
             if (scene.getUserMap().containsKey(user.getUsername())) {
                 scene.getUserMap().remove(user.getUsername());
             }
         }
 
-        Scene sceneTarget = ProjectContext.sceneMap.get(GrobalConfig.STARTSCENE);
+        Scene sceneTarget = SceneResourceLoad.sceneMap.get(GrobalConfig.STARTSCENE);
         sceneTarget.getUserMap().put(user.getUsername(), user);
 
         user.setStatus(GrobalConfig.ALIVE);
@@ -56,7 +57,7 @@ public class DeadService {
         userService.recoverUser(user);
         userMapper.updateByPrimaryKeySelective(user);
 
-        ProjectContext.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LIVEINSTART));
 
     }

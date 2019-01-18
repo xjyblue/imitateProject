@@ -1,13 +1,14 @@
 package service.attackservice.util;
 
+import core.context.ProjectContext;
 import service.sceneservice.entity.BossScene;
 import core.component.monster.Monster;
 import core.channel.ChannelStatus;
 import service.rewardservice.service.RewardService;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
 import pojo.User;
 import service.teamservice.entity.Team;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 import utils.SpringContextUtil;
 
@@ -29,9 +30,9 @@ public class AttackUtil {
         user.getUserToMonsterMap().remove(monster.getId());
 //      将所有用户弄为战斗状态
         for (Map.Entry<String, User> entry : bossScene.getUserMap().entrySet()) {
-            Channel channelT = ProjectContext.userToChannelMap.get(entry.getValue());
-            if (!ProjectContext.channelStatus.get(channelT).equals(ChannelStatus.DEADSCENE)) {
-                ProjectContext.channelStatus.put(channelT, ChannelStatus.ATTACK);
+            Channel channelT = ChannelUtil.userToChannelMap.get(entry.getValue());
+            if (!ChannelUtil.channelStatus.get(channelT).equals(ChannelStatus.DEADSCENE)) {
+                ChannelUtil.channelStatus.put(channelT, ChannelStatus.ATTACK);
             }
         }
     }
@@ -46,7 +47,7 @@ public class AttackUtil {
         RewardService rewardService = SpringContextUtil.getBean("rewardService");
         Team team = ProjectContext.teamMap.get(user.getTeamId());
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
-            Channel channelTemp = ProjectContext.userToChannelMap.get(entry.getValue());
+            Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
             rewardService.getGoods(channelTemp, monster);
             channelTemp.writeAndFlush(MessageUtil.turnToPacket("玩家" + user.getUsername() + "击杀了：" + monster.getName()));
         }

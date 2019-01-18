@@ -1,5 +1,8 @@
 package service.rewardservice.service;
 
+import config.impl.excel.AchievementResourceLoad;
+import config.impl.excel.CollectGoodResourceLoad;
+import config.impl.excel.EquipmentResourceLoad;
 import service.achievementservice.entity.Achievement;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
@@ -10,14 +13,13 @@ import core.component.monster.Monster;
 import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import io.netty.channel.Channel;
-import mapper.UserMapper;
-import core.context.ProjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
 import pojo.User;
 import pojo.Userbag;
 import service.levelservice.service.LevelService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.Random;
@@ -32,8 +34,6 @@ import java.util.UUID;
  **/
 @Component
 public class RewardService {
-    @Autowired
-    private UserMapper userMapper;
     @Autowired
     private AchievementService achievementService;
     @Autowired
@@ -96,7 +96,7 @@ public class RewardService {
 
 //      触发打怪任务事件
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
-            Achievement achievement = ProjectContext.achievementMap.get(achievementprocess.getAchievementid());
+            Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
             if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.ATTACKMONSTER)) {
                 achievementService.executeKillMonster(user, achievementprocess, monster.getId());
             }
@@ -115,7 +115,7 @@ public class RewardService {
      */
     private void goodToUser(String goodType, Integer goodId, User user, Channel channel) {
         if (goodType.equals(BaseGood.EQUIPMENT)) {
-            Equipment equipment = ProjectContext.equipmentMap.get(goodId);
+            Equipment equipment = EquipmentResourceLoad.equipmentMap.get(goodId);
             Userbag userbag = new Userbag();
             userbag.setId(UUID.randomUUID().toString());
             userbag.setName(equipment.getName());
@@ -129,7 +129,7 @@ public class RewardService {
             channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + equipment.getName() + "增加攻击力为" + equipment.getAddValue()));
         }
         if (goodType.equals(BaseGood.CHANGEGOOD)) {
-            CollectGood collectGood = ProjectContext.collectGoodMap.get(goodId);
+            CollectGood collectGood = CollectGoodResourceLoad.collectGoodMap.get(goodId);
             Userbag userbag = new Userbag();
             userbag.setId(UUID.randomUUID().toString());
             userbag.setName(user.getUsername());
@@ -142,7 +142,7 @@ public class RewardService {
     }
 
     private User getUser(Channel channel) {
-        return ProjectContext.channelToUserMap.get(channel);
+        return ChannelUtil.channelToUserMap.get(channel);
     }
 
     public void extraBonus(User user, Channel channel) {

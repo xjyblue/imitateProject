@@ -1,27 +1,25 @@
 package server;
 
+import com.google.protobuf.MessageLite;
 import core.config.GrobalConfig;
-import core.context.ProjectContext;
 import core.channel.ChannelStatus;
-import service.teamservice.service.TeamService;
+import core.packet.ProtoBufEnum;
+import core.packet.server_packet;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import io.netty.channel.ChannelHandler.Sharable;
-import core.packet.PacketProto;
-import core.packet.PacketType;
 import pojo.User;
+import utils.ChannelUtil;
 import utils.ProjectContextUtil;
 
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static core.packet.PacketProto.Packet.newBuilder;
 
 /**
  * @ClassName ServerNetHandler
@@ -32,19 +30,17 @@ import static core.packet.PacketProto.Packet.newBuilder;
  **/
 @Sharable
 @Slf4j
-@Service("serverNetHandler")
+@Service
 public class ServerNetHandler extends ChannelHandlerAdapter {
 
     public static final Map<Channel, Integer> HEART_COUNTS = new ConcurrentHashMap<>();
-    @Autowired
-    private TeamService teamService;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         HEART_COUNTS.put(ctx.channel(), 0);
-        PacketProto.Packet packet = (PacketProto.Packet) msg;
-        if (packet.getPacketType().equals(PacketProto.Packet.PacketType.HEARTBEAT)) {
-//          客户端心跳包处理
+//      由于客户端全部在一个窗口输入，故只分为心跳包和普通包，心跳包全部在这一层处理，普通包往下跑
+        if (ProtoBufEnum.protoIndexOfMessage((MessageLite) msg) == ProtoBufEnum.CLIENT_PACKET_PINGREQ.getiValue()) {
+//         心跳包不做回应
         } else {
             ctx.fireChannelRead(msg);
         }
@@ -56,15 +52,20 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
         Channel channel = ctx.channel();
         log.info("端口号为：{}的渠道开始与服务端连接", channel.remoteAddress());
         HEART_COUNTS.put(channel, 0);
-
+//      进来的时候新添加channel
+        ChannelUtil.group.add(channel);
 //      有渠道连接进来的时候
-        ProjectContext.channelStatus.put(channel, ChannelStatus.COMING);
-        PacketProto.Packet.Builder builder = newBuilder();
-        builder.setPacketType(PacketProto.Packet.PacketType.DATA);
+        ChannelUtil.channelStatus.put(channel, ChannelStatus.COMING);
+        for (Channel channel1 : ChannelUtil.group) {
+            System.out.println(channel1.remoteAddress());
+        }
+        sendMessage(ctx);
+    }
+
+    private void sendMessage(ChannelHandlerContext ctx) {
+        server_packet.server_packet_normalresp.Builder builder = server_packet.server_packet_normalresp.newBuilder();
         builder.setData("欢迎来到【星宇征服】,请按以下提示操作：dl:登录 zc:注册");
-        builder.setType(PacketType.NORMALMSG);
-        PacketProto.Packet packetResp = builder.build();
-        ctx.writeAndFlush(packetResp);
+        ctx.writeAndFlush(builder.build());
     }
 
     @Override
@@ -73,12 +74,12 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
         Channel channel = ctx.channel();
         log.info("端口号为{}的渠道与服务器断开连接", channel.remoteAddress());
         //      已登录的情况下断开
-        if (ProjectContext.channelToUserMap.containsKey(ctx.channel())) {
-            User user = ProjectContext.channelToUserMap.get(ctx.channel());
+        if (ChannelUtil.channelToUserMap.containsKey(ctx.channel())) {
+            User user = ChannelUtil.channelToUserMap.get(ctx.channel());
 //          顶号关闭，更改渠道和用户的绑定和渠道的事件状态就OK
             if (user != null && user.isIfOccupy()) {
-                ProjectContext.channelStatus.remove(ctx.channel());
-                ProjectContext.channelToUserMap.remove(ctx.channel());
+                ChannelUtil.channelStatus.remove(ctx.channel());
+                ChannelUtil.channelToUserMap.remove(ctx.channel());
                 user.setIfOccupy(false);
             } else if (user != null) {
                 ProjectContextUtil.clearContextUserInfo(ctx, user);
@@ -86,7 +87,7 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
             HEART_COUNTS.remove(ctx.channel());
         } else {
 //          未登录的情况下断开
-            ProjectContext.channelStatus.remove(ctx.channel());
+            ChannelUtil.channelStatus.remove(ctx.channel());
             HEART_COUNTS.remove(ctx.channel());
         }
     }
@@ -114,7 +115,7 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
     /**
      * 处理心跳包
      */
-    private void handleHeartbreat(ChannelHandlerContext ctx, PacketProto.Packet packet) {
+    private void handleHeartbreat(ChannelHandlerContext ctx, Object o) {
 //      将心跳丢失计数器置为0
         HEART_COUNTS.put(ctx.channel(), 0);
 

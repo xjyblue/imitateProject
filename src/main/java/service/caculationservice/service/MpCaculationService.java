@@ -1,13 +1,13 @@
 package service.caculationservice.service;
 
 import core.config.MessageConfig;
-import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import service.levelservice.service.LevelService;
 import service.skillservice.entity.UserSkill;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 /**
@@ -65,7 +65,7 @@ public class MpCaculationService {
     public boolean checkUserMpEnough(User user, UserSkill userSkill) {
         Integer userMp = Integer.parseInt(user.getMp());
         Integer skillMp = Integer.parseInt(userSkill.getSkillMp());
-        Channel channel = ProjectContext.userToChannelMap.get(user);
+        Channel channel = ChannelUtil.userToChannelMap.get(user);
         if (userMp < skillMp) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNENOUGHMP));
             return false;

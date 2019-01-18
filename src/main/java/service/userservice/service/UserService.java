@@ -1,6 +1,7 @@
 package service.userservice.service;
 
 import com.google.common.collect.Maps;
+import config.impl.excel.SceneResourceLoad;
 import core.channel.ChannelStatus;
 import core.annotation.Order;
 import core.annotation.Region;
@@ -8,12 +9,12 @@ import core.component.monster.Monster;
 import service.buffservice.entity.BuffConstant;
 import service.npcservice.entity.Npc;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
 import service.levelservice.service.LevelService;
 import mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 import utils.SpringContextUtil;
 
@@ -40,28 +41,28 @@ public class UserService {
      */
     @Order(orderMsg = "aoi", status = {ChannelStatus.COMMONSCENE})
     public void aoiMethod(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         String allStatus = System.getProperty("line.separator")
                 + "玩家[" + user.getUsername()
                 + "] 玩家的状态[" + user.getStatus()
                 + "] 玩家的经验[" + user.getExperience()
                 + "] 玩家的等级[" + levelService.getLevelByExperience(user.getExperience())
-                + "] 处于[" + ProjectContext.sceneMap.get(user.getPos()).getName()
+                + "] 处于[" + SceneResourceLoad.sceneMap.get(user.getPos()).getName()
                 + "] 玩家的HP量：[" + user.getHp()
                 + "] 玩家的HP上限 [" + levelService.getMaxHp(user)
                 + "] 玩家的MP量：[" + user.getMp()
                 + "] 玩家的MP上限: [" + levelService.getMaxMp(user)
                 + "] 玩家的金币：[" + user.getMoney()
                 + "]" + System.getProperty("line.separator");
-        for (Map.Entry<Channel, User> entry : ProjectContext.channelToUserMap.entrySet()) {
+        for (Map.Entry<Channel, User> entry : ChannelUtil.channelToUserMap.entrySet()) {
             if (!user.getUsername().equals(entry.getValue().getUsername()) && user.getPos().equals(entry.getValue().getPos())) {
                 allStatus += "其他玩家" + entry.getValue().getUsername() + "---" + entry.getValue().getStatus() + System.getProperty("line.separator");
             }
         }
-        for (Npc npc : ProjectContext.sceneMap.get(user.getPos()).getNpcs()) {
+        for (Npc npc : SceneResourceLoad.sceneMap.get(user.getPos()).getNpcs()) {
             allStatus += "Npc:" + npc.getName() + " 状态[" + npc.getStatus() + "]" + System.getProperty("line.separator");
         }
-        for (Monster monster : ProjectContext.sceneMap.get(user.getPos()).getMonsters()) {
+        for (Monster monster : SceneResourceLoad.sceneMap.get(user.getPos()).getMonsters()) {
             allStatus += "怪物有" + monster.getName() + " 生命值[" + monster.getValueOfLife()
                     + "] 攻击技能为[" + monster.getMonsterSkillList().get(0).getSkillName()
                     + "] 伤害为：[" + monster.getMonsterSkillList().get(0).getDamage() + "]";
@@ -76,7 +77,7 @@ public class UserService {
      * @return
      */
     public User getUserByNameFromSession(String s) {
-        for (Map.Entry<Channel, User> entry : ProjectContext.channelToUserMap.entrySet()) {
+        for (Map.Entry<Channel, User> entry : ChannelUtil.channelToUserMap.entrySet()) {
             if (entry.getValue().getUsername().equals(s)) {
                 return entry.getValue();
             }
@@ -99,7 +100,7 @@ public class UserService {
     }
 
     public void sendMessageByUserName(String username, String msg, String type) {
-        for (Map.Entry<User, Channel> entry : ProjectContext.userToChannelMap.entrySet()) {
+        for (Map.Entry<User, Channel> entry : ChannelUtil.userToChannelMap.entrySet()) {
             if (entry.getKey().getUsername().equals(username)) {
                 Channel channel = entry.getValue();
                 if (type == null) {

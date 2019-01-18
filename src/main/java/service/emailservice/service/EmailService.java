@@ -1,5 +1,6 @@
 package service.emailservice.service;
 
+import config.impl.db.EmailDbLoad;
 import core.channel.ChannelStatus;
 import core.annotation.Order;
 import core.annotation.Region;
@@ -11,11 +12,11 @@ import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
 import service.emailservice.entity.Mail;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import pojo.Userbag;
 import service.userbagservice.service.UserbagService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.util.Map;
@@ -47,8 +48,8 @@ public class EmailService {
     @Order(orderMsg = "qmail", status = {ChannelStatus.COMMONSCENE})
     public void queryEmail(Channel channel, String msg) {
 //      展示用户的email信息
-        User user = ProjectContext.channelToUserMap.get(channel);
-        Map<String, Mail> emailMap = ProjectContext.userEmailMap.get(user.getUsername());
+        User user = ChannelUtil.channelToUserMap.get(channel);
+        Map<String, Mail> emailMap = EmailDbLoad.userEmailMap.get(user.getUsername());
         if (emailMap.size() == 0) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.EMPTYEMAIL));
             return;
@@ -73,9 +74,9 @@ public class EmailService {
      */
     @Order(orderMsg = "sendmail", status = {ChannelStatus.COMMONSCENE})
     public void sendEmail(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
-        if (!ProjectContext.userEmailMap.containsKey(temp[GrobalConfig.ONE])) {
+        if (!EmailDbLoad.userEmailMap.containsKey(temp[GrobalConfig.ONE])) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEMAILUSER));
             return;
         }
@@ -113,24 +114,24 @@ public class EmailService {
      */
     @Order(orderMsg = "receivemail", status = {ChannelStatus.COMMONSCENE})
     public void receiveEmail(Channel channel, String msg) {
-        User user = ProjectContext.channelToUserMap.get(channel);
+        User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
             return;
         }
-        if (!ProjectContext.userEmailMap.get(user.getUsername()).containsKey(temp[GrobalConfig.ONE])) {
+        if (!EmailDbLoad.userEmailMap.get(user.getUsername()).containsKey(temp[GrobalConfig.ONE])) {
             channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILFAIL));
             return;
         }
-        Mail mail = ProjectContext.userEmailMap.get(user.getUsername()).get(temp[GrobalConfig.ONE]);
+        Mail mail = EmailDbLoad.userEmailMap.get(user.getUsername()).get(temp[GrobalConfig.ONE]);
         if (mail.isIfUserBag()) {
             userbagCaculationService.addUserBagForUser(user, mail.getUserbag());
         }
         if (mail.getMoney() != null) {
             moneyCaculationService.addMoneyToUser(user, mail.getMoney().toString());
         }
-        ProjectContext.userEmailMap.get(user.getUsername()).remove(temp[GrobalConfig.ONE]);
+        EmailDbLoad.userEmailMap.get(user.getUsername()).remove(temp[GrobalConfig.ONE]);
         channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILSUCCESS));
     }
 
@@ -163,6 +164,6 @@ public class EmailService {
             mail.setMoney(money);
         }
 //      存到全局中
-        ProjectContext.userEmailMap.get(toUser).put(mail.getEmailId(), mail);
+        EmailDbLoad.userEmailMap.get(toUser).put(mail.getEmailId(), mail);
     }
 }

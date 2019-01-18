@@ -11,6 +11,9 @@ import core.component.good.Equipment;
 import core.component.good.HpMedicine;
 import core.component.good.MpMedicine;
 import core.component.monster.Monster;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import service.auctionservice.entity.AuctionItem;
 import service.npcservice.entity.Npc;
 import service.petservice.service.entity.PetConfig;
@@ -40,119 +43,15 @@ import service.transactionservice.entity.Trade;
  **/
 public class ProjectContext {
     /**
-     * 缓存通信上下文环境对应的登录用户
-     */
-    public final static Map<Channel, User> channelToUserMap = Maps.newConcurrentMap();
-    /**
-     * 根据用户拿去对应的渠道
-     */
-    public final static Map<User, Channel> userToChannelMap = Maps.newConcurrentMap();
-    /**
-     * 收集类物品的id
-     */
-    public final static Map<Integer, CollectGood> collectGoodMap = Maps.newConcurrentMap();
-    /**
-     * 信道所处事件的装填
-     */
-    public final static Map<Channel, String> channelStatus = Maps.newConcurrentMap();
-    /**
-     * 地图缓存到内存中
-     */
-    public final static Map<String, Scene> sceneMap = Maps.newHashMap();
-    /**
-     * 初始化全局技能伤害
-     */
-    public final static Map<Integer, UserSkill> skillMap = Maps.newHashMap();
-    /**
-     * 初始化地图Set集合
-     */
-    public final static Set<String> sceneSet = Sets.newHashSet();
-    /**
-     * 初始化药物属性
-     */
-    public final static Map<Integer, MpMedicine> mpMedicineMap = Maps.newHashMap();
-    /**
-     * 初始化武器
-     */
-    public final static Map<Integer, Equipment> equipmentMap = Maps.newHashMap();
-    /**
-     * 初始化全局武器特殊buf效果
-     */
-    public final static Map<Integer, Buff> buffMap = Maps.newHashMap();
-    /**
-     * 记录玩家队伍
-     */
-    public final static Map<String, Team> teamMap = Maps.newConcurrentMap();
-    /**
-     * 每个boss副本和teamId挂钩
-     */
-    public final static Map<String, BossScene> bossAreaMap = Maps.newConcurrentMap();
-    /**
-     * 记录每个队伍挑战副本的截止时间，超过时间就GG
-     */
-    public final static Map<String, Long> endBossAreaTime = Maps.newConcurrentMap();
-    /**
-     * 缓存副本的配置，为生成副本而用
-     */
-    public final static Map<String, BossSceneConfig> bossSceneConfigMap = Maps.newHashMap();
-    /**
-     * 辅助定时任务关闭的线程的futuremap
-     */
-    public final static Map<String, Future> futureMap = Maps.newConcurrentMap();
-    /**
-     * 缓存邮件信息
-     */
-    public final static Map<String, ConcurrentHashMap<String, Mail>> userEmailMap = Maps.newHashMap();
-    /**
-     * 初始化怪物技能
-     */
-    public final static Map<Integer, MonsterSkill> monsterSkillMap = Maps.newHashMap();
-    /**
-     * 职业的构建
-     */
-    public final static Map<Integer, Role> roleMap = Maps.newHashMap();
-    /**
-     * 怪物的构建
-     */
-    public final static Map<Integer, Monster> monsterMap = Maps.newHashMap();
-    /**
      * 交易单的建立
      */
     public final static Map<String, Trade> tradeMap = Maps.newConcurrentMap();
-    /**
-     * 人物经验表的建立
-     */
-    public final static Map<Integer, Level> levelMap = Maps.newHashMap();
-    /**
-     * 成就表的建立
-     */
-    public final static Map<Integer, Achievement> achievementMap = Maps.newHashMap();
-    /**
-     * npc
-     */
-    public final static Map<Integer, Npc> npcMap = Maps.newHashMap();
-    /**
-     * 红药恢复的时间
-     */
-    public final static Map<Integer, HpMedicine> hpMedicineMap = Maps.newHashMap();
     /**
      * 拍卖物品
      */
     public final static Map<String, AuctionItem> auctionItemMap = Maps.newConcurrentMap();
     /**
-     * 宠物配置
+     * 记录玩家队伍
      */
-    public final static Map<String, PetConfig> petConfigMap = Maps.newHashMap();
-    /**
-     * 宠物技能配置
-     */
-    public final static Map<String, PetSkillConfig> petSkillConfigMap = Maps.newHashMap();
-    /**
-     * 指令-方法
-     */
-    public final static Map<String, InvokeMethod> methodMap = Maps.newHashMap();
-    /**
-     * 指令-状态
-     */
-    public final static Map<String, Set<String>> orderStatusMap = Maps.newHashMap();
+    public final static Map<String, Team> teamMap = Maps.newConcurrentMap();
 }

@@ -1,21 +1,22 @@
 package client;
 
+import core.packet.ByteToProtoBufDecoder;
+import core.packet.ProtoBufToByteEncoder;
+import core.packet.client_packet;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
-import core.packet.PacketProto;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
-
-import static core.packet.PacketProto.Packet.newBuilder;
 
 /**
  * @ClassName ClientConfig
@@ -62,13 +63,17 @@ public class ClientConfig {
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         // 初始化编码器，解码器，处理器
                         ChannelPipeline pipeline = socketChannel.pipeline();
-                        pipeline.addLast(new ProtobufVarint32FrameDecoder());
-                        pipeline.addLast(new ProtobufEncoder());
-                        pipeline.addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
+//                       32位编码解析器
+//                        pipeline.addLast(new ProtobufVarint32FrameDecoder());
+//                        pipeline.addLast(new ProtobufEncoder());
+//                        pipeline.addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
+
+                        pipeline.addLast(new LengthFieldBasedFrameDecoder(8192, 0, 4, 0, 4));
+                        pipeline.addLast(new ProtoBufToByteEncoder());
+                        pipeline.addLast(new ByteToProtoBufDecoder());
 //                      读空闲心跳，写空闲心跳，读或者写空闲心跳,读空闲每隔两秒发送心跳包
-                        pipeline.addLast(new IdleStateHandler(1, 1, 0));
-                        socketChannel.pipeline().addLast(
-                                new ClientHandler(ClientConfig.this, clientStart));
+//                        pipeline.addLast(new IdleStateHandler(1, 1, 0));
+                        socketChannel.pipeline().addLast(new ClientHandler(ClientConfig.this, clientStart));
                     }
                 });
         // 进行连接
@@ -95,9 +100,9 @@ public class ClientConfig {
                     future.channel().eventLoop().schedule(new Runnable() {
                         @Override
                         public void run() {
-                            if(future.isSuccess()){
+                            if (future.isSuccess()) {
                                 System.out.println("重连成功");
-                            }else {
+                            } else {
                                 System.out.println("失败尝试5s后重连");
                                 doConnect();
                             }
@@ -135,13 +140,17 @@ public class ClientConfig {
     }
 
 
-    public void sendMessage(Object msg) {
+    public void sendMessage(String msg) {
         if (channel != null) {
-            PacketProto.Packet.Builder builder = newBuilder();
-            builder.setPacketType(PacketProto.Packet.PacketType.DATA);
-            builder.setData((String) msg);
-            PacketProto.Packet packet = builder.build();
-            channel.writeAndFlush(packet);
+            client_packet.client_packet_normalreq.Builder builder = client_packet.client_packet_normalreq.newBuilder();
+            builder.setData(msg);
+            channel.writeAndFlush(builder.build());
+//            clientStart
+//            PacketProto.Packet.Builder builder = newBuilder();
+//            builder.setPacketType(PacketProto.Packet.PacketType.DATA);
+//            builder.setData((String) msg);
+//            PacketProto.Packet packet = builder.build();
+//            channel.writeAndFlush(packet);
         }
     }
 }

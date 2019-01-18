@@ -1,12 +1,11 @@
 package core;
 
 
-import core.context.ProjectContext;
+import config.impl.reflect.ReflectMethodLoad;
 import core.reflect.InvokeMethod;
 import org.springframework.stereotype.Component;
 
 import io.netty.channel.Channel;
-import pojo.User;
 import utils.ChannelUtil;
 
 import java.io.IOException;
@@ -30,12 +29,12 @@ public class ServiceDistributor {
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    public void distributeEvent(Channel ch, String msg) throws IOException, InvocationTargetException, IllegalAccessException {
+    public void distributeService(Channel ch, String msg) throws IOException, InvocationTargetException, IllegalAccessException {
         String[] temp = msg.split("=");
-        if (ProjectContext.methodMap.containsKey(temp[0])) {
-            String chStatus = ProjectContext.channelStatus.get(ch);
-            if (ProjectContext.orderStatusMap.get(temp[0]).contains(chStatus)) {
-                InvokeMethod invokeMethod = ProjectContext.methodMap.get(temp[0]);
+        if (ReflectMethodLoad.methodMap.containsKey(temp[0])) {
+            String chStatus = ChannelUtil.channelStatus.get(ch);
+            if (ReflectMethodLoad.orderStatusMap.get(temp[0]).contains(chStatus)) {
+                InvokeMethod invokeMethod = ReflectMethodLoad.methodMap.get(temp[0]);
                 invokeMethod.getMethod().invoke(invokeMethod.getObject(), ch, msg);
             }
         }
