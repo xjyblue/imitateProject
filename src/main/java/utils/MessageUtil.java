@@ -1,8 +1,8 @@
 package utils;
 
-import core.packet.ProtoBufEnum;
-import core.packet.client_packet;
-import core.packet.server_packet;
+import com.google.protobuf.MessageLite;
+import io.netty.channel.Channel;
+import io.netty.util.ReferenceCountUtil;
 
 /**
  * @ClassName MessageUtil
@@ -13,28 +13,9 @@ import core.packet.server_packet;
  **/
 public class MessageUtil {
 
-	public static Object turnToPacket(String data){
-		return turnToPacket(data,null);
-	}
+    public static void sendMessage(Channel channel, MessageLite messageLite) {
+        channel.writeAndFlush(messageLite);
+    }
 
-    public static Object turnToPacket(String data,String type) {
-		if(type == null){
-			int nType = ProtoBufEnum.SERVER_PACKET_NORMALRESP.getiValue();
-			return ProtoBufEnum.buildPacket(data,nType);
-		}else {
-//			return ProtoBufEnum.buildPacket(data,type);
-		}
-//		PacketProto.Packet.Builder builder = newBuilder();
-//		builder.setPacketType(PacketProto.Packet.PacketType.DATA);
-//		builder.setData(data);
-//		if(type == null){
-//			builder.setType(PacketType.NORMALMSG);
-//		}else {
-//			builder.setType(type);
-//		}
-//		PacketProto.Packet packetResp = builder.build();
-//		return packetResp;
-		return null;
-	}
 
 }

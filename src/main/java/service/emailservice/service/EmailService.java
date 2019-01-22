@@ -6,6 +6,7 @@ import core.annotation.Order;
 import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.packet.ServerPacket;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import service.caculationservice.service.MoneyCaculationService;
@@ -51,17 +52,23 @@ public class EmailService {
         User user = ChannelUtil.channelToUserMap.get(channel);
         Map<String, Mail> emailMap = EmailDbLoad.userEmailMap.get(user.getUsername());
         if (emailMap.size() == 0) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.EMPTYEMAIL));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.EMPTYEMAIL);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         for (Map.Entry<String, Mail> entry : emailMap.entrySet()) {
             Mail mailTemp = entry.getValue();
             if (mailTemp.isIfUserBag()) {
-                channel.writeAndFlush(MessageUtil.turnToPacket("您有一封来自" + mailTemp.getFromUser() + "的邮件,邮件编号为" + mailTemp.getEmailId()
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData("您有一封来自" + mailTemp.getFromUser() + "的邮件,邮件编号为" + mailTemp.getEmailId()
                         + ",邮件附件为" + userbagService.getGoodNameByUserbag(mailTemp.getUserbag())
-                        + ",邮件内容为[" + mailTemp.getEmailText() + "]"));
+                        + ",邮件内容为[" + mailTemp.getEmailText() + "]");
+                MessageUtil.sendMessage(channel,builder.build());
             } else {
-                channel.writeAndFlush(MessageUtil.turnToPacket("您有一封来自" + mailTemp.getFromUser() + "的邮件,邮件编号为" + mailTemp.getEmailId() + ",邮件内容为[" + mailTemp.getEmailText() + "]"));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData("您有一封来自" + mailTemp.getFromUser() + "的邮件,邮件编号为" + mailTemp.getEmailId() + ",邮件内容为[" + mailTemp.getEmailText() + "]");
+                MessageUtil.sendMessage(channel,builder.build());
             }
         }
     }
@@ -77,22 +84,30 @@ public class EmailService {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (!EmailDbLoad.userEmailMap.containsKey(temp[GrobalConfig.ONE])) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEMAILUSER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOEMAILUSER);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         if (temp.length == GrobalConfig.THREE) {
             send(user.getUsername(), temp[GrobalConfig.ONE], temp[GrobalConfig.TWO], null, null);
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSSENDEMIAL));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.SUCCESSSENDEMIAL);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         if (temp.length == GrobalConfig.FIVE) {
             Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[GrobalConfig.THREE]);
             if (userbag == null) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.NOUSERBAGID);
+                MessageUtil.sendMessage(channel,builder.build());
                 return;
             }
             if (!userbagService.checkUserbagNum(userbag, temp[GrobalConfig.FOUR])) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHCHANGEGOOD));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.NOENOUGHCHANGEGOOD);
+                MessageUtil.sendMessage(channel,builder.build());
                 return;
             }
             Userbag userbagNew = new Userbag();
@@ -100,7 +115,9 @@ public class EmailService {
             userbagNew.setNum(Integer.parseInt(temp[4]));
             userbagCaculationService.removeUserbagFromUser(user, userbag, Integer.parseInt(temp[4]));
             send(user.getUsername(), temp[GrobalConfig.ONE], temp[GrobalConfig.TWO], userbagNew, null);
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSSENDEMIAL));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.SUCCESSSENDEMIAL);
+            MessageUtil.sendMessage(channel,builder.build());
             channel.writeAndFlush("邮件携带了附件:" + userbag.getName());
             return;
         }
@@ -117,11 +134,15 @@ public class EmailService {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         if (!EmailDbLoad.userEmailMap.get(user.getUsername()).containsKey(temp[GrobalConfig.ONE])) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILFAIL));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.RECEIVEEMAILFAIL);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         Mail mail = EmailDbLoad.userEmailMap.get(user.getUsername()).get(temp[GrobalConfig.ONE]);
@@ -132,7 +153,9 @@ public class EmailService {
             moneyCaculationService.addMoneyToUser(user, mail.getMoney().toString());
         }
         EmailDbLoad.userEmailMap.get(user.getUsername()).remove(temp[GrobalConfig.ONE]);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECEIVEEMAILSUCCESS));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.RECEIVEEMAILSUCCESS);
+        MessageUtil.sendMessage(channel,builder.build());
     }
 
     /**

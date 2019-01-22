@@ -4,7 +4,7 @@ import com.google.protobuf.MessageLite;
 import core.config.GrobalConfig;
 import core.channel.ChannelStatus;
 import core.packet.ProtoBufEnum;
-import core.packet.server_packet;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import io.netty.channel.ChannelHandler.Sharable;
 import pojo.User;
 import utils.ChannelUtil;
+import utils.MessageUtil;
 import utils.ProjectContextUtil;
 
 
@@ -63,9 +64,9 @@ public class ServerNetHandler extends ChannelHandlerAdapter {
     }
 
     private void sendMessage(ChannelHandlerContext ctx) {
-        server_packet.server_packet_normalresp.Builder builder = server_packet.server_packet_normalresp.newBuilder();
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
         builder.setData("欢迎来到【星宇征服】,请按以下提示操作：dl:登录 zc:注册");
-        ctx.writeAndFlush(builder.build());
+        MessageUtil.sendMessage(ctx.channel(), builder.build());
     }
 
     @Override

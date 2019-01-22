@@ -1,9 +1,9 @@
 package service.auctionservice.period;
 
 import core.base.parent.BaseThread;
-import core.context.ProjectContext;
 import pojo.User;
 import pojo.Userbag;
+import service.auctionservice.entity.AuctionCache;
 import service.auctionservice.entity.AuctionItem;
 import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
@@ -11,10 +11,8 @@ import service.userbagservice.service.UserbagService;
 import service.userservice.service.UserService;
 import utils.SpringContextUtil;
 
-import javax.swing.text.html.HTMLDocument;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @ClassName AuctionPeriodTask
@@ -54,7 +52,7 @@ public class AuctionPeriodTask extends BaseThread implements Runnable {
     }
 
     private void refreshAuctionItems() {
-        Iterator<Map.Entry<String, AuctionItem>> iterator = ProjectContext.auctionItemMap.entrySet().iterator();
+        Iterator<Map.Entry<String, AuctionItem>> iterator = AuctionCache.auctionItemMap.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, AuctionItem> entry = iterator.next();
             AuctionItem auctionItem = entry.getValue();

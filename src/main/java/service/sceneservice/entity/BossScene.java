@@ -5,8 +5,7 @@ import config.impl.excel.BuffResourceLoad;
 import config.impl.excel.SceneResourceLoad;
 import core.component.boss.BossSceneConfig;
 import core.component.monster.Monster;
-import core.context.ProjectContext;
-import core.packet.PacketType;
+import core.packet.ServerPacket;
 import service.attackservice.util.AttackUtil;
 import service.broadcastservice.service.BroadcastService;
 import service.buffservice.entity.Buff;
@@ -25,6 +24,7 @@ import io.netty.channel.Channel;
 import pojo.User;
 import core.component.monster.MonsterSkill;
 import service.teamservice.entity.Team;
+import service.teamservice.entity.TeamCache;
 import service.userservice.service.UserService;
 import utils.ChannelUtil;
 import utils.MessageUtil;
@@ -439,7 +439,9 @@ public class BossScene extends BaseThread implements Runnable {
             if (userHp.compareTo(new BigInteger(GrobalConfig.MINVALUE)) <= 0) {
                 userTarget.setHp(GrobalConfig.MINVALUE);
                 userTarget.setStatus(GrobalConfig.DEAD);
-                channelTarget.writeAndFlush(MessageUtil.turnToPacket("你已死亡"));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData("你已死亡");
+                MessageUtil.sendMessage(channelTarget, builder.build());
 //              人物死亡全队提示
                 oneDeadMessageToAll(monster, userTarget);
 //              全队死亡检查，是否副本失败
@@ -476,7 +478,9 @@ public class BossScene extends BaseThread implements Runnable {
         this.setFight(false);
 //      获取新场景boss名字
         String bossMessage = getNewBossName(monsterMap);
-        broadcastService.sendMessageToAll(bossMessage, teamId, null);
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(bossMessage);
+        broadcastService.sendMessageToAll(teamId, builder.build());
         return monsterMap;
     }
 
@@ -491,12 +495,14 @@ public class BossScene extends BaseThread implements Runnable {
         for (Map.Entry<String, Monster> entry : monsterMap.entrySet()) {
 //          检查怪物场景是否为要求多人场景
             if (this.needMordMen.contains(entry.getValue().getPos())) {
-                if (ProjectContext.teamMap.get(teamId).getUserMap().size() == 1) {
+                if (TeamCache.teamMap.get(teamId).getUserMap().size() == 1) {
 //                  人数不够告诉玩家不能继续下去了
                     Future future = futureMap.remove(teamId);
                     future.cancel(true);
                     Channel channelTarget = ChannelUtil.userToChannelMap.get(userTarget);
-                    channelTarget.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMANTOFIGHT));
+                    ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                    builder.setData(MessageConfig.NOENOUGHMANTOFIGHT);
+                    MessageUtil.sendMessage(channelTarget, builder.build());
                     BossSceneConfigResourceLoad.bossAreaMap.remove(teamId);
                     moveAllUser();
                     return true;
@@ -587,7 +593,7 @@ public class BossScene extends BaseThread implements Runnable {
      * @param msg
      */
     private void sendTimeOutToAll(String teamId, String msg) {
-        Map<String, User> map = ProjectContext.teamMap.get(teamId).getUserMap();
+        Map<String, User> map = TeamCache.teamMap.get(teamId).getUserMap();
         for (Map.Entry<String, User> entry : map.entrySet()) {
             Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
 //          战斗时间结束初始化所有人的buff
@@ -596,7 +602,9 @@ public class BossScene extends BaseThread implements Runnable {
             if (!ChannelUtil.channelStatus.get(channelTemp).equals(ChannelStatus.DEADSCENE)) {
                 ChannelUtil.channelStatus.put(channelTemp, ChannelStatus.COMMONSCENE);
             }
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(msg);
+            MessageUtil.sendMessage(channelTemp, builder.build());
         }
     }
 
@@ -607,10 +615,12 @@ public class BossScene extends BaseThread implements Runnable {
      * @param monster
      */
     private void successMessToAll(BossScene bossScene, Monster monster) {
-        Team team = ProjectContext.teamMap.get(bossScene.getTeamId());
+        Team team = TeamCache.teamMap.get(bossScene.getTeamId());
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket(bossScene.getBossName() + "副本攻略成功，热烈庆祝各位参与的小伙伴"));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(bossScene.getBossName() + "副本攻略成功，热烈庆祝各位参与的小伙伴");
+            MessageUtil.sendMessage(channelTemp, builder.build());
             ChannelUtil.channelStatus.put(channelTemp, ChannelStatus.COMMONSCENE);
 //          初始化所有人的buff
             User userTemp = entry.getValue();
@@ -622,19 +632,23 @@ public class BossScene extends BaseThread implements Runnable {
     }
 
     private void oneDeadMessageToAll(Monster monster, User user) {
-        Team team = ProjectContext.teamMap.get(teamId);
+        Team team = TeamCache.teamMap.get(teamId);
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "被" + monster.getName() + "打死"));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(user.getUsername() + "被" + monster.getName() + "打死");
+            MessageUtil.sendMessage(channelTemp, builder.build());
         }
     }
 
     private void failMessageToAll() {
-        Team team = ProjectContext.teamMap.get(teamId);
+        Team team = TeamCache.teamMap.get(teamId);
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
             ChannelUtil.channelStatus.put(channelTemp, ChannelStatus.DEADSCENE);
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.BOSSFAIL));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.BOSSFAIL);
+            MessageUtil.sendMessage(channelTemp, builder.build());
         }
     }
 
@@ -662,7 +676,7 @@ public class BossScene extends BaseThread implements Runnable {
 //      不断随机合适的boss技能
         MonsterSkill monsterSkill = selectMonsterSkill(monster, userTarget);
 
-        for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(teamId).getUserMap().entrySet()) {
+        for (Map.Entry<String, User> entry : TeamCache.teamMap.get(teamId).getUserMap().entrySet()) {
             String resp = null;
             if (ChannelUtil.channelStatus.get(ChannelUtil.userToChannelMap.get(entry.getValue())).equals(ChannelStatus.COMMONSCENE)) {
                 continue;
@@ -716,7 +730,9 @@ public class BossScene extends BaseThread implements Runnable {
                         + "-----怪物血量:" + monster.getValueOfLife()
                         + "----你处于[" + ChannelUtil.channelStatus.get(channelTemp) + "]状态";
             }
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ATTACKMSG));
+            ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
+            builder.setData(resp);
+            MessageUtil.sendMessage(channelTemp, builder.build());
         }
 
 
@@ -732,7 +748,9 @@ public class BossScene extends BaseThread implements Runnable {
             user.getUserBuffEndTimeMap().put(BuffConstant.SLEEPBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
             hpCaculationService.subUserHp(user, monsterSkillDamage.toString());
             Channel channelTarget = ChannelUtil.userToChannelMap.get(user);
-            channelTarget.writeAndFlush(MessageUtil.turnToPacket("您收到怪物boss击打晕效果,无法使用技能,人物受到" + monsterSkillDamage.toString() + "伤害", PacketType.ATTACKMSG));
+            ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
+            builder.setData("您收到怪物boss击打晕效果,无法使用技能,人物受到" + monsterSkillDamage.toString() + "伤害");
+            MessageUtil.sendMessage(channelTarget, builder.build());
         }
     }
 
@@ -746,7 +764,9 @@ public class BossScene extends BaseThread implements Runnable {
             user.getUserBuffEndTimeMap().put(BuffConstant.POISONINGBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
             hpCaculationService.subUserHp(user, monsterSkillDamage.toString());
             Channel channelTarget = ChannelUtil.userToChannelMap.get(user);
-            channelTarget.writeAndFlush(MessageUtil.turnToPacket("怪物boss使用中毒绝技,你会持续掉血，人物受到" + monsterSkillDamage.toString() + "伤害", PacketType.ATTACKMSG));
+            ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
+            builder.setData("怪物boss使用中毒绝技,你会持续掉血，人物受到" + monsterSkillDamage.toString() + "伤害");
+            MessageUtil.sendMessage(channelTarget, builder.build());
         }
     }
 
@@ -789,7 +809,9 @@ public class BossScene extends BaseThread implements Runnable {
                     + "-----你的剩余血:" + user.getHp()
                     + "-----你的蓝量" + user.getMp()
                     + "-----怪物血量:" + monster.getValueOfLife();
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ATTACKMSG));
+            ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
+            builder.setData(resp);
+            MessageUtil.sendMessage(channelTemp,builder.build());
         }
     }
 
@@ -811,7 +833,7 @@ public class BossScene extends BaseThread implements Runnable {
             }
         }
         if (userTarget == null) {
-            for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(bossScene.getTeamId()).getUserMap().entrySet()) {
+            for (Map.Entry<String, User> entry : TeamCache.teamMap.get(bossScene.getTeamId()).getUserMap().entrySet()) {
                 if (!entry.getValue().getStatus().equals(GrobalConfig.DEAD)) {
                     userTarget = entry.getValue();
                 }

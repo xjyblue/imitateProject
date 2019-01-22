@@ -3,7 +3,7 @@ package service.petservice.service;
 import config.impl.excel.PetResourceLoad;
 import core.component.monster.Monster;
 import core.config.GrobalConfig;
-import core.packet.PacketType;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,7 +53,9 @@ public class PetService {
         PetSkillConfig petSkillConfig = getPetSkill(user);
 //      这里可以附加宠物技能伤害，比如根据宠物等级等
         hpCaculationService.subMonsterHp(monster, petSkillConfig.getDamage().toString());
-        channel.writeAndFlush(MessageUtil.turnToPacket("你的宠物:" + petConfig.getName() + "对怪物使用了" + petSkillConfig.getSkillName()
-                + "技能，造成伤害:" + petSkillConfig.getDamage(), PacketType.ATTACKMSG));
+        ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
+        builder.setData("你的宠物:" + petConfig.getName() + "对怪物使用了" + petSkillConfig.getSkillName()
+                + "技能，造成伤害:" + petSkillConfig.getDamage());
+        MessageUtil.sendMessage(channel, builder.build());
     }
 }

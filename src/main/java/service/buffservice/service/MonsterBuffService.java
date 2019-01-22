@@ -3,7 +3,7 @@ package service.buffservice.service;
 import config.impl.excel.BuffResourceLoad;
 import core.component.monster.Monster;
 import core.config.GrobalConfig;
-import core.packet.PacketType;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,7 +53,9 @@ public class MonsterBuffService {
                     monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
                 }
 //              怪物中毒将buff推送给所有玩家
-                broadcastService.sendMessageToAll("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), teamId, PacketType.MONSTERBUFMSG);
+                ServerPacket.MonsterbufResp.Builder builder = ServerPacket.MonsterbufResp.newBuilder();
+                builder.setData("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife());
+                broadcastService.sendMessageToAll(teamId, builder.build());
             } else {
                 monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
             }
@@ -78,7 +80,9 @@ public class MonsterBuffService {
                     monster.setStatus(GrobalConfig.DEAD);
                     monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
                 }
-                channel.writeAndFlush(MessageUtil.turnToPacket("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife(), PacketType.MONSTERBUFMSG));
+                ServerPacket.MonsterbufResp.Builder builder = ServerPacket.MonsterbufResp.newBuilder();
+                builder.setData("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife());
+                MessageUtil.sendMessage(channel, builder.build());
             } else {
                 monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
             }

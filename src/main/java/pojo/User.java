@@ -3,7 +3,7 @@ package pojo;
 import com.google.common.collect.Maps;
 import core.ServiceDistributor;
 import core.component.monster.Monster;
-import core.packet.client_packet;
+import core.packet.ClientPacket;
 import io.netty.channel.Channel;
 import service.buffservice.service.UserBuffService;
 import service.petservice.service.entity.Pet;
@@ -364,10 +364,10 @@ public class User {
     private void consumePacket() {
         if (packetsQueue.peek() != null) {
             Object o = packetsQueue.poll();
-            client_packet.client_packet_normalreq normalreq = (client_packet.client_packet_normalreq) o;
+            ClientPacket.NormalReq normalReq = (ClientPacket.NormalReq) o;
             Channel channel = ChannelUtil.userToChannelMap.get(this);
             try {
-                serviceDistributor.distributeService(channel, normalreq.getData());
+                serviceDistributor.distributeService(channel, normalReq.getData());
             } catch (Exception e) {
                 e.printStackTrace();
             }

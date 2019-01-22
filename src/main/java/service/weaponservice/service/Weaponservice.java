@@ -8,6 +8,7 @@ import core.component.good.Equipment;
 import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,7 +61,9 @@ public class Weaponservice {
                     + "] [当前星级" + weaponequipmentbar.getStartlevel() + "]"
                     + System.getProperty("line.separator");
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket(wresp));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(wresp);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
 
@@ -75,22 +78,29 @@ public class Weaponservice {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (!EquipmentResourceLoad.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.GOODNOEXIST);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
             if (weaponequipmentbar.getWid() == Integer.parseInt(temp[1])) {
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
                 if (weaponequipmentbar.getDurability() < EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid()).getDurability()) {
                     weaponequipmentbar.setDurability(EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid()).getDurability());
-                    channel.writeAndFlush(MessageUtil.turnToPacket("[" + EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid()).getName() + "]" + "武器修复成功"));
+                    builder.setData("[" + EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid()).getName() + "]" + "武器修复成功");
+                    MessageUtil.sendMessage(channel, builder.build());
                     return;
                 } else {
-                    channel.writeAndFlush(MessageUtil.turnToPacket("[" + EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid()).getName() + "]" + "武器无需修复"));
+                    builder.setData("[" + EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid()).getName() + "]" + "武器无需修复");
+                    MessageUtil.sendMessage(channel, builder.build());
                     return;
                 }
             }
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEQUIPGOOD));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.NOEQUIPGOOD);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     /**
@@ -104,7 +114,9 @@ public class Weaponservice {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (EquipmentResourceLoad.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
@@ -120,14 +132,19 @@ public class Weaponservice {
                     userbag.setWid(weaponequipmentbar.getWid());
                     user.getUserBag().add(userbag);
                     user.getWeaponequipmentbars().remove(weaponequipmentbar);
-                    channel.writeAndFlush(MessageUtil.turnToPacket("你成功卸下" + EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid()).getName()));
+                    ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                    builder.setData("你成功卸下" + EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid()).getName());
+                    MessageUtil.sendMessage(channel,builder.build());
                     return;
                 }
             }
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEQUIPGOOD));
-            return;
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOEQUIPGOOD);
+            MessageUtil.sendMessage(channel,builder.build());
         } else {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.GOODNOEXIST);
+            MessageUtil.sendMessage(channel,builder.build());
         }
     }
 
@@ -142,29 +159,39 @@ public class Weaponservice {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket("请按照ww=背包格子id"));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("请按照ww=背包格子id");
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 //          背包中是否存在该物品
         Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOUSERBAGID);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 //          检查该物品是否为可穿戴装备
         if (!EquipmentResourceLoad.equipmentMap.containsKey(userbag.getWid())) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.GOODNOEXIST);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 //          检查是否穿戴主武器
         if (userbag.getWid() >= GrobalConfig.EQUIPMENT_WEAPON_START && userbag.getWid() < GrobalConfig.EQUIPMENT_WEAPON_END && checkHasCoreEquipment(user)) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.HASCOREEQUIP));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.HASCOREEQUIP);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 
 //          检查是否已穿戴帽子
         if (userbag.getWid() >= GrobalConfig.HAT_WEAPON_START && userbag.getWid() < GrobalConfig.HAT_WEAPON_END && checkHasHatEquipment(user)) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.HASHATEQUIP));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.HASHATEQUIP);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 
@@ -177,8 +204,10 @@ public class Weaponservice {
         weaponequipmentbar.setWid(userbag.getWid());
         user.getWeaponequipmentbars().add(weaponequipmentbar);
         user.getUserBag().remove(userbag);
-        channel.writeAndFlush(MessageUtil.turnToPacket("[" + EquipmentResourceLoad.equipmentMap.get(userbag.getWid()).getName() + "]" + "该装备穿戴成功"));
-//          成就装备等级总和
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData("[" + EquipmentResourceLoad.equipmentMap.get(userbag.getWid()).getName() + "]" + "该装备穿戴成功");
+        MessageUtil.sendMessage(channel,builder.build());
+//      成就装备等级总和
         achievementService.executeEquipmentStartLevel(user);
 
         return;

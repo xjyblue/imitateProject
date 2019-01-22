@@ -6,6 +6,7 @@ import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.channel.ChannelStatus;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import mapper.UserskillrelationMapper;
 import core.annotation.Order;
@@ -41,11 +42,15 @@ public class SkillService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "lookSkill",status = {ChannelStatus.SKILLVIEW})
+    @Order(orderMsg = "lookSkill", status = {ChannelStatus.SKILLVIEW})
     public void lookSkill(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String skillLook = "";
-        channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
+
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(skillLook);
+        MessageUtil.sendMessage(channel, builder.build());
+
         Map<String, Userskillrelation> map = user.getUserskillrelationMap();
         for (Map.Entry<String, Userskillrelation> entry : map.entrySet()) {
             UserSkill userSkill = UserSkillResourceLoad.skillMap.get(entry.getValue().getSkillid());
@@ -55,7 +60,9 @@ public class SkillService {
                     + "----技能cd:" + userSkill.getAttackCd()
                     + System.getProperty("line.separator");
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket(skillLook));
+
+        builder.setData(skillLook);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     /**
@@ -64,7 +71,7 @@ public class SkillService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "change",status = {ChannelStatus.SKILLVIEW})
+    @Order(orderMsg = "change", status = {ChannelStatus.SKILLVIEW})
     public void changeSkill(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
@@ -87,12 +94,17 @@ public class SkillService {
                     List<Userskillrelation> userskillrelations = userskillrelationMapper.selectByExample(userskillrelationExample);
                     userskillrelations.get(0).setKeypos(temp[2]);
                     userskillrelationMapper.updateByExample(userskillrelations.get(0), userskillrelationExample);
-                    channel.writeAndFlush(MessageUtil.turnToPacket("键位更换成功"));
+
+                    ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                    builder.setData("键位更换成功");
+                    MessageUtil.sendMessage(channel, builder.build());
                     break;
                 }
             }
             if (!flag) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.ERRORORDER);
+                MessageUtil.sendMessage(channel, builder.build());
             }
         }
     }
@@ -103,10 +115,12 @@ public class SkillService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "quitSkill",status = {ChannelStatus.SKILLVIEW})
+    @Order(orderMsg = "quitSkill", status = {ChannelStatus.SKILLVIEW})
     public void quitSkill(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
-        channel.writeAndFlush(MessageUtil.turnToPacket("您已退出技能管理模块，进入" + SceneResourceLoad.sceneMap.get(user.getPos()).getName()));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData("您已退出技能管理模块，进入" + SceneResourceLoad.sceneMap.get(user.getPos()).getName());
+        MessageUtil.sendMessage(channel, builder.build());
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
     }
 
@@ -116,10 +130,12 @@ public class SkillService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "viewSkill",status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = "viewSkill", status = {ChannelStatus.COMMONSCENE})
     public void enterSkillView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.SKILLVIEW);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SKILLVIEWMESG));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.SKILLVIEWMESG);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     /**
@@ -165,7 +181,9 @@ public class SkillService {
      */
     public boolean checkUserSkillCd(Userskillrelation userskillrelation, Channel channel) {
         if (System.currentTimeMillis() < userskillrelation.getSkillcds()) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNSKILLCD));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.UNSKILLCD);
+            MessageUtil.sendMessage(channel, builder.build());
             return false;
         }
         return true;

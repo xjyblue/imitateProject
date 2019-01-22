@@ -4,7 +4,7 @@ import config.impl.excel.BossSceneConfigResourceLoad;
 import config.impl.excel.SceneResourceLoad;
 import config.impl.thread.ThreadPeriodTaskLoad;
 import core.annotation.Region;
-import core.context.ProjectContext;
+import core.packet.ServerPacket;
 import service.sceneservice.entity.BossScene;
 import core.component.monster.Monster;
 import service.sceneservice.entity.Scene;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import pojo.User;
 import service.teamservice.entity.Team;
 import service.levelservice.service.LevelService;
+import service.teamservice.entity.TeamCache;
 import utils.ChannelUtil;
 import utils.MessageUtil;
 
@@ -44,17 +45,21 @@ public class BossService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ef",status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = "ef", status = {ChannelStatus.COMMONSCENE})
     public void enterBossArea(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User user = ChannelUtil.channelToUserMap.get(channel);
 //      10级以下无法进入副本
         if (levelService.getLevelByExperience(user.getExperience()) < GrobalConfig.MIN_ENTER_BOSSSCENE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOLEVELTOMOVE));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOLEVELTOMOVE);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Team team = null;
@@ -68,7 +73,9 @@ public class BossService {
 
             Scene scene = SceneResourceLoad.sceneMap.get(user.getPos());
             scene.getUserMap().remove(user.getUsername());
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REBRORNANDCONNECTBOSSAREA));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.REBRORNANDCONNECTBOSSAREA);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
@@ -81,18 +88,22 @@ public class BossService {
             HashMap<String, User> teamUserMap = new HashMap<>(64);
             teamUserMap.put(user.getUsername(), user);
             team.setUserMap(teamUserMap);
-            ProjectContext.teamMap.put(user.getTeamId(), team);
+            TeamCache.teamMap.put(user.getTeamId(), team);
         } else {
 //      进入副本队员死亡检查
-            team = ProjectContext.teamMap.get(user.getTeamId());
+            team = TeamCache.teamMap.get(user.getTeamId());
             if (checkAllManAlive(team)) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SOMEBODYDEAD));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.SOMEBODYDEAD);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
         }
 //      进入副本队长检查
         if (!team.getLeader().getUsername().equals(user.getUsername())) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.YOUARENOLEADER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.YOUARENOLEADER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //      生成新副本
@@ -146,7 +157,9 @@ public class BossService {
             for (Map.Entry<String, Monster> entryMonster : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {
                 resp += entryMonster.getValue().getName() + " ";
             }
-            channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(resp);
+            MessageUtil.sendMessage(channel, builder.build());
         }
     }
 

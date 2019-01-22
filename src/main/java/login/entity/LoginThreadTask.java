@@ -7,6 +7,7 @@ import core.component.role.Role;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.packet.PacketType;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
@@ -81,7 +82,7 @@ public class LoginThreadTask implements Runnable {
 
     @Override
     public void run() {
-        for(;;){
+        for (; ; ) {
             if (loginUserTaskQueue.peek() != null) {
                 LoginUserTask loginUserTask = loginUserTaskQueue.poll();
                 doLogin(loginUserTask);
@@ -98,7 +99,9 @@ public class LoginThreadTask implements Runnable {
         Channel channel = loginUserTask.getChannel();
         User user = userMapper.getUser(loginUserTask.getUsername(), loginUserTask.getPassword());
         if (user == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORPASSWORD));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORPASSWORD);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //          解决玩家顶号问题
@@ -129,9 +132,10 @@ public class LoginThreadTask implements Runnable {
         ChannelUtil.userToChannelMap.put(user, channel);
 //          展示成就信息
         AchievementUtil.refreshAchievementInfo(user);
-
-        channel.writeAndFlush(MessageUtil.turnToPacket("登录成功"));
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData("登陆成功");
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     /**
@@ -168,7 +172,9 @@ public class LoginThreadTask implements Runnable {
             userskillrelationMap.put(userskillrelation.getKeypos(), userskillrelation);
             skillLook += "[键位-" + userskillrelation.getKeypos() + "-技能名称-" + userSkill.getSkillName() + "-技能伤害-" + userSkill.getDamage() + "技能cd" + userSkill.getAttackCd() + "] ";
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket("   " + user.getUsername() + "    职业为:" + role.getName() + "] " + skillLook, PacketType.USERINFO));
+        ServerPacket.UserinfoResp.Builder builder = ServerPacket.UserinfoResp.newBuilder();
+        builder.setData("   " + user.getUsername() + "    职业为:" + role.getName() + "] " + skillLook);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     /**
@@ -195,8 +201,14 @@ public class LoginThreadTask implements Runnable {
             ChannelUtil.channelToUserMap.put(channel, user);
             ChannelUtil.userToChannelMap.put(user, channel);
             ChannelUtil.channelStatus.put(channel, ChannelUtil.channelStatus.get(channelTarget));
-            channel.writeAndFlush(MessageUtil.turnToPacket("登录成功"));
-            channelTarget.writeAndFlush(MessageUtil.turnToPacket("不好意思,有人在别处登录你的游戏号，请选择重新登录或者修改密码", PacketType.CHANGECHANNEL));
+
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("登录成功");
+            MessageUtil.sendMessage(channel,builder.build());
+
+            ServerPacket.ChangeChannelResp.Builder builder1 = ServerPacket.ChangeChannelResp.newBuilder();
+            builder1.setData("不好意思,有人在别处登录你的游戏号，请选择重新登录或者修改密码");
+            MessageUtil.sendMessage(channel,builder1.build());
             channelTarget.close();
             return true;
         }

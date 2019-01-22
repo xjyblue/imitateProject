@@ -2,8 +2,7 @@ package service.sceneservice.entity;
 
 import config.impl.excel.BuffResourceLoad;
 import config.impl.excel.SceneResourceLoad;
-import core.packet.PacketType;
-import core.packet.ProtoBufEnum;
+import core.packet.ServerPacket;
 import service.buffservice.service.MonsterBuffService;
 import service.caculationservice.service.HpCaculationService;
 import core.component.monster.Monster;
@@ -270,7 +269,9 @@ public class Scene extends BaseThread implements Runnable {
                         monsterDamage = attackBuffService.monsterAttackDefendBuff(monsterDamage, user);
                         Buff buff = BuffResourceLoad.buffMap.get(user.getBuffMap().get(BuffConstant.DEFENSEBUFF));
                         if (user.getBuffMap().get(BuffConstant.DEFENSEBUFF) != 3000) {
-                            channel.writeAndFlush(MessageUtil.turnToPacket("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp(), PacketType.USERBUFMSG));
+                            ServerPacket.UserbufResp.Builder builder = ServerPacket.UserbufResp.newBuilder();
+                            builder.setData("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp());
+                            MessageUtil.sendMessage(channel, builder.build());
                         }
 
 //                      用户扣血，死亡状态处理
@@ -283,11 +284,15 @@ public class Scene extends BaseThread implements Runnable {
                                 + "-----你的剩余血:" + user.getHp()
                                 + "-----你的蓝量" + user.getMp()
                                 + "-----怪物血量:" + monster.getValueOfLife();
-                        channel.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ATTACKMSG));
+                        ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
+                        builder.setData(resp);
+                        MessageUtil.sendMessage(channel, builder.build());
                         if (user.getHp().equals(GrobalConfig.MINVALUE)) {
 //                          人物死亡初始化人物buff
                             userService.initUserBuff(user);
-                            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY));
+                            ServerPacket.NormalResp.Builder builder1 = ServerPacket.NormalResp.newBuilder();
+                            builder1.setData(MessageConfig.SELECTLIVEWAY);
+                            MessageUtil.sendMessage(channel, builder1.build());
                             return;
                         }
                         ChannelUtil.channelStatus.put(channel, ChannelStatus.ATTACK);
@@ -305,8 +310,10 @@ public class Scene extends BaseThread implements Runnable {
             monster.setValueOfLife(GrobalConfig.MINVALUE);
             monster.setStatus(GrobalConfig.DEAD);
             user.getUserToMonsterMap().remove(monster.getId());
-            broadcastMessage(monster.getName() + "已死亡", null);
-            channel.writeAndFlush(MessageUtil.turnToPacket("怪物已死亡", PacketType.ATTACKMSG));
+            broadcastMessage(monster.getName() + "已死亡");
+            ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
+            builder.setData("怪物已死亡");
+            MessageUtil.sendMessage(channel, builder.build());
             List<Monster> monsters = SceneResourceLoad.sceneMap.get(user.getPos()).monsters;
             monsters.remove(monster);
 //          填充因buff中毒而死的怪物
@@ -333,16 +340,13 @@ public class Scene extends BaseThread implements Runnable {
      * 场景内广播消息
      *
      * @param msg
-     * @param packetType
      */
-    private void broadcastMessage(String msg, String packetType) {
+    private void broadcastMessage(String msg) {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             Channel channelT = ChannelUtil.userToChannelMap.get(entry.getValue());
-            if (packetType == null) {
-                channelT.writeAndFlush(MessageUtil.turnToPacket(msg));
-            } else {
-                channelT.writeAndFlush(MessageUtil.turnToPacket(msg, packetType));
-            }
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(msg);
+            MessageUtil.sendMessage(channelT, builder.build());
         }
     }
 }

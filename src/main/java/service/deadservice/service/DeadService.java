@@ -2,6 +2,7 @@ package service.deadservice.service;
 
 import config.impl.excel.SceneResourceLoad;
 import core.annotation.Region;
+import core.packet.ServerPacket;
 import service.sceneservice.entity.Scene;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
@@ -58,7 +59,9 @@ public class DeadService {
         userMapper.updateByPrimaryKeySelective(user);
 
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.LIVEINSTART));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.LIVEINSTART);
+        MessageUtil.sendMessage(channel, builder.build());
 
     }
 }

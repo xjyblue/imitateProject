@@ -4,7 +4,7 @@ import config.impl.excel.BossSceneConfigResourceLoad;
 import core.channel.ChannelStatus;
 import core.annotation.Region;
 import core.config.GrobalConfig;
-import core.context.ProjectContext;
+import core.packet.ServerPacket;
 import service.achievementservice.service.AchievementService;
 import service.sceneservice.entity.BossScene;
 import core.config.MessageConfig;
@@ -17,6 +17,7 @@ import pojo.Teamapplyinfo;
 import pojo.TeamapplyinfoExample;
 import pojo.User;
 import service.teamservice.entity.Team;
+import service.teamservice.entity.TeamCache;
 import utils.ChannelUtil;
 import utils.MessageUtil;
 import service.userservice.service.UserService;
@@ -50,10 +51,12 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "team",status = {ChannelStatus.TEAM})
+    @Order(orderMsg = "team", status = {ChannelStatus.TEAM})
     public void queryTeamInfo(Channel channel, String msg) {
         if (getUser(channel).getTeamId() == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTEAMMESSAGE));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOTEAMMESSAGE);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         } else {
             Team team = getTeam(getUser(channel));
@@ -63,9 +66,13 @@ public class TeamService {
                     resp += entry.getKey() + "  ";
                 }
                 resp += "]该队伍队长是[" + team.getLeader().getUsername() + "]";
-                channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(resp);
+                MessageUtil.sendMessage(channel, builder.build());
             } else {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTEAMMESSAGE));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.NOTEAMMESSAGE);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
         }
@@ -77,11 +84,13 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tcreate",status = {ChannelStatus.TEAM})
+    @Order(orderMsg = "tcreate", status = {ChannelStatus.TEAM})
     public void createTeam(Channel channel, String msg) {
         User user = getUser(channel);
         if (getUser(channel).getTeamId() != null && getTeam(getUser(channel)) != null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.INTEAMNOCREATETEAM));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.INTEAMNOCREATETEAM);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         } else {
             Team team = new Team();
@@ -91,8 +100,11 @@ public class TeamService {
             HashMap<String, User> teamUserMap = new HashMap<>(64);
             teamUserMap.put(user.getUsername(), user);
             team.setUserMap(teamUserMap);
-            ProjectContext.teamMap.put(user.getTeamId(), team);
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.CREATETEAMSUCCESSMESSAGE));
+            TeamCache.teamMap.put(user.getTeamId(), team);
+
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.CREATETEAMSUCCESSMESSAGE);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
     }
@@ -103,26 +115,32 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tremove",status = {ChannelStatus.TEAM})
+    @Order(orderMsg = "tremove", status = {ChannelStatus.TEAM})
     public void removeTeam(Channel channel, String msg) {
         User user = getUser(channel);
         Team team = getTeam(getUser(channel));
         if (team == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOINTEAMERRORMESSAGE));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOINTEAMERRORMESSAGE);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (team.getLeader().getUsername().equals(user.getUsername())) {
-            ProjectContext.teamMap.remove(user.getTeamId());
+            TeamCache.teamMap.remove(user.getTeamId());
             for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
                 entry.getValue().setTeamId(null);
             }
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DISSOLUTIONTEAM));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.DISSOLUTIONTEAM);
+            MessageUtil.sendMessage(channel, builder.build());
         } else {
             if (team.getUserMap().containsKey(user.getUsername())) {
                 team.getUserMap().remove(user.getUsername());
             }
             user.setTeamId(null);
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SIGNOUTTEAM));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.SIGNOUTTEAM);
+            MessageUtil.sendMessage(channel, builder.build());
         }
     }
 
@@ -132,17 +150,22 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tback",status = {ChannelStatus.TEAM})
+    @Order(orderMsg = "tback", status = {ChannelStatus.TEAM})
     public void teamAllRemove(Channel channel, String msg) {
         User user = getUser(channel);
         Team team = getTeam(getUser(channel));
         if (team == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTEAMMESSAGE));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOTEAMMESSAGE);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (team.getUserMap().size() == 1) {
-            ProjectContext.teamMap.remove(user.getTeamId());
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ONLEAVEFORREMOVE));
+            TeamCache.teamMap.remove(user.getTeamId());
+
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ONLEAVEFORREMOVE);
+            MessageUtil.sendMessage(channel, builder.build());
             user.setTeamId(null);
             return;
         }
@@ -155,23 +178,29 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tadd",status = {ChannelStatus.TEAM})
+    @Order(orderMsg = "tadd", status = {ChannelStatus.TEAM})
     public void addTeam(Channel channel, String msg) {
         User user = getUser(channel);
         if (user.getTeamId() != null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.YOUARENINTEAM));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.YOUARENINTEAM);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         String[] temp = msg.split("=");
         User userLeader = userService.getUserByNameFromSession(temp[1]);
         if (userLeader == null || getTeam(userLeader) == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDTEAM));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOFOUNDTEAM);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         } else {
             Team team = getTeam(userLeader);
 //              加入创建申请单
             if (team == null) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDTEAM));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.NOFOUNDTEAM);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             Teamapplyinfo teamapplyinfo = new Teamapplyinfo();
@@ -179,8 +208,10 @@ public class TeamService {
             teamapplyinfo.setUsername(user.getUsername());
             teamapplyinfo.setTeamid(team.getTeamId());
             teamapplyinfoMapper.insertSelective(teamapplyinfo);
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSTOAPPLY));
 
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.SUCCESSTOAPPLY);
+            MessageUtil.sendMessage(channel, builder.build());
         }
     }
 
@@ -190,31 +221,43 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ty",status = {ChannelStatus.TEAM})
+    @Order(orderMsg = "ty", status = {ChannelStatus.TEAM})
     public void agreeEnterTeam(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User user = ChannelUtil.channelToUserMap.get(channel);
         Teamapplyinfo teamapplyinfo = teamapplyinfoMapper.selectByPrimaryKey(temp[1]);
         if (teamapplyinfo == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDTEAMAPPLYINFO));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOFOUNDTEAMAPPLYINFO);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User userTarget = userService.getUserByNameFromSession(teamapplyinfo.getUsername());
         if (userTarget == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.USERNOONLINETOADDTEAM));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.USERNOONLINETOADDTEAM);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Channel channelTarget = ChannelUtil.userToChannelMap.get(userTarget);
-        Team team = ProjectContext.teamMap.get(user.getTeamId());
+        Team team = TeamCache.teamMap.get(user.getTeamId());
 //          加入队伍
         team.getUserMap().put(userTarget.getUsername(), userTarget);
         userTarget.setTeamId(team.getTeamId());
-        channel.writeAndFlush(MessageUtil.turnToPacket("您同意了" + userTarget.getUsername() + "加入队伍"));
-        channelTarget.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSENTERTEAM));
+
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData("您同意了" + userTarget.getUsername() + "加入队伍");
+        MessageUtil.sendMessage(channel, builder.build());
+
+        builder.setData(MessageConfig.SUCCESSENTERTEAM);
+        MessageUtil.sendMessage(channel, builder.build());
+
 //          加入后销毁申请记录，队伍应该数据库持久化的。。。
         teamapplyinfoMapper.deleteByPrimaryKey(teamapplyinfo.getId());
 //          触发第一次组队的任务
@@ -228,12 +271,14 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tlu",status = {ChannelStatus.TEAM})
+    @Order(orderMsg = "tlu", status = {ChannelStatus.TEAM})
     public void queryTeamApplyInfo(Channel channel, String msg) {
 //      展示申请者的信息
         User user = ChannelUtil.channelToUserMap.get(channel);
-        if (user.getTeamId() == null || !ProjectContext.teamMap.containsKey(user.getTeamId())) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTEAMMESSAGE));
+        if (user.getTeamId() == null || !TeamCache.teamMap.containsKey(user.getTeamId())) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOTEAMMESSAGE);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         TeamapplyinfoExample teamapplyinfoExample = new TeamapplyinfoExample();
@@ -244,7 +289,9 @@ public class TeamService {
         for (Teamapplyinfo teamapplyinfo : teamApplyInfoList) {
             resp += "[ID: " + teamapplyinfo.getId() + "] " + "[用户名:" + teamapplyinfo.getUsername() + "]" + System.getProperty("line.separator");
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(resp);
+        MessageUtil.sendMessage(channel, builder.build());
         return;
     }
 
@@ -259,13 +306,18 @@ public class TeamService {
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
             if (entry.getValue() == user) {
-                channelTemp.writeAndFlush(MessageUtil.turnToPacket("你已离开队伍"));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData("你已离开队伍");
+                MessageUtil.sendMessage(channelTemp, builder.build());
                 entry.getValue().setTeamId(null);
             } else {
-                channelTemp.writeAndFlush(MessageUtil.turnToPacket("玩家" + user.getUsername() + "已离开队伍"));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData("玩家" + user.getUsername() + "已离开队伍");
+                MessageUtil.sendMessage(channelTemp, builder.build());
                 if (user == team.getLeader() && flag) {
                     flag = false;
-                    channelTemp.writeAndFlush(MessageUtil.turnToPacket("玩家" + entry.getValue().getUsername() + "已成为新的队长"));
+                    builder.setData("玩家" + entry.getValue().getUsername() + "已成为新的队长");
+                    MessageUtil.sendMessage(channelTemp, builder.build());
                     team.setLeader(entry.getValue());
                 }
             }
@@ -280,8 +332,8 @@ public class TeamService {
      * @return
      */
     private Team getTeam(User user) {
-        if (user.getTeamId() != null && ProjectContext.teamMap.containsKey(user.getTeamId())) {
-            return ProjectContext.teamMap.get(user.getTeamId());
+        if (user.getTeamId() != null && TeamCache.teamMap.containsKey(user.getTeamId())) {
+            return TeamCache.teamMap.get(user.getTeamId());
         }
         return null;
     }
@@ -296,11 +348,11 @@ public class TeamService {
      * @param user
      */
     public void handleUserOffline(User user) {
-        Map<String, User> userMap = ProjectContext.teamMap.get(user.getTeamId()).getUserMap();
+        Map<String, User> userMap = TeamCache.teamMap.get(user.getTeamId()).getUserMap();
         if (userMap.size() == 1) {
 //          普通的移除
             if (!BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
-                ProjectContext.teamMap.remove(user.getTeamId());
+                TeamCache.teamMap.remove(user.getTeamId());
                 return;
             }
 
@@ -311,21 +363,24 @@ public class TeamService {
             }
             bossScene.getUserMap().remove(user.getUsername());
 //          移除该队伍
-            ProjectContext.teamMap.remove(user.getTeamId());
+            TeamCache.teamMap.remove(user.getTeamId());
             return;
         }
 
 //      当队长掉线时
-        Team team = ProjectContext.teamMap.get(user.getTeamId());
+        Team team = TeamCache.teamMap.get(user.getTeamId());
         if (user == team.getLeader()) {
             boolean flag = true;
-            for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
+            for (Map.Entry<String, User> entry : TeamCache.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
                 Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
                 if (entry.getValue() != user) {
-                    channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "已离线退出队伍"));
+                    ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                    builder.setData(user.getUsername() + "已离线退出队伍");
+                    MessageUtil.sendMessage(channelTemp, builder.build());
                     if (flag) {
                         team.setLeader(entry.getValue());
-                        channelTemp.writeAndFlush(MessageUtil.turnToPacket(entry.getValue().getUsername() + "已成为新队长"));
+                        builder.setData(entry.getValue().getUsername() + "已成为新队长");
+                        MessageUtil.sendMessage(channelTemp, builder.build());
                         flag = false;
                     }
                 }
@@ -341,9 +396,11 @@ public class TeamService {
         }
 
 //      普通玩家掉线
-        for (Map.Entry<String, User> entry : ProjectContext.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
+        for (Map.Entry<String, User> entry : TeamCache.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
             Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "已离线退出队伍"));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(user.getUsername() + "已离线退出队伍");
+            MessageUtil.sendMessage(channelTemp, builder.build());
         }
         //    处理玩家打副本
         if (BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
@@ -352,14 +409,16 @@ public class TeamService {
             bossScene.getDamageAll().remove(user);
         }
 
-        ProjectContext.teamMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
+        TeamCache.teamMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
         BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
     }
 
-    @Order(orderMsg = "eteam",status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = "eteam", status = {ChannelStatus.COMMONSCENE})
     public void enterTeamView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.TEAM);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERTEAMMANAGERVIEW));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.ENTERTEAMMANAGERVIEW);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     /**
@@ -368,9 +427,11 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qteam",status = {ChannelStatus.TEAM})
+    @Order(orderMsg = "qteam", status = {ChannelStatus.TEAM})
     public void outTeamView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTTEAMVIEW));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.OUTTEAMVIEW);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 }

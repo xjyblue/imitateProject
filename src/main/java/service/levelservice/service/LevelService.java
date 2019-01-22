@@ -3,6 +3,7 @@ package service.levelservice.service;
 import config.impl.excel.AchievementResourceLoad;
 import config.impl.excel.EquipmentResourceLoad;
 import config.impl.excel.LevelResourceLoad;
+import core.packet.ServerPacket;
 import service.achievementservice.entity.Achievement;
 import service.achievementservice.service.AchievementService;
 import core.component.good.Equipment;
@@ -80,10 +81,14 @@ public class LevelService {
         if (getLevelByExperience(user.getExperience()) > oleL) {
 //            提示人物升级信息
             Channel channelTarget = ChannelUtil.userToChannelMap.get(user);
-            channelTarget.writeAndFlush(MessageUtil.turnToPacket(">>>>>>>>>>>>>>恭喜您升到了万众瞩目的" + getLevelByExperience(user.getExperience()) + "级<<<<<<<<<<<<<<<"));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(">>>>>>>>>>>>>>恭喜您升到了万众瞩目的" + getLevelByExperience(user.getExperience()) + "级<<<<<<<<<<<<<<<");
+            MessageUtil.sendMessage(channelTarget, builder.build());
         } else {
             Channel channelTarget = ChannelUtil.userToChannelMap.get(user);
-            channelTarget.writeAndFlush(MessageUtil.turnToPacket("您当前经验值增长了" + value + ",你目前的经验值为：" + user.getExperience()));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("您当前经验值增长了" + value + ",你目前的经验值为：" + user.getExperience());
+            MessageUtil.sendMessage(channelTarget, builder.build());
         }
         UserMapper userMapper = SpringContextUtil.getBean("userMapper");
 //      升级就刷新人物的hp和mp
@@ -103,6 +108,7 @@ public class LevelService {
 
     /**
      * 人物mp最大值
+     *
      * @param user
      * @return
      */

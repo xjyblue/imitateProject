@@ -1,11 +1,12 @@
 package service.broadcastservice.service;
 
+import com.google.protobuf.GeneratedMessageV3;
 import core.channel.ChannelStatus;
-import core.context.ProjectContext;
 import io.netty.channel.Channel;
 import org.springframework.stereotype.Component;
 import pojo.User;
 import service.teamservice.entity.Team;
+import service.teamservice.entity.TeamCache;
 import utils.ChannelUtil;
 import utils.MessageUtil;
 
@@ -21,19 +22,15 @@ import java.util.Map;
 @Component
 public class BroadcastService {
 
-    public void sendMessageToAll(String msg, String teamId, String type) {
-        Team team = ProjectContext.teamMap.get(teamId);
+    public void sendMessageToAll(String teamId, GeneratedMessageV3 serverPacket) {
+        Team team = TeamCache.teamMap.get(teamId);
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             User user = entry.getValue();
             Channel channel = ChannelUtil.userToChannelMap.get(user);
             String userStatus = ChannelUtil.channelStatus.get(channel);
             if (userStatus.equals(ChannelStatus.BOSSSCENE) || userStatus.equals(ChannelStatus.DEADSCENE) || userStatus.equals(ChannelStatus.ATTACK)) {
                 Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
-                if (type == null) {
-                    channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
-                } else {
-                    channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg, type));
-                }
+                MessageUtil.sendMessage(channelTemp,serverPacket);
             }
         }
     }

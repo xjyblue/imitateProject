@@ -14,7 +14,7 @@ import core.component.good.MpMedicine;
 import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
-import core.packet.PacketType;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -73,7 +73,9 @@ public class UserbagService {
         User user = ChannelUtil.channelToUserMap.get(channel);
         Integer key = Integer.parseInt(temp[1]);
         if (!checkGoodInUserbag(user, key)) {
-            channel.writeAndFlush(MessageUtil.turnToPacket("背包中无此物品"));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("背包中无此物品");
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
@@ -100,15 +102,21 @@ public class UserbagService {
             HpMedicine hpMedicine = HpMedicineResourceLoad.hpMedicineMap.get(key);
             if (user.getUserBuffEndTimeMap().get(BuffConstant.TREATMENTBUFF) < System.currentTimeMillis()) {
                 user.getBuffMap().put(BuffConstant.TREATMENTBUFF, hpMedicine.getId());
-                channel.writeAndFlush(MessageUtil.turnToPacket("你使用了" + hpMedicine.getName() + "回复红量：" + hpMedicine.getReplyValue()));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData("你使用了" + hpMedicine.getName() + "回复红量：" + hpMedicine.getReplyValue());
+                MessageUtil.sendMessage(channel, builder.build());
 //                  处理用户背包
                 sloveUserbag(user, channel, key);
             } else {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNSKILLCD));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.UNSKILLCD);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
         } else {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXIST));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.GOODNOEXIST);
+            MessageUtil.sendMessage(channel, builder.build());
         }
     }
 
@@ -147,7 +155,9 @@ public class UserbagService {
         }
 
         if (userbagNow == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXISTBAG));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.GOODNOEXISTBAG);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
     }
@@ -184,7 +194,11 @@ public class UserbagService {
         for (Userbag userbag : user.getUserBag()) {
             bagResp = showUserBagInfo(bagResp, userbag);
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket(bagResp, PacketType.USERBAGMSG));
+
+
+        ServerPacket.UserbagResp.Builder builder = ServerPacket.UserbagResp.newBuilder();
+        builder.setData(bagResp);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     private String showUserBagInfo(String bagResp, Userbag userbag) {

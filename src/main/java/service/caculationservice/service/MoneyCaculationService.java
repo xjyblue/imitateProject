@@ -1,5 +1,6 @@
 package service.caculationservice.service;
 
+import core.packet.ServerPacket;
 import service.achievementservice.service.AchievementService;
 import core.config.MessageConfig;
 import io.netty.channel.Channel;
@@ -26,6 +27,7 @@ public class MoneyCaculationService {
 
     /**
      * 加钱
+     *
      * @param user
      * @param money
      */
@@ -42,21 +44,25 @@ public class MoneyCaculationService {
 
     /**
      * 扣钱
+     *
      * @param user
      * @param money
      */
-    public void removeMoneyToUser(User user, String money) {
+    public boolean removeMoneyToUser(User user, String money) {
         int usermoney = Integer.parseInt(user.getMoney());
         int removemoney = Integer.parseInt(money);
         if (removemoney > usermoney) {
             Channel channelT = ChannelUtil.userToChannelMap.get(user);
-            channelT.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMONEYTOGIVE));
-            return;
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOENOUGHMONEYTOGIVE);
+            MessageUtil.sendMessage(channelT, builder.build());
+            return false;
         }
         usermoney -= removemoney;
         user.setMoney(String.valueOf(usermoney));
 //      同步到数据库
         userMapper.updateByPrimaryKeySelective(user);
+        return true;
     }
 
     /**

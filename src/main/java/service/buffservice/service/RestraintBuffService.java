@@ -3,6 +3,7 @@ package service.buffservice.service;
 import core.component.monster.Monster;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,8 @@ import service.buffservice.entity.BuffConstant;
 import service.skillservice.entity.UserSkill;
 import utils.ChannelUtil;
 import utils.MessageUtil;
+
+import javax.sql.rowset.serial.SerialArray;
 
 /**
  * @ClassName RestraintBuffService
@@ -32,7 +35,9 @@ public class RestraintBuffService {
                 attackBuffService.buffSolve(userskillrelation, userSkill, monster, user);
                 return true;
             } else {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SLEEPMESSAGE));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.SLEEPMESSAGE);
+                MessageUtil.sendMessage(channel, builder.build());
                 return false;
             }
         }

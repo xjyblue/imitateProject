@@ -6,6 +6,7 @@ import config.impl.excel.MpMedicineResourceLoad;
 import core.channel.ChannelStatus;
 import core.annotation.Order;
 import core.annotation.Region;
+import core.packet.ServerPacket;
 import service.caculationservice.service.UserbagCaculationService;
 import core.component.good.Equipment;
 import core.component.good.HpMedicine;
@@ -21,6 +22,7 @@ import pojo.Userbag;
 import utils.ChannelUtil;
 import utils.MessageUtil;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.UUID;
@@ -40,12 +42,13 @@ public class ShopService {
 
     /**
      * 展示商城信息
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qshop",status = {ChannelStatus.COMMONSCENE,ChannelStatus.ATTACK,ChannelStatus.LABOURUNION,
-            ChannelStatus.TRADE,ChannelStatus.BOSSSCENE,ChannelStatus.AUCTION})
-    public void queryShopGood(Channel channel,String msg){
+    @Order(orderMsg = "qshop", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.LABOURUNION,
+            ChannelStatus.TRADE, ChannelStatus.BOSSSCENE, ChannelStatus.AUCTION})
+    public void queryShopGood(Channel channel, String msg) {
         String resp = System.getProperty("line.separator")
                 + MessageConfig.MESSAGESTART
                 + System.getProperty("line.separator")
@@ -85,31 +88,41 @@ public class ShopService {
         }
         resp += "[购买武器请输入s-物品编号-数量 即可购买]" + System.getProperty("line.separator");
         resp += MessageConfig.MESSAGEEND;
-        channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(resp);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     /**
      * 购买商城物品
+     *
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "bshop",status = {ChannelStatus.COMMONSCENE,ChannelStatus.ATTACK,ChannelStatus.LABOURUNION,
-            ChannelStatus.TRADE,ChannelStatus.BOSSSCENE,ChannelStatus.AUCTION})
-    public void buyShopGood(Channel channel,String msg){
+    @Order(orderMsg = "bshop", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.LABOURUNION,
+            ChannelStatus.TRADE, ChannelStatus.BOSSSCENE, ChannelStatus.AUCTION})
+    public void buyShopGood(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //          校验是否为有效的物品id
         if (!checkIfGoodId(temp[1])) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FAILGOODID));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.FAILGOODID);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //          校验用户的金钱是否足够
         if (!checkUserMoneyEnough(temp[GrobalConfig.TWO], temp[1], channel)) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNENOUGHMONEY));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.UNENOUGHMONEY);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //           处理蓝药购买逻辑
@@ -123,7 +136,9 @@ public class ShopService {
             userbag.setTypeof(BaseGood.MPMEDICINE);
             userbagCaculationService.addUserBagForUser(user, userbag);
             String goodAllMoney = changeUserMoney(mpMedicine.getBuyMoney(), temp[2], user);
-            channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + mpMedicine.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("您已购买了" + mpMedicine.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]");
+            MessageUtil.sendMessage(channel, builder.build());
         }
 //            处理装备购买逻辑
         if (EquipmentResourceLoad.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
@@ -145,10 +160,12 @@ public class ShopService {
                 count--;
             }
             String goodAllMoney = changeUserMoney(equipment.getBuyMoney(), temp[2], user);
-            channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + equipment.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("您已购买了" + equipment.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]");
+            MessageUtil.sendMessage(channel, builder.build());
         }
         //处理红药购买逻辑
-        if(HpMedicineResourceLoad.hpMedicineMap.containsKey(Integer.parseInt(temp[1]))){
+        if (HpMedicineResourceLoad.hpMedicineMap.containsKey(Integer.parseInt(temp[1]))) {
             HpMedicine hpMedicine = HpMedicineResourceLoad.hpMedicineMap.get(Integer.parseInt(temp[1]));
             Userbag userbag = new Userbag();
             userbag.setWid(hpMedicine.getId());
@@ -158,7 +175,9 @@ public class ShopService {
             userbag.setTypeof(BaseGood.HPMEDICINE);
             userbagCaculationService.addUserBagForUser(user, userbag);
             String goodAllMoney = changeUserMoney(hpMedicine.getBuyMoney(), temp[2], user);
-            channel.writeAndFlush(MessageUtil.turnToPacket("您已购买了" + hpMedicine.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]"));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("您已购买了" + hpMedicine.getName() + temp[2] + "件" + "[花费:" + goodAllMoney + "]" + "[用户剩余金币:" + user.getMoney() + "]");
+            MessageUtil.sendMessage(channel, builder.build());
         }
     }
 
@@ -194,7 +213,7 @@ public class ShopService {
         if (EquipmentResourceLoad.equipmentMap.containsKey(Integer.parseInt(s))) {
             return true;
         }
-        if(HpMedicineResourceLoad.hpMedicineMap.containsKey(Integer.parseInt(s))){
+        if (HpMedicineResourceLoad.hpMedicineMap.containsKey(Integer.parseInt(s))) {
             return true;
         }
         return false;

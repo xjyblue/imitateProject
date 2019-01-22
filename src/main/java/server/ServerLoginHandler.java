@@ -3,9 +3,8 @@ package server;
 
 import com.google.protobuf.MessageLite;
 import core.ServiceDistributor;
-import core.packet.PacketProto;
+import core.packet.ClientPacket;
 import core.packet.ProtoBufEnum;
-import core.packet.client_packet;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
@@ -31,7 +30,7 @@ public class ServerLoginHandler extends ChannelHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (ProtoBufEnum.protoIndexOfMessage((MessageLite) msg) == ProtoBufEnum.CLIENT_PACKET_NORMALREQ.getiValue()) {
             if (!ChannelUtil.channelToUserMap.containsKey(ctx.channel())) {
-                String data = ((client_packet.client_packet_normalreq) msg).getData();
+                String data = ((ClientPacket.NormalReq) msg).getData();
                 serviceDistributor.distributeService(ctx.channel(), data);
             } else {
                 ctx.fireChannelRead(msg);

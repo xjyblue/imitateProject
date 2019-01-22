@@ -3,8 +3,8 @@
 
 package core.packet;
 
-public final class server_packet {
-  private server_packet() {}
+public final class ServerPacket {
+  private ServerPacket() {}
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistryLite registry) {
   }
@@ -14,8 +14,8 @@ public final class server_packet {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
-  public interface server_packet_pongrespOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.server_packet_pongresp)
+  public interface PongRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.PongResp)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -33,18 +33,18 @@ public final class server_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.server_packet_pongresp}
+   * Protobuf type {@code core.packet.PongResp}
    */
-  public  static final class server_packet_pongresp extends
+  public  static final class PongResp extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.server_packet_pongresp)
-      server_packet_pongrespOrBuilder {
+      // @@protoc_insertion_point(message_implements:core.packet.PongResp)
+      PongRespOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use server_packet_pongresp.newBuilder() to construct.
-    private server_packet_pongresp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use PongResp.newBuilder() to construct.
+    private PongResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private server_packet_pongresp() {
+    private PongResp() {
       data_ = "";
     }
 
@@ -53,7 +53,7 @@ public final class server_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private server_packet_pongresp(
+    private PongResp(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -99,15 +99,15 @@ public final class server_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return server_packet.internal_static_xjy_server_packet_pongresp_descriptor;
+      return ServerPacket.internal_static_core_packet_PongResp_descriptor;
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return server_packet.internal_static_xjy_server_packet_pongresp_fieldAccessorTable
+      return ServerPacket.internal_static_core_packet_PongResp_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              server_packet.server_packet_pongresp.class, server_packet.server_packet_pongresp.Builder.class);
+              PongResp.class, Builder.class);
     }
 
     private int bitField0_;
@@ -127,7 +127,7 @@ public final class server_packet {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -143,7 +143,7 @@ public final class server_packet {
         getDataBytes() {
       Object ref = data_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         data_ = b;
@@ -192,10 +192,10 @@ public final class server_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof server_packet.server_packet_pongresp)) {
+      if (!(obj instanceof PongResp)) {
         return super.equals(obj);
       }
-      server_packet.server_packet_pongresp other = (server_packet.server_packet_pongresp) obj;
+      PongResp other = (PongResp) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -223,69 +223,69 @@ public final class server_packet {
       return hash;
     }
 
-    public static server_packet.server_packet_pongresp parseFrom(
+    public static PongResp parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_pongresp parseFrom(
+    public static PongResp parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_pongresp parseFrom(
+    public static PongResp parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_pongresp parseFrom(
+    public static PongResp parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_pongresp parseFrom(byte[] data)
+    public static PongResp parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_pongresp parseFrom(
+    public static PongResp parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_pongresp parseFrom(java.io.InputStream input)
+    public static PongResp parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_pongresp parseFrom(
+    public static PongResp parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_pongresp parseDelimitedFrom(java.io.InputStream input)
+    public static PongResp parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_pongresp parseDelimitedFrom(
+    public static PongResp parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_pongresp parseFrom(
+    public static PongResp parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_pongresp parseFrom(
+    public static PongResp parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -298,7 +298,7 @@ public final class server_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(server_packet.server_packet_pongresp prototype) {
+    public static Builder newBuilder(PongResp prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -309,37 +309,37 @@ public final class server_packet {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.server_packet_pongresp}
+     * Protobuf type {@code core.packet.PongResp}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.server_packet_pongresp)
-        server_packet.server_packet_pongrespOrBuilder {
+        // @@protoc_insertion_point(builder_implements:core.packet.PongResp)
+        PongRespOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return server_packet.internal_static_xjy_server_packet_pongresp_descriptor;
+        return ServerPacket.internal_static_core_packet_PongResp_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return server_packet.internal_static_xjy_server_packet_pongresp_fieldAccessorTable
+        return ServerPacket.internal_static_core_packet_PongResp_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                server_packet.server_packet_pongresp.class, server_packet.server_packet_pongresp.Builder.class);
+                PongResp.class, Builder.class);
       }
 
-      // Construct using packet.server_packet.server_packet_pongresp.newBuilder()
+      // Construct using core.packet.ServerPacket.PongResp.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -359,17 +359,17 @@ public final class server_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return server_packet.internal_static_xjy_server_packet_pongresp_descriptor;
+        return ServerPacket.internal_static_core_packet_PongResp_descriptor;
       }
 
       @Override
-      public server_packet.server_packet_pongresp getDefaultInstanceForType() {
-        return server_packet.server_packet_pongresp.getDefaultInstance();
+      public PongResp getDefaultInstanceForType() {
+        return PongResp.getDefaultInstance();
       }
 
       @Override
-      public server_packet.server_packet_pongresp build() {
-        server_packet.server_packet_pongresp result = buildPartial();
+      public PongResp build() {
+        PongResp result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -377,8 +377,8 @@ public final class server_packet {
       }
 
       @Override
-      public server_packet.server_packet_pongresp buildPartial() {
-        server_packet.server_packet_pongresp result = new server_packet.server_packet_pongresp(this);
+      public PongResp buildPartial() {
+        PongResp result = new PongResp(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -424,16 +424,16 @@ public final class server_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof server_packet.server_packet_pongresp) {
-          return mergeFrom((server_packet.server_packet_pongresp)other);
+        if (other instanceof PongResp) {
+          return mergeFrom((PongResp)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(server_packet.server_packet_pongresp other) {
-        if (other == server_packet.server_packet_pongresp.getDefaultInstance()) return this;
+      public Builder mergeFrom(PongResp other) {
+        if (other == PongResp.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -454,11 +454,11 @@ public final class server_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        server_packet.server_packet_pongresp parsedMessage = null;
+        PongResp parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (server_packet.server_packet_pongresp) e.getUnfinishedMessage();
+          parsedMessage = (PongResp) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -500,7 +500,7 @@ public final class server_packet {
           getDataBytes() {
         Object ref = data_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (String) ref);
           data_ = b;
@@ -557,48 +557,48 @@ public final class server_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.server_packet_pongresp)
+      // @@protoc_insertion_point(builder_scope:core.packet.PongResp)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.server_packet_pongresp)
-    private static final server_packet.server_packet_pongresp DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:core.packet.PongResp)
+    private static final PongResp DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new server_packet.server_packet_pongresp();
+      DEFAULT_INSTANCE = new PongResp();
     }
 
-    public static server_packet.server_packet_pongresp getDefaultInstance() {
+    public static PongResp getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<server_packet_pongresp>
-        PARSER = new com.google.protobuf.AbstractParser<server_packet_pongresp>() {
+    @Deprecated public static final com.google.protobuf.Parser<PongResp>
+        PARSER = new com.google.protobuf.AbstractParser<PongResp>() {
       @Override
-      public server_packet_pongresp parsePartialFrom(
+      public PongResp parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new server_packet_pongresp(input, extensionRegistry);
+        return new PongResp(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<server_packet_pongresp> parser() {
+    public static com.google.protobuf.Parser<PongResp> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<server_packet_pongresp> getParserForType() {
+    public com.google.protobuf.Parser<PongResp> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public server_packet.server_packet_pongresp getDefaultInstanceForType() {
+    public PongResp getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface server_packet_normalrespOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.server_packet_normalresp)
+  public interface NormalRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.NormalResp)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -616,18 +616,18 @@ public final class server_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.server_packet_normalresp}
+   * Protobuf type {@code core.packet.NormalResp}
    */
-  public  static final class server_packet_normalresp extends
+  public  static final class NormalResp extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.server_packet_normalresp)
-      server_packet_normalrespOrBuilder {
+      // @@protoc_insertion_point(message_implements:core.packet.NormalResp)
+      NormalRespOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use server_packet_normalresp.newBuilder() to construct.
-    private server_packet_normalresp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use NormalResp.newBuilder() to construct.
+    private NormalResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private server_packet_normalresp() {
+    private NormalResp() {
       data_ = "";
     }
 
@@ -636,7 +636,7 @@ public final class server_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private server_packet_normalresp(
+    private NormalResp(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -682,15 +682,15 @@ public final class server_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return server_packet.internal_static_xjy_server_packet_normalresp_descriptor;
+      return ServerPacket.internal_static_core_packet_NormalResp_descriptor;
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return server_packet.internal_static_xjy_server_packet_normalresp_fieldAccessorTable
+      return ServerPacket.internal_static_core_packet_NormalResp_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              server_packet.server_packet_normalresp.class, server_packet.server_packet_normalresp.Builder.class);
+              NormalResp.class, Builder.class);
     }
 
     private int bitField0_;
@@ -710,7 +710,7 @@ public final class server_packet {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -726,7 +726,7 @@ public final class server_packet {
         getDataBytes() {
       Object ref = data_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         data_ = b;
@@ -775,10 +775,10 @@ public final class server_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof server_packet.server_packet_normalresp)) {
+      if (!(obj instanceof NormalResp)) {
         return super.equals(obj);
       }
-      server_packet.server_packet_normalresp other = (server_packet.server_packet_normalresp) obj;
+      NormalResp other = (NormalResp) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -806,69 +806,69 @@ public final class server_packet {
       return hash;
     }
 
-    public static server_packet.server_packet_normalresp parseFrom(
+    public static NormalResp parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_normalresp parseFrom(
+    public static NormalResp parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_normalresp parseFrom(
+    public static NormalResp parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_normalresp parseFrom(
+    public static NormalResp parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_normalresp parseFrom(byte[] data)
+    public static NormalResp parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_normalresp parseFrom(
+    public static NormalResp parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_normalresp parseFrom(java.io.InputStream input)
+    public static NormalResp parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_normalresp parseFrom(
+    public static NormalResp parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_normalresp parseDelimitedFrom(java.io.InputStream input)
+    public static NormalResp parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_normalresp parseDelimitedFrom(
+    public static NormalResp parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_normalresp parseFrom(
+    public static NormalResp parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_normalresp parseFrom(
+    public static NormalResp parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -881,7 +881,7 @@ public final class server_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(server_packet.server_packet_normalresp prototype) {
+    public static Builder newBuilder(NormalResp prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -892,37 +892,37 @@ public final class server_packet {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.server_packet_normalresp}
+     * Protobuf type {@code core.packet.NormalResp}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.server_packet_normalresp)
-        server_packet.server_packet_normalrespOrBuilder {
+        // @@protoc_insertion_point(builder_implements:core.packet.NormalResp)
+        NormalRespOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return server_packet.internal_static_xjy_server_packet_normalresp_descriptor;
+        return ServerPacket.internal_static_core_packet_NormalResp_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return server_packet.internal_static_xjy_server_packet_normalresp_fieldAccessorTable
+        return ServerPacket.internal_static_core_packet_NormalResp_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                server_packet.server_packet_normalresp.class, server_packet.server_packet_normalresp.Builder.class);
+                NormalResp.class, Builder.class);
       }
 
-      // Construct using packet.server_packet.server_packet_normalresp.newBuilder()
+      // Construct using core.packet.ServerPacket.NormalResp.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -942,17 +942,17 @@ public final class server_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return server_packet.internal_static_xjy_server_packet_normalresp_descriptor;
+        return ServerPacket.internal_static_core_packet_NormalResp_descriptor;
       }
 
       @Override
-      public server_packet.server_packet_normalresp getDefaultInstanceForType() {
-        return server_packet.server_packet_normalresp.getDefaultInstance();
+      public NormalResp getDefaultInstanceForType() {
+        return NormalResp.getDefaultInstance();
       }
 
       @Override
-      public server_packet.server_packet_normalresp build() {
-        server_packet.server_packet_normalresp result = buildPartial();
+      public NormalResp build() {
+        NormalResp result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -960,8 +960,8 @@ public final class server_packet {
       }
 
       @Override
-      public server_packet.server_packet_normalresp buildPartial() {
-        server_packet.server_packet_normalresp result = new server_packet.server_packet_normalresp(this);
+      public NormalResp buildPartial() {
+        NormalResp result = new NormalResp(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -1007,16 +1007,16 @@ public final class server_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof server_packet.server_packet_normalresp) {
-          return mergeFrom((server_packet.server_packet_normalresp)other);
+        if (other instanceof NormalResp) {
+          return mergeFrom((NormalResp)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(server_packet.server_packet_normalresp other) {
-        if (other == server_packet.server_packet_normalresp.getDefaultInstance()) return this;
+      public Builder mergeFrom(NormalResp other) {
+        if (other == NormalResp.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -1037,11 +1037,11 @@ public final class server_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        server_packet.server_packet_normalresp parsedMessage = null;
+        NormalResp parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (server_packet.server_packet_normalresp) e.getUnfinishedMessage();
+          parsedMessage = (NormalResp) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -1083,7 +1083,7 @@ public final class server_packet {
           getDataBytes() {
         Object ref = data_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (String) ref);
           data_ = b;
@@ -1140,48 +1140,48 @@ public final class server_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.server_packet_normalresp)
+      // @@protoc_insertion_point(builder_scope:core.packet.NormalResp)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.server_packet_normalresp)
-    private static final server_packet.server_packet_normalresp DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:core.packet.NormalResp)
+    private static final NormalResp DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new server_packet.server_packet_normalresp();
+      DEFAULT_INSTANCE = new NormalResp();
     }
 
-    public static server_packet.server_packet_normalresp getDefaultInstance() {
+    public static NormalResp getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<server_packet_normalresp>
-        PARSER = new com.google.protobuf.AbstractParser<server_packet_normalresp>() {
+    @Deprecated public static final com.google.protobuf.Parser<NormalResp>
+        PARSER = new com.google.protobuf.AbstractParser<NormalResp>() {
       @Override
-      public server_packet_normalresp parsePartialFrom(
+      public NormalResp parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new server_packet_normalresp(input, extensionRegistry);
+        return new NormalResp(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<server_packet_normalresp> parser() {
+    public static com.google.protobuf.Parser<NormalResp> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<server_packet_normalresp> getParserForType() {
+    public com.google.protobuf.Parser<NormalResp> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public server_packet.server_packet_normalresp getDefaultInstanceForType() {
+    public NormalResp getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface server_packet_userbufrespOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.server_packet_userbufresp)
+  public interface UserbufRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.UserbufResp)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -1199,18 +1199,18 @@ public final class server_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.server_packet_userbufresp}
+   * Protobuf type {@code core.packet.UserbufResp}
    */
-  public  static final class server_packet_userbufresp extends
+  public  static final class UserbufResp extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.server_packet_userbufresp)
-      server_packet_userbufrespOrBuilder {
+      // @@protoc_insertion_point(message_implements:core.packet.UserbufResp)
+      UserbufRespOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use server_packet_userbufresp.newBuilder() to construct.
-    private server_packet_userbufresp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use UserbufResp.newBuilder() to construct.
+    private UserbufResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private server_packet_userbufresp() {
+    private UserbufResp() {
       data_ = "";
     }
 
@@ -1219,7 +1219,7 @@ public final class server_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private server_packet_userbufresp(
+    private UserbufResp(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1265,15 +1265,15 @@ public final class server_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return server_packet.internal_static_xjy_server_packet_userbufresp_descriptor;
+      return ServerPacket.internal_static_core_packet_UserbufResp_descriptor;
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return server_packet.internal_static_xjy_server_packet_userbufresp_fieldAccessorTable
+      return ServerPacket.internal_static_core_packet_UserbufResp_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              server_packet.server_packet_userbufresp.class, server_packet.server_packet_userbufresp.Builder.class);
+              UserbufResp.class, Builder.class);
     }
 
     private int bitField0_;
@@ -1293,7 +1293,7 @@ public final class server_packet {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -1309,7 +1309,7 @@ public final class server_packet {
         getDataBytes() {
       Object ref = data_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         data_ = b;
@@ -1358,10 +1358,10 @@ public final class server_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof server_packet.server_packet_userbufresp)) {
+      if (!(obj instanceof UserbufResp)) {
         return super.equals(obj);
       }
-      server_packet.server_packet_userbufresp other = (server_packet.server_packet_userbufresp) obj;
+      UserbufResp other = (UserbufResp) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -1389,69 +1389,69 @@ public final class server_packet {
       return hash;
     }
 
-    public static server_packet.server_packet_userbufresp parseFrom(
+    public static UserbufResp parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_userbufresp parseFrom(
+    public static UserbufResp parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_userbufresp parseFrom(
+    public static UserbufResp parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_userbufresp parseFrom(
+    public static UserbufResp parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_userbufresp parseFrom(byte[] data)
+    public static UserbufResp parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_userbufresp parseFrom(
+    public static UserbufResp parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_userbufresp parseFrom(java.io.InputStream input)
+    public static UserbufResp parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_userbufresp parseFrom(
+    public static UserbufResp parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_userbufresp parseDelimitedFrom(java.io.InputStream input)
+    public static UserbufResp parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_userbufresp parseDelimitedFrom(
+    public static UserbufResp parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_userbufresp parseFrom(
+    public static UserbufResp parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_userbufresp parseFrom(
+    public static UserbufResp parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1464,7 +1464,7 @@ public final class server_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(server_packet.server_packet_userbufresp prototype) {
+    public static Builder newBuilder(UserbufResp prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -1475,37 +1475,37 @@ public final class server_packet {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.server_packet_userbufresp}
+     * Protobuf type {@code core.packet.UserbufResp}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.server_packet_userbufresp)
-        server_packet.server_packet_userbufrespOrBuilder {
+        // @@protoc_insertion_point(builder_implements:core.packet.UserbufResp)
+        UserbufRespOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return server_packet.internal_static_xjy_server_packet_userbufresp_descriptor;
+        return ServerPacket.internal_static_core_packet_UserbufResp_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return server_packet.internal_static_xjy_server_packet_userbufresp_fieldAccessorTable
+        return ServerPacket.internal_static_core_packet_UserbufResp_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                server_packet.server_packet_userbufresp.class, server_packet.server_packet_userbufresp.Builder.class);
+                UserbufResp.class, Builder.class);
       }
 
-      // Construct using packet.server_packet.server_packet_userbufresp.newBuilder()
+      // Construct using core.packet.ServerPacket.UserbufResp.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -1525,17 +1525,17 @@ public final class server_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return server_packet.internal_static_xjy_server_packet_userbufresp_descriptor;
+        return ServerPacket.internal_static_core_packet_UserbufResp_descriptor;
       }
 
       @Override
-      public server_packet.server_packet_userbufresp getDefaultInstanceForType() {
-        return server_packet.server_packet_userbufresp.getDefaultInstance();
+      public UserbufResp getDefaultInstanceForType() {
+        return UserbufResp.getDefaultInstance();
       }
 
       @Override
-      public server_packet.server_packet_userbufresp build() {
-        server_packet.server_packet_userbufresp result = buildPartial();
+      public UserbufResp build() {
+        UserbufResp result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -1543,8 +1543,8 @@ public final class server_packet {
       }
 
       @Override
-      public server_packet.server_packet_userbufresp buildPartial() {
-        server_packet.server_packet_userbufresp result = new server_packet.server_packet_userbufresp(this);
+      public UserbufResp buildPartial() {
+        UserbufResp result = new UserbufResp(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -1590,16 +1590,16 @@ public final class server_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof server_packet.server_packet_userbufresp) {
-          return mergeFrom((server_packet.server_packet_userbufresp)other);
+        if (other instanceof UserbufResp) {
+          return mergeFrom((UserbufResp)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(server_packet.server_packet_userbufresp other) {
-        if (other == server_packet.server_packet_userbufresp.getDefaultInstance()) return this;
+      public Builder mergeFrom(UserbufResp other) {
+        if (other == UserbufResp.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -1620,11 +1620,11 @@ public final class server_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        server_packet.server_packet_userbufresp parsedMessage = null;
+        UserbufResp parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (server_packet.server_packet_userbufresp) e.getUnfinishedMessage();
+          parsedMessage = (UserbufResp) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -1666,7 +1666,7 @@ public final class server_packet {
           getDataBytes() {
         Object ref = data_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (String) ref);
           data_ = b;
@@ -1723,48 +1723,48 @@ public final class server_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.server_packet_userbufresp)
+      // @@protoc_insertion_point(builder_scope:core.packet.UserbufResp)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.server_packet_userbufresp)
-    private static final server_packet.server_packet_userbufresp DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:core.packet.UserbufResp)
+    private static final UserbufResp DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new server_packet.server_packet_userbufresp();
+      DEFAULT_INSTANCE = new UserbufResp();
     }
 
-    public static server_packet.server_packet_userbufresp getDefaultInstance() {
+    public static UserbufResp getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<server_packet_userbufresp>
-        PARSER = new com.google.protobuf.AbstractParser<server_packet_userbufresp>() {
+    @Deprecated public static final com.google.protobuf.Parser<UserbufResp>
+        PARSER = new com.google.protobuf.AbstractParser<UserbufResp>() {
       @Override
-      public server_packet_userbufresp parsePartialFrom(
+      public UserbufResp parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new server_packet_userbufresp(input, extensionRegistry);
+        return new UserbufResp(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<server_packet_userbufresp> parser() {
+    public static com.google.protobuf.Parser<UserbufResp> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<server_packet_userbufresp> getParserForType() {
+    public com.google.protobuf.Parser<UserbufResp> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public server_packet.server_packet_userbufresp getDefaultInstanceForType() {
+    public UserbufResp getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface server_packet_monsterbufrespOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.server_packet_monsterbufresp)
+  public interface MonsterbufRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.MonsterbufResp)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -1782,18 +1782,18 @@ public final class server_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.server_packet_monsterbufresp}
+   * Protobuf type {@code core.packet.MonsterbufResp}
    */
-  public  static final class server_packet_monsterbufresp extends
+  public  static final class MonsterbufResp extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.server_packet_monsterbufresp)
-      server_packet_monsterbufrespOrBuilder {
+      // @@protoc_insertion_point(message_implements:core.packet.MonsterbufResp)
+      MonsterbufRespOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use server_packet_monsterbufresp.newBuilder() to construct.
-    private server_packet_monsterbufresp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use MonsterbufResp.newBuilder() to construct.
+    private MonsterbufResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private server_packet_monsterbufresp() {
+    private MonsterbufResp() {
       data_ = "";
     }
 
@@ -1802,7 +1802,7 @@ public final class server_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private server_packet_monsterbufresp(
+    private MonsterbufResp(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1848,15 +1848,15 @@ public final class server_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return server_packet.internal_static_xjy_server_packet_monsterbufresp_descriptor;
+      return ServerPacket.internal_static_core_packet_MonsterbufResp_descriptor;
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return server_packet.internal_static_xjy_server_packet_monsterbufresp_fieldAccessorTable
+      return ServerPacket.internal_static_core_packet_MonsterbufResp_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              server_packet.server_packet_monsterbufresp.class, server_packet.server_packet_monsterbufresp.Builder.class);
+              MonsterbufResp.class, Builder.class);
     }
 
     private int bitField0_;
@@ -1876,7 +1876,7 @@ public final class server_packet {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -1892,7 +1892,7 @@ public final class server_packet {
         getDataBytes() {
       Object ref = data_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         data_ = b;
@@ -1941,10 +1941,10 @@ public final class server_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof server_packet.server_packet_monsterbufresp)) {
+      if (!(obj instanceof MonsterbufResp)) {
         return super.equals(obj);
       }
-      server_packet.server_packet_monsterbufresp other = (server_packet.server_packet_monsterbufresp) obj;
+      MonsterbufResp other = (MonsterbufResp) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -1972,69 +1972,69 @@ public final class server_packet {
       return hash;
     }
 
-    public static server_packet.server_packet_monsterbufresp parseFrom(
+    public static MonsterbufResp parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_monsterbufresp parseFrom(
+    public static MonsterbufResp parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_monsterbufresp parseFrom(
+    public static MonsterbufResp parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_monsterbufresp parseFrom(
+    public static MonsterbufResp parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_monsterbufresp parseFrom(byte[] data)
+    public static MonsterbufResp parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_monsterbufresp parseFrom(
+    public static MonsterbufResp parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_monsterbufresp parseFrom(java.io.InputStream input)
+    public static MonsterbufResp parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_monsterbufresp parseFrom(
+    public static MonsterbufResp parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_monsterbufresp parseDelimitedFrom(java.io.InputStream input)
+    public static MonsterbufResp parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_monsterbufresp parseDelimitedFrom(
+    public static MonsterbufResp parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_monsterbufresp parseFrom(
+    public static MonsterbufResp parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_monsterbufresp parseFrom(
+    public static MonsterbufResp parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2047,7 +2047,7 @@ public final class server_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(server_packet.server_packet_monsterbufresp prototype) {
+    public static Builder newBuilder(MonsterbufResp prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -2058,37 +2058,37 @@ public final class server_packet {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.server_packet_monsterbufresp}
+     * Protobuf type {@code core.packet.MonsterbufResp}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.server_packet_monsterbufresp)
-        server_packet.server_packet_monsterbufrespOrBuilder {
+        // @@protoc_insertion_point(builder_implements:core.packet.MonsterbufResp)
+        MonsterbufRespOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return server_packet.internal_static_xjy_server_packet_monsterbufresp_descriptor;
+        return ServerPacket.internal_static_core_packet_MonsterbufResp_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return server_packet.internal_static_xjy_server_packet_monsterbufresp_fieldAccessorTable
+        return ServerPacket.internal_static_core_packet_MonsterbufResp_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                server_packet.server_packet_monsterbufresp.class, server_packet.server_packet_monsterbufresp.Builder.class);
+                MonsterbufResp.class, Builder.class);
       }
 
-      // Construct using packet.server_packet.server_packet_monsterbufresp.newBuilder()
+      // Construct using core.packet.ServerPacket.MonsterbufResp.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -2108,17 +2108,17 @@ public final class server_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return server_packet.internal_static_xjy_server_packet_monsterbufresp_descriptor;
+        return ServerPacket.internal_static_core_packet_MonsterbufResp_descriptor;
       }
 
       @Override
-      public server_packet.server_packet_monsterbufresp getDefaultInstanceForType() {
-        return server_packet.server_packet_monsterbufresp.getDefaultInstance();
+      public MonsterbufResp getDefaultInstanceForType() {
+        return MonsterbufResp.getDefaultInstance();
       }
 
       @Override
-      public server_packet.server_packet_monsterbufresp build() {
-        server_packet.server_packet_monsterbufresp result = buildPartial();
+      public MonsterbufResp build() {
+        MonsterbufResp result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -2126,8 +2126,8 @@ public final class server_packet {
       }
 
       @Override
-      public server_packet.server_packet_monsterbufresp buildPartial() {
-        server_packet.server_packet_monsterbufresp result = new server_packet.server_packet_monsterbufresp(this);
+      public MonsterbufResp buildPartial() {
+        MonsterbufResp result = new MonsterbufResp(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -2173,16 +2173,16 @@ public final class server_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof server_packet.server_packet_monsterbufresp) {
-          return mergeFrom((server_packet.server_packet_monsterbufresp)other);
+        if (other instanceof MonsterbufResp) {
+          return mergeFrom((MonsterbufResp)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(server_packet.server_packet_monsterbufresp other) {
-        if (other == server_packet.server_packet_monsterbufresp.getDefaultInstance()) return this;
+      public Builder mergeFrom(MonsterbufResp other) {
+        if (other == MonsterbufResp.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -2203,11 +2203,11 @@ public final class server_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        server_packet.server_packet_monsterbufresp parsedMessage = null;
+        MonsterbufResp parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (server_packet.server_packet_monsterbufresp) e.getUnfinishedMessage();
+          parsedMessage = (MonsterbufResp) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -2249,7 +2249,7 @@ public final class server_packet {
           getDataBytes() {
         Object ref = data_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (String) ref);
           data_ = b;
@@ -2306,48 +2306,48 @@ public final class server_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.server_packet_monsterbufresp)
+      // @@protoc_insertion_point(builder_scope:core.packet.MonsterbufResp)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.server_packet_monsterbufresp)
-    private static final server_packet.server_packet_monsterbufresp DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:core.packet.MonsterbufResp)
+    private static final MonsterbufResp DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new server_packet.server_packet_monsterbufresp();
+      DEFAULT_INSTANCE = new MonsterbufResp();
     }
 
-    public static server_packet.server_packet_monsterbufresp getDefaultInstance() {
+    public static MonsterbufResp getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<server_packet_monsterbufresp>
-        PARSER = new com.google.protobuf.AbstractParser<server_packet_monsterbufresp>() {
+    @Deprecated public static final com.google.protobuf.Parser<MonsterbufResp>
+        PARSER = new com.google.protobuf.AbstractParser<MonsterbufResp>() {
       @Override
-      public server_packet_monsterbufresp parsePartialFrom(
+      public MonsterbufResp parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new server_packet_monsterbufresp(input, extensionRegistry);
+        return new MonsterbufResp(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<server_packet_monsterbufresp> parser() {
+    public static com.google.protobuf.Parser<MonsterbufResp> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<server_packet_monsterbufresp> getParserForType() {
+    public com.google.protobuf.Parser<MonsterbufResp> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public server_packet.server_packet_monsterbufresp getDefaultInstanceForType() {
+    public MonsterbufResp getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface server_packet_attackrespOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.server_packet_attackresp)
+  public interface AttackRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.AttackResp)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -2365,18 +2365,18 @@ public final class server_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.server_packet_attackresp}
+   * Protobuf type {@code core.packet.AttackResp}
    */
-  public  static final class server_packet_attackresp extends
+  public  static final class AttackResp extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.server_packet_attackresp)
-      server_packet_attackrespOrBuilder {
+      // @@protoc_insertion_point(message_implements:core.packet.AttackResp)
+      AttackRespOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use server_packet_attackresp.newBuilder() to construct.
-    private server_packet_attackresp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use AttackResp.newBuilder() to construct.
+    private AttackResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private server_packet_attackresp() {
+    private AttackResp() {
       data_ = "";
     }
 
@@ -2385,7 +2385,7 @@ public final class server_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private server_packet_attackresp(
+    private AttackResp(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2431,15 +2431,15 @@ public final class server_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return server_packet.internal_static_xjy_server_packet_attackresp_descriptor;
+      return ServerPacket.internal_static_core_packet_AttackResp_descriptor;
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return server_packet.internal_static_xjy_server_packet_attackresp_fieldAccessorTable
+      return ServerPacket.internal_static_core_packet_AttackResp_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              server_packet.server_packet_attackresp.class, server_packet.server_packet_attackresp.Builder.class);
+              AttackResp.class, Builder.class);
     }
 
     private int bitField0_;
@@ -2459,7 +2459,7 @@ public final class server_packet {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -2475,7 +2475,7 @@ public final class server_packet {
         getDataBytes() {
       Object ref = data_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         data_ = b;
@@ -2524,10 +2524,10 @@ public final class server_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof server_packet.server_packet_attackresp)) {
+      if (!(obj instanceof AttackResp)) {
         return super.equals(obj);
       }
-      server_packet.server_packet_attackresp other = (server_packet.server_packet_attackresp) obj;
+      AttackResp other = (AttackResp) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -2555,69 +2555,69 @@ public final class server_packet {
       return hash;
     }
 
-    public static server_packet.server_packet_attackresp parseFrom(
+    public static AttackResp parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_attackresp parseFrom(
+    public static AttackResp parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_attackresp parseFrom(
+    public static AttackResp parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_attackresp parseFrom(
+    public static AttackResp parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_attackresp parseFrom(byte[] data)
+    public static AttackResp parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_attackresp parseFrom(
+    public static AttackResp parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_attackresp parseFrom(java.io.InputStream input)
+    public static AttackResp parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_attackresp parseFrom(
+    public static AttackResp parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_attackresp parseDelimitedFrom(java.io.InputStream input)
+    public static AttackResp parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_attackresp parseDelimitedFrom(
+    public static AttackResp parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_attackresp parseFrom(
+    public static AttackResp parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_attackresp parseFrom(
+    public static AttackResp parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2630,7 +2630,7 @@ public final class server_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(server_packet.server_packet_attackresp prototype) {
+    public static Builder newBuilder(AttackResp prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -2641,37 +2641,37 @@ public final class server_packet {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.server_packet_attackresp}
+     * Protobuf type {@code core.packet.AttackResp}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.server_packet_attackresp)
-        server_packet.server_packet_attackrespOrBuilder {
+        // @@protoc_insertion_point(builder_implements:core.packet.AttackResp)
+        AttackRespOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return server_packet.internal_static_xjy_server_packet_attackresp_descriptor;
+        return ServerPacket.internal_static_core_packet_AttackResp_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return server_packet.internal_static_xjy_server_packet_attackresp_fieldAccessorTable
+        return ServerPacket.internal_static_core_packet_AttackResp_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                server_packet.server_packet_attackresp.class, server_packet.server_packet_attackresp.Builder.class);
+                AttackResp.class, Builder.class);
       }
 
-      // Construct using packet.server_packet.server_packet_attackresp.newBuilder()
+      // Construct using core.packet.ServerPacket.AttackResp.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -2691,17 +2691,17 @@ public final class server_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return server_packet.internal_static_xjy_server_packet_attackresp_descriptor;
+        return ServerPacket.internal_static_core_packet_AttackResp_descriptor;
       }
 
       @Override
-      public server_packet.server_packet_attackresp getDefaultInstanceForType() {
-        return server_packet.server_packet_attackresp.getDefaultInstance();
+      public AttackResp getDefaultInstanceForType() {
+        return AttackResp.getDefaultInstance();
       }
 
       @Override
-      public server_packet.server_packet_attackresp build() {
-        server_packet.server_packet_attackresp result = buildPartial();
+      public AttackResp build() {
+        AttackResp result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -2709,8 +2709,8 @@ public final class server_packet {
       }
 
       @Override
-      public server_packet.server_packet_attackresp buildPartial() {
-        server_packet.server_packet_attackresp result = new server_packet.server_packet_attackresp(this);
+      public AttackResp buildPartial() {
+        AttackResp result = new AttackResp(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -2756,16 +2756,16 @@ public final class server_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof server_packet.server_packet_attackresp) {
-          return mergeFrom((server_packet.server_packet_attackresp)other);
+        if (other instanceof AttackResp) {
+          return mergeFrom((AttackResp)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(server_packet.server_packet_attackresp other) {
-        if (other == server_packet.server_packet_attackresp.getDefaultInstance()) return this;
+      public Builder mergeFrom(AttackResp other) {
+        if (other == AttackResp.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -2786,11 +2786,11 @@ public final class server_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        server_packet.server_packet_attackresp parsedMessage = null;
+        AttackResp parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (server_packet.server_packet_attackresp) e.getUnfinishedMessage();
+          parsedMessage = (AttackResp) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -2832,7 +2832,7 @@ public final class server_packet {
           getDataBytes() {
         Object ref = data_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (String) ref);
           data_ = b;
@@ -2889,48 +2889,48 @@ public final class server_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.server_packet_attackresp)
+      // @@protoc_insertion_point(builder_scope:core.packet.AttackResp)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.server_packet_attackresp)
-    private static final server_packet.server_packet_attackresp DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:core.packet.AttackResp)
+    private static final AttackResp DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new server_packet.server_packet_attackresp();
+      DEFAULT_INSTANCE = new AttackResp();
     }
 
-    public static server_packet.server_packet_attackresp getDefaultInstance() {
+    public static AttackResp getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<server_packet_attackresp>
-        PARSER = new com.google.protobuf.AbstractParser<server_packet_attackresp>() {
+    @Deprecated public static final com.google.protobuf.Parser<AttackResp>
+        PARSER = new com.google.protobuf.AbstractParser<AttackResp>() {
       @Override
-      public server_packet_attackresp parsePartialFrom(
+      public AttackResp parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new server_packet_attackresp(input, extensionRegistry);
+        return new AttackResp(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<server_packet_attackresp> parser() {
+    public static com.google.protobuf.Parser<AttackResp> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<server_packet_attackresp> getParserForType() {
+    public com.google.protobuf.Parser<AttackResp> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public server_packet.server_packet_attackresp getDefaultInstanceForType() {
+    public AttackResp getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface server_packet_traderespOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.server_packet_traderesp)
+  public interface TradeRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.TradeResp)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -2948,18 +2948,18 @@ public final class server_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.server_packet_traderesp}
+   * Protobuf type {@code core.packet.TradeResp}
    */
-  public  static final class server_packet_traderesp extends
+  public  static final class TradeResp extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.server_packet_traderesp)
-      server_packet_traderespOrBuilder {
+      // @@protoc_insertion_point(message_implements:core.packet.TradeResp)
+      TradeRespOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use server_packet_traderesp.newBuilder() to construct.
-    private server_packet_traderesp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use TradeResp.newBuilder() to construct.
+    private TradeResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private server_packet_traderesp() {
+    private TradeResp() {
       data_ = "";
     }
 
@@ -2968,7 +2968,7 @@ public final class server_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private server_packet_traderesp(
+    private TradeResp(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -3014,15 +3014,15 @@ public final class server_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return server_packet.internal_static_xjy_server_packet_traderesp_descriptor;
+      return ServerPacket.internal_static_core_packet_TradeResp_descriptor;
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return server_packet.internal_static_xjy_server_packet_traderesp_fieldAccessorTable
+      return ServerPacket.internal_static_core_packet_TradeResp_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              server_packet.server_packet_traderesp.class, server_packet.server_packet_traderesp.Builder.class);
+              TradeResp.class, Builder.class);
     }
 
     private int bitField0_;
@@ -3042,7 +3042,7 @@ public final class server_packet {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -3058,7 +3058,7 @@ public final class server_packet {
         getDataBytes() {
       Object ref = data_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         data_ = b;
@@ -3107,10 +3107,10 @@ public final class server_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof server_packet.server_packet_traderesp)) {
+      if (!(obj instanceof TradeResp)) {
         return super.equals(obj);
       }
-      server_packet.server_packet_traderesp other = (server_packet.server_packet_traderesp) obj;
+      TradeResp other = (TradeResp) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -3138,69 +3138,69 @@ public final class server_packet {
       return hash;
     }
 
-    public static server_packet.server_packet_traderesp parseFrom(
+    public static TradeResp parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_traderesp parseFrom(
+    public static TradeResp parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_traderesp parseFrom(
+    public static TradeResp parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_traderesp parseFrom(
+    public static TradeResp parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_traderesp parseFrom(byte[] data)
+    public static TradeResp parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_traderesp parseFrom(
+    public static TradeResp parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_traderesp parseFrom(java.io.InputStream input)
+    public static TradeResp parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_traderesp parseFrom(
+    public static TradeResp parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_traderesp parseDelimitedFrom(java.io.InputStream input)
+    public static TradeResp parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_traderesp parseDelimitedFrom(
+    public static TradeResp parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_traderesp parseFrom(
+    public static TradeResp parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_traderesp parseFrom(
+    public static TradeResp parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -3213,7 +3213,7 @@ public final class server_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(server_packet.server_packet_traderesp prototype) {
+    public static Builder newBuilder(TradeResp prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -3224,37 +3224,37 @@ public final class server_packet {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.server_packet_traderesp}
+     * Protobuf type {@code core.packet.TradeResp}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.server_packet_traderesp)
-        server_packet.server_packet_traderespOrBuilder {
+        // @@protoc_insertion_point(builder_implements:core.packet.TradeResp)
+        TradeRespOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return server_packet.internal_static_xjy_server_packet_traderesp_descriptor;
+        return ServerPacket.internal_static_core_packet_TradeResp_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return server_packet.internal_static_xjy_server_packet_traderesp_fieldAccessorTable
+        return ServerPacket.internal_static_core_packet_TradeResp_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                server_packet.server_packet_traderesp.class, server_packet.server_packet_traderesp.Builder.class);
+                TradeResp.class, Builder.class);
       }
 
-      // Construct using packet.server_packet.server_packet_traderesp.newBuilder()
+      // Construct using core.packet.ServerPacket.TradeResp.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -3274,17 +3274,17 @@ public final class server_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return server_packet.internal_static_xjy_server_packet_traderesp_descriptor;
+        return ServerPacket.internal_static_core_packet_TradeResp_descriptor;
       }
 
       @Override
-      public server_packet.server_packet_traderesp getDefaultInstanceForType() {
-        return server_packet.server_packet_traderesp.getDefaultInstance();
+      public TradeResp getDefaultInstanceForType() {
+        return TradeResp.getDefaultInstance();
       }
 
       @Override
-      public server_packet.server_packet_traderesp build() {
-        server_packet.server_packet_traderesp result = buildPartial();
+      public TradeResp build() {
+        TradeResp result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -3292,8 +3292,8 @@ public final class server_packet {
       }
 
       @Override
-      public server_packet.server_packet_traderesp buildPartial() {
-        server_packet.server_packet_traderesp result = new server_packet.server_packet_traderesp(this);
+      public TradeResp buildPartial() {
+        TradeResp result = new TradeResp(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -3339,16 +3339,16 @@ public final class server_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof server_packet.server_packet_traderesp) {
-          return mergeFrom((server_packet.server_packet_traderesp)other);
+        if (other instanceof TradeResp) {
+          return mergeFrom((TradeResp)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(server_packet.server_packet_traderesp other) {
-        if (other == server_packet.server_packet_traderesp.getDefaultInstance()) return this;
+      public Builder mergeFrom(TradeResp other) {
+        if (other == TradeResp.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -3369,11 +3369,11 @@ public final class server_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        server_packet.server_packet_traderesp parsedMessage = null;
+        TradeResp parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (server_packet.server_packet_traderesp) e.getUnfinishedMessage();
+          parsedMessage = (TradeResp) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -3415,7 +3415,7 @@ public final class server_packet {
           getDataBytes() {
         Object ref = data_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (String) ref);
           data_ = b;
@@ -3472,48 +3472,48 @@ public final class server_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.server_packet_traderesp)
+      // @@protoc_insertion_point(builder_scope:core.packet.TradeResp)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.server_packet_traderesp)
-    private static final server_packet.server_packet_traderesp DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:core.packet.TradeResp)
+    private static final TradeResp DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new server_packet.server_packet_traderesp();
+      DEFAULT_INSTANCE = new TradeResp();
     }
 
-    public static server_packet.server_packet_traderesp getDefaultInstance() {
+    public static TradeResp getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<server_packet_traderesp>
-        PARSER = new com.google.protobuf.AbstractParser<server_packet_traderesp>() {
+    @Deprecated public static final com.google.protobuf.Parser<TradeResp>
+        PARSER = new com.google.protobuf.AbstractParser<TradeResp>() {
       @Override
-      public server_packet_traderesp parsePartialFrom(
+      public TradeResp parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new server_packet_traderesp(input, extensionRegistry);
+        return new TradeResp(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<server_packet_traderesp> parser() {
+    public static com.google.protobuf.Parser<TradeResp> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<server_packet_traderesp> getParserForType() {
+    public com.google.protobuf.Parser<TradeResp> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public server_packet.server_packet_traderesp getDefaultInstanceForType() {
+    public TradeResp getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface server_packet_userinforespOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.server_packet_userinforesp)
+  public interface UserinfoRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.UserinfoResp)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -3531,18 +3531,18 @@ public final class server_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.server_packet_userinforesp}
+   * Protobuf type {@code core.packet.UserinfoResp}
    */
-  public  static final class server_packet_userinforesp extends
+  public  static final class UserinfoResp extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.server_packet_userinforesp)
-      server_packet_userinforespOrBuilder {
+      // @@protoc_insertion_point(message_implements:core.packet.UserinfoResp)
+      UserinfoRespOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use server_packet_userinforesp.newBuilder() to construct.
-    private server_packet_userinforesp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use UserinfoResp.newBuilder() to construct.
+    private UserinfoResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private server_packet_userinforesp() {
+    private UserinfoResp() {
       data_ = "";
     }
 
@@ -3551,7 +3551,7 @@ public final class server_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private server_packet_userinforesp(
+    private UserinfoResp(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -3597,15 +3597,15 @@ public final class server_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return server_packet.internal_static_xjy_server_packet_userinforesp_descriptor;
+      return ServerPacket.internal_static_core_packet_UserinfoResp_descriptor;
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return server_packet.internal_static_xjy_server_packet_userinforesp_fieldAccessorTable
+      return ServerPacket.internal_static_core_packet_UserinfoResp_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              server_packet.server_packet_userinforesp.class, server_packet.server_packet_userinforesp.Builder.class);
+              UserinfoResp.class, Builder.class);
     }
 
     private int bitField0_;
@@ -3625,7 +3625,7 @@ public final class server_packet {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -3641,7 +3641,7 @@ public final class server_packet {
         getDataBytes() {
       Object ref = data_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         data_ = b;
@@ -3690,10 +3690,10 @@ public final class server_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof server_packet.server_packet_userinforesp)) {
+      if (!(obj instanceof UserinfoResp)) {
         return super.equals(obj);
       }
-      server_packet.server_packet_userinforesp other = (server_packet.server_packet_userinforesp) obj;
+      UserinfoResp other = (UserinfoResp) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -3721,69 +3721,69 @@ public final class server_packet {
       return hash;
     }
 
-    public static server_packet.server_packet_userinforesp parseFrom(
+    public static UserinfoResp parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_userinforesp parseFrom(
+    public static UserinfoResp parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_userinforesp parseFrom(
+    public static UserinfoResp parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_userinforesp parseFrom(
+    public static UserinfoResp parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_userinforesp parseFrom(byte[] data)
+    public static UserinfoResp parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_userinforesp parseFrom(
+    public static UserinfoResp parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_userinforesp parseFrom(java.io.InputStream input)
+    public static UserinfoResp parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_userinforesp parseFrom(
+    public static UserinfoResp parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_userinforesp parseDelimitedFrom(java.io.InputStream input)
+    public static UserinfoResp parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_userinforesp parseDelimitedFrom(
+    public static UserinfoResp parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_userinforesp parseFrom(
+    public static UserinfoResp parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_userinforesp parseFrom(
+    public static UserinfoResp parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -3796,7 +3796,7 @@ public final class server_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(server_packet.server_packet_userinforesp prototype) {
+    public static Builder newBuilder(UserinfoResp prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -3807,37 +3807,37 @@ public final class server_packet {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.server_packet_userinforesp}
+     * Protobuf type {@code core.packet.UserinfoResp}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.server_packet_userinforesp)
-        server_packet.server_packet_userinforespOrBuilder {
+        // @@protoc_insertion_point(builder_implements:core.packet.UserinfoResp)
+        UserinfoRespOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return server_packet.internal_static_xjy_server_packet_userinforesp_descriptor;
+        return ServerPacket.internal_static_core_packet_UserinfoResp_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return server_packet.internal_static_xjy_server_packet_userinforesp_fieldAccessorTable
+        return ServerPacket.internal_static_core_packet_UserinfoResp_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                server_packet.server_packet_userinforesp.class, server_packet.server_packet_userinforesp.Builder.class);
+                UserinfoResp.class, Builder.class);
       }
 
-      // Construct using packet.server_packet.server_packet_userinforesp.newBuilder()
+      // Construct using core.packet.ServerPacket.UserinfoResp.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -3857,17 +3857,17 @@ public final class server_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return server_packet.internal_static_xjy_server_packet_userinforesp_descriptor;
+        return ServerPacket.internal_static_core_packet_UserinfoResp_descriptor;
       }
 
       @Override
-      public server_packet.server_packet_userinforesp getDefaultInstanceForType() {
-        return server_packet.server_packet_userinforesp.getDefaultInstance();
+      public UserinfoResp getDefaultInstanceForType() {
+        return UserinfoResp.getDefaultInstance();
       }
 
       @Override
-      public server_packet.server_packet_userinforesp build() {
-        server_packet.server_packet_userinforesp result = buildPartial();
+      public UserinfoResp build() {
+        UserinfoResp result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -3875,8 +3875,8 @@ public final class server_packet {
       }
 
       @Override
-      public server_packet.server_packet_userinforesp buildPartial() {
-        server_packet.server_packet_userinforesp result = new server_packet.server_packet_userinforesp(this);
+      public UserinfoResp buildPartial() {
+        UserinfoResp result = new UserinfoResp(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -3922,16 +3922,16 @@ public final class server_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof server_packet.server_packet_userinforesp) {
-          return mergeFrom((server_packet.server_packet_userinforesp)other);
+        if (other instanceof UserinfoResp) {
+          return mergeFrom((UserinfoResp)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(server_packet.server_packet_userinforesp other) {
-        if (other == server_packet.server_packet_userinforesp.getDefaultInstance()) return this;
+      public Builder mergeFrom(UserinfoResp other) {
+        if (other == UserinfoResp.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -3952,11 +3952,11 @@ public final class server_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        server_packet.server_packet_userinforesp parsedMessage = null;
+        UserinfoResp parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (server_packet.server_packet_userinforesp) e.getUnfinishedMessage();
+          parsedMessage = (UserinfoResp) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -3998,7 +3998,7 @@ public final class server_packet {
           getDataBytes() {
         Object ref = data_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (String) ref);
           data_ = b;
@@ -4055,48 +4055,48 @@ public final class server_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.server_packet_userinforesp)
+      // @@protoc_insertion_point(builder_scope:core.packet.UserinfoResp)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.server_packet_userinforesp)
-    private static final server_packet.server_packet_userinforesp DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:core.packet.UserinfoResp)
+    private static final UserinfoResp DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new server_packet.server_packet_userinforesp();
+      DEFAULT_INSTANCE = new UserinfoResp();
     }
 
-    public static server_packet.server_packet_userinforesp getDefaultInstance() {
+    public static UserinfoResp getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<server_packet_userinforesp>
-        PARSER = new com.google.protobuf.AbstractParser<server_packet_userinforesp>() {
+    @Deprecated public static final com.google.protobuf.Parser<UserinfoResp>
+        PARSER = new com.google.protobuf.AbstractParser<UserinfoResp>() {
       @Override
-      public server_packet_userinforesp parsePartialFrom(
+      public UserinfoResp parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new server_packet_userinforesp(input, extensionRegistry);
+        return new UserinfoResp(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<server_packet_userinforesp> parser() {
+    public static com.google.protobuf.Parser<UserinfoResp> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<server_packet_userinforesp> getParserForType() {
+    public com.google.protobuf.Parser<UserinfoResp> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public server_packet.server_packet_userinforesp getDefaultInstanceForType() {
+    public UserinfoResp getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface server_packet_achievementrespOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.server_packet_achievementresp)
+  public interface AchievementRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.AchievementResp)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -4114,18 +4114,18 @@ public final class server_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.server_packet_achievementresp}
+   * Protobuf type {@code core.packet.AchievementResp}
    */
-  public  static final class server_packet_achievementresp extends
+  public  static final class AchievementResp extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.server_packet_achievementresp)
-      server_packet_achievementrespOrBuilder {
+      // @@protoc_insertion_point(message_implements:core.packet.AchievementResp)
+      AchievementRespOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use server_packet_achievementresp.newBuilder() to construct.
-    private server_packet_achievementresp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use AchievementResp.newBuilder() to construct.
+    private AchievementResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private server_packet_achievementresp() {
+    private AchievementResp() {
       data_ = "";
     }
 
@@ -4134,7 +4134,7 @@ public final class server_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private server_packet_achievementresp(
+    private AchievementResp(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -4180,15 +4180,15 @@ public final class server_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return server_packet.internal_static_xjy_server_packet_achievementresp_descriptor;
+      return ServerPacket.internal_static_core_packet_AchievementResp_descriptor;
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return server_packet.internal_static_xjy_server_packet_achievementresp_fieldAccessorTable
+      return ServerPacket.internal_static_core_packet_AchievementResp_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              server_packet.server_packet_achievementresp.class, server_packet.server_packet_achievementresp.Builder.class);
+              AchievementResp.class, Builder.class);
     }
 
     private int bitField0_;
@@ -4208,7 +4208,7 @@ public final class server_packet {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -4224,7 +4224,7 @@ public final class server_packet {
         getDataBytes() {
       Object ref = data_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         data_ = b;
@@ -4273,10 +4273,10 @@ public final class server_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof server_packet.server_packet_achievementresp)) {
+      if (!(obj instanceof AchievementResp)) {
         return super.equals(obj);
       }
-      server_packet.server_packet_achievementresp other = (server_packet.server_packet_achievementresp) obj;
+      AchievementResp other = (AchievementResp) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -4304,69 +4304,69 @@ public final class server_packet {
       return hash;
     }
 
-    public static server_packet.server_packet_achievementresp parseFrom(
+    public static AchievementResp parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_achievementresp parseFrom(
+    public static AchievementResp parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_achievementresp parseFrom(
+    public static AchievementResp parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_achievementresp parseFrom(
+    public static AchievementResp parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_achievementresp parseFrom(byte[] data)
+    public static AchievementResp parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_achievementresp parseFrom(
+    public static AchievementResp parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_achievementresp parseFrom(java.io.InputStream input)
+    public static AchievementResp parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_achievementresp parseFrom(
+    public static AchievementResp parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_achievementresp parseDelimitedFrom(java.io.InputStream input)
+    public static AchievementResp parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_achievementresp parseDelimitedFrom(
+    public static AchievementResp parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_achievementresp parseFrom(
+    public static AchievementResp parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_achievementresp parseFrom(
+    public static AchievementResp parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -4379,7 +4379,7 @@ public final class server_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(server_packet.server_packet_achievementresp prototype) {
+    public static Builder newBuilder(AchievementResp prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -4390,37 +4390,37 @@ public final class server_packet {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.server_packet_achievementresp}
+     * Protobuf type {@code core.packet.AchievementResp}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.server_packet_achievementresp)
-        server_packet.server_packet_achievementrespOrBuilder {
+        // @@protoc_insertion_point(builder_implements:core.packet.AchievementResp)
+        AchievementRespOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return server_packet.internal_static_xjy_server_packet_achievementresp_descriptor;
+        return ServerPacket.internal_static_core_packet_AchievementResp_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return server_packet.internal_static_xjy_server_packet_achievementresp_fieldAccessorTable
+        return ServerPacket.internal_static_core_packet_AchievementResp_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                server_packet.server_packet_achievementresp.class, server_packet.server_packet_achievementresp.Builder.class);
+                AchievementResp.class, Builder.class);
       }
 
-      // Construct using packet.server_packet.server_packet_achievementresp.newBuilder()
+      // Construct using core.packet.ServerPacket.AchievementResp.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -4440,17 +4440,17 @@ public final class server_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return server_packet.internal_static_xjy_server_packet_achievementresp_descriptor;
+        return ServerPacket.internal_static_core_packet_AchievementResp_descriptor;
       }
 
       @Override
-      public server_packet.server_packet_achievementresp getDefaultInstanceForType() {
-        return server_packet.server_packet_achievementresp.getDefaultInstance();
+      public AchievementResp getDefaultInstanceForType() {
+        return AchievementResp.getDefaultInstance();
       }
 
       @Override
-      public server_packet.server_packet_achievementresp build() {
-        server_packet.server_packet_achievementresp result = buildPartial();
+      public AchievementResp build() {
+        AchievementResp result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -4458,8 +4458,8 @@ public final class server_packet {
       }
 
       @Override
-      public server_packet.server_packet_achievementresp buildPartial() {
-        server_packet.server_packet_achievementresp result = new server_packet.server_packet_achievementresp(this);
+      public AchievementResp buildPartial() {
+        AchievementResp result = new AchievementResp(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -4505,16 +4505,16 @@ public final class server_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof server_packet.server_packet_achievementresp) {
-          return mergeFrom((server_packet.server_packet_achievementresp)other);
+        if (other instanceof AchievementResp) {
+          return mergeFrom((AchievementResp)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(server_packet.server_packet_achievementresp other) {
-        if (other == server_packet.server_packet_achievementresp.getDefaultInstance()) return this;
+      public Builder mergeFrom(AchievementResp other) {
+        if (other == AchievementResp.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -4535,11 +4535,11 @@ public final class server_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        server_packet.server_packet_achievementresp parsedMessage = null;
+        AchievementResp parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (server_packet.server_packet_achievementresp) e.getUnfinishedMessage();
+          parsedMessage = (AchievementResp) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -4581,7 +4581,7 @@ public final class server_packet {
           getDataBytes() {
         Object ref = data_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (String) ref);
           data_ = b;
@@ -4638,48 +4638,48 @@ public final class server_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.server_packet_achievementresp)
+      // @@protoc_insertion_point(builder_scope:core.packet.AchievementResp)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.server_packet_achievementresp)
-    private static final server_packet.server_packet_achievementresp DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:core.packet.AchievementResp)
+    private static final AchievementResp DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new server_packet.server_packet_achievementresp();
+      DEFAULT_INSTANCE = new AchievementResp();
     }
 
-    public static server_packet.server_packet_achievementresp getDefaultInstance() {
+    public static AchievementResp getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<server_packet_achievementresp>
-        PARSER = new com.google.protobuf.AbstractParser<server_packet_achievementresp>() {
+    @Deprecated public static final com.google.protobuf.Parser<AchievementResp>
+        PARSER = new com.google.protobuf.AbstractParser<AchievementResp>() {
       @Override
-      public server_packet_achievementresp parsePartialFrom(
+      public AchievementResp parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new server_packet_achievementresp(input, extensionRegistry);
+        return new AchievementResp(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<server_packet_achievementresp> parser() {
+    public static com.google.protobuf.Parser<AchievementResp> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<server_packet_achievementresp> getParserForType() {
+    public com.google.protobuf.Parser<AchievementResp> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public server_packet.server_packet_achievementresp getDefaultInstanceForType() {
+    public AchievementResp getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface server_packet_userbagrespOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.server_packet_userbagresp)
+  public interface UserbagRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.UserbagResp)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -4697,18 +4697,18 @@ public final class server_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.server_packet_userbagresp}
+   * Protobuf type {@code core.packet.UserbagResp}
    */
-  public  static final class server_packet_userbagresp extends
+  public  static final class UserbagResp extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.server_packet_userbagresp)
-      server_packet_userbagrespOrBuilder {
+      // @@protoc_insertion_point(message_implements:core.packet.UserbagResp)
+      UserbagRespOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use server_packet_userbagresp.newBuilder() to construct.
-    private server_packet_userbagresp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use UserbagResp.newBuilder() to construct.
+    private UserbagResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private server_packet_userbagresp() {
+    private UserbagResp() {
       data_ = "";
     }
 
@@ -4717,7 +4717,7 @@ public final class server_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private server_packet_userbagresp(
+    private UserbagResp(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -4763,15 +4763,15 @@ public final class server_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return server_packet.internal_static_xjy_server_packet_userbagresp_descriptor;
+      return ServerPacket.internal_static_core_packet_UserbagResp_descriptor;
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return server_packet.internal_static_xjy_server_packet_userbagresp_fieldAccessorTable
+      return ServerPacket.internal_static_core_packet_UserbagResp_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              server_packet.server_packet_userbagresp.class, server_packet.server_packet_userbagresp.Builder.class);
+              UserbagResp.class, Builder.class);
     }
 
     private int bitField0_;
@@ -4791,7 +4791,7 @@ public final class server_packet {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -4807,7 +4807,7 @@ public final class server_packet {
         getDataBytes() {
       Object ref = data_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         data_ = b;
@@ -4856,10 +4856,10 @@ public final class server_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof server_packet.server_packet_userbagresp)) {
+      if (!(obj instanceof UserbagResp)) {
         return super.equals(obj);
       }
-      server_packet.server_packet_userbagresp other = (server_packet.server_packet_userbagresp) obj;
+      UserbagResp other = (UserbagResp) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -4887,69 +4887,69 @@ public final class server_packet {
       return hash;
     }
 
-    public static server_packet.server_packet_userbagresp parseFrom(
+    public static UserbagResp parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_userbagresp parseFrom(
+    public static UserbagResp parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_userbagresp parseFrom(
+    public static UserbagResp parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_userbagresp parseFrom(
+    public static UserbagResp parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_userbagresp parseFrom(byte[] data)
+    public static UserbagResp parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_userbagresp parseFrom(
+    public static UserbagResp parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_userbagresp parseFrom(java.io.InputStream input)
+    public static UserbagResp parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_userbagresp parseFrom(
+    public static UserbagResp parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_userbagresp parseDelimitedFrom(java.io.InputStream input)
+    public static UserbagResp parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_userbagresp parseDelimitedFrom(
+    public static UserbagResp parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_userbagresp parseFrom(
+    public static UserbagResp parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_userbagresp parseFrom(
+    public static UserbagResp parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -4962,7 +4962,7 @@ public final class server_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(server_packet.server_packet_userbagresp prototype) {
+    public static Builder newBuilder(UserbagResp prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -4973,37 +4973,37 @@ public final class server_packet {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.server_packet_userbagresp}
+     * Protobuf type {@code core.packet.UserbagResp}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.server_packet_userbagresp)
-        server_packet.server_packet_userbagrespOrBuilder {
+        // @@protoc_insertion_point(builder_implements:core.packet.UserbagResp)
+        UserbagRespOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return server_packet.internal_static_xjy_server_packet_userbagresp_descriptor;
+        return ServerPacket.internal_static_core_packet_UserbagResp_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return server_packet.internal_static_xjy_server_packet_userbagresp_fieldAccessorTable
+        return ServerPacket.internal_static_core_packet_UserbagResp_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                server_packet.server_packet_userbagresp.class, server_packet.server_packet_userbagresp.Builder.class);
+                UserbagResp.class, Builder.class);
       }
 
-      // Construct using packet.server_packet.server_packet_userbagresp.newBuilder()
+      // Construct using core.packet.ServerPacket.UserbagResp.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -5023,17 +5023,17 @@ public final class server_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return server_packet.internal_static_xjy_server_packet_userbagresp_descriptor;
+        return ServerPacket.internal_static_core_packet_UserbagResp_descriptor;
       }
 
       @Override
-      public server_packet.server_packet_userbagresp getDefaultInstanceForType() {
-        return server_packet.server_packet_userbagresp.getDefaultInstance();
+      public UserbagResp getDefaultInstanceForType() {
+        return UserbagResp.getDefaultInstance();
       }
 
       @Override
-      public server_packet.server_packet_userbagresp build() {
-        server_packet.server_packet_userbagresp result = buildPartial();
+      public UserbagResp build() {
+        UserbagResp result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -5041,8 +5041,8 @@ public final class server_packet {
       }
 
       @Override
-      public server_packet.server_packet_userbagresp buildPartial() {
-        server_packet.server_packet_userbagresp result = new server_packet.server_packet_userbagresp(this);
+      public UserbagResp buildPartial() {
+        UserbagResp result = new UserbagResp(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -5088,16 +5088,16 @@ public final class server_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof server_packet.server_packet_userbagresp) {
-          return mergeFrom((server_packet.server_packet_userbagresp)other);
+        if (other instanceof UserbagResp) {
+          return mergeFrom((UserbagResp)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(server_packet.server_packet_userbagresp other) {
-        if (other == server_packet.server_packet_userbagresp.getDefaultInstance()) return this;
+      public Builder mergeFrom(UserbagResp other) {
+        if (other == UserbagResp.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -5118,11 +5118,11 @@ public final class server_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        server_packet.server_packet_userbagresp parsedMessage = null;
+        UserbagResp parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (server_packet.server_packet_userbagresp) e.getUnfinishedMessage();
+          parsedMessage = (UserbagResp) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -5164,7 +5164,7 @@ public final class server_packet {
           getDataBytes() {
         Object ref = data_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (String) ref);
           data_ = b;
@@ -5221,48 +5221,48 @@ public final class server_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.server_packet_userbagresp)
+      // @@protoc_insertion_point(builder_scope:core.packet.UserbagResp)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.server_packet_userbagresp)
-    private static final server_packet.server_packet_userbagresp DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:core.packet.UserbagResp)
+    private static final UserbagResp DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new server_packet.server_packet_userbagresp();
+      DEFAULT_INSTANCE = new UserbagResp();
     }
 
-    public static server_packet.server_packet_userbagresp getDefaultInstance() {
+    public static UserbagResp getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<server_packet_userbagresp>
-        PARSER = new com.google.protobuf.AbstractParser<server_packet_userbagresp>() {
+    @Deprecated public static final com.google.protobuf.Parser<UserbagResp>
+        PARSER = new com.google.protobuf.AbstractParser<UserbagResp>() {
       @Override
-      public server_packet_userbagresp parsePartialFrom(
+      public UserbagResp parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new server_packet_userbagresp(input, extensionRegistry);
+        return new UserbagResp(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<server_packet_userbagresp> parser() {
+    public static com.google.protobuf.Parser<UserbagResp> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<server_packet_userbagresp> getParserForType() {
+    public com.google.protobuf.Parser<UserbagResp> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public server_packet.server_packet_userbagresp getDefaultInstanceForType() {
+    public UserbagResp getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface server_packet_friendrespOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.server_packet_friendresp)
+  public interface FriendRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.FriendResp)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -5280,18 +5280,18 @@ public final class server_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.server_packet_friendresp}
+   * Protobuf type {@code core.packet.FriendResp}
    */
-  public  static final class server_packet_friendresp extends
+  public  static final class FriendResp extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.server_packet_friendresp)
-      server_packet_friendrespOrBuilder {
+      // @@protoc_insertion_point(message_implements:core.packet.FriendResp)
+      FriendRespOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use server_packet_friendresp.newBuilder() to construct.
-    private server_packet_friendresp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use FriendResp.newBuilder() to construct.
+    private FriendResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private server_packet_friendresp() {
+    private FriendResp() {
       data_ = "";
     }
 
@@ -5300,7 +5300,7 @@ public final class server_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private server_packet_friendresp(
+    private FriendResp(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -5346,15 +5346,15 @@ public final class server_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return server_packet.internal_static_xjy_server_packet_friendresp_descriptor;
+      return ServerPacket.internal_static_core_packet_FriendResp_descriptor;
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return server_packet.internal_static_xjy_server_packet_friendresp_fieldAccessorTable
+      return ServerPacket.internal_static_core_packet_FriendResp_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              server_packet.server_packet_friendresp.class, server_packet.server_packet_friendresp.Builder.class);
+              FriendResp.class, Builder.class);
     }
 
     private int bitField0_;
@@ -5374,7 +5374,7 @@ public final class server_packet {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -5390,7 +5390,7 @@ public final class server_packet {
         getDataBytes() {
       Object ref = data_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         data_ = b;
@@ -5439,10 +5439,10 @@ public final class server_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof server_packet.server_packet_friendresp)) {
+      if (!(obj instanceof FriendResp)) {
         return super.equals(obj);
       }
-      server_packet.server_packet_friendresp other = (server_packet.server_packet_friendresp) obj;
+      FriendResp other = (FriendResp) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -5470,69 +5470,69 @@ public final class server_packet {
       return hash;
     }
 
-    public static server_packet.server_packet_friendresp parseFrom(
+    public static FriendResp parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_friendresp parseFrom(
+    public static FriendResp parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_friendresp parseFrom(
+    public static FriendResp parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_friendresp parseFrom(
+    public static FriendResp parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_friendresp parseFrom(byte[] data)
+    public static FriendResp parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_friendresp parseFrom(
+    public static FriendResp parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_friendresp parseFrom(java.io.InputStream input)
+    public static FriendResp parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_friendresp parseFrom(
+    public static FriendResp parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_friendresp parseDelimitedFrom(java.io.InputStream input)
+    public static FriendResp parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_friendresp parseDelimitedFrom(
+    public static FriendResp parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_friendresp parseFrom(
+    public static FriendResp parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_friendresp parseFrom(
+    public static FriendResp parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -5545,7 +5545,7 @@ public final class server_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(server_packet.server_packet_friendresp prototype) {
+    public static Builder newBuilder(FriendResp prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -5556,37 +5556,37 @@ public final class server_packet {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.server_packet_friendresp}
+     * Protobuf type {@code core.packet.FriendResp}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.server_packet_friendresp)
-        server_packet.server_packet_friendrespOrBuilder {
+        // @@protoc_insertion_point(builder_implements:core.packet.FriendResp)
+        FriendRespOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return server_packet.internal_static_xjy_server_packet_friendresp_descriptor;
+        return ServerPacket.internal_static_core_packet_FriendResp_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return server_packet.internal_static_xjy_server_packet_friendresp_fieldAccessorTable
+        return ServerPacket.internal_static_core_packet_FriendResp_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                server_packet.server_packet_friendresp.class, server_packet.server_packet_friendresp.Builder.class);
+                FriendResp.class, Builder.class);
       }
 
-      // Construct using packet.server_packet.server_packet_friendresp.newBuilder()
+      // Construct using core.packet.ServerPacket.FriendResp.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -5606,17 +5606,17 @@ public final class server_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return server_packet.internal_static_xjy_server_packet_friendresp_descriptor;
+        return ServerPacket.internal_static_core_packet_FriendResp_descriptor;
       }
 
       @Override
-      public server_packet.server_packet_friendresp getDefaultInstanceForType() {
-        return server_packet.server_packet_friendresp.getDefaultInstance();
+      public FriendResp getDefaultInstanceForType() {
+        return FriendResp.getDefaultInstance();
       }
 
       @Override
-      public server_packet.server_packet_friendresp build() {
-        server_packet.server_packet_friendresp result = buildPartial();
+      public FriendResp build() {
+        FriendResp result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -5624,8 +5624,8 @@ public final class server_packet {
       }
 
       @Override
-      public server_packet.server_packet_friendresp buildPartial() {
-        server_packet.server_packet_friendresp result = new server_packet.server_packet_friendresp(this);
+      public FriendResp buildPartial() {
+        FriendResp result = new FriendResp(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -5671,16 +5671,16 @@ public final class server_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof server_packet.server_packet_friendresp) {
-          return mergeFrom((server_packet.server_packet_friendresp)other);
+        if (other instanceof FriendResp) {
+          return mergeFrom((FriendResp)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(server_packet.server_packet_friendresp other) {
-        if (other == server_packet.server_packet_friendresp.getDefaultInstance()) return this;
+      public Builder mergeFrom(FriendResp other) {
+        if (other == FriendResp.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -5701,11 +5701,11 @@ public final class server_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        server_packet.server_packet_friendresp parsedMessage = null;
+        FriendResp parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (server_packet.server_packet_friendresp) e.getUnfinishedMessage();
+          parsedMessage = (FriendResp) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -5747,7 +5747,7 @@ public final class server_packet {
           getDataBytes() {
         Object ref = data_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (String) ref);
           data_ = b;
@@ -5804,48 +5804,48 @@ public final class server_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.server_packet_friendresp)
+      // @@protoc_insertion_point(builder_scope:core.packet.FriendResp)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.server_packet_friendresp)
-    private static final server_packet.server_packet_friendresp DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:core.packet.FriendResp)
+    private static final FriendResp DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new server_packet.server_packet_friendresp();
+      DEFAULT_INSTANCE = new FriendResp();
     }
 
-    public static server_packet.server_packet_friendresp getDefaultInstance() {
+    public static FriendResp getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<server_packet_friendresp>
-        PARSER = new com.google.protobuf.AbstractParser<server_packet_friendresp>() {
+    @Deprecated public static final com.google.protobuf.Parser<FriendResp>
+        PARSER = new com.google.protobuf.AbstractParser<FriendResp>() {
       @Override
-      public server_packet_friendresp parsePartialFrom(
+      public FriendResp parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new server_packet_friendresp(input, extensionRegistry);
+        return new FriendResp(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<server_packet_friendresp> parser() {
+    public static com.google.protobuf.Parser<FriendResp> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<server_packet_friendresp> getParserForType() {
+    public com.google.protobuf.Parser<FriendResp> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public server_packet.server_packet_friendresp getDefaultInstanceForType() {
+    public FriendResp getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface server_packet_changechannelrespOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.server_packet_changechannelresp)
+  public interface ChangeChannelRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.ChangeChannelResp)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -5863,18 +5863,18 @@ public final class server_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.server_packet_changechannelresp}
+   * Protobuf type {@code core.packet.ChangeChannelResp}
    */
-  public  static final class server_packet_changechannelresp extends
+  public  static final class ChangeChannelResp extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.server_packet_changechannelresp)
-      server_packet_changechannelrespOrBuilder {
+      // @@protoc_insertion_point(message_implements:core.packet.ChangeChannelResp)
+      ChangeChannelRespOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use server_packet_changechannelresp.newBuilder() to construct.
-    private server_packet_changechannelresp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use ChangeChannelResp.newBuilder() to construct.
+    private ChangeChannelResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private server_packet_changechannelresp() {
+    private ChangeChannelResp() {
       data_ = "";
     }
 
@@ -5883,7 +5883,7 @@ public final class server_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private server_packet_changechannelresp(
+    private ChangeChannelResp(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -5929,15 +5929,15 @@ public final class server_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return server_packet.internal_static_xjy_server_packet_changechannelresp_descriptor;
+      return ServerPacket.internal_static_core_packet_ChangeChannelResp_descriptor;
     }
 
     @Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return server_packet.internal_static_xjy_server_packet_changechannelresp_fieldAccessorTable
+      return ServerPacket.internal_static_core_packet_ChangeChannelResp_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              server_packet.server_packet_changechannelresp.class, server_packet.server_packet_changechannelresp.Builder.class);
+              ChangeChannelResp.class, Builder.class);
     }
 
     private int bitField0_;
@@ -5957,7 +5957,7 @@ public final class server_packet {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -5973,7 +5973,7 @@ public final class server_packet {
         getDataBytes() {
       Object ref = data_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (String) ref);
         data_ = b;
@@ -6022,10 +6022,10 @@ public final class server_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof server_packet.server_packet_changechannelresp)) {
+      if (!(obj instanceof ChangeChannelResp)) {
         return super.equals(obj);
       }
-      server_packet.server_packet_changechannelresp other = (server_packet.server_packet_changechannelresp) obj;
+      ChangeChannelResp other = (ChangeChannelResp) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -6053,69 +6053,69 @@ public final class server_packet {
       return hash;
     }
 
-    public static server_packet.server_packet_changechannelresp parseFrom(
+    public static ChangeChannelResp parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_changechannelresp parseFrom(
+    public static ChangeChannelResp parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_changechannelresp parseFrom(
+    public static ChangeChannelResp parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_changechannelresp parseFrom(
+    public static ChangeChannelResp parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_changechannelresp parseFrom(byte[] data)
+    public static ChangeChannelResp parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static server_packet.server_packet_changechannelresp parseFrom(
+    public static ChangeChannelResp parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static server_packet.server_packet_changechannelresp parseFrom(java.io.InputStream input)
+    public static ChangeChannelResp parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_changechannelresp parseFrom(
+    public static ChangeChannelResp parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_changechannelresp parseDelimitedFrom(java.io.InputStream input)
+    public static ChangeChannelResp parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_changechannelresp parseDelimitedFrom(
+    public static ChangeChannelResp parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static server_packet.server_packet_changechannelresp parseFrom(
+    public static ChangeChannelResp parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static server_packet.server_packet_changechannelresp parseFrom(
+    public static ChangeChannelResp parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -6128,7 +6128,7 @@ public final class server_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(server_packet.server_packet_changechannelresp prototype) {
+    public static Builder newBuilder(ChangeChannelResp prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -6139,37 +6139,37 @@ public final class server_packet {
 
     @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.server_packet_changechannelresp}
+     * Protobuf type {@code core.packet.ChangeChannelResp}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.server_packet_changechannelresp)
-        server_packet.server_packet_changechannelrespOrBuilder {
+        // @@protoc_insertion_point(builder_implements:core.packet.ChangeChannelResp)
+        ChangeChannelRespOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return server_packet.internal_static_xjy_server_packet_changechannelresp_descriptor;
+        return ServerPacket.internal_static_core_packet_ChangeChannelResp_descriptor;
       }
 
       @Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return server_packet.internal_static_xjy_server_packet_changechannelresp_fieldAccessorTable
+        return ServerPacket.internal_static_core_packet_ChangeChannelResp_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                server_packet.server_packet_changechannelresp.class, server_packet.server_packet_changechannelresp.Builder.class);
+                ChangeChannelResp.class, Builder.class);
       }
 
-      // Construct using packet.server_packet.server_packet_changechannelresp.newBuilder()
+      // Construct using core.packet.ServerPacket.ChangeChannelResp.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -6189,17 +6189,17 @@ public final class server_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return server_packet.internal_static_xjy_server_packet_changechannelresp_descriptor;
+        return ServerPacket.internal_static_core_packet_ChangeChannelResp_descriptor;
       }
 
       @Override
-      public server_packet.server_packet_changechannelresp getDefaultInstanceForType() {
-        return server_packet.server_packet_changechannelresp.getDefaultInstance();
+      public ChangeChannelResp getDefaultInstanceForType() {
+        return ChangeChannelResp.getDefaultInstance();
       }
 
       @Override
-      public server_packet.server_packet_changechannelresp build() {
-        server_packet.server_packet_changechannelresp result = buildPartial();
+      public ChangeChannelResp build() {
+        ChangeChannelResp result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -6207,8 +6207,8 @@ public final class server_packet {
       }
 
       @Override
-      public server_packet.server_packet_changechannelresp buildPartial() {
-        server_packet.server_packet_changechannelresp result = new server_packet.server_packet_changechannelresp(this);
+      public ChangeChannelResp buildPartial() {
+        ChangeChannelResp result = new ChangeChannelResp(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -6254,16 +6254,16 @@ public final class server_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof server_packet.server_packet_changechannelresp) {
-          return mergeFrom((server_packet.server_packet_changechannelresp)other);
+        if (other instanceof ChangeChannelResp) {
+          return mergeFrom((ChangeChannelResp)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(server_packet.server_packet_changechannelresp other) {
-        if (other == server_packet.server_packet_changechannelresp.getDefaultInstance()) return this;
+      public Builder mergeFrom(ChangeChannelResp other) {
+        if (other == ChangeChannelResp.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -6284,11 +6284,11 @@ public final class server_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        server_packet.server_packet_changechannelresp parsedMessage = null;
+        ChangeChannelResp parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (server_packet.server_packet_changechannelresp) e.getUnfinishedMessage();
+          parsedMessage = (ChangeChannelResp) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -6330,7 +6330,7 @@ public final class server_packet {
           getDataBytes() {
         Object ref = data_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (String) ref);
           data_ = b;
@@ -6387,101 +6387,689 @@ public final class server_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.server_packet_changechannelresp)
+      // @@protoc_insertion_point(builder_scope:core.packet.ChangeChannelResp)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.server_packet_changechannelresp)
-    private static final server_packet.server_packet_changechannelresp DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:core.packet.ChangeChannelResp)
+    private static final ChangeChannelResp DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new server_packet.server_packet_changechannelresp();
+      DEFAULT_INSTANCE = new ChangeChannelResp();
     }
 
-    public static server_packet.server_packet_changechannelresp getDefaultInstance() {
+    public static ChangeChannelResp getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<server_packet_changechannelresp>
-        PARSER = new com.google.protobuf.AbstractParser<server_packet_changechannelresp>() {
+    @Deprecated public static final com.google.protobuf.Parser<ChangeChannelResp>
+        PARSER = new com.google.protobuf.AbstractParser<ChangeChannelResp>() {
       @Override
-      public server_packet_changechannelresp parsePartialFrom(
+      public ChangeChannelResp parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new server_packet_changechannelresp(input, extensionRegistry);
+        return new ChangeChannelResp(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<server_packet_changechannelresp> parser() {
+    public static com.google.protobuf.Parser<ChangeChannelResp> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<server_packet_changechannelresp> getParserForType() {
+    public com.google.protobuf.Parser<ChangeChannelResp> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public server_packet.server_packet_changechannelresp getDefaultInstanceForType() {
+    public ChangeChannelResp getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface UnionRespOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:core.packet.UnionResp)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional string data = 1;</code>
+     */
+    boolean hasData();
+    /**
+     * <code>optional string data = 1;</code>
+     */
+    String getData();
+    /**
+     * <code>optional string data = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getDataBytes();
+  }
+  /**
+   * Protobuf type {@code core.packet.UnionResp}
+   */
+  public  static final class UnionResp extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:core.packet.UnionResp)
+      UnionRespOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use UnionResp.newBuilder() to construct.
+    private UnionResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private UnionResp() {
+      data_ = "";
+    }
+
+    @Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private UnionResp(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000001;
+              data_ = bs;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return ServerPacket.internal_static_core_packet_UnionResp_descriptor;
+    }
+
+    @Override
+    protected FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ServerPacket.internal_static_core_packet_UnionResp_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              UnionResp.class, Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int DATA_FIELD_NUMBER = 1;
+    private volatile Object data_;
+    /**
+     * <code>optional string data = 1;</code>
+     */
+    public boolean hasData() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional string data = 1;</code>
+     */
+    public String getData() {
+      Object ref = data_;
+      if (ref instanceof String) {
+        return (String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          data_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string data = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getDataBytes() {
+      Object ref = data_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (String) ref);
+        data_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, data_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, data_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof UnionResp)) {
+        return super.equals(obj);
+      }
+      UnionResp other = (UnionResp) obj;
+
+      boolean result = true;
+      result = result && (hasData() == other.hasData());
+      if (hasData()) {
+        result = result && getData()
+            .equals(other.getData());
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasData()) {
+        hash = (37 * hash) + DATA_FIELD_NUMBER;
+        hash = (53 * hash) + getData().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static UnionResp parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static UnionResp parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static UnionResp parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static UnionResp parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static UnionResp parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static UnionResp parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static UnionResp parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static UnionResp parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static UnionResp parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static UnionResp parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static UnionResp parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static UnionResp parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(UnionResp prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @Override
+    protected Builder newBuilderForType(
+        BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code core.packet.UnionResp}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:core.packet.UnionResp)
+        UnionRespOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return ServerPacket.internal_static_core_packet_UnionResp_descriptor;
+      }
+
+      @Override
+      protected FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ServerPacket.internal_static_core_packet_UnionResp_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                UnionResp.class, Builder.class);
+      }
+
+      // Construct using core.packet.ServerPacket.UnionResp.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @Override
+      public Builder clear() {
+        super.clear();
+        data_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return ServerPacket.internal_static_core_packet_UnionResp_descriptor;
+      }
+
+      @Override
+      public UnionResp getDefaultInstanceForType() {
+        return UnionResp.getDefaultInstance();
+      }
+
+      @Override
+      public UnionResp build() {
+        UnionResp result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @Override
+      public UnionResp buildPartial() {
+        UnionResp result = new UnionResp(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.data_ = data_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof UnionResp) {
+          return mergeFrom((UnionResp)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(UnionResp other) {
+        if (other == UnionResp.getDefaultInstance()) return this;
+        if (other.hasData()) {
+          bitField0_ |= 0x00000001;
+          data_ = other.data_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        UnionResp parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (UnionResp) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private Object data_ = "";
+      /**
+       * <code>optional string data = 1;</code>
+       */
+      public boolean hasData() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional string data = 1;</code>
+       */
+      public String getData() {
+        Object ref = data_;
+        if (!(ref instanceof String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            data_ = s;
+          }
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      /**
+       * <code>optional string data = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getDataBytes() {
+        Object ref = data_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (String) ref);
+          data_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string data = 1;</code>
+       */
+      public Builder setData(
+          String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        data_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string data = 1;</code>
+       */
+      public Builder clearData() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        data_ = getDefaultInstance().getData();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string data = 1;</code>
+       */
+      public Builder setDataBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        data_ = value;
+        onChanged();
+        return this;
+      }
+      @Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:core.packet.UnionResp)
+    }
+
+    // @@protoc_insertion_point(class_scope:core.packet.UnionResp)
+    private static final UnionResp DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new UnionResp();
+    }
+
+    public static UnionResp getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @Deprecated public static final com.google.protobuf.Parser<UnionResp>
+        PARSER = new com.google.protobuf.AbstractParser<UnionResp>() {
+      @Override
+      public UnionResp parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new UnionResp(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<UnionResp> parser() {
+      return PARSER;
+    }
+
+    @Override
+    public com.google.protobuf.Parser<UnionResp> getParserForType() {
+      return PARSER;
+    }
+
+    @Override
+    public UnionResp getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_server_packet_pongresp_descriptor;
-  private static final
+    internal_static_core_packet_PongResp_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_server_packet_pongresp_fieldAccessorTable;
+      internal_static_core_packet_PongResp_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_server_packet_normalresp_descriptor;
-  private static final
+    internal_static_core_packet_NormalResp_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_server_packet_normalresp_fieldAccessorTable;
+      internal_static_core_packet_NormalResp_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_server_packet_userbufresp_descriptor;
-  private static final
+    internal_static_core_packet_UserbufResp_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_server_packet_userbufresp_fieldAccessorTable;
+      internal_static_core_packet_UserbufResp_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_server_packet_monsterbufresp_descriptor;
-  private static final
+    internal_static_core_packet_MonsterbufResp_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_server_packet_monsterbufresp_fieldAccessorTable;
+      internal_static_core_packet_MonsterbufResp_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_server_packet_attackresp_descriptor;
-  private static final
+    internal_static_core_packet_AttackResp_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_server_packet_attackresp_fieldAccessorTable;
+      internal_static_core_packet_AttackResp_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_server_packet_traderesp_descriptor;
-  private static final
+    internal_static_core_packet_TradeResp_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_server_packet_traderesp_fieldAccessorTable;
+      internal_static_core_packet_TradeResp_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_server_packet_userinforesp_descriptor;
-  private static final
+    internal_static_core_packet_UserinfoResp_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_server_packet_userinforesp_fieldAccessorTable;
+      internal_static_core_packet_UserinfoResp_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_server_packet_achievementresp_descriptor;
-  private static final
+    internal_static_core_packet_AchievementResp_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_server_packet_achievementresp_fieldAccessorTable;
+      internal_static_core_packet_AchievementResp_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_server_packet_userbagresp_descriptor;
-  private static final
+    internal_static_core_packet_UserbagResp_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_server_packet_userbagresp_fieldAccessorTable;
+      internal_static_core_packet_UserbagResp_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_server_packet_friendresp_descriptor;
-  private static final
+    internal_static_core_packet_FriendResp_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_server_packet_friendresp_fieldAccessorTable;
+      internal_static_core_packet_FriendResp_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_server_packet_changechannelresp_descriptor;
-  private static final
+    internal_static_core_packet_ChangeChannelResp_descriptor;
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_server_packet_changechannelresp_fieldAccessorTable;
+      internal_static_core_packet_ChangeChannelResp_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_core_packet_UnionResp_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_core_packet_UnionResp_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -6491,19 +7079,16 @@ public final class server_packet {
       descriptor;
   static {
     String[] descriptorData = {
-      "\n\014Packet.proto\022\003xjy\"&\n\026server_packet_pon" +
-      "gresp\022\014\n\004data\030\001 \001(\t\"(\n\030server_packet_nor" +
-      "malresp\022\014\n\004data\030\001 \001(\t\")\n\031server_packet_u" +
-      "serbufresp\022\014\n\004data\030\001 \001(\t\",\n\034server_packe" +
-      "t_monsterbufresp\022\014\n\004data\030\001 \001(\t\"(\n\030server" +
-      "_packet_attackresp\022\014\n\004data\030\001 \001(\t\"\'\n\027serv" +
-      "er_packet_traderesp\022\014\n\004data\030\001 \001(\t\"*\n\032ser" +
-      "ver_packet_userinforesp\022\014\n\004data\030\001 \001(\t\"-\n" +
-      "\035server_packet_achievementresp\022\014\n\004data\030\001" +
-      " \001(\t\")\n\031server_packet_userbagresp\022\014\n\004dat" +
-      "a\030\001 \001(\t\"(\n\030server_packet_friendresp\022\014\n\004d" +
-      "ata\030\001 \001(\t\"/\n\037server_packet_changechannel" +
-      "resp\022\014\n\004data\030\001 \001(\tB\017B\rserver_packet"
+      "\n\014Packet.proto\022\013core.packet\"\030\n\010PongResp\022" +
+      "\014\n\004data\030\001 \001(\t\"\032\n\nNormalResp\022\014\n\004data\030\001 \001(" +
+      "\t\"\033\n\013UserbufResp\022\014\n\004data\030\001 \001(\t\"\036\n\016Monste" +
+      "rbufResp\022\014\n\004data\030\001 \001(\t\"\032\n\nAttackResp\022\014\n\004" +
+      "data\030\001 \001(\t\"\031\n\tTradeResp\022\014\n\004data\030\001 \001(\t\"\034\n" +
+      "\014UserinfoResp\022\014\n\004data\030\001 \001(\t\"\037\n\017Achieveme" +
+      "ntResp\022\014\n\004data\030\001 \001(\t\"\033\n\013UserbagResp\022\014\n\004d" +
+      "ata\030\001 \001(\t\"\032\n\nFriendResp\022\014\n\004data\030\001 \001(\t\"!\n" +
+      "\021ChangeChannelResp\022\014\n\004data\030\001 \001(\t\"\031\n\tUnio" +
+      "nResp\022\014\n\004data\030\001 \001(\tB\016B\014ServerPacket"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6517,71 +7102,77 @@ public final class server_packet {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_xjy_server_packet_pongresp_descriptor =
+    internal_static_core_packet_PongResp_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_xjy_server_packet_pongresp_fieldAccessorTable = new
+    internal_static_core_packet_PongResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_server_packet_pongresp_descriptor,
+        internal_static_core_packet_PongResp_descriptor,
         new String[] { "Data", });
-    internal_static_xjy_server_packet_normalresp_descriptor =
+    internal_static_core_packet_NormalResp_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_xjy_server_packet_normalresp_fieldAccessorTable = new
+    internal_static_core_packet_NormalResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_server_packet_normalresp_descriptor,
+        internal_static_core_packet_NormalResp_descriptor,
         new String[] { "Data", });
-    internal_static_xjy_server_packet_userbufresp_descriptor =
+    internal_static_core_packet_UserbufResp_descriptor =
       getDescriptor().getMessageTypes().get(2);
-    internal_static_xjy_server_packet_userbufresp_fieldAccessorTable = new
+    internal_static_core_packet_UserbufResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_server_packet_userbufresp_descriptor,
+        internal_static_core_packet_UserbufResp_descriptor,
         new String[] { "Data", });
-    internal_static_xjy_server_packet_monsterbufresp_descriptor =
+    internal_static_core_packet_MonsterbufResp_descriptor =
       getDescriptor().getMessageTypes().get(3);
-    internal_static_xjy_server_packet_monsterbufresp_fieldAccessorTable = new
+    internal_static_core_packet_MonsterbufResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_server_packet_monsterbufresp_descriptor,
+        internal_static_core_packet_MonsterbufResp_descriptor,
         new String[] { "Data", });
-    internal_static_xjy_server_packet_attackresp_descriptor =
+    internal_static_core_packet_AttackResp_descriptor =
       getDescriptor().getMessageTypes().get(4);
-    internal_static_xjy_server_packet_attackresp_fieldAccessorTable = new
+    internal_static_core_packet_AttackResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_server_packet_attackresp_descriptor,
+        internal_static_core_packet_AttackResp_descriptor,
         new String[] { "Data", });
-    internal_static_xjy_server_packet_traderesp_descriptor =
+    internal_static_core_packet_TradeResp_descriptor =
       getDescriptor().getMessageTypes().get(5);
-    internal_static_xjy_server_packet_traderesp_fieldAccessorTable = new
+    internal_static_core_packet_TradeResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_server_packet_traderesp_descriptor,
+        internal_static_core_packet_TradeResp_descriptor,
         new String[] { "Data", });
-    internal_static_xjy_server_packet_userinforesp_descriptor =
+    internal_static_core_packet_UserinfoResp_descriptor =
       getDescriptor().getMessageTypes().get(6);
-    internal_static_xjy_server_packet_userinforesp_fieldAccessorTable = new
+    internal_static_core_packet_UserinfoResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_server_packet_userinforesp_descriptor,
+        internal_static_core_packet_UserinfoResp_descriptor,
         new String[] { "Data", });
-    internal_static_xjy_server_packet_achievementresp_descriptor =
+    internal_static_core_packet_AchievementResp_descriptor =
       getDescriptor().getMessageTypes().get(7);
-    internal_static_xjy_server_packet_achievementresp_fieldAccessorTable = new
+    internal_static_core_packet_AchievementResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_server_packet_achievementresp_descriptor,
+        internal_static_core_packet_AchievementResp_descriptor,
         new String[] { "Data", });
-    internal_static_xjy_server_packet_userbagresp_descriptor =
+    internal_static_core_packet_UserbagResp_descriptor =
       getDescriptor().getMessageTypes().get(8);
-    internal_static_xjy_server_packet_userbagresp_fieldAccessorTable = new
+    internal_static_core_packet_UserbagResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_server_packet_userbagresp_descriptor,
+        internal_static_core_packet_UserbagResp_descriptor,
         new String[] { "Data", });
-    internal_static_xjy_server_packet_friendresp_descriptor =
+    internal_static_core_packet_FriendResp_descriptor =
       getDescriptor().getMessageTypes().get(9);
-    internal_static_xjy_server_packet_friendresp_fieldAccessorTable = new
+    internal_static_core_packet_FriendResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_server_packet_friendresp_descriptor,
+        internal_static_core_packet_FriendResp_descriptor,
         new String[] { "Data", });
-    internal_static_xjy_server_packet_changechannelresp_descriptor =
+    internal_static_core_packet_ChangeChannelResp_descriptor =
       getDescriptor().getMessageTypes().get(10);
-    internal_static_xjy_server_packet_changechannelresp_fieldAccessorTable = new
+    internal_static_core_packet_ChangeChannelResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_server_packet_changechannelresp_descriptor,
+        internal_static_core_packet_ChangeChannelResp_descriptor,
+        new String[] { "Data", });
+    internal_static_core_packet_UnionResp_descriptor =
+      getDescriptor().getMessageTypes().get(11);
+    internal_static_core_packet_UnionResp_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_core_packet_UnionResp_descriptor,
         new String[] { "Data", });
   }
 

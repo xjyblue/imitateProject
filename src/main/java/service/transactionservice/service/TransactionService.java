@@ -3,7 +3,7 @@ package service.transactionservice.service;
 import config.impl.excel.EquipmentResourceLoad;
 import config.impl.excel.MpMedicineResourceLoad;
 import core.annotation.Region;
-import core.packet.PacketType;
+import core.packet.ServerPacket;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
@@ -12,10 +12,10 @@ import core.component.good.MpMedicine;
 import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import service.transactionservice.entity.TradeCache;
 import service.userbagservice.service.UserbagService;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
-import core.context.ProjectContext;
 import core.annotation.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -67,11 +67,13 @@ public class TransactionService {
     @Order(orderMsg = "ntrade", status = {ChannelStatus.COMMONSCENE})
     public void cancelTrade(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
-        if (user.getTraceId() == null || !ProjectContext.tradeMap.containsKey(user.getTraceId())) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOCREATETRADE));
+        if (user.getTraceId() == null || !TradeCache.tradeMap.containsKey(user.getTraceId())) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOCREATETRADE);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
-        Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
+        Trade trade = TradeCache.tradeMap.get(user.getTraceId());
 
 //      加锁处理
         lock.lock();
@@ -81,9 +83,11 @@ public class TransactionService {
                 return;
             } else {
 //              解决取消线程先抢到锁
-                ProjectContext.tradeMap.remove(user.getTraceId());
+                TradeCache.tradeMap.remove(user.getTraceId());
                 user.setTraceId(null);
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.CANCELTRADE));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.CANCELTRADE);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
         } finally {
@@ -102,27 +106,35 @@ public class TransactionService {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
-        if (!ProjectContext.tradeMap.containsKey(temp[1])) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTRADERECORD));
+        if (!TradeCache.tradeMap.containsKey(temp[1])) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOTRADERECORD);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //      建立起交易，把两者的转态弄到交易状态中去，多个线程抢锁
-        User userStart = ProjectContext.tradeMap.get(temp[1]).getUserStart();
-        Trade trade = ProjectContext.tradeMap.get(temp[1]);
+        User userStart = TradeCache.tradeMap.get(temp[1]).getUserStart();
+        Trade trade = TradeCache.tradeMap.get(temp[1]);
         lock.lock();
         try {
 //          解决取消线程先抢到锁
-            if (!ProjectContext.tradeMap.containsKey(trade.getTradeId())) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.CANCELTRADE));
+            if (!TradeCache.tradeMap.containsKey(trade.getTradeId())) {
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.CANCELTRADE);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
 //          解决同意线程先抢到锁
 //          解决针对同一用户的同意交易和被同意的抢锁问题
             if (userStart.isIfTrade() || user.isIfTrade()) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.TRADEING));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.TRADEING);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             userStart.setIfTrade(true);
@@ -139,11 +151,17 @@ public class TransactionService {
         ChannelUtil.channelStatus.put(channelStart, ChannelStatus.TRADE);
         trade.setUserTo(user);
         trade.setEndTime(System.currentTimeMillis() + 500000);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSCREATETRADE));
-        channelStart.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSCREATETRADE));
 
-        channel.writeAndFlush(MessageUtil.turnToPacket("欢迎来到交易界面，现在您与" + userStart.getUsername() + "建立交易，jbjy=金币金额进行金币交易，jyg=交易格子号可以把交易物品填充到交易栏，jy=y确认交易物品，双方都确认后交易完成", PacketType.TRADEMSG));
-        channelStart.writeAndFlush(MessageUtil.turnToPacket("欢迎来到交易界面，现在您与" + user.getUsername() + "建立交易，jbjy=金币金额进行金币交易，jyg=交易格子号可以把交易物品填充到交易栏，jy=y确认交易物品，双方都确认后交易完成", PacketType.TRADEMSG));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.SUCCESSCREATETRADE);
+        MessageUtil.sendMessage(channel, builder.build());
+        MessageUtil.sendMessage(channelStart, builder.build());
+
+        ServerPacket.TradeResp.Builder builder1 = ServerPacket.TradeResp.newBuilder();
+        builder1.setData("欢迎来到交易界面，现在您与" + userStart.getUsername() + "建立交易，jbjy=金币金额进行金币交易，jyg=交易格子号可以把交易物品填充到交易栏，jy=y确认交易物品，双方都确认后交易完成");
+        MessageUtil.sendMessage(channel, builder1.build());
+        builder1.setData("欢迎来到交易界面，现在您与" + user.getUsername() + "建立交易，jbjy=金币金额进行金币交易，jyg=交易格子号可以把交易物品填充到交易栏，jy=y确认交易物品，双方都确认后交易完成");
+        MessageUtil.sendMessage(channelStart, builder1.build());
     }
 
     /**
@@ -157,30 +175,41 @@ public class TransactionService {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Channel channelTarget = ChannelUtil.userToChannelMap.get(userService.getUserByNameFromSession(temp[1]));
         if (channelTarget == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTRACEUSER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOTRACEUSER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User userTarget = ChannelUtil.channelToUserMap.get(channelTarget);
-        if (user.getTraceId() != null && ProjectContext.tradeMap.containsKey(user.getTraceId())) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.MANISINGTRADING));
+        if (user.getTraceId() != null && TradeCache.tradeMap.containsKey(user.getTraceId())) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.MANISINGTRADING);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         try {
             lock.lock();
 //          解决同意交易和另外创建用户交易请求的锁问题
             if (userTarget.isIfTrade()) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.TRADETARGETHASMAN));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.TRADETARGETHASMAN);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
         } finally {
             lock.unlock();
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket("你向" + temp[1] + "发起了交易请求等待交易准许"));
+
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData("你向" + temp[1] + "发起了交易请求等待交易准许");
+        MessageUtil.sendMessage(channel, builder.build());
 //      建立单方交易单
         String uuid = UUID.randomUUID().toString();
         user.setTraceId(uuid);
@@ -195,8 +224,11 @@ public class TransactionService {
         trade.setStartUserBag(new HashMap<String, Userbag>(64));
         trade.setToUserBag(new HashMap<String, Userbag>(64));
         trade.setUserStart(user);
-        ProjectContext.tradeMap.put(trade.getTradeId(), trade);
-        channelTarget.writeAndFlush(MessageUtil.turnToPacket("你收到了来自" + user.getUsername() + "的交易请求交易单为:" + uuid + ",同意交易请输入ytrade=交易单"));
+        TradeCache.tradeMap.put(trade.getTradeId(), trade);
+
+
+        builder.setData("你收到了来自" + user.getUsername() + "的交易请求交易单为:" + uuid + ",同意交易请输入ytrade=交易单");
+        MessageUtil.sendMessage(channelTarget, builder.build());
     }
 
     /**
@@ -205,10 +237,10 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jyq",status = {ChannelStatus.TRADE})
+    @Order(orderMsg = "jyq", status = {ChannelStatus.TRADE})
     public void quitTrade(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
-        Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
+        Trade trade = TradeCache.tradeMap.get(user.getTraceId());
         Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
         Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         try {
@@ -228,12 +260,18 @@ public class TransactionService {
         moneyCaculationService.addMoneyToUser(trade.getUserStart(), trade.getStartMoney().toString());
         moneyCaculationService.addMoneyToUser(trade.getUserTo(), trade.getToMoney().toString());
 
-        channelStart.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FAILTRADEEND));
-        channelEnd.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FAILTRADEEND));
-        channelStart.writeAndFlush(MessageUtil.turnToPacket("", PacketType.TRADEMSG));
-        channelEnd.writeAndFlush(MessageUtil.turnToPacket("", PacketType.TRADEMSG));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.FAILTRADEEND);
+        MessageUtil.sendMessage(channelStart, builder.build());
+        MessageUtil.sendMessage(channelEnd, builder.build());
+
+        ServerPacket.TradeResp.Builder builder1 = ServerPacket.TradeResp.newBuilder();
+        builder1.setData("");
+        MessageUtil.sendMessage(channelStart, builder1.build());
+        MessageUtil.sendMessage(channelEnd, builder1.build());
+
 //           内存交易单移除
-        ProjectContext.tradeMap.remove(trade.getTradeId());
+        TradeCache.tradeMap.remove(trade.getTradeId());
 //          渠道状态还原
         ChannelUtil.channelStatus.put(channelStart, ChannelStatus.COMMONSCENE);
         ChannelUtil.channelStatus.put(channelEnd, ChannelStatus.COMMONSCENE);
@@ -251,24 +289,28 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jyy",status = {ChannelStatus.TRADE})
+    @Order(orderMsg = "jyy", status = {ChannelStatus.TRADE})
     public void trading(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
-        Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
+        Trade trade = TradeCache.tradeMap.get(user.getTraceId());
         Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
         Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         try {
             agreelock.lock();
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             if (!trade.isIfexe()) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.FAILTRADEEND));
+                builder.setData(MessageConfig.FAILTRADEEND);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             if (user == trade.getUserStart() && trade.getStartUserAgree()) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REPEATYESTRADE));
+                builder.setData(MessageConfig.REPEATYESTRADE);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             if (user == trade.getUserTo() && trade.getToUserAgree()) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REPEATYESTRADE));
+                builder.setData(MessageConfig.REPEATYESTRADE);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             if (user == trade.getUserStart() && !trade.getStartUserAgree()) {
@@ -279,11 +321,15 @@ public class TransactionService {
             }
             if (selectTradeUser(trade)) {
                 if (user == trade.getUserStart()) {
-                    channelStart.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.YOUCOMFIRMTRADE));
-                    channelEnd.writeAndFlush(MessageUtil.turnToPacket(trade.getUserStart().getUsername() + "同意了此次交易，请您尽快做出抉择"));
+                    builder.setData(MessageConfig.YOUCOMFIRMTRADE);
+                    MessageUtil.sendMessage(channelStart, builder.build());
+                    builder.setData(trade.getUserStart().getUsername() + "同意了此次交易，请您尽快做出抉择");
+                    MessageUtil.sendMessage(channelEnd, builder.build());
                 } else {
-                    channelEnd.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.YOUCOMFIRMTRADE));
-                    channelStart.writeAndFlush(MessageUtil.turnToPacket(trade.getUserTo().getUsername() + "同意了此次交易，请您尽快做出抉择"));
+                    builder.setData(MessageConfig.YOUCOMFIRMTRADE);
+                    MessageUtil.sendMessage(channelEnd, builder.build());
+                    builder.setData(trade.getUserTo().getUsername() + "同意了此次交易，请您尽快做出抉择");
+                    MessageUtil.sendMessage(channelStart, builder.build());
                 }
                 return;
             }
@@ -301,12 +347,19 @@ public class TransactionService {
         for (Map.Entry<String, Userbag> entry : trade.getStartUserBag().entrySet()) {
             userbagCaculationService.addUserBagForUser(trade.getUserTo(), entry.getValue());
         }
-        channelStart.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSTRADEEND));
-        channelEnd.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SUCCESSTRADEEND));
-        channelStart.writeAndFlush(MessageUtil.turnToPacket("", PacketType.TRADEMSG));
-        channelEnd.writeAndFlush(MessageUtil.turnToPacket("", PacketType.TRADEMSG));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.SUCCESSTRADEEND);
+        MessageUtil.sendMessage(channelStart, builder.build());
+
+        builder.setData(MessageConfig.SUCCESSTRADEEND);
+        MessageUtil.sendMessage(channelEnd, builder.build());
+
+        ServerPacket.TradeResp.Builder builder1 = ServerPacket.TradeResp.newBuilder();
+        builder1.setData("");
+        MessageUtil.sendMessage(channelStart, builder1.build());
+        MessageUtil.sendMessage(channelEnd, builder1.build());
 //           内存交易单移除
-        ProjectContext.tradeMap.remove(trade.getTradeId());
+        TradeCache.tradeMap.remove(trade.getTradeId());
 //          渠道状态还原
         ChannelUtil.channelStatus.put(channelStart, ChannelStatus.COMMONSCENE);
         ChannelUtil.channelStatus.put(channelEnd, ChannelStatus.COMMONSCENE);
@@ -340,21 +393,25 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "xjbjy",status = {ChannelStatus.TRADE})
+    @Order(orderMsg = "xjbjy", status = {ChannelStatus.TRADE})
     public void reduceMoney(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
-        Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
+        Trade trade = TradeCache.tradeMap.get(user.getTraceId());
         Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
         Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         BigInteger noSendMoney = new BigInteger(temp[1]);
         if (user == trade.getUserStart()) {
             if (trade.getStartMoney().compareTo(noSendMoney) < 0) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMONEYTORESET));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.NOENOUGHMONEYTORESET);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             } else {
                 moneyCaculationService.addMoneyToUser(user, noSendMoney.toString());
@@ -362,7 +419,9 @@ public class TransactionService {
             }
         } else {
             if (trade.getToMoney().compareTo(noSendMoney) < 0) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMONEYTORESET));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.NOENOUGHMONEYTORESET);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             } else {
                 moneyCaculationService.addMoneyToUser(user, noSendMoney.toString());
@@ -371,9 +430,16 @@ public class TransactionService {
         }
 //          输出双方物品信息
         String resp = outTradeMessage(trade);
-        channel.writeAndFlush(MessageUtil.turnToPacket("你的剩余金额为：" + user.getMoney()));
-        channelStart.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
-        channelEnd.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData("你的剩余金额为：" + user.getMoney());
+        MessageUtil.sendMessage(channel, builder.build());
+
+
+
+        ServerPacket.TradeResp.Builder builder1 = ServerPacket.TradeResp.newBuilder();
+        builder1.setData("");
+        MessageUtil.sendMessage(channelStart, builder1.build());
+        MessageUtil.sendMessage(channelEnd, builder1.build());
         return;
     }
 
@@ -383,33 +449,42 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jbjy",status = {ChannelStatus.TRADE})
+    @Order(orderMsg = "jbjy", status = {ChannelStatus.TRADE})
     public void addMoney(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
-        Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
+        Trade trade = TradeCache.tradeMap.get(user.getTraceId());
         Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
         Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         BigInteger userMoney = new BigInteger(user.getMoney());
         BigInteger sendMoney = new BigInteger(temp[1]);
         if (userMoney.compareTo(sendMoney) <= 0) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.TRADENOENOUGHMONEY));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.TRADENOENOUGHMONEY);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         moneyCaculationService.removeMoneyToUser(user, sendMoney.toString());
-        channel.writeAndFlush(MessageUtil.turnToPacket("你的剩余金额为：" + user.getMoney()));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData("你的剩余金额为：" + user.getMoney());
+        MessageUtil.sendMessage(channel, builder.build());
         if (user == trade.getUserStart()) {
             trade.setStartMoney(trade.getStartMoney().add(sendMoney));
         } else {
             trade.setToMoney(trade.getToMoney().add(sendMoney));
         }
         String resp = outTradeMessage(trade);
-        channelStart.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
-        channelEnd.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
+
+        ServerPacket.TradeResp.Builder builder1 = ServerPacket.TradeResp.newBuilder();
+        builder1.setData(resp);
+        MessageUtil.sendMessage(channelStart, builder1.build());
+        MessageUtil.sendMessage(channelEnd, builder1.build());
     }
 
     /**
@@ -418,27 +493,33 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jyg",status = {ChannelStatus.TRADE})
+    @Order(orderMsg = "jyg", status = {ChannelStatus.TRADE})
     public void addGood(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
-        Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
+        Trade trade = TradeCache.tradeMap.get(user.getTraceId());
         Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
         Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //          移除背包给子物品到交易单
         Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOUSERBAGID);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //          移除背包格子,放到交易单中
         if (trade.getUserStart() == user) {
             if (userbag.getNum() < Integer.parseInt(temp[GrobalConfig.TWO])) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHGOODFORTRADE));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.NOENOUGHGOODFORTRADE);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             moveToUserTrade(trade.getUserStart(), trade.getStartUserBag(), userbag, temp[2]);
@@ -447,8 +528,11 @@ public class TransactionService {
         }
 //          输出双方物品信息
         String resp = outTradeMessage(trade);
-        channelStart.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
-        channelEnd.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
+
+        ServerPacket.TradeResp.Builder builder1 = ServerPacket.TradeResp.newBuilder();
+        builder1.setData(resp);
+        MessageUtil.sendMessage(channelStart, builder1.build());
+        MessageUtil.sendMessage(channelEnd, builder1.build());
     }
 
     /**
@@ -457,16 +541,18 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "xjyg",status = {ChannelStatus.TRADE})
+    @Order(orderMsg = "xjyg", status = {ChannelStatus.TRADE})
     public void reduceGood(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
-        Trade trade = ProjectContext.tradeMap.get(user.getTraceId());
+        Trade trade = TradeCache.tradeMap.get(user.getTraceId());
         Channel channelStart = ChannelUtil.userToChannelMap.get(trade.getUserStart());
         Channel channelEnd = ChannelUtil.userToChannelMap.get(trade.getUserTo());
         String[] temp = msg.split("=");
 //      移除交易单号武平到背包格子
         if (temp.length != GrobalConfig.THREE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user == trade.getUserStart() && trade.getStartUserBag().containsKey(temp[1])) {
@@ -474,8 +560,13 @@ public class TransactionService {
             moveToUserBag(userbag, trade.getUserStart(), trade.getStartUserBag(), temp[2]);
 
             String resp = outTradeMessage(trade);
-            channelStart.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
-            channelEnd.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
+
+            ServerPacket.TradeResp.Builder builder = ServerPacket.TradeResp.newBuilder();
+            builder.setData(resp);
+            MessageUtil.sendMessage(channelStart, builder.build());
+
+            builder.setData(resp);
+            MessageUtil.sendMessage(channelEnd, builder.build());
             return;
         }
         if (user == trade.getUserTo() && trade.getToUserBag().containsKey(temp[1])) {
@@ -483,11 +574,18 @@ public class TransactionService {
             moveToUserBag(userbag, trade.getUserTo(), trade.getToUserBag(), temp[2]);
 
             String resp = outTradeMessage(trade);
-            channelStart.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
-            channelEnd.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.TRADEMSG));
+
+            ServerPacket.TradeResp.Builder builder = ServerPacket.TradeResp.newBuilder();
+            builder.setData(resp);
+            MessageUtil.sendMessage(channelStart, builder.build());
+
+            builder.setData(resp);
+            MessageUtil.sendMessage(channelEnd, builder.build());
             return;
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.ERRORORDER);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     /**
@@ -529,6 +627,7 @@ public class TransactionService {
 
     /**
      * 移动到用户背包
+     *
      * @param user
      * @param startUserBag
      * @param userbag

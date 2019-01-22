@@ -6,6 +6,7 @@ import core.annotation.Order;
 import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,19 +50,25 @@ public class SceneService {
     public void moveScene(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp[1].equals(SceneResourceLoad.sceneMap.get(user.getPos()).getName())) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNMOVELOCAL));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.UNMOVELOCAL);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 
         Scene sceneTarget = SceneResourceLoad.sceneMap.get(sceneService.getSceneByName(temp[1]).getId());
         if (levelService.getLevelByExperience(user.getExperience()) < Integer.parseInt(sceneTarget.getNeedLevel())) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOLEVELTOMOVE));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOLEVELTOMOVE);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 
@@ -73,13 +80,17 @@ public class SceneService {
 //      场景的移动切换用户到不同的场景线程
         Scene scene = SceneResourceLoad.sceneMap.get(user.getPos());
         if (!SceneResourceLoad.sceneSet.contains(temp[1])) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTARGETTOMOVE));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOTARGETTOMOVE);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 
         if (!SceneResourceLoad.sceneMap.get(user.getPos()).getSceneSet().contains(temp[1])) {
 //           场景切换
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REMOTEMOVEMESSAGE));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.REMOTEMOVEMESSAGE);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 
@@ -88,7 +99,9 @@ public class SceneService {
         user.setPos(sceneTarget.getId());
         userMapper.updateByPrimaryKeySelective(user);
         ChannelUtil.channelToUserMap.put(channel, user);
-        channel.writeAndFlush(MessageUtil.turnToPacket("已移动到" + temp[1]));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData("已移动到" + temp[1]);
+        MessageUtil.sendMessage(channel,builder.build());
     }
 
     /**

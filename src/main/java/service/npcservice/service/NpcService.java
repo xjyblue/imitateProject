@@ -8,6 +8,7 @@ import core.annotation.Order;
 import core.annotation.Region;
 import core.component.good.Equipment;
 import core.component.good.parent.BaseGood;
+import core.packet.ServerPacket;
 import service.npcservice.entity.Npc;
 import service.sceneservice.entity.Scene;
 import core.config.GrobalConfig;
@@ -48,29 +49,39 @@ public class NpcService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "npcTalk",status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = "npcTalk", status = {ChannelStatus.COMMONSCENE})
     public void talkMethod(Channel channel, String msg) {
-        String[] temp = msg.split("=");
-        User user = ChannelUtil.channelToUserMap.get(channel);
-        if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
-        } else {
-            List<Npc> npcs = SceneResourceLoad.sceneMap.get(ChannelUtil.channelToUserMap.get(channel).getPos())
-                    .getNpcs();
-            for (Npc npc : npcs) {
-                if (npc.getName().equals(temp[1])) {
-                    channel.writeAndFlush(MessageUtil.turnToPacket(npc.getTalk()));
+        try {
+            String[] temp = msg.split("=");
+            User user = ChannelUtil.channelToUserMap.get(channel);
+            if (temp.length != GrobalConfig.TWO) {
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.ERRORORDER);
+                MessageUtil.sendMessage(channel, builder.build());
+            } else {
+                List<Npc> npcs = SceneResourceLoad.sceneMap.get(ChannelUtil.channelToUserMap.get(channel).getPos())
+                        .getNpcs();
+                for (Npc npc : npcs) {
+                    if (npc.getName().equals(temp[1])) {
+                        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                        builder.setData(npc.getTalk());
+                        MessageUtil.sendMessage(channel, builder.build());
 //                      人物任务触发
-                    for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
-                        Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
-                        if (achievementprocess.getType().equals(Achievement.TALKTONPC)) {
-                            achievementService.executeTalkNPC(achievementprocess, user, achievement, npc);
+                        for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
+                            Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
+                            if (achievementprocess.getType().equals(Achievement.TALKTONPC)) {
+                                achievementService.executeTalkNPC(achievementprocess, user, achievement, npc);
+                            }
                         }
+                        return;
                     }
-                    return;
                 }
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.NOFOUNDNPC);
+                MessageUtil.sendMessage(channel, builder.build());
             }
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDNPC));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -80,57 +91,69 @@ public class NpcService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "npcGet",status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = "npcGet", status = {ChannelStatus.COMMONSCENE})
     public void getEquipFromNpc(Channel channel, String msg) {
-        String[] temp = msg.split("=");
-        if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
-            return;
-        }
-        User user = ChannelUtil.channelToUserMap.get(channel);
-        Scene scene = SceneResourceLoad.sceneMap.get(user.getPos());
-        Npc npc = null;
-        for (Npc npcT : scene.getNpcs()) {
-            if (npcT.getName().equals(temp[1])) {
-                npc = npcT;
+        try {
+            String[] temp = msg.split("=");
+            if (temp.length != GrobalConfig.TWO) {
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.ERRORORDER);
+                MessageUtil.sendMessage(channel, builder.build());
+                return;
             }
-        }
-        if (npc == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDNPC));
-            return;
-        }
-        if (npc.getGetGoods().equals(GrobalConfig.NULL)) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEXACHANGEFORNPC));
-            return;
-        }
+            User user = ChannelUtil.channelToUserMap.get(channel);
+            Scene scene = SceneResourceLoad.sceneMap.get(user.getPos());
+            Npc npc = null;
+            for (Npc npcT : scene.getNpcs()) {
+                if (npcT.getName().equals(temp[1])) {
+                    npc = npcT;
+                }
+            }
+            if (npc == null) {
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.NOFOUNDNPC);
+                MessageUtil.sendMessage(channel, builder.build());
+                return;
+            }
+            if (npc.getGetGoods().equals(GrobalConfig.NULL)) {
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.NOEXACHANGEFORNPC);
+                MessageUtil.sendMessage(channel, builder.build());
+                return;
+            }
 
 //      扣去兑换品
-        String[] target = npc.getGetTarget().split(":");
-        Userbag userbagTarget = null;
-        for (Userbag userbag : user.getUserBag()) {
-            if (userbag.getWid().equals(Integer.parseInt(target[0]))) {
-                if (userbag.getNum() < Integer.parseInt(target[1])) {
-                    channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHCHANGEGOOD));
-                    return;
+            String[] target = npc.getGetTarget().split(":");
+            Userbag userbagTarget = null;
+            for (Userbag userbag : user.getUserBag()) {
+                if (userbag.getWid().equals(Integer.parseInt(target[0]))) {
+                    if (userbag.getNum() < Integer.parseInt(target[1])) {
+                        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                        builder.setData(MessageConfig.NOENOUGHCHANGEGOOD);
+                        MessageUtil.sendMessage(channel, builder.build());
+                        return;
+                    }
+                    userbagTarget = userbag;
                 }
-                userbagTarget = userbag;
             }
-        }
-        userbagCaculationService.removeUserbagFromUser(user, userbagTarget, Integer.parseInt(target[1]));
+            userbagCaculationService.removeUserbagFromUser(user, userbagTarget, Integer.parseInt(target[1]));
 
 //        新增武器
-        String[] getGoods = npc.getGetGoods().split("-");
-        for (String getGood : getGoods) {
-            Equipment equipment = EquipmentResourceLoad.equipmentMap.get(Integer.parseInt(getGood));
-            Userbag userbag1 = new Userbag();
-            userbag1.setWid(equipment.getId());
-            userbag1.setNum(1);
-            userbag1.setStartlevel(equipment.getStartLevel());
-            userbag1.setId(UUID.randomUUID().toString());
-            userbag1.setDurability(equipment.getDurability());
-            userbag1.setName(user.getUsername());
-            userbag1.setTypeof(BaseGood.EQUIPMENT);
-            userbagCaculationService.addUserBagForUser(user, userbag1);
+            String[] getGoods = npc.getGetGoods().split("-");
+            for (String getGood : getGoods) {
+                Equipment equipment = EquipmentResourceLoad.equipmentMap.get(Integer.parseInt(getGood));
+                Userbag userbag1 = new Userbag();
+                userbag1.setWid(equipment.getId());
+                userbag1.setNum(1);
+                userbag1.setStartlevel(equipment.getStartLevel());
+                userbag1.setId(UUID.randomUUID().toString());
+                userbag1.setDurability(equipment.getDurability());
+                userbag1.setName(user.getUsername());
+                userbag1.setTypeof(BaseGood.EQUIPMENT);
+                userbagCaculationService.addUserBagForUser(user, userbag1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

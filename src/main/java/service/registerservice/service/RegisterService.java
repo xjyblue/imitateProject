@@ -4,6 +4,7 @@ import config.impl.excel.AchievementResourceLoad;
 import config.impl.excel.LevelResourceLoad;
 import config.impl.excel.RoleResourceLoad;
 import core.annotation.Region;
+import core.packet.ServerPacket;
 import lombok.extern.slf4j.Slf4j;
 import service.achievementservice.entity.Achievement;
 import core.config.GrobalConfig;
@@ -28,7 +29,6 @@ import utils.MessageUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.RunnableFuture;
 
 /**
  * @ClassName RegisterService
@@ -62,15 +62,21 @@ public class RegisterService {
     public void register(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.FIVE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!temp[GrobalConfig.TWO].equals(temp[GrobalConfig.THREE])) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DOUBLEPASSWORDERROR));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.DOUBLEPASSWORDERROR);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!RoleResourceLoad.roleMap.containsKey(Integer.parseInt(temp[GrobalConfig.FOUR]))) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOROLE));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOROLE);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //      设置用户基本信息
@@ -87,17 +93,8 @@ public class RegisterService {
         user.setMp(level.getMaxMp());
         user.setHp(level.getMaxHp());
 
-        long time = System.currentTimeMillis();
-
         userMapper.insertSelective(user);
 
-//        try {
-//            Thread.sleep(50000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
-        System.out.println(System.currentTimeMillis() - time);
 
 //      根据用户种族填充初始技能信息
         List<UserSkill> list = skillService.getUserSkillByUserRole(user.getRoleid());
@@ -133,7 +130,9 @@ public class RegisterService {
             achievementprocessMapper.insert(achievementprocess);
         }
 
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.REGISTERSUCCESS));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.REGISTERSUCCESS);
+        MessageUtil.sendMessage(channel,builder.build());
         ChannelUtil.channelStatus.put(channel, ChannelStatus.LOGIN);
     }
 }

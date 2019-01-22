@@ -6,6 +6,7 @@ import core.channel.ChannelStatus;
 import core.annotation.Order;
 import core.annotation.Region;
 import core.component.monster.Monster;
+import core.packet.ServerPacket;
 import service.buffservice.entity.BuffConstant;
 import service.npcservice.entity.Npc;
 import io.netty.channel.Channel;
@@ -67,7 +68,9 @@ public class UserService {
                     + "] 攻击技能为[" + monster.getMonsterSkillList().get(0).getSkillName()
                     + "] 伤害为：[" + monster.getMonsterSkillList().get(0).getDamage() + "]";
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket(allStatus));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(allStatus);
+        MessageUtil.sendMessage(channel,builder.build());
     }
 
     /**
@@ -104,9 +107,12 @@ public class UserService {
             if (entry.getKey().getUsername().equals(username)) {
                 Channel channel = entry.getValue();
                 if (type == null) {
-                    channel.writeAndFlush(MessageUtil.turnToPacket(msg));
+                    ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                    builder.setData(msg);
+                    MessageUtil.sendMessage(channel,builder.build());
                 } else {
-                    channel.writeAndFlush(MessageUtil.turnToPacket(msg, type));
+                    //TODO:没了分类
+//                    channel.writeAndFlush(MessageUtil.turnToPacket(msg, type));
                 }
             }
         }

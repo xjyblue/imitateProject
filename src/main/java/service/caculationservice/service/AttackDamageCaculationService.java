@@ -4,7 +4,7 @@ import config.impl.excel.BuffResourceLoad;
 import config.impl.excel.EquipmentResourceLoad;
 import config.impl.excel.LevelResourceLoad;
 import core.config.GrobalConfig;
-import core.packet.PacketType;
+import core.packet.ServerPacket;
 import service.buffservice.entity.Buff;
 import core.component.good.Equipment;
 import service.buffservice.entity.BuffConstant;
@@ -76,7 +76,9 @@ public class AttackDamageCaculationService {
             BigInteger buffDefenceDamage = new BigInteger(buff.getInjurySecondValue());
             mosterSkillDamage = mosterSkillDamage.subtract(buffDefenceDamage);
             Channel channelTemp = ChannelUtil.userToChannelMap.get(user);
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp(), PacketType.USERBUFMSG));
+            ServerPacket.UserbufResp.Builder builder = ServerPacket.UserbufResp.newBuilder();
+            builder.setData("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp());
+            MessageUtil.sendMessage(channelTemp,builder.build());
             return mosterSkillDamage;
         }
         return new BigInteger(monsterSkill.getDamage());

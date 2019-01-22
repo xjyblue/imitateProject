@@ -1,6 +1,7 @@
 package service.caculationservice.service;
 
 import core.config.MessageConfig;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -67,7 +68,9 @@ public class MpCaculationService {
         Integer skillMp = Integer.parseInt(userSkill.getSkillMp());
         Channel channel = ChannelUtil.userToChannelMap.get(user);
         if (userMp < skillMp) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNENOUGHMP));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.UNENOUGHMP);
+            MessageUtil.sendMessage(channel,builder.build());
             return false;
         }
         return true;

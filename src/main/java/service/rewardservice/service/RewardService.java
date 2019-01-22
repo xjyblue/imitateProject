@@ -3,6 +3,7 @@ package service.rewardservice.service;
 import config.impl.excel.AchievementResourceLoad;
 import config.impl.excel.CollectGoodResourceLoad;
 import config.impl.excel.EquipmentResourceLoad;
+import core.packet.ServerPacket;
 import service.achievementservice.entity.Achievement;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
@@ -45,6 +46,7 @@ public class RewardService {
 
     /**
      * 获得奖励
+     *
      * @param channel
      * @param monster
      */
@@ -61,7 +63,9 @@ public class RewardService {
                         if (rewardArr[0].equals(GrobalConfig.NULL)) {
                             String money = rewardArr[3];
                             moneyCaculationService.addMoneyToUser(user, money);
-                            channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + money + "金币,当前人物金币为[" + user.getMoney() + "]"));
+                            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                            builder.setData("恭喜你获得" + money + "金币,当前人物金币为[" + user.getMoney() + "]");
+                            MessageUtil.sendMessage(channel, builder.build());
                         } else {
                             String goodType = rewardArr[0];
                             Integer goodId = Integer.parseInt(rewardArr[1]);
@@ -80,7 +84,9 @@ public class RewardService {
                     if (rewardArr[0].equals(GrobalConfig.NULL)) {
                         String money = rewardArr[3];
                         moneyCaculationService.addMoneyToUser(user, money);
-                        channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + money + "金币,当前人物金币为[" + user.getMoney() + "]"));
+                        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                        builder.setData("恭喜你获得" + money + "金币,当前人物金币为[" + user.getMoney() + "]");
+                        MessageUtil.sendMessage(channel, builder.build());
                     } else {
                         String goodType = rewardArr[0];
                         Integer goodId = Integer.parseInt(rewardArr[1]);
@@ -108,6 +114,7 @@ public class RewardService {
 
     /**
      * 奖励物品给用户
+     *
      * @param goodType
      * @param goodId
      * @param user
@@ -126,7 +133,9 @@ public class RewardService {
             userbag.setWid(equipment.getId());
             userbag.setDurability(equipment.getDurability());
             userbagCaculationService.addUserBagForUser(user, userbag);
-            channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + equipment.getName() + "增加攻击力为" + equipment.getAddValue()));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("恭喜你获得" + equipment.getName() + "增加攻击力为" + equipment.getAddValue());
+            MessageUtil.sendMessage(channel, builder.build());
         }
         if (goodType.equals(BaseGood.CHANGEGOOD)) {
             CollectGood collectGood = CollectGoodResourceLoad.collectGoodMap.get(goodId);
@@ -137,7 +146,9 @@ public class RewardService {
             userbag.setWid(goodId);
             userbag.setTypeof(BaseGood.CHANGEGOOD);
             userbagCaculationService.addUserBagForUser(user, userbag);
-            channel.writeAndFlush(MessageUtil.turnToPacket("恭喜你获得" + collectGood.getName()));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("恭喜你获得" + collectGood.getName());
+            MessageUtil.sendMessage(channel, builder.build());
         }
     }
 
@@ -147,6 +158,8 @@ public class RewardService {
 
     public void extraBonus(User user, Channel channel) {
         moneyCaculationService.addMoneyToUser(user, "200");
-        channel.writeAndFlush(MessageUtil.turnToPacket("************最终击杀者额外奖励200金币*************"));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData("************最终击杀者额外奖励200金币*************");
+        MessageUtil.sendMessage(channel, builder.build());
     }
 }

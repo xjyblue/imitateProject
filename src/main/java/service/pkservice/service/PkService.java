@@ -2,6 +2,7 @@ package service.pkservice.service;
 
 import core.annotation.Order;
 import core.annotation.Region;
+import core.packet.ServerPacket;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.AttackDamageCaculationService;
 import service.caculationservice.service.HpCaculationService;
@@ -53,32 +54,40 @@ public class PkService {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.THREE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User userTarget = userService.getUserByNameFromSession(temp[1]);
         Channel channelTarget = ChannelUtil.userToChannelMap.get(userTarget);
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
 //       解决夸场景pk禁止
         if (userTarget != null && user != null && !user.getPos().equals(userTarget.getPos())) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOSUPPORTREMOTEPK));
+            builder.setData(MessageConfig.NOSUPPORTREMOTEPK);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //       解决起始之地不允许pk
         if (user != null && user.getPos().equals(GrobalConfig.STARTSCENE)) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RESURRECTIONNOPK));
+            builder.setData(MessageConfig.RESURRECTIONNOPK);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (userTarget == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDPKPERSON));
+            builder.setData(MessageConfig.NOFOUNDPKPERSON);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUsername().equals(temp[1])) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOPKSELF));
+            builder.setData(MessageConfig.NOPKSELF);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         UserSkill userSkill = skillService.getUserSkillByKey(channel, temp[2]);
         if (userSkill == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
+            builder.setData(MessageConfig.NOKEYSKILL);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         BigInteger attackDamage = attackDamageCaculationService.caculate(user, userSkill.getDamage());
@@ -87,13 +96,15 @@ public class PkService {
         BigInteger userMp = new BigInteger(user.getMp());
         BigInteger minHp = new BigInteger(GrobalConfig.MINVALUE);
         if (userSkillMp.compareTo(userMp) > 0) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNENOUGHMP));
+            builder.setData(MessageConfig.UNENOUGHMP);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //      人物cd校验
         Userskillrelation userskillrelation = user.getUserskillrelationMap().get(temp[2]);
         if (System.currentTimeMillis() < userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNSKILLCD));
+            builder.setData(MessageConfig.UNSKILLCD);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         userskillrelation.setSkillcds(System.currentTimeMillis());
@@ -104,11 +115,18 @@ public class PkService {
             userTarget.setStatus(GrobalConfig.DEAD);
             String resp = "你受到来自：" + user.getUsername() + "的" + userSkill.getSkillName() + "的攻击，伤害为["
                     + attackDamage.toString() + "]你的剩余血量为：" + userTarget.getHp() + ",你已死亡";
-            channelTarget.writeAndFlush(MessageUtil.turnToPacket(resp));
+
+            builder.setData(resp);
+            MessageUtil.sendMessage(channel, builder.build());
+
             resp = "你对" + userTarget.getUsername() + "使用" + userSkill.getSkillName() + "进行攻击，造成伤害[" + attackDamage.toString() + "]" +
                     "，" + userTarget.getUsername() + "的剩余血量为：" + userTarget.getHp() + "，你已杀死" + userTarget.getUsername();
-            channel.writeAndFlush(MessageUtil.turnToPacket(resp));
-            channelTarget.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.SELECTLIVEWAY));
+
+            builder.setData(resp);
+            MessageUtil.sendMessage(channel, builder.build());
+
+            builder.setData(MessageConfig.SELECTLIVEWAY);
+            MessageUtil.sendMessage(channelTarget, builder.build());
 //          死亡后处理
 
 //          pk触发pk胜利成就
@@ -117,12 +135,17 @@ public class PkService {
             ChannelUtil.channelStatus.put(channelTarget, ChannelStatus.DEADSCENE);
             return;
         }
+
         String resp = "你受到来自：" + user.getUsername() + "的" + userSkill.getSkillName() + "的攻击，伤害为["
                 + attackDamage.toString() + "]你的剩余血量为：" + userTarget.getHp();
-        channelTarget.writeAndFlush(MessageUtil.turnToPacket(resp));
+        builder.setData(resp);
+        MessageUtil.sendMessage(channelTarget, builder.build());
+
+
         resp = "你对" + userTarget.getUsername() + "使用" + userSkill.getSkillName() + "进行攻击，造成伤害[" + attackDamage.toString() + "]" +
                 "，" + userTarget.getUsername() + "的剩余血量为：" + userTarget.getHp();
-        channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+        builder.setData(resp);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
 }

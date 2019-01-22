@@ -1,7 +1,6 @@
 package service.achievementservice.service;
 
 import config.impl.excel.AchievementResourceLoad;
-import core.context.ProjectContext;
 import service.achievementservice.entity.Achievement;
 import core.component.good.Equipment;
 import core.component.monster.Monster;
@@ -18,6 +17,7 @@ import pojo.Weaponequipmentbar;
 import service.teamservice.entity.Team;
 import service.achievementservice.util.AchievementUtil;
 import service.levelservice.service.LevelService;
+import service.teamservice.entity.TeamCache;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -142,8 +142,9 @@ public class AchievementService {
             achievementprocess.setIffinish(true);
             achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
             sloveAchievementReward(achievement,user);
+            AchievementUtil.refreshAchievementInfo(user);
+
         }
-        AchievementUtil.refreshAchievementInfo(user);
     }
 
     /**
@@ -323,7 +324,7 @@ public class AchievementService {
      * @param monster
      */
     private void updateAchievementprocessWithOther(User user, Monster monster) {
-        Team team = ProjectContext.teamMap.get(user.getTeamId());
+        Team team = TeamCache.teamMap.get(user.getTeamId());
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             User userT = entry.getValue();
             for (Achievementprocess achievementprocess : userT.getAchievementprocesses()) {

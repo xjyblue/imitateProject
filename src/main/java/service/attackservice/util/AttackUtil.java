@@ -1,6 +1,6 @@
 package service.attackservice.util;
 
-import core.context.ProjectContext;
+import core.packet.ServerPacket;
 import service.sceneservice.entity.BossScene;
 import core.component.monster.Monster;
 import core.channel.ChannelStatus;
@@ -8,6 +8,7 @@ import service.rewardservice.service.RewardService;
 import io.netty.channel.Channel;
 import pojo.User;
 import service.teamservice.entity.Team;
+import service.teamservice.entity.TeamCache;
 import utils.ChannelUtil;
 import utils.MessageUtil;
 import utils.SpringContextUtil;
@@ -45,11 +46,13 @@ public class AttackUtil {
      */
     public static void killBossMessageToAll(User user, Monster monster) {
         RewardService rewardService = SpringContextUtil.getBean("rewardService");
-        Team team = ProjectContext.teamMap.get(user.getTeamId());
+        Team team = TeamCache.teamMap.get(user.getTeamId());
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
             rewardService.getGoods(channelTemp, monster);
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket("玩家" + user.getUsername() + "击杀了：" + monster.getName()));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("玩家" + user.getUsername() + "击杀了：" + monster.getName());
+            MessageUtil.sendMessage(channelTemp, builder.build());
         }
     }
 

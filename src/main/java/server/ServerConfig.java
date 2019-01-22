@@ -4,6 +4,8 @@ import core.config.GrobalConfig;
 import core.packet.ByteToProtoBufDecoder;
 import core.packet.ProtoBufToByteEncoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import mapper.UserMapper;
@@ -59,15 +61,10 @@ public class ServerConfig {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            // 初始化编码器，解码器，处理器
-//                            ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
-//                            ch.pipeline().addLast(new ProtobufEncoder());
-//                            ch.pipeline().addLast(new ProtobufDecoder(PacketProto.Packet.getDefaultInstance()));
-                            ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(8192, 0, 4, 0, 4));
-                            ch.pipeline().addLast(new ProtoBufToByteEncoder());
                             ch.pipeline().addLast(new ByteToProtoBufDecoder());
+                            ch.pipeline().addLast(new ProtoBufToByteEncoder());
 //                          写空闲,每隔3秒触发心跳包丢失统计
-//                            ch.pipeline().addLast(new IdleStateHandler(3, 0, 0));
+                            ch.pipeline().addLast(new IdleStateHandler(3, 0, 0));
 //                          处理空闲客户端网络心跳包，网络波动处理在这里
                             ch.pipeline().addLast(serverNetHandler);
 //                          这里会有并发问题，记得处理

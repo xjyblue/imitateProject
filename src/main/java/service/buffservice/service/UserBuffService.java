@@ -3,8 +3,7 @@ package service.buffservice.service;
 import config.impl.excel.BuffResourceLoad;
 import config.impl.excel.HpMedicineResourceLoad;
 import config.impl.excel.MpMedicineResourceLoad;
-import core.context.ProjectContext;
-import core.packet.PacketType;
+import core.packet.ServerPacket;
 import lombok.extern.slf4j.Slf4j;
 import service.caculationservice.service.HpCaculationService;
 import core.component.good.HpMedicine;
@@ -21,6 +20,7 @@ import service.buffservice.entity.Buff;
 import service.petservice.service.PetService;
 import service.teamservice.entity.Team;
 import service.levelservice.service.LevelService;
+import service.teamservice.entity.TeamCache;
 import utils.ChannelUtil;
 import utils.MessageUtil;
 
@@ -173,16 +173,20 @@ public class UserBuffService {
 //     群体
         Buff buff = BuffResourceLoad.buffMap.get(buffValue);
         if (user.getTeamId() != null) {
-            Team team = ProjectContext.teamMap.get(user.getTeamId());
+            Team team = TeamCache.teamMap.get(user.getTeamId());
             for (Map.Entry<String, User> entryUser : team.getUserMap().entrySet()) {
                 hpCaculationService.addUserHp(entryUser.getValue(), buff.getRecoverValue());
                 Channel channelTemp = ChannelUtil.userToChannelMap.get(entryUser.getValue());
-                channelTemp.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "使用了全体回血技能,全体回复血量:" + buff.getRecoverValue()));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(user.getUsername() + "使用了全体回血技能,全体回复血量:" + buff.getRecoverValue());
+                MessageUtil.sendMessage(channelTemp, builder.build());
             }
 //                  单人
         } else {
             hpCaculationService.addUserHp(user, buff.getRecoverValue());
-            channel.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "使用了全体回血技能,全体回复血量:" + buff.getRecoverValue()));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(user.getUsername() + "使用了全体回血技能,全体回复血量:" + buff.getRecoverValue());
+            MessageUtil.sendMessage(channel, builder.build());
         }
         user.getBuffMap().put(BuffConstant.TREATMENTBUFF, 6000);
     }
@@ -218,7 +222,9 @@ public class UserBuffService {
             user.getBuffMap().put(BuffConstant.POISONINGBUFF, 2000);
         } else {
             Buff buff = BuffResourceLoad.buffMap.get(buffValue);
-            channel.writeAndFlush(MessageUtil.turnToPacket("你受到了怪物的中毒攻击，产生中毒伤害为:" + buff.getAddSecondValue() + "人物剩余血量" + user.getHp(), PacketType.USERBUFMSG));
+            ServerPacket.UserbufResp.Builder builder = ServerPacket.UserbufResp.newBuilder();
+            builder.setData("你受到了怪物的中毒攻击，产生中毒伤害为:" + buff.getAddSecondValue() + "人物剩余血量" + user.getHp());
+            MessageUtil.sendMessage(channel,builder.build());
         }
     }
 

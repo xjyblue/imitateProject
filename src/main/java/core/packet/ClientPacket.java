@@ -3,8 +3,8 @@
 
 package core.packet;
 
-public final class client_packet {
-  private client_packet() {}
+public final class ClientPacket {
+  private ClientPacket() {}
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistryLite registry) {
   }
@@ -14,8 +14,8 @@ public final class client_packet {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
-  public interface client_packet_pingreqOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.client_packet_pingreq)
+  public interface PingReqOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:xjy.PingReq)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -33,18 +33,18 @@ public final class client_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.client_packet_pingreq}
+   * Protobuf type {@code xjy.PingReq}
    */
-  public  static final class client_packet_pingreq extends
+  public  static final class PingReq extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.client_packet_pingreq)
-      client_packet_pingreqOrBuilder {
+      // @@protoc_insertion_point(message_implements:xjy.PingReq)
+      PingReqOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use client_packet_pingreq.newBuilder() to construct.
-    private client_packet_pingreq(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use PingReq.newBuilder() to construct.
+    private PingReq(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private client_packet_pingreq() {
+    private PingReq() {
       data_ = "";
     }
 
@@ -53,7 +53,7 @@ public final class client_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private client_packet_pingreq(
+    private PingReq(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -99,15 +99,15 @@ public final class client_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return client_packet.internal_static_xjy_client_packet_pingreq_descriptor;
+      return ClientPacket.internal_static_xjy_PingReq_descriptor;
     }
 
     @Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return client_packet.internal_static_xjy_client_packet_pingreq_fieldAccessorTable
+      return ClientPacket.internal_static_xjy_PingReq_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              client_packet.client_packet_pingreq.class, client_packet.client_packet_pingreq.Builder.class);
+              ClientPacket.PingReq.class, ClientPacket.PingReq.Builder.class);
     }
 
     private int bitField0_;
@@ -192,10 +192,10 @@ public final class client_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof client_packet.client_packet_pingreq)) {
+      if (!(obj instanceof ClientPacket.PingReq)) {
         return super.equals(obj);
       }
-      client_packet.client_packet_pingreq other = (client_packet.client_packet_pingreq) obj;
+      ClientPacket.PingReq other = (ClientPacket.PingReq) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -223,69 +223,69 @@ public final class client_packet {
       return hash;
     }
 
-    public static client_packet.client_packet_pingreq parseFrom(
+    public static ClientPacket.PingReq parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static client_packet.client_packet_pingreq parseFrom(
+    public static ClientPacket.PingReq parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static client_packet.client_packet_pingreq parseFrom(
+    public static ClientPacket.PingReq parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static client_packet.client_packet_pingreq parseFrom(
+    public static ClientPacket.PingReq parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static client_packet.client_packet_pingreq parseFrom(byte[] data)
+    public static ClientPacket.PingReq parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static client_packet.client_packet_pingreq parseFrom(
+    public static ClientPacket.PingReq parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static client_packet.client_packet_pingreq parseFrom(java.io.InputStream input)
+    public static ClientPacket.PingReq parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static client_packet.client_packet_pingreq parseFrom(
+    public static ClientPacket.PingReq parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static client_packet.client_packet_pingreq parseDelimitedFrom(java.io.InputStream input)
+    public static ClientPacket.PingReq parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static client_packet.client_packet_pingreq parseDelimitedFrom(
+    public static ClientPacket.PingReq parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static client_packet.client_packet_pingreq parseFrom(
+    public static ClientPacket.PingReq parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static client_packet.client_packet_pingreq parseFrom(
+    public static ClientPacket.PingReq parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -298,7 +298,7 @@ public final class client_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(client_packet.client_packet_pingreq prototype) {
+    public static Builder newBuilder(ClientPacket.PingReq prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -314,26 +314,26 @@ public final class client_packet {
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.client_packet_pingreq}
+     * Protobuf type {@code xjy.PingReq}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.client_packet_pingreq)
-        client_packet.client_packet_pingreqOrBuilder {
+        // @@protoc_insertion_point(builder_implements:xjy.PingReq)
+        ClientPacket.PingReqOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return client_packet.internal_static_xjy_client_packet_pingreq_descriptor;
+        return ClientPacket.internal_static_xjy_PingReq_descriptor;
       }
 
       @Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return client_packet.internal_static_xjy_client_packet_pingreq_fieldAccessorTable
+        return ClientPacket.internal_static_xjy_PingReq_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                client_packet.client_packet_pingreq.class, client_packet.client_packet_pingreq.Builder.class);
+                ClientPacket.PingReq.class, ClientPacket.PingReq.Builder.class);
       }
 
-      // Construct using packet.client_packet.client_packet_pingreq.newBuilder()
+      // Construct using packet.ClientPacket.PingReq.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -359,17 +359,17 @@ public final class client_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return client_packet.internal_static_xjy_client_packet_pingreq_descriptor;
+        return ClientPacket.internal_static_xjy_PingReq_descriptor;
       }
 
       @Override
-      public client_packet.client_packet_pingreq getDefaultInstanceForType() {
-        return client_packet.client_packet_pingreq.getDefaultInstance();
+      public ClientPacket.PingReq getDefaultInstanceForType() {
+        return ClientPacket.PingReq.getDefaultInstance();
       }
 
       @Override
-      public client_packet.client_packet_pingreq build() {
-        client_packet.client_packet_pingreq result = buildPartial();
+      public ClientPacket.PingReq build() {
+        ClientPacket.PingReq result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -377,8 +377,8 @@ public final class client_packet {
       }
 
       @Override
-      public client_packet.client_packet_pingreq buildPartial() {
-        client_packet.client_packet_pingreq result = new client_packet.client_packet_pingreq(this);
+      public ClientPacket.PingReq buildPartial() {
+        ClientPacket.PingReq result = new ClientPacket.PingReq(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -424,16 +424,16 @@ public final class client_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof client_packet.client_packet_pingreq) {
-          return mergeFrom((client_packet.client_packet_pingreq)other);
+        if (other instanceof ClientPacket.PingReq) {
+          return mergeFrom((ClientPacket.PingReq)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(client_packet.client_packet_pingreq other) {
-        if (other == client_packet.client_packet_pingreq.getDefaultInstance()) return this;
+      public Builder mergeFrom(ClientPacket.PingReq other) {
+        if (other == ClientPacket.PingReq.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -454,11 +454,11 @@ public final class client_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        client_packet.client_packet_pingreq parsedMessage = null;
+        ClientPacket.PingReq parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (client_packet.client_packet_pingreq) e.getUnfinishedMessage();
+          parsedMessage = (ClientPacket.PingReq) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -557,48 +557,48 @@ public final class client_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.client_packet_pingreq)
+      // @@protoc_insertion_point(builder_scope:xjy.PingReq)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.client_packet_pingreq)
-    private static final client_packet.client_packet_pingreq DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:xjy.PingReq)
+    private static final ClientPacket.PingReq DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new client_packet.client_packet_pingreq();
+      DEFAULT_INSTANCE = new ClientPacket.PingReq();
     }
 
-    public static client_packet.client_packet_pingreq getDefaultInstance() {
+    public static ClientPacket.PingReq getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<client_packet_pingreq>
-        PARSER = new com.google.protobuf.AbstractParser<client_packet_pingreq>() {
+    @Deprecated public static final com.google.protobuf.Parser<PingReq>
+        PARSER = new com.google.protobuf.AbstractParser<PingReq>() {
       @Override
-      public client_packet_pingreq parsePartialFrom(
+      public PingReq parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new client_packet_pingreq(input, extensionRegistry);
+        return new PingReq(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<client_packet_pingreq> parser() {
+    public static com.google.protobuf.Parser<PingReq> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<client_packet_pingreq> getParserForType() {
+    public com.google.protobuf.Parser<PingReq> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public client_packet.client_packet_pingreq getDefaultInstanceForType() {
+    public ClientPacket.PingReq getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface client_packet_normalreqOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:xjy.client_packet_normalreq)
+  public interface NormalReqOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:xjy.NormalReq)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -616,18 +616,18 @@ public final class client_packet {
         getDataBytes();
   }
   /**
-   * Protobuf type {@code xjy.client_packet_normalreq}
+   * Protobuf type {@code xjy.NormalReq}
    */
-  public  static final class client_packet_normalreq extends
+  public  static final class NormalReq extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:xjy.client_packet_normalreq)
-      client_packet_normalreqOrBuilder {
+      // @@protoc_insertion_point(message_implements:xjy.NormalReq)
+      NormalReqOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use client_packet_normalreq.newBuilder() to construct.
-    private client_packet_normalreq(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use NormalReq.newBuilder() to construct.
+    private NormalReq(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private client_packet_normalreq() {
+    private NormalReq() {
       data_ = "";
     }
 
@@ -636,7 +636,7 @@ public final class client_packet {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private client_packet_normalreq(
+    private NormalReq(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -682,15 +682,15 @@ public final class client_packet {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return client_packet.internal_static_xjy_client_packet_normalreq_descriptor;
+      return ClientPacket.internal_static_xjy_NormalReq_descriptor;
     }
 
     @Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return client_packet.internal_static_xjy_client_packet_normalreq_fieldAccessorTable
+      return ClientPacket.internal_static_xjy_NormalReq_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              client_packet.client_packet_normalreq.class, client_packet.client_packet_normalreq.Builder.class);
+              ClientPacket.NormalReq.class, ClientPacket.NormalReq.Builder.class);
     }
 
     private int bitField0_;
@@ -775,10 +775,10 @@ public final class client_packet {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof client_packet.client_packet_normalreq)) {
+      if (!(obj instanceof ClientPacket.NormalReq)) {
         return super.equals(obj);
       }
-      client_packet.client_packet_normalreq other = (client_packet.client_packet_normalreq) obj;
+      ClientPacket.NormalReq other = (ClientPacket.NormalReq) obj;
 
       boolean result = true;
       result = result && (hasData() == other.hasData());
@@ -806,69 +806,69 @@ public final class client_packet {
       return hash;
     }
 
-    public static client_packet.client_packet_normalreq parseFrom(
+    public static ClientPacket.NormalReq parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static client_packet.client_packet_normalreq parseFrom(
+    public static ClientPacket.NormalReq parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static client_packet.client_packet_normalreq parseFrom(
+    public static ClientPacket.NormalReq parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static client_packet.client_packet_normalreq parseFrom(
+    public static ClientPacket.NormalReq parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static client_packet.client_packet_normalreq parseFrom(byte[] data)
+    public static ClientPacket.NormalReq parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static client_packet.client_packet_normalreq parseFrom(
+    public static ClientPacket.NormalReq parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static client_packet.client_packet_normalreq parseFrom(java.io.InputStream input)
+    public static ClientPacket.NormalReq parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static client_packet.client_packet_normalreq parseFrom(
+    public static ClientPacket.NormalReq parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static client_packet.client_packet_normalreq parseDelimitedFrom(java.io.InputStream input)
+    public static ClientPacket.NormalReq parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static client_packet.client_packet_normalreq parseDelimitedFrom(
+    public static ClientPacket.NormalReq parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static client_packet.client_packet_normalreq parseFrom(
+    public static ClientPacket.NormalReq parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static client_packet.client_packet_normalreq parseFrom(
+    public static ClientPacket.NormalReq parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -881,7 +881,7 @@ public final class client_packet {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(client_packet.client_packet_normalreq prototype) {
+    public static Builder newBuilder(ClientPacket.NormalReq prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @Override
@@ -897,26 +897,26 @@ public final class client_packet {
       return builder;
     }
     /**
-     * Protobuf type {@code xjy.client_packet_normalreq}
+     * Protobuf type {@code xjy.NormalReq}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:xjy.client_packet_normalreq)
-        client_packet.client_packet_normalreqOrBuilder {
+        // @@protoc_insertion_point(builder_implements:xjy.NormalReq)
+        ClientPacket.NormalReqOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return client_packet.internal_static_xjy_client_packet_normalreq_descriptor;
+        return ClientPacket.internal_static_xjy_NormalReq_descriptor;
       }
 
       @Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return client_packet.internal_static_xjy_client_packet_normalreq_fieldAccessorTable
+        return ClientPacket.internal_static_xjy_NormalReq_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                client_packet.client_packet_normalreq.class, client_packet.client_packet_normalreq.Builder.class);
+                ClientPacket.NormalReq.class, ClientPacket.NormalReq.Builder.class);
       }
 
-      // Construct using packet.client_packet.client_packet_normalreq.newBuilder()
+      // Construct using packet.ClientPacket.NormalReq.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -942,17 +942,17 @@ public final class client_packet {
       @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return client_packet.internal_static_xjy_client_packet_normalreq_descriptor;
+        return ClientPacket.internal_static_xjy_NormalReq_descriptor;
       }
 
       @Override
-      public client_packet.client_packet_normalreq getDefaultInstanceForType() {
-        return client_packet.client_packet_normalreq.getDefaultInstance();
+      public ClientPacket.NormalReq getDefaultInstanceForType() {
+        return ClientPacket.NormalReq.getDefaultInstance();
       }
 
       @Override
-      public client_packet.client_packet_normalreq build() {
-        client_packet.client_packet_normalreq result = buildPartial();
+      public ClientPacket.NormalReq build() {
+        ClientPacket.NormalReq result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -960,8 +960,8 @@ public final class client_packet {
       }
 
       @Override
-      public client_packet.client_packet_normalreq buildPartial() {
-        client_packet.client_packet_normalreq result = new client_packet.client_packet_normalreq(this);
+      public ClientPacket.NormalReq buildPartial() {
+        ClientPacket.NormalReq result = new ClientPacket.NormalReq(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -1007,16 +1007,16 @@ public final class client_packet {
       }
       @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof client_packet.client_packet_normalreq) {
-          return mergeFrom((client_packet.client_packet_normalreq)other);
+        if (other instanceof ClientPacket.NormalReq) {
+          return mergeFrom((ClientPacket.NormalReq)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(client_packet.client_packet_normalreq other) {
-        if (other == client_packet.client_packet_normalreq.getDefaultInstance()) return this;
+      public Builder mergeFrom(ClientPacket.NormalReq other) {
+        if (other == ClientPacket.NormalReq.getDefaultInstance()) return this;
         if (other.hasData()) {
           bitField0_ |= 0x00000001;
           data_ = other.data_;
@@ -1037,11 +1037,11 @@ public final class client_packet {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        client_packet.client_packet_normalreq parsedMessage = null;
+        ClientPacket.NormalReq parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (client_packet.client_packet_normalreq) e.getUnfinishedMessage();
+          parsedMessage = (ClientPacket.NormalReq) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -1140,56 +1140,56 @@ public final class client_packet {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:xjy.client_packet_normalreq)
+      // @@protoc_insertion_point(builder_scope:xjy.NormalReq)
     }
 
-    // @@protoc_insertion_point(class_scope:xjy.client_packet_normalreq)
-    private static final client_packet.client_packet_normalreq DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:xjy.NormalReq)
+    private static final ClientPacket.NormalReq DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new client_packet.client_packet_normalreq();
+      DEFAULT_INSTANCE = new ClientPacket.NormalReq();
     }
 
-    public static client_packet.client_packet_normalreq getDefaultInstance() {
+    public static ClientPacket.NormalReq getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    @Deprecated public static final com.google.protobuf.Parser<client_packet_normalreq>
-        PARSER = new com.google.protobuf.AbstractParser<client_packet_normalreq>() {
+    @Deprecated public static final com.google.protobuf.Parser<NormalReq>
+        PARSER = new com.google.protobuf.AbstractParser<NormalReq>() {
       @Override
-      public client_packet_normalreq parsePartialFrom(
+      public NormalReq parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new client_packet_normalreq(input, extensionRegistry);
+        return new NormalReq(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<client_packet_normalreq> parser() {
+    public static com.google.protobuf.Parser<NormalReq> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<client_packet_normalreq> getParserForType() {
+    public com.google.protobuf.Parser<NormalReq> getParserForType() {
       return PARSER;
     }
 
     @Override
-    public client_packet.client_packet_normalreq getDefaultInstanceForType() {
+    public ClientPacket.NormalReq getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_client_packet_pingreq_descriptor;
+    internal_static_xjy_PingReq_descriptor;
   private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_client_packet_pingreq_fieldAccessorTable;
+      internal_static_xjy_PingReq_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_xjy_client_packet_normalreq_descriptor;
+    internal_static_xjy_NormalReq_descriptor;
   private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_xjy_client_packet_normalreq_fieldAccessorTable;
+      internal_static_xjy_NormalReq_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1199,9 +1199,9 @@ public final class client_packet {
       descriptor;
   static {
     String[] descriptorData = {
-      "\n\014Client.proto\022\003xjy\"%\n\025client_packet_pin" +
-      "greq\022\014\n\004data\030\001 \001(\t\"\'\n\027client_packet_norm" +
-      "alreq\022\014\n\004data\030\001 \001(\tB\017B\rclient_packet"
+      "\n\014Client.proto\022\003xjy\"\027\n\007PingReq\022\014\n\004data\030\001" +
+      " \001(\t\"\031\n\tNormalReq\022\014\n\004data\030\001 \001(\tB\016B\014Clien" +
+      "tPacket"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1215,17 +1215,17 @@ public final class client_packet {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_xjy_client_packet_pingreq_descriptor =
+    internal_static_xjy_PingReq_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_xjy_client_packet_pingreq_fieldAccessorTable = new
+    internal_static_xjy_PingReq_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_client_packet_pingreq_descriptor,
+        internal_static_xjy_PingReq_descriptor,
         new String[] { "Data", });
-    internal_static_xjy_client_packet_normalreq_descriptor =
+    internal_static_xjy_NormalReq_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_xjy_client_packet_normalreq_fieldAccessorTable = new
+    internal_static_xjy_NormalReq_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_xjy_client_packet_normalreq_descriptor,
+        internal_static_xjy_NormalReq_descriptor,
         new String[] { "Data", });
   }
 

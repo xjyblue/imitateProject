@@ -5,6 +5,7 @@ import config.impl.excel.EquipmentResourceLoad;
 import config.impl.excel.SceneResourceLoad;
 import config.impl.excel.UserSkillResourceLoad;
 import core.annotation.Region;
+import core.packet.ServerPacket;
 import service.buffservice.entity.BuffConstant;
 import service.buffservice.service.RestraintBuffService;
 import service.caculationservice.service.AttackDamageCaculationService;
@@ -85,7 +86,10 @@ public class AttackService {
             return;
         }
         //普通战斗中退出
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RETREATFIGHT));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.RETREATFIGHT);
+        MessageUtil.sendMessage(channel, builder.build());
+
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         //移除玩家所有对战怪物
         AttackUtil.removeAllMonster(user);
@@ -117,7 +121,9 @@ public class AttackService {
 //      上下文回收
         BossSceneConfigResourceLoad.bossAreaMap.remove(user.getTeamId());
 //      提示
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTBOSSAREA));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.OUTBOSSAREA);
+        MessageUtil.sendMessage(channel, builder.build());
 //      渠道状态更新
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
 //      初始化人物buff
@@ -137,18 +143,18 @@ public class AttackService {
         if (!BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
             return;
         }
-        if (msg == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
-            return;
-        }
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         //检查技能是否存在
         if (!user.getUserskillrelationMap().containsKey(temp[2])) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOKEYSKILL);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         //      在副本中转移战斗目标
@@ -185,21 +191,27 @@ public class AttackService {
     public void recoverUserHpAndMp(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getTeamId() == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NORECOVERUSERHPANDMP));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NORECOVERUSERHPANDMP);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NORECOVERUSERHPANDMP));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NORECOVERUSERHPANDMP);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
         if (bossScene.isFight()) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NORECOVERUSERHPANDMP));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NORECOVERUSERHPANDMP);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         userService.recoverUser(user);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.RECOVRESUCCESS));
-        channel.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "的血量为：" + user.getHp() + "蓝量为：" + user.getMp()));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.RECOVRESUCCESS + "===" + user.getUsername() + "的血量为：" + user.getHp() + "蓝量为：" + user.getMp());
     }
 
 
@@ -221,7 +233,9 @@ public class AttackService {
 
         //检查技能是否存在
         if (!user.getUserskillrelationMap().containsKey(msg)) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOKEYSKILL);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         UserSkill userSkill = UserSkillResourceLoad.skillMap.get(user.getUserskillrelationMap().get(msg).getSkillid());
@@ -239,8 +253,10 @@ public class AttackService {
         String resp = out(user, userSkill, monster, attackDamage.toString());
 
         if (monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
-            //通知玩家技能伤害情况
-            channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+//          通知玩家技能伤害情况
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(resp);
+            MessageUtil.sendMessage(channel, builder.build());
             monster.setStatus(GrobalConfig.DEAD);
 
 //          boss战斗场景
@@ -270,12 +286,13 @@ public class AttackService {
             }
         } else {
             //通知玩家技能伤害情况
-            channel.writeAndFlush(MessageUtil.turnToPacket(resp));
             //如果是在副本中战斗更新用户总战斗伤害的值，仇恨值
             if (user.getTeamId() != null && BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()) != null) {
                 refreshUserDamageInBossScene(user, attackDamage);
             }
-            channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(resp);
+            MessageUtil.sendMessage(channel, builder.build());
         }
     }
 
@@ -343,12 +360,16 @@ public class AttackService {
         //输入的怪物是否存在
         Monster monster = getMonsterFirst(user, temp[1], Monster.TYPEOFCOMMONMONSTER);
         if (monster == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDMONSTER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOFOUNDMONSTER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         //输入的键位是否存在
         if (!(temp.length == GrobalConfig.THREE && user.getUserskillrelationMap().containsKey(temp[GrobalConfig.TWO]))) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOKEYSKILL);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
@@ -373,7 +394,9 @@ public class AttackService {
             userService.initUserBuff(user);
             resp += System.getProperty("line.separator")
                     + "怪物已死亡";
-            channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(resp);
+            MessageUtil.sendMessage(channel, builder.build());
             //修改怪物状态
             monster.setStatus(GrobalConfig.DEAD);
             //爆装备
@@ -389,11 +412,15 @@ public class AttackService {
         } else {
             //切换到攻击模式
             ChannelUtil.channelStatus.put(channel, ChannelStatus.ATTACK);
-            channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(resp);
+            MessageUtil.sendMessage(channel, builder.build());
             //记录当前攻击的目标
             user.getUserToMonsterMap().put(monster.getId(), monster);
             //提醒用户你已进入战斗模式
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERFIGHT));
+            ServerPacket.NormalResp.Builder builder2 = ServerPacket.NormalResp.newBuilder();
+            builder2.setData(MessageConfig.ENTERFIGHT);
+            MessageUtil.sendMessage(channel, builder2.build());
         }
     }
 
@@ -470,12 +497,17 @@ public class AttackService {
         //      锁定怪物  输入的怪物是否存在
         Monster monster = getMonsterFirst(user, temp[1], Monster.TYPEOFBOSS);
         if (monster == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOFOUNDMONSTER));
+            //提醒用户你已进入战斗模式
+            ServerPacket.NormalResp.Builder builder2 = ServerPacket.NormalResp.newBuilder();
+            builder2.setData(MessageConfig.NOFOUNDMONSTER);
+            MessageUtil.sendMessage(channel, builder2.build());
             return;
         }
         //      键位校验
         if (!(temp.length == GrobalConfig.THREE && user.getUserskillrelationMap().containsKey(temp[GrobalConfig.TWO]))) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOKEYSKILL));
+            ServerPacket.NormalResp.Builder builder2 = ServerPacket.NormalResp.newBuilder();
+            builder2.setData(MessageConfig.NOKEYSKILL);
+            MessageUtil.sendMessage(channel, builder2.build());
             return;
         }
         Userskillrelation userskillrelation = user.getUserskillrelationMap().get(temp[2]);
@@ -486,7 +518,9 @@ public class AttackService {
         if (preAttackCheck(channel, user, monster, userSkill, userskillrelation)) {
 //          是否特殊技能直接打死
             resp = checkMonsterDead(channel, user, monster, resp);
-            channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+            ServerPacket.NormalResp.Builder builder2 = ServerPacket.NormalResp.newBuilder();
+            builder2.setData(resp);
+            MessageUtil.sendMessage(channel, builder2.build());
             return;
         }
 //      激活第一次攻击需要的特殊buff
@@ -502,7 +536,9 @@ public class AttackService {
         resp = out(user, userSkill, monster, attackDamage.toString());
         //      怪物死亡校验,这里是为了解决有人一下子就把怪物打死的逻辑
         resp = checkMonsterDead(channel, user, monster, resp);
-        channel.writeAndFlush(MessageUtil.turnToPacket(resp));
+        ServerPacket.NormalResp.Builder builder2 = ServerPacket.NormalResp.newBuilder();
+        builder2.setData(resp);
+        MessageUtil.sendMessage(channel, builder2.build());
     }
 
     /**

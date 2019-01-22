@@ -1,13 +1,14 @@
 package client;
 
 import com.google.protobuf.MessageLite;
+import core.packet.ClientPacket;
 import core.packet.ProtoBufEnum;
-import core.packet.client_packet;
-import core.packet.server_packet;
+import core.packet.ServerPacket;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.handler.timeout.IdleStateEvent;
+import utils.MessageUtil;
 
 import javax.swing.*;
 
@@ -42,63 +43,80 @@ public class ClientHandler extends ChannelHandlerAdapter {
 
 
     private void handleData(ChannelHandlerContext ctx, Object msg) {
-        int respType = ProtoBufEnum.protoIndexOfMessage((MessageLite) msg);
-        JTextArea jTextArea = null;
-        String respData = null;
-        if (respType == ProtoBufEnum.SERVER_PACKET_NORMALRESP.getiValue()) {
-            server_packet.server_packet_normalresp resp = (server_packet.server_packet_normalresp) msg;
-            jTextArea = clientStart.getjTextArea1();
-            respData = resp.getData();
+        try {
+            int respType = ProtoBufEnum.protoIndexOfMessage((MessageLite) msg);
+            JTextArea jTextArea = null;
+            String respData = null;
+            if (respType == ProtoBufEnum.SERVER_PACKET_NORMALRESP.getiValue()) {
+                jTextArea = clientStart.getjTextArea1();
+                ServerPacket.NormalResp normalResp = (ServerPacket.NormalResp) msg;
+                respData = normalResp.getData();
+            }
+            if (respType == ProtoBufEnum.SERVER_PACKET_USERBUFRESP.getiValue()) {
+                jTextArea = clientStart.getjTextArea2();
+                ServerPacket.UserbufResp userbufResp = (ServerPacket.UserbufResp) msg;
+                respData = userbufResp.getData();
+            }
+            if (respType == ProtoBufEnum.SERVER_PACKET_MONSTERBUFRESP.getiValue()) {
+                jTextArea = clientStart.getjTextArea3();
+                ServerPacket.MonsterbufResp monsterbufResp = (ServerPacket.MonsterbufResp) msg;
+                respData = monsterbufResp.getData();
+            }
+            if (respType == ProtoBufEnum.SERVER_PACKET_ATTACKRESP.getiValue()) {
+                jTextArea = clientStart.getjTextArea4();
+                ServerPacket.AttackResp attackResp = (ServerPacket.AttackResp) msg;
+                respData = attackResp.getData();
+            }
+            if (respType == ProtoBufEnum.SERVER_PACKET_TRADERESP.getiValue()) {
+                jTextArea = clientStart.getjTextArea5();
+                jTextArea.setText("");
+                ServerPacket.TradeResp tradeResp = (ServerPacket.TradeResp) msg;
+                respData = tradeResp.getData();
+                jTextArea.setCaretPosition(jTextArea.getDocument().getLength());
+            }
+            if (respType == ProtoBufEnum.SERVER_PACKET_USERINFORESP.getiValue()) {
+                ServerPacket.UserinfoResp userinfoResp = (ServerPacket.UserinfoResp) msg;
+                clientStart.setTitle("用户[" + userinfoResp.getData() + "]客户端");
+                return;
+            }
+            if (respType == ProtoBufEnum.SERVER_PACKET_UNIONRESP.getiValue()) {
+                jTextArea = clientStart.getjTextArea6();
+                jTextArea.setText("");
+                ServerPacket.UnionResp unionResp = (ServerPacket.UnionResp) msg;
+                respData = unionResp.getData();
+            }
+            if (respType == ProtoBufEnum.SERVER_PACKET_USERBAGRESP.getiValue()) {
+                ServerPacket.UserbagResp userbagResp = (ServerPacket.UserbagResp) msg;
+                respData = userbagResp.getData();
+                jTextArea = clientStart.getjTextArea8();
+                jTextArea.setText("");
+            }
+            if (respType == ProtoBufEnum.SERVER_PACKET_FRIENDRESP.getiValue()) {
+                jTextArea = clientStart.getjTextArea9();
+                jTextArea.setText("");
+                ServerPacket.FriendResp friendResp = (ServerPacket.FriendResp) msg;
+                respData = friendResp.getData();
+            }
+            if (respType == ProtoBufEnum.SERVER_PACKET_ACHIEVEMENTRESP.getiValue()) {
+                jTextArea = clientStart.getjTextArea7();
+                jTextArea.setText("");
+                ServerPacket.AchievementResp normalResp = (ServerPacket.AchievementResp) msg;
+                respData = normalResp.getData();
+                jTextArea.setCaretPosition(jTextArea.getDocument().getLength());
+            }
+            if (respType == ProtoBufEnum.SERVER_PACKET_CHANGECHANNELRESP.getiValue()) {
+                clientConfig.setChannel(null);
+                jTextArea = clientStart.getjTextArea1();
+            }
+            String resp = jTextArea.getText();
+            resp += "客户端收到：" + respData + System.getProperty("line.separator");
+            jTextArea.setText(resp);
+            jTextArea.setCaretPosition(jTextArea.getDocument().getLength());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            ReferenceCountUtil.release(msg);
         }
-//        if (packet.getType().equals(PacketType.NORMALMSG)) {
-//            jTextArea = clientStart.getjTextArea1();
-//        }
-//        if (packet.getType().equals(PacketType.USERBUFMSG)) {
-//            jTextArea = clientStart.getjTextArea2();
-//        }
-//        if (packet.getType().equals(PacketType.MONSTERBUFMSG)) {
-//            jTextArea = clientStart.getjTextArea3();
-//        }
-//        if (packet.getType().equals(PacketType.ATTACKMSG)) {
-//            jTextArea = clientStart.getjTextArea4();
-//        }
-//        if (packet.getType().equals(PacketType.TRADEMSG)) {
-//            jTextArea = clientStart.getjTextArea5();
-//            jTextArea.setText("");
-//        }
-//        if (packet.getType().equals(PacketType.USERINFO)) {
-//            clientStart.setTitle("用户[" + packet.getData() + "]客户端");
-//            return;
-//        }
-//        if (packet.getType().equals(PacketType.UNIONINFO)) {
-//            jTextArea = clientStart.getjTextArea6();
-//            jTextArea.setText("");
-//        }
-//        if (packet.getType().equals(PacketType.USERBAGMSG)) {
-//            jTextArea = clientStart.getjTextArea8();
-//            jTextArea.setText("");
-//        }
-//        if (packet.getType().equals(PacketType.FRIENDMSG)) {
-//            jTextArea = clientStart.getjTextArea9();
-//            jTextArea.setText("");
-//        }
-//        if (packet.getType().equals(PacketType.ACHIEVEMENT)) {
-//            jTextArea = clientStart.getjTextArea7();
-//            jTextArea.setText("");
-//            jTextArea.setText(packet.getData());
-//            jTextArea.setCaretPosition(jTextArea.getDocument().getLength());
-//            return;
-//        }
-//        if(packet.getType().equals(PacketType.CHANGECHANNEL)){
-//            clientConfig.setChannel(null);
-//            jTextArea = clientStart.getjTextArea1();
-//        }
-        String resp = jTextArea.getText();
-        resp += "客户端收到：" + respData + System.getProperty("line.separator");
-        jTextArea.setText(resp);
-        jTextArea.setCaretPosition(jTextArea.getDocument().getLength());
-//
-//        System.out.println("客户端收到：" + packet.getData());
     }
 
 
@@ -136,8 +154,8 @@ public class ClientHandler extends ChannelHandlerAdapter {
      */
     private void sendHeartbeatPacket(ChannelHandlerContext ctx) {
         if (clientStart.flag) {
-            client_packet.client_packet_normalreq.Builder builder = client_packet.client_packet_normalreq.newBuilder();
-            ctx.channel().writeAndFlush(builder.build());
+            ClientPacket.PingReq.Builder builder = ClientPacket.PingReq.newBuilder();
+            MessageUtil.sendMessage(ctx.channel(), builder.build());
         }
     }
 }

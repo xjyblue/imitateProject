@@ -3,6 +3,7 @@ package service.buffservice.service;
 import config.impl.excel.BossSceneConfigResourceLoad;
 import config.impl.excel.BuffResourceLoad;
 import config.impl.excel.SceneResourceLoad;
+import core.packet.ServerPacket;
 import org.springframework.beans.factory.annotation.Autowired;
 import service.buffservice.entity.Buff;
 import com.google.common.collect.Lists;
@@ -110,7 +111,10 @@ public class AttackBuffService {
         Channel channelTemp = ChannelUtil.userToChannelMap.get(user);
         userskillrelation.setSkillcds(userSkill.getAttackCd() + System.currentTimeMillis());
         if (user.getTeamId() != null && BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket("你使用了" + userSkill.getSkillName() + "对怪物造成了集体伤害" + userSkill.getDamage()));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("你使用了" + userSkill.getSkillName() + "对怪物造成了集体伤害" + userSkill.getDamage());
+            MessageUtil.sendMessage(channelTemp, builder.build());
+
             BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
             for (Map.Entry<String, Monster> monsterEntry : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {
                 hpCaculationService.subMonsterHp(monsterEntry.getValue(), userSkill.getDamage());
@@ -148,7 +152,10 @@ public class AttackBuffService {
         for (User userT : userTarget) {
             userT.getBuffMap().put(BuffConstant.SLEEPBUFF, 5000);
             Channel channelT = ChannelUtil.userToChannelMap.get(user);
-            channelT.writeAndFlush(MessageUtil.turnToPacket(user.getUsername() + "解除了怪物的眩晕效果"));
+
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(user.getUsername() + "解除了怪物的眩晕效果");
+            MessageUtil.sendMessage(channelT, builder.build());
         }
     }
 

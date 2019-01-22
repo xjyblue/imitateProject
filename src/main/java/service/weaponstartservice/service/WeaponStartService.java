@@ -5,6 +5,7 @@ import core.annotation.Order;
 import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import mapper.UserbagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,30 +41,40 @@ public class WeaponStartService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "iu",status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = "iu", status = {ChannelStatus.COMMONSCENE})
     public void upEquipmentStartlevel(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User user = ChannelUtil.channelToUserMap.get(channel);
         Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.GOODNOEXISTBAG));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.GOODNOEXISTBAG);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //      开始升星
         if (userbag.getStartlevel() == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOTOUPSTARTLEVEL));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOTOUPSTARTLEVEL);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
-        moneyCaculationService.removeMoneyToUser(user, "100000");
+        if (!moneyCaculationService.removeMoneyToUser(user, "100000")) {
+            return;
+        }
 
         userbag.setStartlevel(userbag.getStartlevel() + 1);
         userbagMapper.updateByPrimaryKeySelective(userbag);
-        channel.writeAndFlush(MessageUtil.turnToPacket("升星成功，升星花费100000金币,当前装备星级" + userbag.getStartlevel()));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData("升星成功，升星花费100000金币,当前装备星级" + userbag.getStartlevel());
+        MessageUtil.sendMessage(channel, builder.build());
         userbagService.refreshUserbagInfo(channel, null);
     }
 

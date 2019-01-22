@@ -3,7 +3,7 @@ package service.achievementservice.util;
 import config.impl.excel.AchievementResourceLoad;
 import config.impl.excel.EquipmentResourceLoad;
 import config.impl.excel.NpcResourceLoad;
-import core.packet.PacketType;
+import core.packet.ServerPacket;
 import service.achievementservice.entity.Achievement;
 import core.config.GrobalConfig;
 import io.netty.channel.Channel;
@@ -25,6 +25,7 @@ import java.util.Map;
 public class AchievementUtil {
     /**
      * 成就提示
+     *
      * @param user
      */
     public static void refreshAchievementInfo(User user) {
@@ -151,11 +152,13 @@ public class AchievementUtil {
             }
         }
         Channel channel = ChannelUtil.userToChannelMap.get(user);
-        channel.writeAndFlush(MessageUtil.turnToPacket(resp, PacketType.ACHIEVEMENT));
+        ServerPacket.AchievementResp.Builder builder3 = ServerPacket.AchievementResp.newBuilder();
+        builder3.setData(resp);
+        MessageUtil.sendMessage(channel, builder3.build());
     }
 
     private static String getCombinationProcessName(String process) {
-        if(process.equals(GrobalConfig.NULL)){
+        if (process.equals(GrobalConfig.NULL)) {
             return "";
         }
         String[] proArr = process.split("-");
@@ -163,7 +166,7 @@ public class AchievementUtil {
         for (String proT : proArr) {
             resp += AchievementResourceLoad.achievementMap.get(Integer.parseInt(proT)).getName() + "-";
         }
-        resp = resp.substring(0,resp.length()-1);
+        resp = resp.substring(0, resp.length() - 1);
         return resp;
     }
 

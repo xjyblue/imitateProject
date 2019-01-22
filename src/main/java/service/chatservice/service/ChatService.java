@@ -5,6 +5,7 @@ import core.annotation.Order;
 import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -29,21 +30,27 @@ public class ChatService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "chatAll", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE,ChannelStatus.DEADSCENE})
+    @Order(orderMsg = "chatAll", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE, ChannelStatus.DEADSCENE})
     public void chatAll(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //      广播一次全服大喇叭
         for (Map.Entry<Channel, User> entry : ChannelUtil.channelToUserMap.entrySet()) {
             Channel channelTemp = entry.getKey();
             if (entry.getValue() == user) {
-                channelTemp.writeAndFlush(MessageUtil.turnToPacket("你发送了全服喇叭，消息为>>>>>" + temp[1] + "<<<<<"));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData("您发送了>>>>>>全服大喇叭：" + temp[1] + "<<<<<<");
+                MessageUtil.sendMessage(channel, builder.build());
             } else {
-                channelTemp.writeAndFlush(MessageUtil.turnToPacket("您收到来自" + user.getUsername() + "的全服大喇叭:" + temp[1]));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData("您收到来自" + user.getUsername() + "的全服大喇叭:" + temp[1]);
+                MessageUtil.sendMessage(channelTemp, builder.build());
             }
         }
     }
@@ -54,24 +61,30 @@ public class ChatService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "chatOne",status = {ChannelStatus.COMMONSCENE,ChannelStatus.ATTACK,ChannelStatus.BOSSSCENE,ChannelStatus.DEADSCENE})
+    @Order(orderMsg = "chatOne", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE, ChannelStatus.DEADSCENE})
     public void chatOne(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
         for (Map.Entry<Channel, User> entry : ChannelUtil.channelToUserMap.entrySet()) {
             Channel channelTemp = entry.getKey();
             if (entry.getValue().getUsername().equals(temp[1])) {
-                channelTemp.writeAndFlush(MessageUtil.turnToPacket("您收到来自" + user.getUsername() + "的私聊大喇叭:" + temp[2]));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData("您收到来自" + user.getUsername() + "的私聊大喇叭:" + temp[2]);
+                MessageUtil.sendMessage(channelTemp, builder.build());
                 return;
             }
         }
 
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOONLINEUSER));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.NOONLINEUSER);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
 }

@@ -1,88 +1,115 @@
 package core.packet;
 
+
+import com.google.common.collect.Maps;
 import com.google.protobuf.MessageLite;
 import com.google.protobuf.Parser;
 
-import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Map;
 
 /**
  * 枚举
  */
 public enum ProtoBufEnum {
+    /**
+     * pong响应包
+     */
+    SERVER_PACKET_PONGRESP(1000, "ServerPacket", "PongResp"),
 
     /**
-     * pong包
+     * 普通响应的包
      */
-    SERVER_PACKET_PONGRESP(0),
+    SERVER_PACKET_NORMALRESP(1001, "ServerPacket", "NormalResp"),
 
     /**
-     * 普通的包
+     * 用户buff响应的包
      */
-    SERVER_PACKET_NORMALRESP(1),
+    SERVER_PACKET_USERBUFRESP(1002, "ServerPacket", "UserbufResp"),
 
     /**
-     * 普通的包
+     * 怪物buff响应的包
      */
-    SERVER_PACKET_USERBUFRESP(2),
+    SERVER_PACKET_MONSTERBUFRESP(1003, "ServerPacket", "MonsterbufResp"),
 
     /**
-     * 怪物buff的包
+     * 攻击响应的包
      */
-    SERVER_PACKET_MONSTERBUFRESP(3),
+    SERVER_PACKET_ATTACKRESP(1004, "ServerPacket", "AttackResp"),
 
     /**
-     * 攻击的包
+     * 交易响应的包
      */
-    SERVER_PACKET_ATTACKRESP(4),
+    SERVER_PACKET_TRADERESP(1005, "ServerPacket", "TradeResp"),
 
     /**
-     * 交易的包
+     * 用户信息响应的包
      */
-    SERVER_PACKET_TRADERESP(5),
+    SERVER_PACKET_USERINFORESP(1006, "ServerPacket", "UserinfoResp"),
 
     /**
-     * 用户信息的包
+     * 成就响应的包
      */
-    SERVER_PACKET_USERINFORESP(6),
-
-    /**
-     * 成就的包
-     */
-    SERVER_PACKET_ACHIEVEMENTRESP(7),
-
-
-    /**
-     * 用户背包的包
-     */
-    SERVER_PACKET_USERBAGRESP(8),
-
-    /**
-     * 好友的包
-     */
-    SERVER_PACKET_FRIENDRESP(9),
-
-    /**
-     * 渠道改变的包
-     */
-    SERVER_PACKET_CHANGECHANNELRESP(10),
+    SERVER_PACKET_ACHIEVEMENTRESP(1007, "ServerPacket", "AchievementResp"),
 
 
     /**
-     * 客户端的心跳ping包
+     * 用户背包响应的包
      */
-    CLIENT_PACKET_PINGREQ(11),
+    SERVER_PACKET_USERBAGRESP(1008, "ServerPacket", "UserbagResp"),
+
+    /**
+     * 好友信息响应的包
+     */
+    SERVER_PACKET_FRIENDRESP(1009, "ServerPacket", "FriendResp"),
+
+    /**
+     * 渠道改变响应的包
+     */
+    SERVER_PACKET_CHANGECHANNELRESP(1010, "ServerPacket", "ChangeChannelResp"),
+
+    /**
+     * 公户响应包
+     */
+    SERVER_PACKET_UNIONRESP(1110, "ServerPacket", "UnionResp"),
+
+
+    /**
+     * 客户端的心跳ping请求包
+     */
+    CLIENT_PACKET_PINGREQ(1011, "ClientPacket", "PingReq"),
 
     /**
      * 客户端的统一请求包，后面拆分
      */
-    CLIENT_PACKET_NORMALREQ(12);
+    CLIENT_PACKET_NORMALREQ(1012, "ClientPacket", "NormalReq");
+
 
     private int iValue;
 
-    ProtoBufEnum(int iValue) {
+    private String innerClass;
+
+    private String outClass;
+
+    public String getInnerClass() {
+        return innerClass;
+    }
+
+    public void setInnerClass(String innerClass) {
+        this.innerClass = innerClass;
+    }
+
+    public String getOutClass() {
+        return outClass;
+    }
+
+    public void setOutClass(String outClass) {
+        this.outClass = outClass;
+    }
+
+    ProtoBufEnum(int iValue, String outClass, String innerClass) {
         this.iValue = iValue;
+        this.outClass = outClass;
+        this.innerClass = innerClass;
     }
 
     public int getiValue() {
@@ -94,6 +121,7 @@ public enum ProtoBufEnum {
     }
 
     private static ProtoBufEnum[] values = ProtoBufEnum.values();
+
 
     /**
      * 这里采用的懒汉式管理，所以使用threadLocal，
@@ -128,9 +156,11 @@ public enum ProtoBufEnum {
 
     private static class ProtoParser {
 
-        private final Parser[] parsersArray = new Parser[values.length];
+        private final Map<Integer, Parser> parserMap = Maps.newHashMap();
 
-        private final Map<Class, ProtoBufEnum> messageLiteToEnumMap = new HashMap<>();
+        private final Map<Class, ProtoBufEnum> messageLiteToEnumMap = Maps.newHashMap();
+
+        private final Map<Integer, ProtoBufEnum> protoBufEnumMap = Maps.newHashMap();
         /**
          * protoBuf文件导出的java包路径
          */
@@ -142,6 +172,23 @@ public enum ProtoBufEnum {
         }
 
         /**
+         * 根据编号拿到枚举类型
+         */
+        private ProtoBufEnum getProtoBufEnumByIvalue(final int iValue) {
+            if (protoBufEnumMap.containsKey(iValue)) {
+                return protoBufEnumMap.get(iValue);
+            }
+            for (ProtoBufEnum protoBufEnum : values) {
+                if (protoBufEnum.getiValue() == iValue) {
+                    protoBufEnumMap.put(protoBufEnum.getiValue(), protoBufEnum);
+                    return protoBufEnum;
+                }
+            }
+            return null;
+        }
+
+
+        /**
          * 协议解析器
          *
          * @param protoIndex
@@ -149,48 +196,27 @@ public enum ProtoBufEnum {
          */
         private Parser getParser(final int protoIndex) {
             try {
-                if (parsersArray[protoIndex] != null) {
-                    return parsersArray[protoIndex];
+                if (parserMap.containsKey(protoIndex)) {
+                    return parserMap.get(protoIndex);
                 }
-                ProtoBufEnum protoBufEnum = values[protoIndex];
-
-                String innerClassName = getInnerClassName(protoBufEnum);
-                String outerClassName = getOuterClassName(innerClassName);
-
+                ProtoBufEnum protoBufEnum = getProtoBufEnumByIvalue(protoIndex);
+//              内外部类名拿到解析器
+                String innerClassName = protoBufEnum.getInnerClass();
+                String outerClassName = protoBufEnum.getOutClass();
+//              拼接解析器路径
                 String className = protoBufPackagePath + "." + outerClassName + "$" + innerClassName;
                 Class messageClass = Class.forName(className);
 
-//              proto2 PARSER 字段是pubic，而proto3是private,在获取parser是有一定差异
+                //proto2 PARSER 字段是pubic，而proto3是private,在获取parser是有一定差异
+                //PROTO2
                 Parser parser = (Parser) messageClass.getField("PARSER").get(null);
-
-//PROTO3        Parser parser= (Parser) messageClass.getMethod("parser").invoke(null);
-                parsersArray[protoIndex] = parser;
+                //PROTO3 :Parser parser= (Parser) messageClass.getMethod("parser").invoke(null);
+                parserMap.put(protoIndex, parser);
                 return parser;
             } catch (Exception e) {
                 e.printStackTrace();
             }
             return null;
-        }
-
-        /**
-         * 通过枚举获取内部类名称
-         *
-         * @param protoBufEnum
-         * @return
-         */
-        private String getInnerClassName(ProtoBufEnum protoBufEnum) {
-            return protoBufEnum.name().toLowerCase();
-        }
-
-        /**
-         * 通过内部类名称获得外部类名称
-         *
-         * @param innerClassName
-         * @return
-         */
-        private String getOuterClassName(String innerClassName) {
-            String[] temp = innerClassName.split("_");
-            return temp[0] + "_" + temp[1];
         }
 
         /**
@@ -203,67 +229,17 @@ public enum ProtoBufEnum {
             if (messageLiteToEnumMap.containsKey(messageLite.getClass())) {
                 return messageLiteToEnumMap.get(messageLite.getClass()).getiValue();
             }
-            String enumName = messageLite.getClass().getSimpleName().toUpperCase();
+//          错误点
+//          实际的类名，拿到枚举名
+            String enumName = messageLite.getClass().getSimpleName();
             for (ProtoBufEnum protoBufEnum : values) {
-                if (enumName.equals(protoBufEnum.name())) {
+                if (enumName.equals(protoBufEnum.getInnerClass())) {
                     messageLiteToEnumMap.put(messageLite.getClass(), protoBufEnum);
                     return protoBufEnum.getiValue();
                 }
             }
             return -1;
         }
+
     }
-
-    public static <T extends Enum<T>> T indexOf(Class<T> clazz, int index) {
-        return (T) clazz.getEnumConstants()[index];
-    }
-
-
-    public static Object buildPacket(String data, Integer type) {
-        ProtoBufEnum protoBufEnum = indexOf(ProtoBufEnum.class, type);
-        Object o = null;
-        switch (protoBufEnum) {
-            case SERVER_PACKET_PONGRESP:
-                server_packet.server_packet_pongresp.Builder server_packet_pongresp = server_packet.server_packet_pongresp.newBuilder();
-                server_packet_pongresp.setData(data);
-                o = server_packet_pongresp.build();
-                break;
-            case SERVER_PACKET_NORMALRESP:
-                server_packet.server_packet_normalresp.Builder server_packet_normalresp = server_packet.server_packet_normalresp.newBuilder();
-                server_packet_normalresp.setData(data);
-                o = server_packet_normalresp.build();
-                break;
-            case SERVER_PACKET_MONSTERBUFRESP:
-                server_packet.server_packet_monsterbufresp.Builder server_packet_monsterbufresp = server_packet.server_packet_monsterbufresp.newBuilder();
-                server_packet_monsterbufresp.setData(data);
-                o = server_packet_monsterbufresp;
-                break;
-            case SERVER_PACKET_ATTACKRESP:
-                server_packet.server_packet_attackresp.Builder server_packet_attackresp = server_packet.server_packet_attackresp.newBuilder();
-                server_packet_attackresp.setData(data);
-                o = server_packet_attackresp;
-                break;
-            case SERVER_PACKET_TRADERESP:
-
-                break;
-            case SERVER_PACKET_USERINFORESP:
-                break;
-            case SERVER_PACKET_ACHIEVEMENTRESP:
-                break;
-            case SERVER_PACKET_USERBAGRESP:
-                break;
-            case SERVER_PACKET_FRIENDRESP:
-                break;
-            case SERVER_PACKET_CHANGECHANNELRESP:
-                break;
-            case CLIENT_PACKET_PINGREQ:
-                break;
-            case CLIENT_PACKET_NORMALREQ:
-                break;
-            default:
-        }
-        return o;
-    }
-
-
 }

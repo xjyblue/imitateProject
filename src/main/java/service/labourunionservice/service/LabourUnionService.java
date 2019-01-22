@@ -3,6 +3,7 @@ package service.labourunionservice.service;
 import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.packet.PacketType;
+import core.packet.ServerPacket;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
@@ -65,16 +66,20 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jxjb",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "jxjb", status = {ChannelStatus.LABOURUNION})
     public void giveMoneyToUnion(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!moneyCaculationService.checkUserHasEnoughMoney(user, temp[1])) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOENOUGHMONEYTOGIVE));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOENOUGHMONEYTOGIVE);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         moneyCaculationService.removeMoneyToUser(user, temp[1]);
@@ -82,7 +87,9 @@ public class LabourUnionService {
         unioninfo.setUnionmoney(unioninfo.getUnionmoney() + Integer.parseInt(temp[1]));
         unioninfoMapper.updateByPrimaryKey(unioninfo);
         messageToAllInUnion(user.getUnionid(), user.getUsername() + "向工会捐献了" + temp[1] + "个金币");
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEMONEYTOUNION, PacketType.UNIONINFO));
+        ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+        builder.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEMONEYTOUNION);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
 
@@ -92,20 +99,26 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "hq",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "hq", status = {ChannelStatus.LABOURUNION})
     public void getUserbagFromUnion(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUnionid() == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+            builder.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         if (user.getUnionlevel() > GrobalConfig.THREE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+            builder.setData(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 
@@ -114,7 +127,9 @@ public class LabourUnionService {
 //      拿到工会格子
             Userbag userbag = userbagMapper.selectByPrimaryKey(temp[1]);
             if (userbag.getNum() < Integer.parseInt(temp[GrobalConfig.TWO])) {
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORUSERBAGNUM));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(MessageConfig.ERRORUSERBAGNUM);
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
 
@@ -130,7 +145,9 @@ public class LabourUnionService {
 
                 String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + userbagService.getGoodNameByUserbag(userbag);
                 messageToAllInUnion(user.getUnionid(), resp);
-                channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD, PacketType.UNIONINFO));
+                ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+                builder.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD);
+                MessageUtil.sendMessage(channel,builder.build());
                 return;
             }
 
@@ -160,7 +177,9 @@ public class LabourUnionService {
 
             String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + userbagService.getGoodNameByUserbag(userbagNew);
             messageToAllInUnion(user.getUnionid(), resp);
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+            builder.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
 
         } finally {
@@ -176,25 +195,33 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jxwp",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "jxwp", status = {ChannelStatus.LABOURUNION})
     public void giveUserbagToUnion(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUnionid() == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+            builder.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOUSERBAGID));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOUSERBAGID);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (Integer.parseInt(temp[GrobalConfig.TWO]) > userbag.getNum()) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORUSERBAGNUM));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORUSERBAGNUM);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
@@ -225,7 +252,9 @@ public class LabourUnionService {
 
             String resp = "用户：" + user.getUsername() + "向工会捐献了" + userbagService.getGoodNameByUserbag(userbag);
             messageToAllInUnion(user.getUnionid(), resp);
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+            builder.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
 
@@ -257,7 +286,9 @@ public class LabourUnionService {
 //      广播
         String resp = "用户：" + user.getUsername() + "向工会捐献了" + userbagService.getGoodNameByUserbag(userbagNew);
         messageToAllInUnion(user.getUnionid(), resp);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION, PacketType.UNIONINFO));
+        ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+        builder.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION);
+        MessageUtil.sendMessage(channel,builder.build());
         return;
     }
 
@@ -267,11 +298,13 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "zsck",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "zsck", status = {ChannelStatus.LABOURUNION})
     public void showWarehouse(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+            builder.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         Unioninfo unioninfo = unioninfoMapper.selectByPrimaryKey(user.getUnionid());
@@ -281,25 +314,33 @@ public class LabourUnionService {
             resp += userbagService.getGoodNameByUserbag(userbag) + System.getProperty("line.separator");
         }
         resp += "工会仓库金币数量为：" + unioninfo.getUnionmoney() + System.getProperty("line.separator");
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + resp, PacketType.UNIONINFO));
+        ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+        builder.setData(MessageConfig.UNIONMSG + resp);
+        MessageUtil.sendMessage(channel,builder.build());
         return;
     }
 
-    @Order(orderMsg = "tg",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "tg", status = {ChannelStatus.LABOURUNION})
     public void removeMember(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User userTarget = userMapper.selectByPrimaryKey(temp[1]);
         if (userTarget == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.NOUSER, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+            builder.setData(MessageConfig.UNIONMSG + MessageConfig.NOUSER);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         if (user.getUnionlevel() >= userTarget.getUnionlevel()) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+            builder.setData(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         userTarget.setUnionlevel(null);
@@ -312,7 +353,10 @@ public class LabourUnionService {
             userSession.setUnionid(null);
             userSession.setUnionlevel(null);
             Channel channelTemp = ChannelUtil.userToChannelMap.get(userSession);
-            channelTemp.writeAndFlush(MessageUtil.turnToPacket("你被" + user.getUsername() + "T出了工会"));
+
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("你被" + user.getUsername() + "T出了工会");
+            MessageUtil.sendMessage(channel, builder.build());
         }
 
         String resp = user.getUsername() + "已踢出了工会中的" + userTarget.getUsername() + "玩家";
@@ -326,21 +370,27 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "gn",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "gn", status = {ChannelStatus.LABOURUNION})
     public void disagreeApplyInfo(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Applyunioninfo applyunioninfo = applyunioninfoMapper.selectByPrimaryKey(temp[1]);
         if (applyunioninfo == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOAPPLYINFO));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOAPPLYINFO);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //      不同意
         applyunioninfoMapper.deleteByPrimaryKey(applyunioninfo.getApplyid());
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.DISAGREEUSEAPPLY));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.DISAGREEUSEAPPLY);
+        MessageUtil.sendMessage(channel, builder.build());
         return;
     }
 
@@ -350,20 +400,26 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "sjg",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "sjg", status = {ChannelStatus.LABOURUNION})
     public void memberLevelChange(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.THREE) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUnionlevel() > GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+            builder.setData(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         if (user.getUnionlevel() >= Integer.parseInt(temp[GrobalConfig.TWO])) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+            builder.setData(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         User userTarget = userMapper.selectByPrimaryKey(temp[1]);
@@ -387,11 +443,13 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "zsry",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "zsry", status = {ChannelStatus.LABOURUNION})
     public void queryUnionMemberInfo(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+            builder.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            MessageUtil.sendMessage(channel,builder.build());
             return;
         }
         Unioninfo unioninfo = unioninfoMapper.selectByPrimaryKey(user.getUnionid());
@@ -400,7 +458,9 @@ public class LabourUnionService {
         for (User userTemp : users) {
             resp += "用户名 [ " + userTemp.getUsername() + " ] 用户工会等级 [ " + userTemp.getUnionlevel() + " ] " + System.getProperty("line.separator");
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + resp, PacketType.UNIONINFO));
+        ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+        builder.setData(MessageConfig.UNIONMSG + resp);
+        MessageUtil.sendMessage(channel,builder.build());
         return;
     }
 
@@ -410,16 +470,20 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "gy",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "gy", status = {ChannelStatus.LABOURUNION})
     public void agreeApplyInfo(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Applyunioninfo applyunioninfo = applyunioninfoMapper.selectByPrimaryKey(temp[1]);
         if (applyunioninfo == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOAPPLYINFO));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOAPPLYINFO);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
@@ -435,8 +499,9 @@ public class LabourUnionService {
             userSession.setUnionid(applyunioninfo.getUnionid());
             userSession.setUnionlevel(4);
         }
-
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + "您同意了" + userTarget.getUsername() + "加入本工会", PacketType.UNIONINFO));
+        ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
+        builder.setData(MessageConfig.UNIONMSG + "您同意了" + userTarget.getUsername() + "加入本工会");
+        MessageUtil.sendMessage(channel,builder.build());
 
 //      处理第一次加入工会的事件
         achievementService.executeAddUnionFirst(userSession, userTarget.getUsername());
@@ -454,15 +519,18 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "lsg",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "lsg", status = {ChannelStatus.LABOURUNION})
     public void queryApplyInfo(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
+        ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
         if (user.getUnionid() == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            builder1.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
         if (user.getUnionlevel() > GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE, PacketType.UNIONINFO));
+            builder1.setData(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE);
+            MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
         List<Applyunioninfo> list = applyunioninfoMapper.selectByApplyinfoByUnionId(user.getUnionid());
@@ -470,7 +538,8 @@ public class LabourUnionService {
         for (Applyunioninfo applyunioninfo : list) {
             resp += "申请编号 [ " + applyunioninfo.getApplyid() + "] 申请用户 [ " + applyunioninfo.getApplyuser() + "] " + System.getProperty("line.separator");
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + resp, PacketType.UNIONINFO));
+        builder1.setData(MessageConfig.UNIONMSG + resp);
+        MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
 
@@ -480,28 +549,36 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "sqg",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "sqg", status = {ChannelStatus.LABOURUNION})
     public void applyUnion(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUnionid() != null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOAPPLYUNION));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOAPPLYUNION);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //      申请加入不存在的工会
         Unioninfo unioninfo = unioninfoMapper.selectByPrimaryKey(temp[1]);
         if (unioninfo == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOEXISTUNIONID));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOEXISTUNIONID);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
         int count = applyunioninfoMapper.selectByUserIdAndUnionId(user.getUsername(), temp[1]);
         if (count > 0) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOREPEATUNIONAPPLY));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOREPEATUNIONAPPLY);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
@@ -511,7 +588,10 @@ public class LabourUnionService {
         applyunioninfo.setApplyuser(user.getUsername());
         applyunioninfo.setUnionid(temp[1]);
         applyunioninfoMapper.insert(applyunioninfo);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.SUCCESSUNIONAPPLY, PacketType.UNIONINFO));
+
+        ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
+        builder1.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSUNIONAPPLY);
+        MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
 
@@ -521,15 +601,19 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "backg",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "backg", status = {ChannelStatus.LABOURUNION})
     public void outUnion(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
+            builder1.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
         if (user.getUnionlevel() == 1) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOOUTUNION));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOOUTUNION);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         user.setUnionid(null);
@@ -544,16 +628,20 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "cgu",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "cgu", status = {ChannelStatus.LABOURUNION})
     public void createUnion(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ERRORORDER));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getUnionid() != null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.NOCREATEUNION));
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOCREATEUNION);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Unioninfo unioninfo = new Unioninfo();
@@ -569,7 +657,9 @@ public class LabourUnionService {
         userTemp.setUnionlevel(1);
         unioninfoMapper.insert(unioninfo);
         userMapper.updateByPrimaryKeySelective(userTemp);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + "你创建了" + temp[1] + "工会", PacketType.UNIONINFO));
+        ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
+        builder1.setData(MessageConfig.UNIONMSG + "你创建了" + temp[1] + "工会");
+        MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
 
@@ -579,7 +669,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "lgu",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "lgu", status = {ChannelStatus.LABOURUNION})
     public void queryUnion(Channel channel, String msg) {
         UnioninfoExample unioninfoExample = new UnioninfoExample();
         List<Unioninfo> list = unioninfoMapper.selectByExample(unioninfoExample);
@@ -587,7 +677,9 @@ public class LabourUnionService {
         for (Unioninfo unioninfo : list) {
             resp += System.getProperty("line.separator") + "工会id [ " + unioninfo.getUnionid() + " ]" + "工会名称 [ " + unioninfo.getUnionname() + " ]";
         }
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + resp, PacketType.UNIONINFO));
+        ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
+        builder1.setData(MessageConfig.UNIONMSG + resp);
+        MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
 
@@ -597,15 +689,22 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "eg",status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = "eg", status = {ChannelStatus.COMMONSCENE})
     public void enterUnionView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.LABOURUNION);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.ENTERLABOURVIEW));
+
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.ENTERLABOURVIEW);
+        MessageUtil.sendMessage(channel, builder.build());
+
         User user = ChannelUtil.channelToUserMap.get(channel);
+        ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
         if (user.getUnionid() == null) {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON, PacketType.UNIONINFO));
+            builder1.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            MessageUtil.sendMessage(channel, builder1.build());
         } else {
-            channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.UNIONMSG, PacketType.UNIONINFO));
+            builder1.setData(MessageConfig.UNIONMSG);
+            MessageUtil.sendMessage(channel, builder1.build());
         }
         return;
     }
@@ -616,11 +715,16 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qtg",status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = "qtg", status = {ChannelStatus.LABOURUNION})
     public void outUnionView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
-        channel.writeAndFlush(MessageUtil.turnToPacket(MessageConfig.OUTLABOURVIEW));
-        channel.writeAndFlush(MessageUtil.turnToPacket("", PacketType.UNIONINFO));
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(msg);
+        MessageUtil.sendMessage(channel, builder.build());
+
+        ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
+        builder1.setData("");
+        MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
 
@@ -636,7 +740,9 @@ public class LabourUnionService {
             User userTemp = entry.getValue();
             if (userTemp.getUnionid() != null && userTemp.getUnionid().equals(unionId)) {
                 Channel channelTemp = entry.getKey();
-                channelTemp.writeAndFlush(MessageUtil.turnToPacket(msg));
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(msg);
+                MessageUtil.sendMessage(channelTemp, builder.build());
             }
         }
     }
