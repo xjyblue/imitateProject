@@ -92,7 +92,7 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "sj=", status = {ChannelStatus.AUCTION})
+    @Order(orderMsg = "ausj", status = {ChannelStatus.AUCTION})
     public void upAuctionItem(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
@@ -144,7 +144,7 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qp=", status = {ChannelStatus.AUCTION})
+    @Order(orderMsg = "auqp", status = {ChannelStatus.AUCTION})
     public void getAuctionItem(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
@@ -188,10 +188,16 @@ public class AuctionService {
                     MessageUtil.sendMessage(channel, builder.build());
                     return;
                 }
+                User userS = userService.getUserByNameFromSession(auctionItem.getFromUsername());
+                if (userS == null) {
+//                  处理离线用户的交易逻辑
+                }
 //              扣除用户金币
                 moneyCaculationService.removeMoneyToUser(user, auctionItem.getSaleMoney().toString());
 //              新增物品
                 userbagCaculationService.addUserBagForUser(user, auctionItem.getUserbag());
+//              新增对方用户金币
+                moneyCaculationService.addMoneyToUser(userS, auctionItem.getSaleMoney().toString());
                 auctionItem.setEnd(true);
 //              删除拍卖单
                 AuctionCache.auctionItemMap.remove(auctionItem.getId());
@@ -226,11 +232,16 @@ public class AuctionService {
                     emailService.systemSendMail(auctionItem.getBuyUsername(), "竞拍失败，返回金币:" + auctionItem.getBuyMoney(), null, auctionItem.getBuyMoney());
                     userService.sendMessageByUserName(auctionItem.getBuyUsername(), "[您的竞拍单:" + auctionItem.getId() + "]被顶下了，可重新加价或者放弃竞拍");
                 }
+//              扣除用户金币
+                moneyCaculationService.removeMoneyToUser(user, temp[2]);
+//              归还上一个竞拍者的金币
+                if (auctionItem.getBuyUsername() != null) {
+                    User userOld = userService.getUserByNameFromSession(auctionItem.getBuyUsername());
+                    moneyCaculationService.addMoneyToUser(userOld, auctionItem.getBuyMoney().toString());
+                }
 //              更新竞拍单子
                 auctionItem.setBuyMoney(Integer.parseInt(temp[2]));
                 auctionItem.setBuyUsername(user.getUsername());
-//              扣除用户金币
-                moneyCaculationService.removeMoneyToUser(user, temp[2]);
 
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
                 builder.setData(MessageConfig.SUCCESS_BUY_GOOD_UP_PRICE);
@@ -262,7 +273,7 @@ public class AuctionService {
                 queryMsg += " [价格:" + auctionItem.getSaleMoney() + "]";
             } else {
                 queryMsg += " [竞拍起价:" + auctionItem.getSaleMoney() + "]" + " [目前竞拍者: " + auctionItem.getBuyUsername() + "]"
-                        + " [目前竞拍价格:" + auctionItem.getBuyMoney() + "]" + " [竞拍截止时间:" + auctionItem.getEndTime() + "]";
+                        + " [目前竞拍价格:" + auctionItem.getBuyMoney() + "]" + " [竞拍截止时间:" + (auctionItem.getEndTime() - System.currentTimeMillis()) + "ms]";
             }
             queryMsg += System.getProperty("line.separator");
         }

@@ -101,8 +101,8 @@ public class MessageConfig {
     public static final String REPEATYESTRADE = "您已确认了此次交易,请不要瞎操作";
     public static final String YOUCOMFIRMTRADE = "你确认了此次交易";
     public static final String NOENOUGHGOODFORTRADE = "请输入正确的交易物品数量";
-    public static final String TRADEMSG = "欢迎来到交易界面,jbjy=金币数额 可以增加所要交易的金币,jbjyx=金币数额 可以减少所要交易的金币,jy=交易格子号可以把交易物品填充到交易栏," +
-            System.getProperty("line.separator") + "jyx=交易格子号可以把物品从交易格子取下来，jyy确认交易物品，jyq可以取消交易，双方都确认后交易完成";
+    public static final String TRADEMSG = "欢迎来到交易界面,jbjy=金币数额 可以增加所要交易的金币,xjbjy=金币数额 可以减少所要交易的金币,jyg=交易格子号可以把交易物品填充到交易栏," +
+            System.getProperty("line.separator") + "xjyg=交易格子号可以把物品从交易格子取下来，jyy确认交易物品，jyq可以取消交易，双方都确认后交易完成";
 
 
     public static final String MESSAGESTART = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
@@ -112,7 +112,7 @@ public class MessageConfig {
     public static final String ENTERLABOURVIEW = "你已进入工会管理界面";
     public static final String OUTLABOURVIEW = "你已退出工会管理界面";
     public static final String YOUARENOUNON = "你还没有工会";
-    public static final String UNIONMSG = "[tg=用户id 踢出某个成员][lsg 查看入会申请] [gy=申请id 同意入会申请] [gn=申请id 否决入会申请][jxjb-金币数额] [qtg 退出工会管理界面]"
+    public static final String UNIONMSG = "[tg=用户id 踢出某个成员][lsg 查看入会申请] [gy=申请id 同意入会申请] [gn=申请id 否决入会申请][jxjb=金币数额] [qtg 退出工会管理界面]"
             + System.getProperty("line.separator") + "[lgu查看已有的工会] [sqg=工会编号 申请加入工会] [cgu=工会名称 创建自己的工会] [zsry 展示工会所有成员信息] [zsck 展示工会仓库]" + System.getProperty("line.separator")
             + "[jxwp=格子编号=数量 捐献工会物品] [backg 退出工会] [sjg=工会成员id=等级 提升工会会员等级] [hq=格子编号=数量 取得工会仓库物品]" + System.getProperty("line.separator");
     public static final String NOCREATEUNION = "无法创建工会，你目前已有工会";
@@ -130,9 +130,11 @@ public class MessageConfig {
     public static final String SUCCESSGETUNIONGOOD = "获取物品成功";
     public static final String NOENOUGHMONEYTOGIVE = "你的金币数额不足";
     public static final String SUCCESSGIVEMONEYTOUNION = "成功向工会捐献了金币";
+    public static final String SUCCESS_OUT_UNION = "成功退出工会";
 
-    public static final String FRIENDMSG = "欢迎来到好友管理界面，sqfriend=用户名申请新的好友，lsfriend 查看好友申请" + System.getProperty("line.separator")
-            + "lufriend 查看已有好友 tyf=申请编号同意好友申请 tnf=否决好友申请" +"qfriend 退出好友管理界面"+ System.getProperty("line.separator");
+    public static final String FRIENDMSG = "欢迎来到好友管理界面，sqfriend=用户名申请新的好友，lsfriend 查看好友申请"
+            + "removefriend=好友名称 解除好友关系" + System.getProperty("line.separator")
+            + "lufriend 查看已有好友 tyf=申请编号同意好友申请 tnf=否决好友申请" + "qfriend 退出好友管理界面" + System.getProperty("line.separator");
     public static final String ENTERFRIENDVIEW = "已进入好友管理界面";
     public static final String OUTFRIENDVIEW = "已退出好友管理界面";
     public static final String NOFOUNDMAN = "系统无此玩家";
@@ -146,8 +148,8 @@ public class MessageConfig {
     public static final String MANDEAD = "人物已死亡，无法进行攻击";
     public static final String NOEXACHANGEFORNPC = "该npc无法进行交换物品";
 
-    public static final String ENTER_AUCTION_VIEW = "欢迎进入拍卖行,queryau 刷新拍卖行,qp=id=价格 编号参与拍卖（一口价商品直接拍下不用输入价格）," +
-            "sj=背包格子=数量=金钱=是否竞拍（1：否，2 是） 上架拍卖行,qau 退出拍卖，aoi 查看人物金钱信息 xj=拍卖行id 下架拍卖行";
+    public static final String ENTER_AUCTION_VIEW = "欢迎进入拍卖行,queryau 刷新拍卖行,auqp=id=价格 编号参与拍卖（一口价商品直接拍下不用输入价格）," +
+            "ausj=背包格子=数量=金钱=是否竞拍（1：否，2 是） 上架拍卖行,qau 退出拍卖，aoi 查看人物金钱信息 auxj=拍卖行id 下架拍卖行";
     public static final String OUT_AUCTION_VIEW = "你退出了拍卖行";
     public static final String NOAUCTIONITEMS = "拍卖行无任何交易物品";
     public static final String SUCCESS_UP_AUCTIONITEM = "成功上架物品";

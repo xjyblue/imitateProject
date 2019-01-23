@@ -58,7 +58,7 @@ public class FriendService {
 
         ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
         builder1.setData(MessageConfig.FRIENDMSG);
-        MessageUtil.sendMessage(channel,builder1.build());
+        MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
 
@@ -78,7 +78,7 @@ public class FriendService {
 
         ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
         builder1.setData("");
-        MessageUtil.sendMessage(channel,builder1.build());
+        MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
 
@@ -102,7 +102,7 @@ public class FriendService {
         if (friendapplyinfo == null) {
             ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
             builder1.setData(MessageConfig.FRIENDMSG + MessageConfig.NOFRIENDRECORD);
-            MessageUtil.sendMessage(channel,builder1.build());
+            MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
         Friendinfo friendinfo = new Friendinfo();
@@ -120,7 +120,7 @@ public class FriendService {
 //      通知双方如果在线的话
         ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
         builder1.setData(MessageConfig.FRIENDMSG + "你同意了" + friendapplyinfo.getFromuser() + "的好友申请");
-        MessageUtil.sendMessage(channel,builder1.build());
+        MessageUtil.sendMessage(channel, builder1.build());
 
         User userTarget = userService.getUserByNameFromSession(friendapplyinfo.getFromuser());
         if (userTarget != null) {
@@ -156,7 +156,7 @@ public class FriendService {
         if (list.size() == 0) {
             ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
             builder1.setData(MessageConfig.FRIENDMSG + MessageConfig.NOFRIEND);
-            MessageUtil.sendMessage(channel,builder1.build());
+            MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
         for (Friendinfo friendinfo : list) {
@@ -164,7 +164,7 @@ public class FriendService {
         }
         ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
         builder1.setData(MessageConfig.FRIENDMSG + resp);
-        MessageUtil.sendMessage(channel,builder1.build());
+        MessageUtil.sendMessage(channel, builder1.build());
     }
 
     /**
@@ -190,12 +190,12 @@ public class FriendService {
         if (list.size() == GrobalConfig.ZERO) {
             ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
             builder1.setData(MessageConfig.FRIENDMSG + MessageConfig.NOFOUNDMAN);
-            MessageUtil.sendMessage(channel,builder1.build());
+            MessageUtil.sendMessage(channel, builder1.build());
             return;
         } else {
             ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
             builder1.setData(MessageConfig.FRIENDMSG + "你已向" + temp[1] + "发出了好友申请");
-            MessageUtil.sendMessage(channel,builder1.build());
+            MessageUtil.sendMessage(channel, builder1.build());
         }
         Friendapplyinfo friendapplyinfo = new Friendapplyinfo();
         friendapplyinfo.setTouser(list.get(0).getUsername());
@@ -223,7 +223,7 @@ public class FriendService {
         if (list.size() == 0) {
             ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
             builder1.setData(MessageConfig.FRIENDMSG + "您无好友申请记录");
-            MessageUtil.sendMessage(channel,builder1.build());
+            MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
         for (Friendapplyinfo friendapplyinfo : list) {
@@ -231,7 +231,41 @@ public class FriendService {
         }
         ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
         builder1.setData(MessageConfig.FRIENDMSG + resp);
-        MessageUtil.sendMessage(channel,builder1.build());
+        MessageUtil.sendMessage(channel, builder1.build());
+    }
+
+    @Order(orderMsg = "removefriend", status = {ChannelStatus.FRIEND})
+    public void removefriend(Channel channel, String msg) {
+        String temp[] = msg.split("=");
+        if (temp.length != GrobalConfig.TWO) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
+            return;
+        }
+        User userT = userMapper.selectByPrimaryKey(temp[1]);
+        if (userT == null) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOFOUNDMAN);
+            MessageUtil.sendMessage(channel, builder.build());
+            return;
+        }
+//      在线提示
+        User user = userService.getUserByNameFromSession(temp[1]);
+        User userS = ChannelUtil.channelToUserMap.get(channel);
+        if (user != null) {
+            Channel channelTarget = ChannelUtil.userToChannelMap.get(user);
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(userS.getUsername() + "和你解除好友关系");
+            MessageUtil.sendMessage(channelTarget, builder.build());
+        }
+//      数据库处理
+        friendinfoMapper.deleteByUserName(userS.getUsername(), userT.getUsername());
+        friendinfoMapper.deleteByUserName(userT.getUsername(), userS.getUsername());
+
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData("你成功和" + userT.getUsername() + "解除好友关系");
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
 }

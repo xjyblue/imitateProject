@@ -65,6 +65,9 @@ public class AuctionPeriodTask extends BaseThread implements Runnable {
                 if (System.currentTimeMillis() > auctionItem.getEndTime()) {
                     Userbag userbag = auctionItem.getUserbag();
                     User saleUser = userService.getUserByNameFromSession(auctionItem.getFromUsername());
+                    if (saleUser == null) {
+//                       离线玩家处理
+                    }
                     if (auctionItem.getBuyUsername() == null) {
 //                      无人参与竞拍
                         userbagCaculationService.addUserBagForUser(saleUser, userbag);

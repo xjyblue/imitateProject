@@ -40,7 +40,7 @@ public class ProtoBufToByteEncoder extends MessageToByteEncoder<MessageLite> {
             byteBuf.writeInt(protoLength);
             //写入协议头
             byteBuf.writeInt(protoIndex);
-//      写入数据
+            //写入数据
             byteBuf.writeBytes(messageLite.toByteArray());
         } catch (Exception e) {
             e.printStackTrace();

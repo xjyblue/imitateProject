@@ -129,7 +129,7 @@ public class NpcService {
                 if (userbag.getWid().equals(Integer.parseInt(target[0]))) {
                     if (userbag.getNum() < Integer.parseInt(target[1])) {
                         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                        builder.setData(MessageConfig.NOENOUGHCHANGEGOOD);
+                        builder.setData(MessageConfig.NOENOUGHCHANGEGOOD + "需要的物品数量为:" + Integer.parseInt(target[1]));
                         MessageUtil.sendMessage(channel, builder.build());
                         return;
                     }

@@ -11,6 +11,8 @@ import service.buffservice.service.RestraintBuffService;
 import service.caculationservice.service.AttackDamageCaculationService;
 import service.caculationservice.service.HpCaculationService;
 import service.caculationservice.service.MpCaculationService;
+import service.levelservice.entity.Level;
+import service.levelservice.service.LevelService;
 import service.sceneservice.entity.Scene;
 import service.sceneservice.entity.BossScene;
 import core.component.good.Equipment;
@@ -69,6 +71,9 @@ public class AttackService {
     private RestraintBuffService restraintBuffService;
     @Autowired
     private SkillService skillService;
+    @Autowired
+    private LevelService levelService;
+
 
     /**
      * 普通场景战斗退出战斗
@@ -211,7 +216,8 @@ public class AttackService {
         }
         userService.recoverUser(user);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.RECOVRESUCCESS + "===" + user.getUsername() + "的血量为：" + user.getHp() + "蓝量为：" + user.getMp());
+        builder.setData(MessageConfig.RECOVRESUCCESS + "===" + user.getUsername() + "的血量为：" + levelService.getMaxHp(user) + "蓝量为：" + levelService.getMaxMp(user));
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
 

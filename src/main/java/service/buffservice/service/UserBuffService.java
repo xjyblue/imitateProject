@@ -126,6 +126,9 @@ public class UserBuffService {
         if (userMp.compareTo(maxMp) < 0) {
             if (user.getBuffMap().get(BuffConstant.MPBUFF).equals(GrobalConfig.MP_DEFAULTVALUE)) {
                 userMp = userMp.add(add);
+                if (userMp.compareTo(maxMp) > 0) {
+                    userMp = maxMp;
+                }
                 user.setMp(userMp.toString());
             } else {
                 Long endTime = user.getUserBuffEndTimeMap().get(BuffConstant.MPBUFF);
@@ -224,7 +227,7 @@ public class UserBuffService {
             Buff buff = BuffResourceLoad.buffMap.get(buffValue);
             ServerPacket.UserbufResp.Builder builder = ServerPacket.UserbufResp.newBuilder();
             builder.setData("你受到了怪物的中毒攻击，产生中毒伤害为:" + buff.getAddSecondValue() + "人物剩余血量" + user.getHp());
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
         }
     }
 

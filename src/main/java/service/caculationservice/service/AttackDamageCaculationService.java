@@ -20,6 +20,7 @@ import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
+
 /**
  * @ClassName AttackCaculationService
  * @Description 计算伤害 后期可以改成责任链模式
@@ -41,22 +42,28 @@ public class AttackDamageCaculationService {
      */
     public BigInteger caculate(User user, String attackDamageValue) {
         BigInteger attackDamage = new BigInteger(attackDamageValue);
-//      单一装备加成处理
-        if (user.getWeaponequipmentbars() != null) {
-            for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
-                Equipment equipment = EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid());
-                if (weaponequipmentbar.getDurability() > 0) {
-                    attackDamage = attackDamage.add(new BigInteger(equipment.getAddValue() + ""));
-                    weaponequipmentbar.setDurability(weaponequipmentbar.getDurability() - 1);
-                }
-            }
-        }
 
 //      等级加成处理
         Level level = LevelResourceLoad.levelMap.get(levelService.getLevelByExperience(user.getExperience()));
         BigInteger levelUp = new BigInteger(level.getUpAttack() + "");
         attackDamage = attackDamage.add(levelUp);
 
+//      单一装备加成处理
+        if (user.getWeaponequipmentbars() != null) {
+            for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
+                Equipment equipment = EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid());
+//              武器加成
+                if (weaponequipmentbar.getDurability() > 0) {
+//                  武器星级加成
+                    BigInteger equipAttackValue = BigInteger.valueOf(equipment.getAddValue());
+                    if (!weaponequipmentbar.getStartlevel().equals(0)) {
+                        equipAttackValue = equipAttackValue.multiply(BigInteger.valueOf(weaponequipmentbar.getStartlevel()));
+                    }
+                    attackDamage = attackDamage.add(equipAttackValue);
+                    weaponequipmentbar.setDurability(weaponequipmentbar.getDurability() - 1);
+                }
+            }
+        }
         return attackDamage;
     }
 
@@ -78,7 +85,7 @@ public class AttackDamageCaculationService {
             Channel channelTemp = ChannelUtil.userToChannelMap.get(user);
             ServerPacket.UserbufResp.Builder builder = ServerPacket.UserbufResp.newBuilder();
             builder.setData("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp());
-            MessageUtil.sendMessage(channelTemp,builder.build());
+            MessageUtil.sendMessage(channelTemp, builder.build());
             return mosterSkillDamage;
         }
         return new BigInteger(monsterSkill.getDamage());

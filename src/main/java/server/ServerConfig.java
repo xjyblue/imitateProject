@@ -57,10 +57,11 @@ public class ServerConfig {
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .option(ChannelOption.TCP_NODELAY, true)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
+//                            ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
                             ch.pipeline().addLast(new ByteToProtoBufDecoder());
                             ch.pipeline().addLast(new ProtoBufToByteEncoder());
 //                          写空闲,每隔3秒触发心跳包丢失统计

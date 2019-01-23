@@ -185,7 +185,7 @@ public class UserbagService {
      * @param msg
      */
     @Order(orderMsg = "qb", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE
-            , ChannelStatus.TRADE, ChannelStatus.TEAM, ChannelStatus.LABOURUNION})
+            , ChannelStatus.TRADE, ChannelStatus.TEAM, ChannelStatus.LABOURUNION, ChannelStatus.AUCTION})
     public void refreshUserbagInfo(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String bagResp = System.getProperty("line.separator")
@@ -263,6 +263,10 @@ public class UserbagService {
         if (userbag.getTypeof().equals(BaseGood.HPMEDICINE)) {
             HpMedicine hpMedicine = HpMedicineResourceLoad.hpMedicineMap.get(userbag.getWid());
             return "[红药--》] [物品id:" + userbag.getId() + "] [药品名称：" + hpMedicine.getName() + "]" + " [武器数量： " + userbag.getNum() + "]";
+        }
+        if (userbag.getTypeof().equals(BaseGood.CHANGEGOOD)) {
+            CollectGood collectGood = CollectGoodResourceLoad.collectGoodMap.get(userbag.getWid());
+            return "[收集类物品--》] [物品id:" + userbag.getId() + "] [物品名称:" + collectGood.getName() + "]" + "[物品数量：" + userbag.getNum() + "] [物品描述：" + collectGood.getDesc() + "]";
         }
         return null;
     }

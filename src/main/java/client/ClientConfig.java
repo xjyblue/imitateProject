@@ -55,7 +55,8 @@ public class ClientConfig {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 // 有数据立即发送
                 .option(ChannelOption.TCP_NODELAY, true)
-                .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(2048))
+//               无需神句
+//                .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(2048))
                 // 绑定处理group
                 .group(eventLoopGroup).remoteAddress(host, port)
                 .handler(new ChannelInitializer<SocketChannel>() {
@@ -63,11 +64,13 @@ public class ClientConfig {
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         // 初始化编码器，解码器，处理器
                         ChannelPipeline pipeline = socketChannel.pipeline();
+//                        pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                         pipeline.addLast(new ProtoBufToByteEncoder());
                         pipeline.addLast(new ByteToProtoBufDecoder());
 //                      读空闲心跳，写空闲心跳，读或者写空闲心跳,读空闲每隔两秒发送心跳包
                         pipeline.addLast(new IdleStateHandler(1, 1, 0));
                         socketChannel.pipeline().addLast(new ClientHandler(ClientConfig.this, clientStart));
+
                     }
                 });
         // 进行连接

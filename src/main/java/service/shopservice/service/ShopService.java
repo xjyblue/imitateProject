@@ -83,10 +83,10 @@ public class ShopService {
                     + "----物品名称" + hpMedicine.getName()
                     + "----物品回复血量" + hpMedicine.getReplyValue()
                     + "----物品cd" + hpMedicine.getCd()
-                    + "----物品价值" + hpMedicine.getReplyValue()
+                    + "----物品价值" + hpMedicine.getBuyMoney()
                     + System.getProperty("line.separator");
         }
-        resp += "[购买武器请输入s-物品编号-数量 即可购买]" + System.getProperty("line.separator");
+        resp += "[购买武器请输入bshop=物品编号=数量 即可购买]" + System.getProperty("line.separator");
         resp += MessageConfig.MESSAGEEND;
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();

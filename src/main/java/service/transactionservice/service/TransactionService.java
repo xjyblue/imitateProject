@@ -180,6 +180,12 @@ public class TransactionService {
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
+        if (userService.getUserByNameFromSession(temp[1]) == null) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOTRACEUSER);
+            MessageUtil.sendMessage(channel, builder.build());
+            return;
+        }
         Channel channelTarget = ChannelUtil.userToChannelMap.get(userService.getUserByNameFromSession(temp[1]));
         if (channelTarget == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
@@ -370,9 +376,6 @@ public class TransactionService {
         trade.getUserTo().setIfTrade(false);
         trade.getUserStart().setIfTrade(false);
 
-        userbagService.refreshUserbagInfo(ChannelUtil.userToChannelMap.get(trade.getUserTo()), null);
-        userbagService.refreshUserbagInfo(ChannelUtil.userToChannelMap.get(trade.getUserStart()), null);
-
 //          第一次成功交易触发任务
         achievementService.executeFirstTrade(trade.getUserStart(), trade.getUserTo());
     }
@@ -435,9 +438,8 @@ public class TransactionService {
         MessageUtil.sendMessage(channel, builder.build());
 
 
-
         ServerPacket.TradeResp.Builder builder1 = ServerPacket.TradeResp.newBuilder();
-        builder1.setData("");
+        builder1.setData(resp);
         MessageUtil.sendMessage(channelStart, builder1.build());
         MessageUtil.sendMessage(channelEnd, builder1.build());
         return;
@@ -602,7 +604,8 @@ public class TransactionService {
             user.getUserBag().add(userbag);
             return;
         }
-        if (userbag.getTypeof().equals(BaseGood.MPMEDICINE)) {
+        if (userbag.getTypeof().equals(BaseGood.MPMEDICINE) || userbag.getTypeof().equals(BaseGood.HPMEDICINE)
+                || userbag.getTypeof().equals(BaseGood.CHANGEGOOD)) {
             if (userbag.getNum() == Integer.parseInt(num)) {
                 userBag.remove(userbag.getId());
             } else {
@@ -662,33 +665,19 @@ public class TransactionService {
         resp += trade.getUserStart().getUsername() + "放到交易单上的物品" + System.getProperty("line.separator");
         resp += trade.getUserStart().getUsername() + "的交易金币：" + trade.getStartMoney().toString() + System.getProperty("line.separator");
         for (Map.Entry<String, Userbag> entry : trade.getStartUserBag().entrySet()) {
-            resp += trade.getUserStart().getUsername() + "的背包格子为" + entry.getValue().getId() + "物品为:" + getUserbagInfoByUserbag(entry.getValue()) + "物品数量：" + entry.getValue().getNum() + System.getProperty("line.separator");
+            resp += trade.getUserStart().getUsername() + "的背包格子为: " + userbagService.getGoodNameByUserbag(entry.getValue()) + System.getProperty("line.separator");
         }
         resp += MessageConfig.MESSAGEMID + System.getProperty("line.separator");
         resp += trade.getUserTo().getUsername() + "放到交易单上的物品" + System.getProperty("line.separator");
         resp += trade.getUserTo().getUsername() + "的交易金币" + trade.getToMoney().toString() + System.getProperty("line.separator");
         for (Map.Entry<String, Userbag> entry : trade.getToUserBag().entrySet()) {
-            resp += trade.getUserTo().getUsername() + "的背包格子为" + entry.getValue().getId() + "物品为:" + getUserbagInfoByUserbag(entry.getValue()) + "物品数量：" + entry.getValue().getNum() + System.getProperty("line.separator");
+            resp += trade.getUserTo().getUsername() + "的背包格子为: " + "物品为:" + userbagService.getGoodNameByUserbag(entry.getValue()) + System.getProperty("line.separator");
         }
         resp += MessageConfig.MESSAGEEND + System.getProperty("line.separator");
+
+        userbagService.refreshUserbagInfo(ChannelUtil.userToChannelMap.get(trade.getUserTo()), null);
+        userbagService.refreshUserbagInfo(ChannelUtil.userToChannelMap.get(trade.getUserStart()), null);
         return resp;
     }
 
-    /**
-     * 获取物品名字
-     *
-     * @param userbag
-     * @return
-     */
-    private String getUserbagInfoByUserbag(Userbag userbag) {
-        if (userbag.getTypeof().equals(BaseGood.MPMEDICINE)) {
-            MpMedicine mpMedicine = MpMedicineResourceLoad.mpMedicineMap.get(userbag.getWid());
-            return mpMedicine.getName();
-        }
-        if (userbag.getTypeof().equals(BaseGood.EQUIPMENT)) {
-            Equipment equipment = EquipmentResourceLoad.equipmentMap.get(userbag.getWid());
-            return equipment.getName();
-        }
-        return null;
-    }
 }
