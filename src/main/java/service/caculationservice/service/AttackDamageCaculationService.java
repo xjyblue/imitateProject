@@ -57,7 +57,8 @@ public class AttackDamageCaculationService {
 //                  武器星级加成
                     BigInteger equipAttackValue = BigInteger.valueOf(equipment.getAddValue());
                     if (!weaponequipmentbar.getStartlevel().equals(0)) {
-                        equipAttackValue = equipAttackValue.multiply(BigInteger.valueOf(weaponequipmentbar.getStartlevel()));
+                        equipAttackValue = equipAttackValue.multiply(BigInteger.valueOf(weaponequipmentbar.getStartlevel()
+                        ));
                     }
                     attackDamage = attackDamage.add(equipAttackValue);
                     weaponequipmentbar.setDurability(weaponequipmentbar.getDurability() - 1);

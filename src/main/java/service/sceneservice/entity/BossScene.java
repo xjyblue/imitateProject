@@ -683,7 +683,7 @@ public class BossScene extends BaseThread implements Runnable {
             }
             Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
 
-//           怪物带攻击技能buff
+//          怪物带攻击技能buff
             if (monsterSkill.getBuffMap() != null) {
 //              检查是否为集体攻击,锁定我们的攻击目标
                 List<User> listTarget = null;
@@ -694,18 +694,26 @@ public class BossScene extends BaseThread implements Runnable {
                     listTarget.add(userTarget);
                 }
 
+//              走特殊(带buff的)技能不用往下走
+                boolean flag = false;
                 for (Map.Entry<String, Integer> entryBuf : monsterSkill.getBuffMap().entrySet()) {
                     if (entryBuf.getKey().equals(BuffConstant.SLEEPBUFF) && userTarget.getBuffMap().get(BuffConstant.SLEEPBUFF) != 5001) {
-                        sleepAttack(listTarget, monster, monsterSkill, entryBuf.getValue());
+                        sleepAttack(listTarget, monster, monsterSkill, entryBuf.getValue(), flag);
+                        flag = true;
                     } else if (entryBuf.getKey().equals(BuffConstant.POISONINGBUFF) && userTarget.getBuffMap().get(BuffConstant.POISONINGBUFF) != 2001) {
-                        poisonAttack(listTarget, monster, monsterSkill, entryBuf.getValue());
+                        poisonAttack(listTarget, monster, monsterSkill, entryBuf.getValue(), flag);
+                        flag = true;
                     } else {
-//                      普通攻击
-                        commonAttack(listTarget, monster, monsterSkill);
+//                      全体攻击
+                        commonAttack(listTarget, monster, monsterSkill, flag);
+                        flag = true;
                     }
                 }
+                if (flag) {
+                    return;
+                }
             }
-
+//          普通单体攻击
 //          减伤buff处理
             BigInteger monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, userTarget, entry.getValue());
 
@@ -738,11 +746,14 @@ public class BossScene extends BaseThread implements Runnable {
 
     }
 
-    private void sleepAttack(List<User> listTarget, Monster monster, MonsterSkill monsterSkill, Integer buffId) {
+    private void sleepAttack(List<User> listTarget, Monster monster, MonsterSkill monsterSkill, Integer buffId, boolean flag) {
+        BigInteger monsterSkillDamage = new BigInteger(monsterSkill.getDamage());
         for (User user : listTarget) {
-//                      减伤buff处理
-            BigInteger monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, user, user);
-//                      改变用户buff状态，设置用户buff时间
+            if (!flag) {
+//              减伤buff处理
+                monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, user, user);
+            }
+//           改变用户buff状态，设置用户buff时间
             Buff buff = BuffResourceLoad.buffMap.get(buffId);
             user.getBuffMap().put(BuffConstant.SLEEPBUFF, 5001);
             user.getUserBuffEndTimeMap().put(BuffConstant.SLEEPBUFF, System.currentTimeMillis() + buff.getKeepTime() * 1000);
@@ -754,10 +765,13 @@ public class BossScene extends BaseThread implements Runnable {
         }
     }
 
-    private void poisonAttack(List<User> listTarget, Monster monster, MonsterSkill monsterSkill, Integer buffId) {
+    private void poisonAttack(List<User> listTarget, Monster monster, MonsterSkill monsterSkill, Integer buffId, boolean flag) {
+        BigInteger monsterSkillDamage = new BigInteger(monsterSkill.getDamage());
         for (User user : listTarget) {
-//           减伤buff处理
-            BigInteger monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, user, user);
+            if (!flag) {
+//              减伤buff处理
+                monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, user, user);
+            }
 //           改变用户buff状态，设置用户buff时间
             Buff buff = BuffResourceLoad.buffMap.get(buffId);
             user.getBuffMap().put(BuffConstant.POISONINGBUFF, 2001);
@@ -798,9 +812,12 @@ public class BossScene extends BaseThread implements Runnable {
      * @param monster
      * @param monsterSkill
      */
-    private void commonAttack(List<User> list, Monster monster, MonsterSkill monsterSkill) {
+    private void commonAttack(List<User> list, Monster monster, MonsterSkill monsterSkill, boolean flag) {
+        BigInteger monsterSkillDamage = new BigInteger(monsterSkill.getDamage());
         for (User user : list) {
-            BigInteger monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, user, user);
+            if (!flag) {
+                monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, user, user);
+            }
             Channel channelTemp = ChannelUtil.userToChannelMap.get(user);
             hpCaculationService.subUserHp(user, monsterSkillDamage.toString());
             String resp = "怪物使用了全体攻击技能,对所有人造成攻击:"
@@ -811,7 +828,7 @@ public class BossScene extends BaseThread implements Runnable {
                     + "-----怪物血量:" + monster.getValueOfLife();
             ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
             builder.setData(resp);
-            MessageUtil.sendMessage(channelTemp,builder.build());
+            MessageUtil.sendMessage(channelTemp, builder.build());
         }
     }
 
