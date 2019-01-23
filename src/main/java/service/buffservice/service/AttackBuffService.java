@@ -65,7 +65,6 @@ public class AttackBuffService {
             if (entry.getKey().equals(BuffConstant.DEFENSEBUFF)) {
                 defendBuffSolve(user, entry.getValue());
             }
-
 //          人物集体治疗
             if (entry.getKey().equals(BuffConstant.TREATMENTBUFF)) {
                 treatBuffSolve(user, entry.getValue());
@@ -131,6 +130,9 @@ public class AttackBuffService {
                     hpCaculationService.subMonsterHp(monsterTemp, userSkill.getDamage());
                 }
             }
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData("你使用了" + userSkill.getSkillName() + "对怪物造成了集体伤害" + userSkill.getDamage());
+            MessageUtil.sendMessage(channelTemp, builder.build());
         }
         return BUFF_ATTACK_FLAG;
     }

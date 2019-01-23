@@ -244,15 +244,16 @@ public class AttackService {
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
+
         UserSkill userSkill = UserSkillResourceLoad.skillMap.get(user.getUserskillrelationMap().get(msg).getSkillid());
         Userskillrelation userskillrelation = user.getUserskillrelationMap().get(msg);
 
-        //战斗前置检查，技能buff、mp值、是否被控等
+        //战斗前置检查，技能buff、mp值、是否被控、特殊技能走特殊分支等
         if (preAttackCheck(channel, user, monster, userSkill, userskillrelation)) {
             return;
         }
 
-        //红蓝计算，返回伤害
+        //攻击伤害计算，返回伤害
         BigInteger attackDamage = attackCaculation(user, monster, userSkill);
 
         //输出语句拼接
@@ -278,7 +279,6 @@ public class AttackService {
                     rewardService.extraBonus(user, channel);
                 }
             }
-
             //普通战斗场景
             if (monster.getType().equals(Monster.TYPEOFCOMMONMONSTER)) {
                 //移除死掉的怪物
@@ -313,25 +313,26 @@ public class AttackService {
      * @return
      */
     private boolean preAttackCheck(Channel channel, User user, Monster monster, UserSkill userSkill, Userskillrelation userskillrelation) {
-        //      人物蓝量检查
+//      人物蓝量检查
         if (!mpCaculationService.checkUserMpEnough(user, userSkill)) {
             return true;
         }
-        //      技能CD检查
+//      技能CD检查
         if (!skillService.checkUserSkillCd(userskillrelation, channel)) {
             return true;
         }
-        //      判断用户是否被技能控制，是否为解控技能解除控制
+//      判断用户是否被技能控制，是否为解控技能解除控制
         if (!restraintBuffService.restraintBuff(userSkill, user, userskillrelation, monster)) {
             return true;
         }
-        //      更新技能cd
+//      更新技能cd
         skillService.refreshUserSkillCd(userSkill, userskillrelation);
-        //      技能buff处理
+//      蓝量计算
+        mpCaculationService.subUserMp(user, userSkill.getSkillMp());
+//      技能buff处理，特殊技能无需向下走
         if (attackBuffService.buffSolve(userskillrelation, userSkill, monster, user) == AttackBuffService.BUFF_ATTACK_FLAG) {
             return true;
         }
-
         return false;
     }
 
@@ -384,22 +385,39 @@ public class AttackService {
 
 //      战斗前置检查
         if (preAttackCheck(channel, user, monster, userSkill, userskillrelation)) {
+//          激活战斗
+            activateCombat(channel, user, monster, null);
             return;
         }
-//      激活第一次攻击需要的特殊buff
+//      战斗激活特殊特殊buff
         firstAttackBuffStart(user);
 
-        //红、蓝计算
+        //技能伤害计算
         BigInteger attackDamage = attackCaculation(user, monster, userSkill);
 
         //输出语句拼接
         String resp = out(user, userSkill, monster, attackDamage.toString());
 
+//      激活战斗
+        activateCombat(channel, user, monster, resp);
+    }
+
+    /**
+     * 战斗触发
+     *
+     * @param channel
+     * @param user
+     * @param monster
+     * @param resp
+     * @throws IOException
+     */
+    private void activateCombat(Channel channel, User user, Monster monster, String resp) throws IOException {
         if (monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
 //          初始化人物buff
             userService.initUserBuff(user);
-            resp += System.getProperty("line.separator")
-                    + "怪物已死亡";
+            if (resp == null) {
+                resp = "怪物已死亡";
+            }
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(resp);
             MessageUtil.sendMessage(channel, builder.build());
@@ -418,9 +436,11 @@ public class AttackService {
         } else {
             //切换到攻击模式
             ChannelUtil.channelStatus.put(channel, ChannelStatus.ATTACK);
-            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(resp);
-            MessageUtil.sendMessage(channel, builder.build());
+            if (resp != null) {
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(resp);
+                MessageUtil.sendMessage(channel, builder.build());
+            }
             //记录当前攻击的目标
             user.getUserToMonsterMap().put(monster.getId(), monster);
             //提醒用户你已进入战斗模式
@@ -439,9 +459,7 @@ public class AttackService {
      * @return
      */
     private BigInteger attackCaculation(User user, Monster monster, UserSkill userSkill) {
-        //      蓝量计算
-        mpCaculationService.subUserMp(user, userSkill.getSkillMp());
-        //      攻击伤害计算    怪物掉血，生命值计算逻辑
+        //攻击伤害计算，怪物掉血，生命值计算逻辑
         BigInteger attackDamage = attackDamageCaculationService.caculate(user, userSkill.getDamage());
         hpCaculationService.subMonsterHp(monster, attackDamage.toString());
         return attackDamage;
@@ -531,7 +549,7 @@ public class AttackService {
         }
 //      激活第一次攻击需要的特殊buff
         firstAttackBuffStart(user);
-//      蓝量计算
+//      技能伤害计算
         BigInteger attackDamage = attackCaculation(user, monster, userSkill);
 
         AttackUtil.addMonsterToUserMonsterList(user, monster);

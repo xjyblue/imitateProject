@@ -27,7 +27,7 @@ public class ByteToProtoBufDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf byteBuf, List<Object> out) throws Exception {
         try {
-            if (!ctx.channel().isActive()) {
+            if (byteBuf.readableBytes() < REDUCE_LENGTH) {
                 return;
             }
 //          配合下面使用，标记位

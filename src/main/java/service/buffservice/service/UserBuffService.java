@@ -122,7 +122,7 @@ public class UserBuffService {
     private void refreshUserMpBuff(User user) {
 //      自动回蓝
         BigInteger userMp = new BigInteger(user.getMp());
-        BigInteger maxMp = new BigInteger(levelService.getMaxHp(user));
+        BigInteger maxMp = new BigInteger(levelService.getMaxMp(user));
         if (userMp.compareTo(maxMp) < 0) {
             if (user.getBuffMap().get(BuffConstant.MPBUFF).equals(GrobalConfig.MP_DEFAULTVALUE)) {
                 userMp = userMp.add(add);

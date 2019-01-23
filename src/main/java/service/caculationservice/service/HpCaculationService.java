@@ -34,7 +34,7 @@ public class HpCaculationService {
      */
     public void addUserHp(User user, String recoverValue) {
         Integer userHp = Integer.parseInt(user.getHp());
-        Integer maxHp = Integer.parseInt(levelService.getMaxMp(user));
+        Integer maxHp = Integer.parseInt(levelService.getMaxHp(user));
         Integer recoverHp = Integer.parseInt(recoverValue);
         userHp += recoverHp;
         if (userHp > maxHp) {
