@@ -90,12 +90,11 @@ public class PkService {
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
-        BigInteger attackDamage = attackDamageCaculationService.caculate(user, userSkill.getDamage());
+        Integer attackDamage = attackDamageCaculationService.caculate(user, userSkill.getDamage());
 //      人物蓝量校验
-        BigInteger userSkillMp = new BigInteger(userSkill.getSkillMp());
-        BigInteger userMp = new BigInteger(user.getMp());
-        BigInteger minHp = new BigInteger(GrobalConfig.MINVALUE);
-        if (userSkillMp.compareTo(userMp) > 0) {
+        Integer userSkillMp = Integer.parseInt(userSkill.getSkillMp());
+        Integer userMp = Integer.parseInt(user.getMp());
+        if (userSkillMp > userMp) {
             builder.setData(MessageConfig.UNENOUGHMP);
             MessageUtil.sendMessage(channel, builder.build());
             return;
@@ -110,7 +109,7 @@ public class PkService {
         userskillrelation.setSkillcds(System.currentTimeMillis());
         hpCaculationService.subUserHp(userTarget, attackDamage.toString());
 //      人物死亡处理
-        if (new BigInteger(userTarget.getHp()).compareTo(minHp) <= 0) {
+        if (Integer.parseInt(userTarget.getHp()) < GrobalConfig.ZERO) {
             userTarget.setHp(GrobalConfig.MINVALUE);
             userTarget.setStatus(GrobalConfig.DEAD);
             String resp = "你受到来自：" + user.getUsername() + "的" + userSkill.getSkillName() + "的攻击，伤害为["

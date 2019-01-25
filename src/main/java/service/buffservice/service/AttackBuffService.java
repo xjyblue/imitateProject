@@ -116,10 +116,9 @@ public class AttackBuffService {
 
             BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
             for (Map.Entry<String, Monster> monsterEntry : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {
-                hpCaculationService.subMonsterHp(monsterEntry.getValue(), userSkill.getDamage());
-                BigInteger monsterLife = new BigInteger(monsterEntry.getValue().getValueOfLife());
-                BigInteger minLife = new BigInteger(GrobalConfig.MINVALUE);
-                if (monsterLife.compareTo(minLife) <= 0) {
+                hpCaculationService.subMonsterHp(monsterEntry.getValue(), Integer.parseInt(userSkill.getDamage()));
+                Integer monsterLife = Integer.parseInt(monsterEntry.getValue().getValueOfLife());
+                if (monsterLife <= GrobalConfig.ZERO) {
                     monsterEntry.getValue().setValueOfLife(GrobalConfig.MINVALUE);
                     monsterEntry.getValue().setStatus(GrobalConfig.DEAD);
                 }
@@ -127,7 +126,7 @@ public class AttackBuffService {
         } else {
             for (Monster monsterTemp : SceneResourceLoad.sceneMap.get(user.getPos()).getMonsters()) {
                 if (monsterTemp.getStatus().equals(GrobalConfig.ALIVE)) {
-                    hpCaculationService.subMonsterHp(monsterTemp, userSkill.getDamage());
+                    hpCaculationService.subMonsterHp(monsterTemp, Integer.parseInt(userSkill.getDamage()));
                 }
             }
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
@@ -206,15 +205,15 @@ public class AttackBuffService {
      * @param user
      * @return
      */
-    public BigInteger monsterAttackDefendBuff(BigInteger monsterDamage, User user) {
+    public Integer monsterAttackDefendBuff(Integer monsterDamage, User user) {
         if (BuffResourceLoad.buffMap.containsKey(user.getBuffMap().get(BuffConstant.DEFENSEBUFF))) {
             Buff buff = BuffResourceLoad.buffMap.get(user.getBuffMap().get(BuffConstant.DEFENSEBUFF));
-            if (monsterDamage.compareTo(new BigInteger(buff.getInjurySecondValue())) <= 0) {
+            Integer buffDefence = Integer.parseInt(buff.getInjurySecondValue());
+            if (monsterDamage <= buffDefence) {
 //              相当于没有攻击
-                return new BigInteger(GrobalConfig.MINVALUE);
+                return GrobalConfig.ZERO;
             }
-            BigInteger buffDefence = new BigInteger(buff.getInjurySecondValue());
-            monsterDamage = monsterDamage.subtract(buffDefence);
+            monsterDamage -= buffDefence;
             return monsterDamage;
         }
         return monsterDamage;

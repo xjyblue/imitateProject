@@ -456,7 +456,7 @@ public class LabourUnionService {
         List<User> users = userMapper.selectByUnionId(unioninfo.getUnionid());
         String resp = "";
         for (User userTemp : users) {
-            resp += "用户名 [ " + userTemp.getUsername() + " ] 用户工会等级 [ " + userTemp.getUnionlevel() + " ] " + System.getProperty("line.separator");
+            resp += String.format(MessageConfig.SHOW_UNION_MEN, userTemp.getUsername(), String.valueOf(userTemp.getUnionlevel()));
         }
         ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
         builder.setData(MessageConfig.UNIONMSG + resp);

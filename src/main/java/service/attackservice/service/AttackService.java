@@ -254,7 +254,7 @@ public class AttackService {
         }
 
         //攻击伤害计算，返回伤害
-        BigInteger attackDamage = attackCaculation(user, monster, userSkill);
+        Integer attackDamage = attackCaculation(user, monster, userSkill);
 
         //输出语句拼接
         String resp = out(user, userSkill, monster, attackDamage.toString());
@@ -342,12 +342,13 @@ public class AttackService {
      * @param user
      * @param attackDamage
      */
-    private void refreshUserDamageInBossScene(User user, BigInteger attackDamage) {
+    private void refreshUserDamageInBossScene(User user, Integer attackDamage) {
         if (!BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()).getDamageAll().containsKey(user)) {
             BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()).getDamageAll().put(user, attackDamage.toString());
         } else {
             String newDamageValue = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()).getDamageAll().get(user);
-            BigInteger newDamageValueI = new BigInteger(newDamageValue).add(attackDamage);
+            Integer newDamageValueI = Integer.parseInt(newDamageValue);
+            newDamageValueI += attackDamage;
             BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()).getDamageAll().put(user, newDamageValueI.toString());
         }
     }
@@ -393,7 +394,7 @@ public class AttackService {
         firstAttackBuffStart(user);
 
         //技能伤害计算
-        BigInteger attackDamage = attackCaculation(user, monster, userSkill);
+        Integer attackDamage = attackCaculation(user, monster, userSkill);
 
         //输出语句拼接
         String resp = out(user, userSkill, monster, attackDamage.toString());
@@ -458,10 +459,10 @@ public class AttackService {
      * @param userSkill
      * @return
      */
-    private BigInteger attackCaculation(User user, Monster monster, UserSkill userSkill) {
+    private Integer attackCaculation(User user, Monster monster, UserSkill userSkill) {
         //攻击伤害计算，怪物掉血，生命值计算逻辑
-        BigInteger attackDamage = attackDamageCaculationService.caculate(user, userSkill.getDamage());
-        hpCaculationService.subMonsterHp(monster, attackDamage.toString());
+        Integer attackDamage = attackDamageCaculationService.caculate(user, userSkill.getDamage());
+        hpCaculationService.subMonsterHp(monster, attackDamage);
         return attackDamage;
     }
 
@@ -550,7 +551,7 @@ public class AttackService {
 //      激活第一次攻击需要的特殊buff
         firstAttackBuffStart(user);
 //      技能伤害计算
-        BigInteger attackDamage = attackCaculation(user, monster, userSkill);
+        Integer attackDamage = attackCaculation(user, monster, userSkill);
 
         AttackUtil.addMonsterToUserMonsterList(user, monster);
 

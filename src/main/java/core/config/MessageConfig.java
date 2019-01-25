@@ -131,6 +131,7 @@ public class MessageConfig {
     public static final String NOENOUGHMONEYTOGIVE = "你的金币数额不足";
     public static final String SUCCESSGIVEMONEYTOUNION = "成功向工会捐献了金币";
     public static final String SUCCESS_OUT_UNION = "成功退出工会";
+    public static final String SHOW_UNION_MEN = "用户名 [ %s ] 用户工会等级 [ %s ] " + System.getProperty("line.separator");
 
     public static final String FRIENDMSG = "欢迎来到好友管理界面，sqfriend=用户名申请新的好友，lsfriend 查看好友申请"
             + "removefriend=好友名称 解除好友关系" + System.getProperty("line.separator")

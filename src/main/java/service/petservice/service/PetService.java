@@ -52,7 +52,7 @@ public class PetService {
         PetConfig petConfig = PetResourceLoad.petConfigMap.get(GrobalConfig.DEFAULT_PET);
         PetSkillConfig petSkillConfig = getPetSkill(user);
 //      这里可以附加宠物技能伤害，比如根据宠物等级等
-        hpCaculationService.subMonsterHp(monster, petSkillConfig.getDamage().toString());
+        hpCaculationService.subMonsterHp(monster, petSkillConfig.getDamage());
         ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
         builder.setData("你的宠物:" + petConfig.getName() + "对怪物使用了" + petSkillConfig.getSkillName()
                 + "技能，造成伤害:" + petSkillConfig.getDamage());

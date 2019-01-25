@@ -78,8 +78,7 @@ public class HpCaculationService {
      * @param monster
      * @param subValue
      */
-    public void subMonsterHp(Monster monster, String subValue) {
-        Integer subHp = Integer.parseInt(subValue);
+    public void subMonsterHp(Monster monster, Integer subHp) {
         Integer monsterHp = Integer.parseInt(monster.getValueOfLife());
         monsterHp -= subHp;
         if (monsterHp < 0) {

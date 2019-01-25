@@ -40,13 +40,12 @@ public class AttackDamageCaculationService {
      * @param
      * @return
      */
-    public BigInteger caculate(User user, String attackDamageValue) {
-        BigInteger attackDamage = new BigInteger(attackDamageValue);
+    public Integer caculate(User user, String attackDamageValue) {
+        Integer attackDamage = Integer.parseInt(attackDamageValue);
 
 //      等级加成处理
         Level level = LevelResourceLoad.levelMap.get(levelService.getLevelByExperience(user.getExperience()));
-        BigInteger levelUp = new BigInteger(level.getUpAttack() + "");
-        attackDamage = attackDamage.add(levelUp);
+        attackDamage += level.getUpAttack();
 
 //      单一装备加成处理
         if (user.getWeaponequipmentbars() != null) {
@@ -55,12 +54,11 @@ public class AttackDamageCaculationService {
 //              武器加成
                 if (weaponequipmentbar.getDurability() > 0) {
 //                  武器星级加成
-                    BigInteger equipAttackValue = BigInteger.valueOf(equipment.getAddValue());
+                    Integer equipAttackValue = equipment.getAddValue();
                     if (!weaponequipmentbar.getStartlevel().equals(0)) {
-                        equipAttackValue = equipAttackValue.multiply(BigInteger.valueOf(weaponequipmentbar.getStartlevel()
-                        ));
+                        equipAttackValue *= weaponequipmentbar.getStartlevel();
                     }
-                    attackDamage = attackDamage.add(equipAttackValue);
+                    attackDamage += equipAttackValue;
                     weaponequipmentbar.setDurability(weaponequipmentbar.getDurability() - 1);
                 }
             }
@@ -77,19 +75,19 @@ public class AttackDamageCaculationService {
      * @param target
      * @return
      */
-    public BigInteger dealDefenseBuff(MonsterSkill monsterSkill, User user, User target) {
+    public Integer dealDefenseBuff(MonsterSkill monsterSkill, User user, User target) {
+        Integer monsterSkillDamage = Integer.parseInt(monsterSkill.getDamage());
         if (user.getBuffMap().get(BuffConstant.DEFENSEBUFF) != GrobalConfig.DEFENSEBUFF_DEFAULTVALUE && user == target) {
             Buff buff = BuffResourceLoad.buffMap.get(user.getBuffMap().get(BuffConstant.DEFENSEBUFF));
-            BigInteger mosterSkillDamage = new BigInteger(monsterSkill.getDamage());
-            BigInteger buffDefenceDamage = new BigInteger(buff.getInjurySecondValue());
-            mosterSkillDamage = mosterSkillDamage.subtract(buffDefenceDamage);
+            Integer buffDefenceDamage = Integer.parseInt(buff.getInjurySecondValue());
+            monsterSkillDamage -= buffDefenceDamage;
             Channel channelTemp = ChannelUtil.userToChannelMap.get(user);
             ServerPacket.UserbufResp.Builder builder = ServerPacket.UserbufResp.newBuilder();
             builder.setData("人物减伤buff减伤：" + buff.getInjurySecondValue() + "人物剩余血量：" + user.getHp());
             MessageUtil.sendMessage(channelTemp, builder.build());
-            return mosterSkillDamage;
+            return monsterSkillDamage;
         }
-        return new BigInteger(monsterSkill.getDamage());
+        return monsterSkillDamage;
 
     }
 }

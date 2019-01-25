@@ -25,7 +25,6 @@ import utils.MessageUtil;
 import utils.SpringContextUtil;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -264,7 +263,7 @@ public class Scene extends BaseThread implements Runnable {
                             monster.setAttackEndTime(System.currentTimeMillis() + 1000);
                         }
 
-                        BigInteger monsterDamage = new BigInteger(monster.getMonsterSkillList().get(0).getDamage());
+                        Integer monsterDamage = Integer.parseInt(monster.getMonsterSkillList().get(0).getDamage());
 //                      怪物攻击对人物造成伤害处理buff处理
                         monsterDamage = attackBuffService.monsterAttackDefendBuff(monsterDamage, user);
                         Buff buff = BuffResourceLoad.buffMap.get(user.getBuffMap().get(BuffConstant.DEFENSEBUFF));
@@ -306,7 +305,7 @@ public class Scene extends BaseThread implements Runnable {
 
 
     private boolean checkMonsterStatus(Channel channel, Monster monster, User user) throws IOException {
-        if (monster != null && new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger(GrobalConfig.MINVALUE)) <= 0) {
+        if (monster != null && Integer.parseInt(monster.getValueOfLife()) <= GrobalConfig.ZERO) {
             monster.setValueOfLife(GrobalConfig.MINVALUE);
             monster.setStatus(GrobalConfig.DEAD);
             user.getUserToMonsterMap().remove(monster.getId());

@@ -65,7 +65,7 @@ public class GrobalConfig {
     /**
      * 人物每秒自动回复的蓝量
      */
-    public static final String MPSECONDVALUE = "1000";
+    public static final String MPSECONDVALUE = "10";
     /**
      * 进入副本的最低等级
      */

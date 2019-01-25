@@ -112,9 +112,7 @@ public class ClientHandler extends ChannelHandlerAdapter {
             resp += "客户端收到：" + respData + System.getProperty("line.separator");
             jTextArea.setText(resp);
             jTextArea.setCaretPosition(jTextArea.getDocument().getLength());
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
+        }  finally {
             ReferenceCountUtil.release(msg);
         }
     }

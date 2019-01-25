@@ -31,7 +31,6 @@ import utils.MessageUtil;
 import utils.SpringContextUtil;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -434,9 +433,9 @@ public class BossScene extends BaseThread implements Runnable {
     private void solveOneDead(Monster monster) {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             User userTarget = entry.getValue();
-            BigInteger userHp = new BigInteger(userTarget.getHp());
+            Integer userHp = Integer.parseInt(userTarget.getHp());
             Channel channelTarget = ChannelUtil.userToChannelMap.get(userTarget);
-            if (userHp.compareTo(new BigInteger(GrobalConfig.MINVALUE)) <= 0) {
+            if (userHp <= GrobalConfig.ZERO) {
                 userTarget.setHp(GrobalConfig.MINVALUE);
                 userTarget.setStatus(GrobalConfig.DEAD);
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
@@ -715,11 +714,11 @@ public class BossScene extends BaseThread implements Runnable {
             }
 //          普通单体攻击
 //          减伤buff处理
-            BigInteger monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, userTarget, entry.getValue());
+            Integer monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, userTarget, entry.getValue());
 
             if (entry.getValue().getUsername().equals(userTarget.getUsername())) {
 //              扣血
-                hpCaculationService.subUserHp(userTarget, monsterSkillDamage.toString());
+                hpCaculationService.subUserHp(userTarget, String.valueOf(monsterSkillDamage));
                 resp = "怪物的仇恨值在你身上"
                         + "----怪物名称:" + monster.getName()
                         + "-----怪物技能:" + monsterSkill.getSkillName()
@@ -747,7 +746,7 @@ public class BossScene extends BaseThread implements Runnable {
     }
 
     private void sleepAttack(List<User> listTarget, Monster monster, MonsterSkill monsterSkill, Integer buffId, boolean flag) {
-        BigInteger monsterSkillDamage = new BigInteger(monsterSkill.getDamage());
+        Integer monsterSkillDamage = Integer.parseInt(monsterSkill.getDamage());
         for (User user : listTarget) {
             if (!flag) {
 //              减伤buff处理
@@ -766,7 +765,7 @@ public class BossScene extends BaseThread implements Runnable {
     }
 
     private void poisonAttack(List<User> listTarget, Monster monster, MonsterSkill monsterSkill, Integer buffId, boolean flag) {
-        BigInteger monsterSkillDamage = new BigInteger(monsterSkill.getDamage());
+        Integer monsterSkillDamage = Integer.parseInt(monsterSkill.getDamage());
         for (User user : listTarget) {
             if (!flag) {
 //              减伤buff处理
@@ -813,7 +812,7 @@ public class BossScene extends BaseThread implements Runnable {
      * @param monsterSkill
      */
     private void commonAttack(List<User> list, Monster monster, MonsterSkill monsterSkill, boolean flag) {
-        BigInteger monsterSkillDamage = new BigInteger(monsterSkill.getDamage());
+        Integer monsterSkillDamage = Integer.parseInt(monsterSkill.getDamage());
         for (User user : list) {
             if (!flag) {
                 monsterSkillDamage = attackDamageCaculationService.dealDefenseBuff(monsterSkill, user, user);
@@ -840,22 +839,22 @@ public class BossScene extends BaseThread implements Runnable {
             }
         }
 //      无嘲讽对象选取最大伤害
-        BigInteger max = new BigInteger(GrobalConfig.MINVALUE);
+        Integer max = GrobalConfig.ZERO;
         User userTarget = null;
         for (Map.Entry<User, String> entry : bossScene.getDamageAll().entrySet()) {
-            BigInteger temp = new BigInteger(entry.getValue());
-            if (temp.compareTo(max) > 0 && !entry.getKey().getStatus().equals(GrobalConfig.DEAD)) {
+            Integer temp = Integer.parseInt(entry.getValue());
+            if (temp > max && !entry.getKey().getStatus().equals(GrobalConfig.DEAD)) {
                 max = temp;
                 userTarget = entry.getKey();
             }
         }
-        if (userTarget == null) {
-            for (Map.Entry<String, User> entry : TeamCache.teamMap.get(bossScene.getTeamId()).getUserMap().entrySet()) {
-                if (!entry.getValue().getStatus().equals(GrobalConfig.DEAD)) {
-                    userTarget = entry.getValue();
-                }
-            }
-        }
+//        if (userTarget == null) {
+//            for (Map.Entry<String, User> entry : TeamCache.teamMap.get(bossScene.getTeamId()).getUserMap().entrySet()) {
+//                if (!entry.getValue().getStatus().equals(GrobalConfig.DEAD)) {
+//                    userTarget = entry.getValue();
+//                }
+//            }
+//        }
         return userTarget;
     }
 

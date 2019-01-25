@@ -42,7 +42,7 @@ public class UserBuffService {
     @Autowired
     private PetService petService;
 
-    private BigInteger add = new BigInteger(GrobalConfig.MPSECONDVALUE);
+    private Integer add = Integer.parseInt(GrobalConfig.MPSECONDVALUE);
 
     private HpCaculationService hpCaculationService;
 
@@ -121,12 +121,12 @@ public class UserBuffService {
      */
     private void refreshUserMpBuff(User user) {
 //      自动回蓝
-        BigInteger userMp = new BigInteger(user.getMp());
-        BigInteger maxMp = new BigInteger(levelService.getMaxMp(user));
+        Integer userMp = Integer.parseInt(user.getMp());
+        Integer maxMp = Integer.parseInt(levelService.getMaxMp(user));
         if (userMp.compareTo(maxMp) < 0) {
             if (user.getBuffMap().get(BuffConstant.MPBUFF).equals(GrobalConfig.MP_DEFAULTVALUE)) {
-                userMp = userMp.add(add);
-                if (userMp.compareTo(maxMp) > 0) {
+                userMp += add;
+                if (userMp > maxMp) {
                     userMp = maxMp;
                 }
                 user.setMp(userMp.toString());
@@ -135,15 +135,16 @@ public class UserBuffService {
                 MpMedicine mpMedicine = MpMedicineResourceLoad.mpMedicineMap.get(user.getBuffMap().get(BuffConstant.MPBUFF));
                 Long currentTime = System.currentTimeMillis();
                 if (endTime > currentTime) {
-                    userMp = userMp.add(new BigInteger(mpMedicine.getSecondValue()));
-                    if (userMp.compareTo(maxMp) >= 0) {
+                    userMp += Integer.parseInt(mpMedicine.getSecondValue());
+                    if (userMp >= maxMp) {
                         userMp = maxMp;
                     }
                     user.setMp(userMp.toString());
-                } else {
+                }else {
                     user.getBuffMap().put(BuffConstant.MPBUFF, 1000);
-                    userMp = userMp.add(new BigInteger("10"));
-                    if (userMp.compareTo(maxMp) >= 0) {
+//                  buff转换衔接地
+                    userMp += add;
+                    if (userMp > maxMp) {
                         userMp = maxMp;
                     }
                     user.setMp(userMp.toString());

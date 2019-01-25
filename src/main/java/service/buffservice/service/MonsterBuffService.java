@@ -45,7 +45,7 @@ public class MonsterBuffService {
             Long endTime = monster.getMonsterBuffEndTimeMap().get(BuffConstant.POISONINGBUFF);
             if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
                 Buff buff = BuffResourceLoad.buffMap.get(monster.getBufMap().get(BuffConstant.POISONINGBUFF));
-                hpCaculationService.subMonsterHp(monster, buff.getAddSecondValue());
+                hpCaculationService.subMonsterHp(monster, Integer.parseInt(buff.getAddSecondValue()));
 //               处理中毒扣死
                 if (monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
                     monster.setValueOfLife(GrobalConfig.MINVALUE);
@@ -73,9 +73,9 @@ public class MonsterBuffService {
             Long endTime = monster.getMonsterBuffEndTimeMap().get(BuffConstant.POISONINGBUFF);
             if (System.currentTimeMillis() < endTime && !monster.getValueOfLife().equals(GrobalConfig.MINVALUE)) {
                 Buff buff = BuffResourceLoad.buffMap.get(monster.getBufMap().get(BuffConstant.POISONINGBUFF));
-                hpCaculationService.subMonsterHp(monster, buff.getAddSecondValue());
+                hpCaculationService.subMonsterHp(monster, Integer.parseInt(buff.getAddSecondValue()));
 //               处理中毒扣死
-                if (new BigInteger(monster.getValueOfLife()).compareTo(new BigInteger(GrobalConfig.MINVALUE)) < 0) {
+                if (Integer.parseInt(monster.getValueOfLife()) < GrobalConfig.ZERO) {
                     monster.setValueOfLife(GrobalConfig.MINVALUE);
                     monster.setStatus(GrobalConfig.DEAD);
                     monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);

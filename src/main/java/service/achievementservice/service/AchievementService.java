@@ -39,6 +39,7 @@ public class AchievementService {
 
     /**
      * 杀怪任务
+     *
      * @param user
      * @param achievementprocess
      * @param monsterId
@@ -64,7 +65,7 @@ public class AchievementService {
             if (achievementprocess.getProcesss().equals(achievement.getTarget())) {
                 achievementprocess.setIffinish(true);
 //              任务奖励
-                sloveAchievementReward(achievement,user);
+                sloveAchievementReward(achievement, user);
 //              处理父任务
                 sloveParentProcess(user, achievement);
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
@@ -77,6 +78,7 @@ public class AchievementService {
 
     /**
      * 父任务
+     *
      * @param user
      * @param achievement
      */
@@ -116,6 +118,7 @@ public class AchievementService {
 
     /**
      * 升级任务
+     *
      * @param achievementprocess
      * @param user
      * @param achievement
@@ -131,6 +134,7 @@ public class AchievementService {
 
     /**
      * npc交流任务
+     *
      * @param achievementprocess
      * @param user
      * @param achievement
@@ -141,7 +145,7 @@ public class AchievementService {
             achievementprocess.setProcesss(achievement.getTarget());
             achievementprocess.setIffinish(true);
             achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
-            sloveAchievementReward(achievement,user);
+            sloveAchievementReward(achievement, user);
             AchievementUtil.refreshAchievementInfo(user);
 
         }
@@ -149,6 +153,7 @@ public class AchievementService {
 
     /**
      * 成就奖励
+     *
      * @param achievement
      * @param user
      */
@@ -158,8 +163,8 @@ public class AchievementService {
             for (String rewardT : reward) {
                 String[] rewardArr = rewardT.split(":");
 //                  增加经验值
-                if("1".equals(rewardArr[0])){
-                    levelService.upUserLevel(user,rewardArr[1]);
+                if ("1".equals(rewardArr[0])) {
+                    levelService.upUserLevel(user, rewardArr[1]);
                 }
             }
         }
@@ -167,6 +172,7 @@ public class AchievementService {
 
     /**
      * 收集任务
+     *
      * @param achievementprocess
      * @param baseGood
      * @param user
@@ -216,6 +222,7 @@ public class AchievementService {
 
     /**
      * boss挑战成功任务
+     *
      * @param achievementprocess
      * @param user
      * @param achievement
@@ -233,6 +240,7 @@ public class AchievementService {
 
     /**
      * 第一朋友任务
+     *
      * @param achievementprocess
      * @param user
      * @param userTarget
@@ -271,15 +279,16 @@ public class AchievementService {
 
     /**
      * 金钱达到某个数值任务
+     *
      * @param user
      */
     public void executeMoneyAchievement(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
             if (achievementprocessT.getType().equals(Achievement.MONEYFIRST)) {
                 Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocessT.getAchievementid());
-                BigInteger targetMoney = new BigInteger(achievement.getTarget());
-                BigInteger userMoney = new BigInteger(user.getMoney());
-                if (userMoney.compareTo(targetMoney) >= 0) {
+                Integer targetMoney = Integer.parseInt(achievement.getTarget());
+                Integer userMoney = Integer.parseInt(user.getMoney());
+                if (userMoney >= targetMoney) {
                     achievementprocessT.setProcesss(achievement.getTarget());
                     achievementprocessT.setIffinish(true);
                     achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
@@ -292,6 +301,7 @@ public class AchievementService {
 
     /**
      * 第一次加入工会任务
+     *
      * @param user
      * @param username
      */
@@ -320,6 +330,7 @@ public class AchievementService {
 
     /**
      * 更新对方的任务
+     *
      * @param user
      * @param monster
      */
@@ -340,6 +351,7 @@ public class AchievementService {
 
     /**
      * 第一次加入工会任务
+     *
      * @param userStart
      * @param userTo
      */
@@ -354,6 +366,7 @@ public class AchievementService {
 
     /**
      * 更新对方的任务
+     *
      * @param user
      */
     private void updateFirstTradeOnOneUser(User user) {
@@ -369,6 +382,7 @@ public class AchievementService {
 
     /**
      * 第一次组队任务
+     *
      * @param user
      */
     public void executeFirstAddTeam(User user) {
@@ -383,6 +397,7 @@ public class AchievementService {
 
     /**
      * 第一次pk胜利任务
+     *
      * @param user
      */
     public void executeFirstPKWin(User user) {
@@ -397,6 +412,7 @@ public class AchievementService {
 
     /**
      * 装备星级任务
+     *
      * @param user
      */
     public void executeEquipmentStartLevel(User user) {
@@ -414,6 +430,7 @@ public class AchievementService {
 
     /**
      * 校验装备等级总和
+     *
      * @param user
      * @param achievement
      * @return

@@ -2,7 +2,6 @@ package utils;
 
 import com.google.protobuf.MessageLite;
 import io.netty.channel.Channel;
-import io.netty.util.ReferenceCountUtil;
 
 /**
  * @ClassName MessageUtil

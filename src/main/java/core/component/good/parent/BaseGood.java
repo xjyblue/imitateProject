@@ -1,11 +1,5 @@
 package core.component.good.parent;
 
-import core.component.good.Equipment;
-import core.component.good.HpMedicine;
-import core.component.good.MpMedicine;
-import core.context.ProjectContext;
-import pojo.Userbag;
-
 /**
  * @ClassName BaseGood
  * @Description TODO
