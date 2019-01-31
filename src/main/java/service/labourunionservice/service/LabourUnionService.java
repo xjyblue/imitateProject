@@ -643,9 +643,16 @@ public class LabourUnionService {
         }
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getUnionid() != null) {
-            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOCREATEUNION);
-            MessageUtil.sendMessage(channel, builder.build());
+            ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
+            builder1.setData(MessageConfig.UNIONMSG +MessageConfig.NOCREATEUNION);
+            MessageUtil.sendMessage(channel, builder1.build());
+            return;
+        }
+        Unioninfo unioninfoCheck = unioninfoMapper.selectUnionByUnionName(temp[1]);
+        if (unioninfoCheck != null) {
+            ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
+            builder1.setData(MessageConfig.UNIONMSG + MessageConfig.REPEATUNIONNAME);
+            MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
         Unioninfo unioninfo = new Unioninfo();

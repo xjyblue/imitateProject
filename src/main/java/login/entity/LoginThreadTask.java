@@ -15,6 +15,7 @@ import org.springframework.beans.BeanUtils;
 import pojo.User;
 import pojo.Userskillrelation;
 import pojo.UserskillrelationExample;
+import pojo.Weaponequipmentbar;
 import service.achievementservice.util.AchievementUtil;
 import service.buffservice.service.UserBuffService;
 import service.petservice.service.entity.Pet;
@@ -104,7 +105,7 @@ public class LoginThreadTask implements Runnable {
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
-//          解决玩家顶号问题
+//       解决玩家顶号问题
         if (replaceUserChannel(user.getUsername(), channel)) {
             return;
         }
@@ -115,6 +116,8 @@ public class LoginThreadTask implements Runnable {
         if (user.getRoleid().equals(GrobalConfig.FOUR)) {
             initUserPet(user);
         }
+//          初始化玩家装备栏
+        initUserWeapon(user);
 //          初始化玩家buff
         userService.initUserBuff(user);
 //      这里注入事件处理器是为了让玩家自己心跳去消费命令，执行任务
@@ -130,12 +133,24 @@ public class LoginThreadTask implements Runnable {
 
         ChannelUtil.channelToUserMap.put(channel, user);
         ChannelUtil.userToChannelMap.put(user, channel);
-//          展示成就信息
+//      展示成就信息
         AchievementUtil.refreshAchievementInfo(user);
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
         builder.setData("登陆成功");
         MessageUtil.sendMessage(channel, builder.build());
+//      进来提示用户aoi信息
+        userService.aoiMethod(channel, null);
+    }
+
+    /**
+     * 填充玩家装备栏武器
+     * @param user
+     */
+    private void initUserWeapon(User user) {
+        for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
+            user.getWeaponequipmentbarMap().put(weaponequipmentbar.getWpos(), weaponequipmentbar);
+        }
     }
 
     /**
@@ -204,11 +219,11 @@ public class LoginThreadTask implements Runnable {
 
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData("登录成功");
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
 
             ServerPacket.ChangeChannelResp.Builder builder1 = ServerPacket.ChangeChannelResp.newBuilder();
             builder1.setData("不好意思,有人在别处登录你的游戏号，请选择重新登录或者修改密码");
-            MessageUtil.sendMessage(channel,builder1.build());
+            MessageUtil.sendMessage(channel, builder1.build());
             channelTarget.close();
             return true;
         }

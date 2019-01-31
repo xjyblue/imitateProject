@@ -92,21 +92,20 @@ public class TeamService {
             builder.setData(MessageConfig.INTEAMNOCREATETEAM);
             MessageUtil.sendMessage(channel, builder.build());
             return;
-        } else {
-            Team team = new Team();
-            team.setTeamId(UUID.randomUUID().toString());
-            team.setLeader(user);
-            user.setTeamId(team.getTeamId());
-            HashMap<String, User> teamUserMap = new HashMap<>(64);
-            teamUserMap.put(user.getUsername(), user);
-            team.setUserMap(teamUserMap);
-            TeamCache.teamMap.put(user.getTeamId(), team);
-
-            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.CREATETEAMSUCCESSMESSAGE);
-            MessageUtil.sendMessage(channel, builder.build());
-            return;
         }
+        Team team = new Team();
+        team.setTeamId(UUID.randomUUID().toString());
+        team.setLeader(user);
+        team.setTeamName(user.getUsername());
+        user.setTeamId(team.getTeamId());
+        HashMap<String, User> teamUserMap = new HashMap<>(64);
+        teamUserMap.put(user.getUsername(), user);
+        team.setUserMap(teamUserMap);
+        TeamCache.teamMap.put(user.getTeamId(), team);
+
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.CREATETEAMSUCCESSMESSAGE);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     /**
@@ -194,25 +193,29 @@ public class TeamService {
             builder.setData(MessageConfig.NOFOUNDTEAM);
             MessageUtil.sendMessage(channel, builder.build());
             return;
-        } else {
-            Team team = getTeam(userLeader);
-//              加入创建申请单
-            if (team == null) {
-                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.NOFOUNDTEAM);
-                MessageUtil.sendMessage(channel, builder.build());
-                return;
-            }
-            Teamapplyinfo teamapplyinfo = new Teamapplyinfo();
-            teamapplyinfo.setId(UUID.randomUUID().toString());
-            teamapplyinfo.setUsername(user.getUsername());
-            teamapplyinfo.setTeamid(team.getTeamId());
-            teamapplyinfoMapper.insertSelective(teamapplyinfo);
-
-            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.SUCCESSTOAPPLY);
-            MessageUtil.sendMessage(channel, builder.build());
         }
+        Team team = getTeam(userLeader);
+//      加入创建申请单
+        if (team == null) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOFOUNDTEAM);
+            MessageUtil.sendMessage(channel, builder.build());
+            return;
+        }
+        Teamapplyinfo teamapplyinfo = new Teamapplyinfo();
+        teamapplyinfo.setId(UUID.randomUUID().toString());
+        teamapplyinfo.setUsername(user.getUsername());
+        teamapplyinfo.setTeamid(team.getTeamId());
+        teamapplyinfoMapper.insertSelective(teamapplyinfo);
+
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(MessageConfig.SUCCESSTOAPPLY);
+        MessageUtil.sendMessage(channel, builder.build());
+
+        Channel leaderChannel = ChannelUtil.userToChannelMap.get(userLeader);
+        builder.setData("[申请编号:" + teamapplyinfo.getId() + "]" + " [申请者:" + teamapplyinfo.getUsername() + "]");
+        MessageUtil.sendMessage(leaderChannel, builder.build());
+
     }
 
     /**
@@ -256,7 +259,7 @@ public class TeamService {
         MessageUtil.sendMessage(channel, builder.build());
 
         builder.setData(MessageConfig.SUCCESSENTERTEAM);
-        MessageUtil.sendMessage(channel, builder.build());
+        MessageUtil.sendMessage(channelTarget, builder.build());
 
 //          加入后销毁申请记录，队伍应该数据库持久化的。。。
         teamapplyinfoMapper.deleteByPrimaryKey(teamapplyinfo.getId());
@@ -286,6 +289,9 @@ public class TeamService {
         criteria.andTeamidEqualTo(user.getTeamId());
         List<Teamapplyinfo> teamApplyInfoList = teamapplyinfoMapper.selectByExample(teamapplyinfoExample);
         String resp = "";
+        if (teamApplyInfoList.size() == 0) {
+            resp = "无用户申请记录";
+        }
         for (Teamapplyinfo teamapplyinfo : teamApplyInfoList) {
             resp += "[ID: " + teamapplyinfo.getId() + "] " + "[用户名:" + teamapplyinfo.getUsername() + "]" + System.getProperty("line.separator");
         }
@@ -349,13 +355,13 @@ public class TeamService {
      */
     public void handleUserOffline(User user) {
         Map<String, User> userMap = TeamCache.teamMap.get(user.getTeamId()).getUserMap();
+//      队伍1个人时
         if (userMap.size() == 1) {
 //          普通的移除
             if (!BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
                 TeamCache.teamMap.remove(user.getTeamId());
                 return;
             }
-
 //          游戏副本特殊处理
             BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
             if (bossScene == null) {
@@ -369,7 +375,25 @@ public class TeamService {
 
 //      当队长掉线时
         Team team = TeamCache.teamMap.get(user.getTeamId());
-        if (user == team.getLeader()) {
+//      移除队伍中的玩家
+        removeUserFromTeam(user, team);
+//      移除副本中的玩家
+        if (BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
+            BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
+            bossScene.getDamageAll().remove(user);
+            BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
+        }
+        TeamCache.teamMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
+    }
+
+    /**
+     * 将某个玩家移出队伍
+     * @param user
+     * @param team
+     */
+    public void removeUserFromTeam(User user, Team team) {
+//      队长退出队伍
+        if(user == team.getLeader()){
             boolean flag = true;
             for (Map.Entry<String, User> entry : TeamCache.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
                 Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
@@ -385,32 +409,39 @@ public class TeamService {
                     }
                 }
             }
-            team.getUserMap().remove(user.getUsername());
-            if (!BossSceneConfigResourceLoad.bossAreaMap.containsKey(team.getTeamId())) {
-                return;
+        }else {
+            //      普通玩家退出队伍
+            for (Map.Entry<String, User> entry : TeamCache.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
+                Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
+                ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+                builder.setData(user.getUsername() + "已退出队伍");
+                MessageUtil.sendMessage(channelTemp, builder.build());
             }
-            BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(team.getTeamId());
-            bossScene.getDamageAll().remove(user);
-            BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
+        }
+        team.getUserMap().remove(user.getUsername());
+    }
+
+    @Order(orderMsg = "showteam", status = {ChannelStatus.TEAM})
+    public void queryAllTeam(Channel channel, String msg) {
+        if (TeamCache.teamMap.size() == 0) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NOTEAMRECORD);
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
-
-//      普通玩家掉线
-        for (Map.Entry<String, User> entry : TeamCache.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
-            Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
-            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(user.getUsername() + "已离线退出队伍");
-            MessageUtil.sendMessage(channelTemp, builder.build());
+        String resp = "";
+        for (Map.Entry<String, Team> teamEntry : TeamCache.teamMap.entrySet()) {
+            Team team = teamEntry.getValue();
+            resp += "[队伍的id:" + team.getTeamId() + "]" + " [队伍的名称:" + team.getLeader().getUsername() + "的队伍]" + " [队伍有:";
+            for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
+                User userT = entry.getValue();
+                resp += userT.getUsername() + " ";
+            }
+            resp += "]" + System.getProperty("line.separator");
         }
-        //    处理玩家打副本
-        if (BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
-            BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
-//          移除玩家的伤害统计
-            bossScene.getDamageAll().remove(user);
-        }
-
-        TeamCache.teamMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
-        BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        builder.setData(resp);
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     @Order(orderMsg = "eteam", status = {ChannelStatus.COMMONSCENE})

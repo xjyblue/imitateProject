@@ -3,7 +3,7 @@ package service.friendservice.service;
 import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.packet.ServerPacket;
-import service.achievementservice.entity.Achievement;
+import service.achievementservice.entity.AchievementConfig;
 import service.achievementservice.service.AchievementService;
 import core.config.MessageConfig;
 import core.channel.ChannelStatus;
@@ -132,7 +132,7 @@ public class FriendService {
 
 //      触发好友成就
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
-            if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.FRIEND)) {
+            if (achievementprocess.getIffinish().equals(AchievementConfig.DOING_TASK) && achievementprocess.getType().equals(AchievementConfig.FRIEND)) {
                 achievementService.executeAddFirstFriend(achievementprocess, user, userTarget, friendapplyinfo.getFromuser());
             }
         }

@@ -62,6 +62,12 @@ public class PkService {
         User userTarget = userService.getUserByNameFromSession(temp[1]);
         Channel channelTarget = ChannelUtil.userToChannelMap.get(userTarget);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+//       解决鞭尸问题
+        if(userTarget.getStatus().equals(GrobalConfig.DEAD)){
+            builder.setData(MessageConfig.NOPKDEADMAN);
+            MessageUtil.sendMessage(channel, builder.build());
+            return;
+        }
 //       解决夸场景pk禁止
         if (userTarget != null && user != null && !user.getPos().equals(userTarget.getPos())) {
             builder.setData(MessageConfig.NOSUPPORTREMOTEPK);
@@ -109,14 +115,14 @@ public class PkService {
         userskillrelation.setSkillcds(System.currentTimeMillis());
         hpCaculationService.subUserHp(userTarget, attackDamage.toString());
 //      人物死亡处理
-        if (Integer.parseInt(userTarget.getHp()) < GrobalConfig.ZERO) {
+        if (Integer.parseInt(userTarget.getHp()) <= GrobalConfig.ZERO) {
             userTarget.setHp(GrobalConfig.MINVALUE);
             userTarget.setStatus(GrobalConfig.DEAD);
             String resp = "你受到来自：" + user.getUsername() + "的" + userSkill.getSkillName() + "的攻击，伤害为["
                     + attackDamage.toString() + "]你的剩余血量为：" + userTarget.getHp() + ",你已死亡";
 
             builder.setData(resp);
-            MessageUtil.sendMessage(channel, builder.build());
+            MessageUtil.sendMessage(channelTarget, builder.build());
 
             resp = "你对" + userTarget.getUsername() + "使用" + userSkill.getSkillName() + "进行攻击，造成伤害[" + attackDamage.toString() + "]" +
                     "，" + userTarget.getUsername() + "的剩余血量为：" + userTarget.getHp() + "，你已杀死" + userTarget.getUsername();

@@ -2,13 +2,7 @@ package pojo;
 
 import java.util.ArrayList;
 import java.util.List;
-/**
- * @ClassName AchievementprocessExample
- * @Description TODO
- * @Author xiaojianyu
- * @Date 2019/1/4 11:11
- * @Version 1.0
- **/
+
 public class AchievementprocessExample {
     protected String orderByClause;
 
@@ -250,52 +244,52 @@ public class AchievementprocessExample {
             return (Criteria) this;
         }
 
-        public Criteria andIffinishEqualTo(Boolean value) {
+        public Criteria andIffinishEqualTo(Integer value) {
             addCriterion("ifFinish =", value, "iffinish");
             return (Criteria) this;
         }
 
-        public Criteria andIffinishNotEqualTo(Boolean value) {
+        public Criteria andIffinishNotEqualTo(Integer value) {
             addCriterion("ifFinish <>", value, "iffinish");
             return (Criteria) this;
         }
 
-        public Criteria andIffinishGreaterThan(Boolean value) {
+        public Criteria andIffinishGreaterThan(Integer value) {
             addCriterion("ifFinish >", value, "iffinish");
             return (Criteria) this;
         }
 
-        public Criteria andIffinishGreaterThanOrEqualTo(Boolean value) {
+        public Criteria andIffinishGreaterThanOrEqualTo(Integer value) {
             addCriterion("ifFinish >=", value, "iffinish");
             return (Criteria) this;
         }
 
-        public Criteria andIffinishLessThan(Boolean value) {
+        public Criteria andIffinishLessThan(Integer value) {
             addCriterion("ifFinish <", value, "iffinish");
             return (Criteria) this;
         }
 
-        public Criteria andIffinishLessThanOrEqualTo(Boolean value) {
+        public Criteria andIffinishLessThanOrEqualTo(Integer value) {
             addCriterion("ifFinish <=", value, "iffinish");
             return (Criteria) this;
         }
 
-        public Criteria andIffinishIn(List<Boolean> values) {
+        public Criteria andIffinishIn(List<Integer> values) {
             addCriterion("ifFinish in", values, "iffinish");
             return (Criteria) this;
         }
 
-        public Criteria andIffinishNotIn(List<Boolean> values) {
+        public Criteria andIffinishNotIn(List<Integer> values) {
             addCriterion("ifFinish not in", values, "iffinish");
             return (Criteria) this;
         }
 
-        public Criteria andIffinishBetween(Boolean value1, Boolean value2) {
+        public Criteria andIffinishBetween(Integer value1, Integer value2) {
             addCriterion("ifFinish between", value1, value2, "iffinish");
             return (Criteria) this;
         }
 
-        public Criteria andIffinishNotBetween(Boolean value1, Boolean value2) {
+        public Criteria andIffinishNotBetween(Integer value1, Integer value2) {
             addCriterion("ifFinish not between", value1, value2, "iffinish");
             return (Criteria) this;
         }

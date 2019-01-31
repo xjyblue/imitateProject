@@ -1,19 +1,11 @@
 package pojo;
 
-/**
- * @ClassName Achievementprocess
- * @Description TODO
- * @Author xiaojianyu
- * @Date 2019/1/4 11:11
- * @Version 1.0
- **/
-
 public class Achievementprocess {
     private Integer id;
 
     private String username;
 
-    private Boolean iffinish;
+    private Integer iffinish;
 
     private Integer achievementid;
 
@@ -37,11 +29,11 @@ public class Achievementprocess {
         this.username = username == null ? null : username.trim();
     }
 
-    public Boolean getIffinish() {
+    public Integer getIffinish() {
         return iffinish;
     }
 
-    public void setIffinish(Boolean iffinish) {
+    public void setIffinish(Integer iffinish) {
         this.iffinish = iffinish;
     }
 

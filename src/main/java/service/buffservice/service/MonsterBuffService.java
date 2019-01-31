@@ -7,13 +7,16 @@ import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import pojo.User;
 import service.broadcastservice.service.BroadcastService;
 import service.buffservice.entity.Buff;
 import service.buffservice.entity.BuffConstant;
 import service.caculationservice.service.HpCaculationService;
+import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * @ClassName MonsterBuffService
@@ -62,7 +65,7 @@ public class MonsterBuffService {
         }
     }
 
-    public void monsterBuffRefresh(Monster monster, Channel channel) {
+    public void monsterBuffRefresh(Monster monster, Map<String, User> map) {
         if (monster != null && monster.getBuffRefreshTime() < System.currentTimeMillis()) {
             monster.setBuffRefreshTime(System.currentTimeMillis() + 1000);
         } else {
@@ -80,9 +83,12 @@ public class MonsterBuffService {
                     monster.setStatus(GrobalConfig.DEAD);
                     monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
                 }
-                ServerPacket.MonsterbufResp.Builder builder = ServerPacket.MonsterbufResp.newBuilder();
-                builder.setData("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife());
-                MessageUtil.sendMessage(channel, builder.build());
+                for (Map.Entry<String, User> entry : map.entrySet()) {
+                    Channel channel = ChannelUtil.userToChannelMap.get(entry.getValue());
+                    ServerPacket.MonsterbufResp.Builder builder = ServerPacket.MonsterbufResp.newBuilder();
+                    builder.setData("怪物中毒掉血[" + buff.getAddSecondValue() + "]+怪物剩余血量为:" + monster.getValueOfLife());
+                    MessageUtil.sendMessage(channel, builder.build());
+                }
             } else {
                 monster.getBufMap().put(BuffConstant.POISONINGBUFF, 2000);
             }

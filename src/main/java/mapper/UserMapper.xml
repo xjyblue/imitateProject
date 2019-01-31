@@ -333,6 +333,7 @@
             <result column="wtype" property="typeof"/>
             <result column="wdurability" property="durability"/>
             <result column="wstartlevel" property="startlevel"/>
+            <result column="wpos" property="wpos"/>
         </collection>
         <collection property="achievementprocesses" ofType="pojo.Achievementprocess" column="sid">
             <id column="aid" property="id"/><!-- 这里的column对应的是下面查询的别名，而不是表字段名 -->
@@ -371,6 +372,7 @@
 		 w.wid AS wwid,
 		 w.typeOf AS wtype,
 		 w.startlevel AS wstartlevel,
+		 w.wpos AS wpos,
 		 a.id AS aid,
 		 a.ifFinish AS aiffinish,
 		 a.username AS ausername,

@@ -5,6 +5,7 @@ import config.impl.excel.CollectGoodResourceLoad;
 import config.impl.excel.EquipmentResourceLoad;
 import core.packet.ServerPacket;
 import service.achievementservice.entity.Achievement;
+import service.achievementservice.entity.AchievementConfig;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
@@ -103,10 +104,10 @@ public class RewardService {
 //      触发打怪任务事件
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
             Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
-            if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.ATTACKMONSTER)) {
+            if (achievementprocess.getIffinish().equals(AchievementConfig.DOING_TASK) && achievementprocess.getType().equals(AchievementConfig.ATTACKMONSTER)) {
                 achievementService.executeKillMonster(user, achievementprocess, monster.getId());
             }
-            if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.FINISHBOSSAREA) && monster.getType().equals(Monster.TYPEOFBOSS)) {
+            if (achievementprocess.getIffinish().equals(AchievementConfig.DOING_TASK) && achievementprocess.getType().equals(AchievementConfig.FINISHBOSSAREA) && monster.getType().equals(Monster.TYPEOFBOSS)) {
                 achievementService.executeBossAttack(achievementprocess, user, achievement, monster);
             }
         }
@@ -156,10 +157,37 @@ public class RewardService {
         return ChannelUtil.channelToUserMap.get(channel);
     }
 
+    /**
+     * 最后一击奖励
+     * @param user
+     * @param channel
+     */
     public void extraBonus(User user, Channel channel) {
         moneyCaculationService.addMoneyToUser(user, "200");
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
         builder.setData("************最终击杀者额外奖励200金币*************");
         MessageUtil.sendMessage(channel, builder.build());
+    }
+
+    /**
+     * 成就奖励
+     *
+     * @param achievement
+     * @param user
+     */
+    public void sloveAchievementReward(Achievement achievement, User user) {
+        if(!achievement.isGetTask()){
+            if (!achievement.getReward().equals(GrobalConfig.NULL)) {
+                String[] reward = achievement.getReward().split("-");
+                for (String rewardT : reward) {
+                    String[] rewardArr = rewardT.split(":");
+//                  增加经验值
+                    if ("1".equals(rewardArr[0])) {
+                        levelService.upUserLevel(user, rewardArr[1]);
+                    }
+                }
+            }
+            achievement.setGetTask(true);
+        }
     }
 }

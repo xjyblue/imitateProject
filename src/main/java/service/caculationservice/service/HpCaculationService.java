@@ -1,9 +1,11 @@
 package service.caculationservice.service;
 
+import core.component.good.Equipment;
 import core.component.monster.Monster;
 import core.config.GrobalConfig;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
+import mapper.UserMapper;
 import service.attackservice.util.AttackUtil;
 import service.levelservice.service.LevelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,8 @@ public class HpCaculationService {
     private LevelService levelService;
     @Autowired
     private UserService userService;
-
+    @Autowired
+    private UserMapper userMapper;
     /**
      * 用户加血
      *
@@ -76,7 +79,6 @@ public class HpCaculationService {
      * 怪物扣血
      *
      * @param monster
-     * @param subValue
      */
     public void subMonsterHp(Monster monster, Integer subHp) {
         Integer monsterHp = Integer.parseInt(monster.getValueOfLife());
@@ -86,6 +88,14 @@ public class HpCaculationService {
             monster.setStatus(GrobalConfig.DEAD);
         } else {
             monster.setValueOfLife(monsterHp.toString());
+        }
+    }
+
+    public void subUserHpByTakeOffEquip(User user, Equipment equipment) {
+        if (Integer.parseInt(user.getHp())  > Integer.parseInt(levelService.getMaxHp(user))) {
+            user.setHp(levelService.getMaxHp(user));
+            userMapper.updateByPrimaryKeySelective(user);
+
         }
     }
 }

@@ -1,11 +1,5 @@
 package pojo;
-/**
- * @ClassName Weaponequipmentbar
- * @Description TODO
- * @Author xiaojianyu
- * @Date 2019/1/4 11:11
- * @Version 1.0
- **/
+
 public class Weaponequipmentbar {
     private Integer id;
 
@@ -18,6 +12,8 @@ public class Weaponequipmentbar {
     private String typeof;
 
     private Integer startlevel;
+
+    private Integer wpos;
 
     public Integer getId() {
         return id;
@@ -65,5 +61,13 @@ public class Weaponequipmentbar {
 
     public void setStartlevel(Integer startlevel) {
         this.startlevel = startlevel;
+    }
+
+    public Integer getWpos() {
+        return wpos;
+    }
+
+    public void setWpos(Integer wpos) {
+        this.wpos = wpos;
     }
 }

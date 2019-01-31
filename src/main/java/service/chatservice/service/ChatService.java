@@ -9,6 +9,7 @@ import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.stereotype.Component;
 import pojo.User;
+import service.teamservice.entity.TeamCache;
 import utils.ChannelUtil;
 import utils.MessageUtil;
 
@@ -87,4 +88,33 @@ public class ChatService {
         MessageUtil.sendMessage(channel, builder.build());
     }
 
+
+    @Order(orderMsg = "chatTeam", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE, ChannelStatus.DEADSCENE})
+    public void chatTeam(Channel channel, String msg) {
+        User user = ChannelUtil.channelToUserMap.get(channel);
+        String[] temp = msg.split("=");
+        if (temp.length != GrobalConfig.TWO) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.ERRORORDER);
+            MessageUtil.sendMessage(channel, builder.build());
+            return;
+        }
+        if (user.getTeamId() == null) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.NO_TEAM_NO_TALK);
+            MessageUtil.sendMessage(channel, builder.build());
+            return;
+        }
+        for (Map.Entry<String, User> entry : TeamCache.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
+            Channel channelT = ChannelUtil.userToChannelMap.get(entry.getValue());
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            if (channelT == channel) {
+                builder.setData("你发送了组队聊天消息内容为：" + temp[1]);
+                MessageUtil.sendMessage(channelT, builder.build());
+            } else {
+                builder.setData(user.getUsername() + "发送了组队聊天消息内容为：" + temp[1]);
+                MessageUtil.sendMessage(channelT, builder.build());
+            }
+        }
+    }
 }

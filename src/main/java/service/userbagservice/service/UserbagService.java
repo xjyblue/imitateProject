@@ -189,7 +189,7 @@ public class UserbagService {
     public void refreshUserbagInfo(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String bagResp = System.getProperty("line.separator")
-                + "按b-物品编号使用蓝药"
+                + "按ub=物品编号使用蓝药"
                 + "  按ww=物品编号装备武器";
         for (Userbag userbag : user.getUserBag()) {
             bagResp = showUserBagInfo(bagResp, userbag);

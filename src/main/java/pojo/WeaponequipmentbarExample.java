@@ -2,13 +2,7 @@ package pojo;
 
 import java.util.ArrayList;
 import java.util.List;
-/**
- * @ClassName WeaponequipmentbarExample
- * @Description TODO
- * @Author xiaojianyu
- * @Date 2019/1/4 11:11
- * @Version 1.0
- **/
+
 public class WeaponequipmentbarExample {
     protected String orderByClause;
 
@@ -487,6 +481,66 @@ public class WeaponequipmentbarExample {
 
         public Criteria andStartlevelNotBetween(Integer value1, Integer value2) {
             addCriterion("startlevel not between", value1, value2, "startlevel");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposIsNull() {
+            addCriterion("wpos is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposIsNotNull() {
+            addCriterion("wpos is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposEqualTo(Integer value) {
+            addCriterion("wpos =", value, "wpos");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposNotEqualTo(Integer value) {
+            addCriterion("wpos <>", value, "wpos");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposGreaterThan(Integer value) {
+            addCriterion("wpos >", value, "wpos");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposGreaterThanOrEqualTo(Integer value) {
+            addCriterion("wpos >=", value, "wpos");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposLessThan(Integer value) {
+            addCriterion("wpos <", value, "wpos");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposLessThanOrEqualTo(Integer value) {
+            addCriterion("wpos <=", value, "wpos");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposIn(List<Integer> values) {
+            addCriterion("wpos in", values, "wpos");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposNotIn(List<Integer> values) {
+            addCriterion("wpos not in", values, "wpos");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposBetween(Integer value1, Integer value2) {
+            addCriterion("wpos between", value1, value2, "wpos");
+            return (Criteria) this;
+        }
+
+        public Criteria andWposNotBetween(Integer value1, Integer value2) {
+            addCriterion("wpos not between", value1, value2, "wpos");
             return (Criteria) this;
         }
     }

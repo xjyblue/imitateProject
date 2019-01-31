@@ -9,9 +9,7 @@ import service.buffservice.service.UserBuffService;
 import service.petservice.service.entity.Pet;
 import utils.ChannelUtil;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -87,6 +85,10 @@ public class User {
      */
     private Map<String, Integer> buffMap;
     /**
+     * 存用户的装备栏
+     */
+    private Map<Integer, Weaponequipmentbar> weaponequipmentbarMap = Maps.newHashMap();
+    /**
      * 用户技能关联
      */
     private Map<String, Userskillrelation> userskillrelationMap = Maps.newHashMap();
@@ -131,9 +133,18 @@ public class User {
      */
     private ConcurrentLinkedQueue<Object> packetsQueue = new ConcurrentLinkedQueue<>();
 
+    public Map<Integer, Weaponequipmentbar> getWeaponequipmentbarMap() {
+        return weaponequipmentbarMap;
+    }
+
+    public void setWeaponequipmentbarMap(Map<Integer, Weaponequipmentbar> weaponequipmentbarMap) {
+        this.weaponequipmentbarMap = weaponequipmentbarMap;
+    }
+
     public Map<Integer, Monster> getUserToMonsterMap() {
         return userToMonsterMap;
     }
+
 
     public void setUserToMonsterMap(Map<Integer, Monster> userToMonsterMap) {
         this.userToMonsterMap = userToMonsterMap;

@@ -27,6 +27,7 @@ public interface UnioninfoMapper {
     int updateByPrimaryKeySelective(Unioninfo record);
 
     int updateByPrimaryKey(Unioninfo record);
-    
+
+    Unioninfo selectUnionByUnionName(@Param("unionName")String unionName);
     
 }

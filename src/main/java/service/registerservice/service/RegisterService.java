@@ -11,6 +11,7 @@ import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
+import service.achievementservice.entity.AchievementConfig;
 import service.levelservice.entity.Level;
 import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
@@ -79,6 +80,13 @@ public class RegisterService {
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
+        User userCheck = userMapper.selectByPrimaryKey(temp[1]);
+        if (userCheck != null) {
+            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+            builder.setData(MessageConfig.REPEATUSERNAME);
+            MessageUtil.sendMessage(channel, builder.build());
+            return;
+        }
 //      设置用户基本信息
         User user = new User();
         user.setUsername(temp[1]);
@@ -112,27 +120,30 @@ public class RegisterService {
 
 //      为用户新增任务进程
         for (Map.Entry<Integer, Achievement> entry : AchievementResourceLoad.achievementMap.entrySet()) {
+            if (entry.getValue().isGetTask()) {
+                continue;
+            }
             Achievementprocess achievementprocess = new Achievementprocess();
-            achievementprocess.setIffinish(false);
+            achievementprocess.setIffinish(AchievementConfig.DOING_TASK);
             achievementprocess.setType(entry.getValue().getType());
             achievementprocess.setAchievementid(entry.getValue().getAchievementId());
             achievementprocess.setUsername(user.getUsername());
 
-            if (entry.getValue().getType().equals(Achievement.UPLEVEL)) {
+            if (entry.getValue().getType().equals(AchievementConfig.UPLEVEL)) {
                 achievementprocess.setProcesss(levelService.getLevelByExperience(user.getExperience()) + "");
                 if (Integer.parseInt(achievementprocess.getProcesss()) >= Integer.parseInt(entry.getValue().getTarget())) {
-                    achievementprocess.setIffinish(true);
+                    achievementprocess.setIffinish(AchievementConfig.COMPLETE_TASK);
                 }
             } else {
                 achievementprocess.setProcesss(entry.getValue().getBegin());
             }
-//              存数据库
+//          存数据库
             achievementprocessMapper.insert(achievementprocess);
         }
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
         builder.setData(MessageConfig.REGISTERSUCCESS);
-        MessageUtil.sendMessage(channel,builder.build());
+        MessageUtil.sendMessage(channel, builder.build());
         ChannelUtil.channelStatus.put(channel, ChannelStatus.LOGIN);
     }
 }

@@ -8,6 +8,7 @@
     <result column="durability" property="durability" jdbcType="INTEGER" />
     <result column="typeOf" property="typeof" jdbcType="VARCHAR" />
     <result column="startlevel" property="startlevel" jdbcType="INTEGER" />
+    <result column="wpos" property="wpos" jdbcType="INTEGER" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <where >
@@ -68,7 +69,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List" >
-    id, username, wid, durability, typeOf, startlevel
+    id, username, wid, durability, typeOf, startlevel, wpos
   </sql>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="pojo.WeaponequipmentbarExample" >
     select
@@ -81,7 +82,7 @@
       <include refid="Example_Where_Clause" />
     </if>
     <if test="orderByClause != null" >
-      core.order by ${orderByClause}
+      order by ${orderByClause}
     </if>
   </select>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
@@ -100,15 +101,15 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="pojo.Weaponequipmentbar" >
+  <insert id="insert" parameterType="pojo.Weaponequipmentbar" useGeneratedKeys="true" keyProperty="id">
     insert into weaponequipmentbar (id, username, wid, 
-      durability, typeOf, startlevel
-      )
+      durability, typeOf, startlevel, 
+      wpos)
     values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{wid,jdbcType=INTEGER}, 
-      #{durability,jdbcType=INTEGER}, #{typeof,jdbcType=VARCHAR}, #{startlevel,jdbcType=INTEGER}
-      )
+      #{durability,jdbcType=INTEGER}, #{typeof,jdbcType=VARCHAR}, #{startlevel,jdbcType=INTEGER}, 
+      #{wpos,jdbcType=INTEGER})
   </insert>
-  <insert id="insertSelective" parameterType="pojo.Weaponequipmentbar" >
+  <insert id="insertSelective" parameterType="pojo.Weaponequipmentbar" useGeneratedKeys="true" keyProperty="id">
     insert into weaponequipmentbar
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -129,6 +130,9 @@
       <if test="startlevel != null" >
         startlevel,
       </if>
+      <if test="wpos != null" >
+        wpos,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -148,6 +152,9 @@
       </if>
       <if test="startlevel != null" >
         #{startlevel,jdbcType=INTEGER},
+      </if>
+      <if test="wpos != null" >
+        #{wpos,jdbcType=INTEGER},
       </if>
     </trim>
   </insert>
@@ -178,6 +185,9 @@
       <if test="record.startlevel != null" >
         startlevel = #{record.startlevel,jdbcType=INTEGER},
       </if>
+      <if test="record.wpos != null" >
+        wpos = #{record.wpos,jdbcType=INTEGER},
+      </if>
     </set>
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
@@ -190,7 +200,8 @@
       wid = #{record.wid,jdbcType=INTEGER},
       durability = #{record.durability,jdbcType=INTEGER},
       typeOf = #{record.typeof,jdbcType=VARCHAR},
-      startlevel = #{record.startlevel,jdbcType=INTEGER}
+      startlevel = #{record.startlevel,jdbcType=INTEGER},
+      wpos = #{record.wpos,jdbcType=INTEGER}
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -213,6 +224,9 @@
       <if test="startlevel != null" >
         startlevel = #{startlevel,jdbcType=INTEGER},
       </if>
+      <if test="wpos != null" >
+        wpos = #{wpos,jdbcType=INTEGER},
+      </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -222,7 +236,8 @@
       wid = #{wid,jdbcType=INTEGER},
       durability = #{durability,jdbcType=INTEGER},
       typeOf = #{typeof,jdbcType=VARCHAR},
-      startlevel = #{startlevel,jdbcType=INTEGER}
+      startlevel = #{startlevel,jdbcType=INTEGER},
+      wpos = #{wpos,jdbcType=INTEGER}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>

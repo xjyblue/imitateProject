@@ -54,21 +54,21 @@ public class EmailService {
         if (emailMap.size() == 0) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(MessageConfig.EMPTYEMAIL);
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         for (Map.Entry<String, Mail> entry : emailMap.entrySet()) {
             Mail mailTemp = entry.getValue();
-            if (mailTemp.isIfUserBag()) {
+            if (mailTemp.isIfUserBag() && mailTemp.getUserbag() != null) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
                 builder.setData("您有一封来自" + mailTemp.getFromUser() + "的邮件,邮件编号为" + mailTemp.getEmailId()
                         + ",邮件附件为" + userbagService.getGoodNameByUserbag(mailTemp.getUserbag())
                         + ",邮件内容为[" + mailTemp.getEmailText() + "]");
-                MessageUtil.sendMessage(channel,builder.build());
+                MessageUtil.sendMessage(channel, builder.build());
             } else {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
                 builder.setData("您有一封来自" + mailTemp.getFromUser() + "的邮件,邮件编号为" + mailTemp.getEmailId() + ",邮件内容为[" + mailTemp.getEmailText() + "]");
-                MessageUtil.sendMessage(channel,builder.build());
+                MessageUtil.sendMessage(channel, builder.build());
             }
         }
     }
@@ -86,14 +86,14 @@ public class EmailService {
         if (!EmailDbLoad.userEmailMap.containsKey(temp[GrobalConfig.ONE])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(MessageConfig.NOEMAILUSER);
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (temp.length == GrobalConfig.THREE) {
             send(user.getUsername(), temp[GrobalConfig.ONE], temp[GrobalConfig.TWO], null, null);
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(MessageConfig.SUCCESSSENDEMIAL);
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (temp.length == GrobalConfig.FIVE) {
@@ -101,13 +101,13 @@ public class EmailService {
             if (userbag == null) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
                 builder.setData(MessageConfig.NOUSERBAGID);
-                MessageUtil.sendMessage(channel,builder.build());
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             if (!userbagService.checkUserbagNum(userbag, temp[GrobalConfig.FOUR])) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
                 builder.setData(MessageConfig.NOENOUGHCHANGEGOOD);
-                MessageUtil.sendMessage(channel,builder.build());
+                MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             Userbag userbagNew = new Userbag();
@@ -117,7 +117,7 @@ public class EmailService {
             send(user.getUsername(), temp[GrobalConfig.ONE], temp[GrobalConfig.TWO], userbagNew, null);
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(MessageConfig.SUCCESSSENDEMIAL);
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
             channel.writeAndFlush("邮件携带了附件:" + userbag.getName());
             return;
         }
@@ -136,26 +136,29 @@ public class EmailService {
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(MessageConfig.ERRORORDER);
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!EmailDbLoad.userEmailMap.get(user.getUsername()).containsKey(temp[GrobalConfig.ONE])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(MessageConfig.RECEIVEEMAILFAIL);
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Mail mail = EmailDbLoad.userEmailMap.get(user.getUsername()).get(temp[GrobalConfig.ONE]);
         if (mail.isIfUserBag()) {
             userbagCaculationService.addUserBagForUser(user, mail.getUserbag());
+//          接收完附件邮件还在
+            EmailDbLoad.userEmailMap.get(user.getUsername()).get(temp[GrobalConfig.ONE]).setUserbag(null);
         }
         if (mail.getMoney() != null) {
             moneyCaculationService.addMoneyToUser(user, mail.getMoney().toString());
+//          接收完金币邮件还在
+            EmailDbLoad.userEmailMap.get(user.getUsername()).get(temp[GrobalConfig.ONE]).setMoney(null);
         }
-        EmailDbLoad.userEmailMap.get(user.getUsername()).remove(temp[GrobalConfig.ONE]);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
         builder.setData(MessageConfig.RECEIVEEMAILSUCCESS);
-        MessageUtil.sendMessage(channel,builder.build());
+        MessageUtil.sendMessage(channel, builder.build());
     }
 
     /**

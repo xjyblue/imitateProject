@@ -17,13 +17,37 @@ public class Team {
      */
     private String teamId;
     /**
+     * 队伍名称
+     */
+    private String teamName;
+    /**
      * 队伍中的用户
      */
-    private Map<String,User> userMap;
+    private Map<String, User> userMap;
     /**
      * 队伍中的领导者
      */
     private User leader;
+    /**
+     * 领队的id
+     */
+    private String leaderId;
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
+    }
+
+    public String getLeaderId() {
+        return leaderId;
+    }
+
+    public void setLeaderId(String leaderId) {
+        this.leaderId = leaderId;
+    }
 
     public String getTeamId() {
         return teamId;

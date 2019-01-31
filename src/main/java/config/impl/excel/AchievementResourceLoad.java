@@ -3,6 +3,7 @@ package config.impl.excel;
 import com.google.common.collect.Maps;
 import config.interf.IResourceLoad;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import service.achievementservice.entity.Achievement;
 import utils.ExcelUtil;
@@ -31,6 +32,8 @@ public class AchievementResourceLoad implements IResourceLoad {
      */
     public final static Map<Integer, Achievement> achievementMap = Maps.newHashMap();
 
+    @Autowired
+    private NpcResourceLoad npcResourceLoad;
 
     @PostConstruct
     @Override
@@ -47,9 +50,15 @@ public class AchievementResourceLoad implements IResourceLoad {
             achievementalias.put("父任务", "parent");
             achievementalias.put("子任务", "sons");
             achievementalias.put("奖励", "reward");
+            achievementalias.put("npc名称", "npcId");
+            achievementalias.put("是否可接受", "getTask");
             List<Achievement> achievementList = ExcelUtil.excel2Pojo(achievementfis, Achievement.class, achievementalias);
             for (Achievement achievement : achievementList) {
                 achievementMap.put(achievement.getAchievementId(), achievement);
+//              将可接受的任务放到npc当中
+                if (achievement.isGetTask()) {
+                    NpcResourceLoad.npcMap.get(achievement.getNpcId()).getAchievementMap().put(achievement.getAchievementId(), achievement);
+                }
             }
             log.info("成就配置资源加载完毕");
         } catch (IOException e) {

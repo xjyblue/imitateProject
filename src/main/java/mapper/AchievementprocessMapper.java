@@ -4,17 +4,8 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import pojo.Achievementprocess;
 import pojo.AchievementprocessExample;
-/**
- * Created on 2018/12/25 15:25
- *
- * @Author: xiaojianyu
- */
+
 public interface AchievementprocessMapper {
-    /**
-     *..
-     * @param example
-     * @return
-     */
     int countByExample(AchievementprocessExample example);
 
     int deleteByExample(AchievementprocessExample example);

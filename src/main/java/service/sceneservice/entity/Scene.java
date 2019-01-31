@@ -239,17 +239,17 @@ public class Scene extends BaseThread implements Runnable {
 //      推送战斗消息,触发处于战斗状态的用户 场景内所有用户在战斗的怪物
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             User user = entry.getValue();
-
             Channel channel = ChannelUtil.userToChannelMap.get(user);
             if (ChannelUtil.channelStatus.containsKey(channel) && ChannelUtil.channelStatus.get(channel).equals(ChannelStatus.ATTACK)) {
                 try {
                     if (user.getUserToMonsterMap().size() > 0) {
                         Monster monster = null;
+//                      获取场景每个用户所攻击的怪物
                         for (Map.Entry<Integer, Monster> monsterEntry : user.getUserToMonsterMap().entrySet()) {
                             monster = monsterEntry.getValue();
                         }
-//                      怪物buff刷新
-                        monsterBuffService.monsterBuffRefresh(monster, channel);
+//                      怪物buff刷新,广播场景内所有用户
+                        monsterBuffService.monsterBuffRefresh(monster, userMap);
 
 //                      检查怪物是否死亡
                         if (checkMonsterStatus(channel, monster, user)) {
@@ -277,15 +277,7 @@ public class Scene extends BaseThread implements Runnable {
                         hpCaculationService.subUserHp(user, monsterDamage.toString());
 
 //                      刷新攻击信息
-                        String resp = "怪物名称:" + monster.getName()
-                                + "-----怪物技能:" + monster.getMonsterSkillList().get(0).getSkillName()
-                                + "-----怪物的伤害:" + monster.getMonsterSkillList().get(0).getDamage()
-                                + "-----你的剩余血:" + user.getHp()
-                                + "-----你的蓝量" + user.getMp()
-                                + "-----怪物血量:" + monster.getValueOfLife();
-                        ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
-                        builder.setData(resp);
-                        MessageUtil.sendMessage(channel, builder.build());
+                        refreshMonsterAttackInfo(monster);
                         if (user.getHp().equals(GrobalConfig.MINVALUE)) {
 //                          人物死亡初始化人物buff
                             userService.initUserBuff(user);
@@ -303,19 +295,49 @@ public class Scene extends BaseThread implements Runnable {
         }
     }
 
+    /**
+     * 场景内广播怪物攻击消息
+     *
+     * @param monster
+     */
+    private void refreshMonsterAttackInfo(Monster monster) {
+        for (Map.Entry<String, User> entry : this.getUserMap().entrySet()) {
+            User user = entry.getValue();
+            Channel channel = ChannelUtil.userToChannelMap.get(user);
+            String resp = "怪物名称:" + monster.getName()
+                    + "-----怪物技能:" + monster.getMonsterSkillList().get(0).getSkillName()
+                    + "-----怪物的伤害:" + monster.getMonsterSkillList().get(0).getDamage()
+                    + "-----你的剩余血:" + user.getHp()
+                    + "-----你的蓝量" + user.getMp()
+                    + "-----怪物血量:" + monster.getValueOfLife();
+            ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
+            builder.setData(resp);
+            MessageUtil.sendMessage(channel, builder.build());
+        }
+    }
 
+    /**
+     * 处理怪物死亡一些状态更新
+     * @param channel
+     * @param monster
+     * @param user
+     * @return
+     * @throws IOException
+     */
     private boolean checkMonsterStatus(Channel channel, Monster monster, User user) throws IOException {
         if (monster != null && Integer.parseInt(monster.getValueOfLife()) <= GrobalConfig.ZERO) {
             monster.setValueOfLife(GrobalConfig.MINVALUE);
             monster.setStatus(GrobalConfig.DEAD);
+//          移除用户攻击的怪物
             user.getUserToMonsterMap().remove(monster.getId());
-            broadcastMessage(monster.getName() + "已死亡");
+//          提示
             ServerPacket.AttackResp.Builder builder = ServerPacket.AttackResp.newBuilder();
             builder.setData("怪物已死亡");
             MessageUtil.sendMessage(channel, builder.build());
+//          移除地图中死掉的怪物
             List<Monster> monsters = SceneResourceLoad.sceneMap.get(user.getPos()).monsters;
             monsters.remove(monster);
-//          填充因buff中毒而死的怪物
+//          填充怪物
             MonsterFactory monsterFactory = SpringContextUtil.getBean("monsterFactory");
             monsters.add(monsterFactory.getMonster(Integer.parseInt(SceneResourceLoad.sceneMap.get(user.getPos() + "").getMonsterS())));
 //          退出战斗模式初始化人物buff
@@ -332,20 +354,6 @@ public class Scene extends BaseThread implements Runnable {
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             User user = entry.getValue();
             user.keepCall();
-        }
-    }
-
-    /**
-     * 场景内广播消息
-     *
-     * @param msg
-     */
-    private void broadcastMessage(String msg) {
-        for (Map.Entry<String, User> entry : userMap.entrySet()) {
-            Channel channelT = ChannelUtil.userToChannelMap.get(entry.getValue());
-            ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(msg);
-            MessageUtil.sendMessage(channelT, builder.build());
         }
     }
 }

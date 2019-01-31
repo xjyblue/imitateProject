@@ -20,6 +20,7 @@ import utils.ChannelUtil;
 import utils.MessageUtil;
 
 import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * @ClassName AttackCaculationService
@@ -48,8 +49,9 @@ public class AttackDamageCaculationService {
         attackDamage += level.getUpAttack();
 
 //      单一装备加成处理
-        if (user.getWeaponequipmentbars() != null) {
-            for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
+        if (user.getWeaponequipmentbarMap().size() != 0) {
+            for (Map.Entry<Integer, Weaponequipmentbar> entry : user.getWeaponequipmentbarMap().entrySet()) {
+                Weaponequipmentbar weaponequipmentbar = entry.getValue();
                 Equipment equipment = EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid());
 //              武器加成
                 if (weaponequipmentbar.getDurability() > 0) {

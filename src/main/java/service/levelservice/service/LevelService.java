@@ -5,6 +5,7 @@ import config.impl.excel.EquipmentResourceLoad;
 import config.impl.excel.LevelResourceLoad;
 import core.packet.ServerPacket;
 import service.achievementservice.entity.Achievement;
+import service.achievementservice.entity.AchievementConfig;
 import service.achievementservice.service.AchievementService;
 import core.component.good.Equipment;
 import io.netty.channel.Channel;
@@ -59,7 +60,8 @@ public class LevelService {
         double factor = caculateFactorByRole(level, user);
         addValue *= factor;
 //      装备加成
-        for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
+        for (Map.Entry<Integer, Weaponequipmentbar> entry : user.getWeaponequipmentbarMap().entrySet()) {
+            Weaponequipmentbar weaponequipmentbar = entry.getValue();
             Equipment equipment = EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid());
             if (equipment.getLifeValue() != 0) {
                 addValue += equipment.getLifeValue();
@@ -98,7 +100,7 @@ public class LevelService {
 //      升级触发成就
         AchievementService achievementService = SpringContextUtil.getBean("achievementService");
         for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
-            if (!achievementprocess.getIffinish() && achievementprocess.getType().equals(Achievement.UPLEVEL)) {
+            if (achievementprocess.getIffinish().equals(AchievementConfig.DOING_TASK) && achievementprocess.getType().equals(AchievementConfig.UPLEVEL)) {
                 Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
                 achievementService.executeLevelUp(achievementprocess, user, achievement);
             }

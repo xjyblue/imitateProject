@@ -439,7 +439,7 @@ public class BossScene extends BaseThread implements Runnable {
                 userTarget.setHp(GrobalConfig.MINVALUE);
                 userTarget.setStatus(GrobalConfig.DEAD);
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData("你已死亡");
+                builder.setData("你已死亡，可按Y进行复活");
                 MessageUtil.sendMessage(channelTarget, builder.build());
 //              人物死亡全队提示
                 oneDeadMessageToAll(monster, userTarget);
@@ -848,13 +848,14 @@ public class BossScene extends BaseThread implements Runnable {
                 userTarget = entry.getKey();
             }
         }
-//        if (userTarget == null) {
-//            for (Map.Entry<String, User> entry : TeamCache.teamMap.get(bossScene.getTeamId()).getUserMap().entrySet()) {
-//                if (!entry.getValue().getStatus().equals(GrobalConfig.DEAD)) {
-//                    userTarget = entry.getValue();
-//                }
-//            }
-//        }
+//      这里是为了解决如果某部分玩家都没有进行攻击，需要重新锁定目标的时候就应该从副本中找，而不是从最大伤害中找
+        if (userTarget == null) {
+            for (Map.Entry<String, User> entry : TeamCache.teamMap.get(bossScene.getTeamId()).getUserMap().entrySet()) {
+                if (!entry.getValue().getStatus().equals(GrobalConfig.DEAD)) {
+                    userTarget = entry.getValue();
+                }
+            }
+        }
         return userTarget;
     }
 

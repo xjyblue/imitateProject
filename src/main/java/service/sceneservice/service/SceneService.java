@@ -46,13 +46,13 @@ public class SceneService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "move",status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = "move", status = {ChannelStatus.COMMONSCENE})
     public void moveScene(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(MessageConfig.ERRORORDER);
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
@@ -60,7 +60,7 @@ public class SceneService {
         if (temp[1].equals(SceneResourceLoad.sceneMap.get(user.getPos()).getName())) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(MessageConfig.UNMOVELOCAL);
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
@@ -68,7 +68,7 @@ public class SceneService {
         if (levelService.getLevelByExperience(user.getExperience()) < Integer.parseInt(sceneTarget.getNeedLevel())) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(MessageConfig.NOLEVELTOMOVE);
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
@@ -82,7 +82,7 @@ public class SceneService {
         if (!SceneResourceLoad.sceneSet.contains(temp[1])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(MessageConfig.NOTARGETTOMOVE);
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
@@ -90,7 +90,7 @@ public class SceneService {
 //           场景切换
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             builder.setData(MessageConfig.REMOTEMOVEMESSAGE);
-            MessageUtil.sendMessage(channel,builder.build());
+            MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 
@@ -101,7 +101,10 @@ public class SceneService {
         ChannelUtil.channelToUserMap.put(channel, user);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
         builder.setData("已移动到" + temp[1]);
-        MessageUtil.sendMessage(channel,builder.build());
+        MessageUtil.sendMessage(channel, builder.build());
+
+//      场景切换触发aoi
+        userService.aoiMethod(channel, null);
     }
 
     /**

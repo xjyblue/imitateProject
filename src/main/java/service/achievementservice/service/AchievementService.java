@@ -4,6 +4,7 @@ import config.impl.excel.AchievementResourceLoad;
 import service.achievementservice.entity.Achievement;
 import core.component.good.Equipment;
 import core.component.monster.Monster;
+import service.achievementservice.entity.AchievementConfig;
 import service.npcservice.entity.Npc;
 import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
@@ -14,12 +15,12 @@ import pojo.Achievementprocess;
 import pojo.AchievementprocessExample;
 import pojo.User;
 import pojo.Weaponequipmentbar;
+import service.rewardservice.service.RewardService;
 import service.teamservice.entity.Team;
 import service.achievementservice.util.AchievementUtil;
 import service.levelservice.service.LevelService;
 import service.teamservice.entity.TeamCache;
 
-import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -36,6 +37,8 @@ public class AchievementService {
     private AchievementprocessMapper achievementprocessMapper;
     @Autowired
     private LevelService levelService;
+    @Autowired
+    private RewardService rewardService;
 
     /**
      * 杀怪任务
@@ -45,7 +48,7 @@ public class AchievementService {
      * @param monsterId
      */
     public void executeKillMonster(User user, Achievementprocess achievementprocess, Integer monsterId) {
-        if (achievementprocess.getType().equals(Achievement.ATTACKMONSTER)) {
+        if (achievementprocess.getType().equals(AchievementConfig.ATTACKMONSTER)) {
             String[] temp = achievementprocess.getProcesss().split("-");
             String s = "";
             for (int i = 0; i < temp.length; i++) {
@@ -63,9 +66,9 @@ public class AchievementService {
             Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
             achievementprocess.setProcesss(s);
             if (achievementprocess.getProcesss().equals(achievement.getTarget())) {
-                achievementprocess.setIffinish(true);
+                achievementprocess.setIffinish(AchievementConfig.COMPLETE_TASK);
 //              任务奖励
-                sloveAchievementReward(achievement, user);
+                rewardService.sloveAchievementReward(achievement, user);
 //              处理父任务
                 sloveParentProcess(user, achievement);
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
@@ -99,7 +102,7 @@ public class AchievementService {
                 if (achievementprocessT.getAchievementid().equals(achievementParent.getAchievementId())) {
                     achievementprocessParent = achievementprocessT;
                 }
-                if (sonSet.contains(achievementprocessT.getAchievementid() + "") && achievementprocessT.getIffinish()) {
+                if (sonSet.contains(achievementprocessT.getAchievementid() + "") && achievementprocessT.getIffinish().equals(AchievementConfig.COMPLETE_TASK)) {
                     sonSet.remove(achievementprocessT.getAchievementid() + "");
                     process += achievementprocessT.getAchievementid() + "-";
                 }
@@ -107,8 +110,7 @@ public class AchievementService {
             process = process.substring(0, process.length() - 1);
 //              所有子任务已完成，更新父任务
             if (sonSet.size() == 0) {
-                achievementprocessParent.setIffinish(true);
-
+                achievementprocessParent.setIffinish(AchievementConfig.COMPLETE_TASK);
             } else {
                 achievementprocessParent.setProcesss(process);
             }
@@ -126,7 +128,7 @@ public class AchievementService {
     public void executeLevelUp(Achievementprocess achievementprocess, User user, Achievement achievement) {
         achievementprocess.setProcesss(levelService.getLevelByExperience(user.getExperience()) + "");
         if (Integer.parseInt(achievementprocess.getProcesss()) >= Integer.parseInt(achievement.getTarget())) {
-            achievementprocess.setIffinish(true);
+            achievementprocess.setIffinish(AchievementConfig.COMPLETE_TASK);
             achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
         }
         AchievementUtil.refreshAchievementInfo(user);
@@ -141,32 +143,12 @@ public class AchievementService {
      * @param npc
      */
     public void executeTalkNPC(Achievementprocess achievementprocess, User user, Achievement achievement, Npc npc) {
-        if (achievement.getTarget().equals(npc.getId() + "") && !achievementprocess.getIffinish()) {
+        if (achievement.getTarget().equals(npc.getId() + "") && achievementprocess.getIffinish().equals(AchievementConfig.DOING_TASK)) {
             achievementprocess.setProcesss(achievement.getTarget());
-            achievementprocess.setIffinish(true);
+            achievementprocess.setIffinish(AchievementConfig.COMPLETE_TASK);
             achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
-            sloveAchievementReward(achievement, user);
+            rewardService.sloveAchievementReward(achievement, user);
             AchievementUtil.refreshAchievementInfo(user);
-
-        }
-    }
-
-    /**
-     * 成就奖励
-     *
-     * @param achievement
-     * @param user
-     */
-    private void sloveAchievementReward(Achievement achievement, User user) {
-        if (!achievement.getReward().equals(GrobalConfig.NULL)) {
-            String[] reward = achievement.getReward().split("-");
-            for (String rewardT : reward) {
-                String[] rewardArr = rewardT.split(":");
-//                  增加经验值
-                if ("1".equals(rewardArr[0])) {
-                    levelService.upUserLevel(user, rewardArr[1]);
-                }
-            }
         }
     }
 
@@ -179,7 +161,7 @@ public class AchievementService {
      * @param achievement
      */
     public void executeCollect(Achievementprocess achievementprocess, BaseGood baseGood, User user, Achievement achievement) {
-        if (!achievementprocess.getIffinish()) {
+        if (achievementprocess.getIffinish().equals(AchievementConfig.DOING_TASK)) {
             if (baseGood instanceof Equipment) {
                 Equipment equipment = (Equipment) baseGood;
 
@@ -211,7 +193,7 @@ public class AchievementService {
                                 return;
                             }
                         }
-                        achievementprocess.setIffinish(true);
+                        achievementprocess.setIffinish(AchievementConfig.COMPLETE_TASK);
                     }
                 }
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
@@ -231,7 +213,7 @@ public class AchievementService {
     public void executeBossAttack(Achievementprocess achievementprocess, User user, Achievement achievement, Monster monster) {
         if (monster.getId().equals(Integer.parseInt(achievement.getTarget()))) {
 //          此任务比较特殊和队伍挂钩
-            achievementprocess.setIffinish(true);
+            achievementprocess.setIffinish(AchievementConfig.COMPLETE_TASK);
             achievementprocess.setProcesss(achievement.getTarget());
             updateAchievementprocessWithOther(user, monster);
         }
@@ -249,27 +231,27 @@ public class AchievementService {
     public void executeAddFirstFriend(Achievementprocess achievementprocess, User user, User userTarget, String fromUser) {
 //      更新用户自己的
         Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
-        if (!achievementprocess.getIffinish()) {
+        if (achievementprocess.getIffinish().equals(AchievementConfig.DOING_TASK)) {
             achievementprocess.setProcesss(achievement.getTarget());
-            achievementprocess.setIffinish(true);
+            achievementprocess.setIffinish(AchievementConfig.COMPLETE_TASK);
             achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
         }
 
 //      更新对方的
         if (userTarget != null) {
             for (Achievementprocess achievementprocessT : userTarget.getAchievementprocesses()) {
-                if (!achievementprocessT.getIffinish() && achievementprocessT.getType().equals(Achievement.FRIEND)) {
+                if (achievementprocessT.getIffinish().equals(AchievementConfig.DOING_TASK) && achievementprocessT.getType().equals(AchievementConfig.FRIEND)) {
                     achievementprocessT.setProcesss(achievement.getTarget());
-                    achievementprocessT.setIffinish(true);
+                    achievementprocessT.setIffinish(AchievementConfig.COMPLETE_TASK);
                     achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
                 }
             }
             AchievementUtil.refreshAchievementInfo(userTarget);
         } else {
             Achievementprocess achievementprocessT = achievementprocessMapper.selectprocessByUsernameAndAchievementId(fromUser, achievement.getAchievementId());
-            if (!achievementprocessT.getIffinish()) {
+            if (achievementprocessT.getIffinish().equals(AchievementConfig.DOING_TASK)) {
                 achievementprocessT.setProcesss(achievement.getTarget());
-                achievementprocessT.setIffinish(true);
+                achievementprocessT.setIffinish(AchievementConfig.COMPLETE_TASK);
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
             }
         }
@@ -284,13 +266,13 @@ public class AchievementService {
      */
     public void executeMoneyAchievement(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
-            if (achievementprocessT.getType().equals(Achievement.MONEYFIRST)) {
+            if (achievementprocessT.getType().equals(AchievementConfig.MONEYFIRST)) {
                 Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocessT.getAchievementid());
                 Integer targetMoney = Integer.parseInt(achievement.getTarget());
                 Integer userMoney = Integer.parseInt(user.getMoney());
                 if (userMoney >= targetMoney) {
                     achievementprocessT.setProcesss(achievement.getTarget());
-                    achievementprocessT.setIffinish(true);
+                    achievementprocessT.setIffinish(AchievementConfig.COMPLETE_TASK);
                     achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
                 }
                 return;
@@ -316,9 +298,9 @@ public class AchievementService {
             list = achievementprocessMapper.selectByExample(achievementprocessExample);
         }
         for (Achievementprocess achievementprocess : list) {
-            if (achievementprocess.getType().equals(Achievement.UNIONFIRST) && !achievementprocess.getIffinish()) {
+            if (achievementprocess.getType().equals(AchievementConfig.UNIONFIRST) && achievementprocess.getIffinish().equals(AchievementConfig.DOING_TASK)) {
                 Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
-                achievementprocess.setIffinish(true);
+                achievementprocess.setIffinish(AchievementConfig.COMPLETE_TASK);
                 achievementprocess.setProcesss(achievement.getTarget());
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocess);
             }
@@ -340,9 +322,9 @@ public class AchievementService {
             User userT = entry.getValue();
             for (Achievementprocess achievementprocess : userT.getAchievementprocesses()) {
                 Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
-                if (achievementprocess.getType().equals(Achievement.FINISHBOSSAREA) && monster.getId().equals(Integer.parseInt(achievement.getTarget()))) {
+                if (achievementprocess.getType().equals(AchievementConfig.FINISHBOSSAREA) && monster.getId().equals(Integer.parseInt(achievement.getTarget()))) {
 //                  此任务比较特殊和队伍挂钩
-                    achievementprocess.setIffinish(true);
+                    achievementprocess.setIffinish(AchievementConfig.COMPLETE_TASK);
                     achievementprocess.setProcesss(achievement.getTarget());
                 }
             }
@@ -372,9 +354,9 @@ public class AchievementService {
     private void updateFirstTradeOnOneUser(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
             Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocessT.getAchievementid());
-            if (!achievementprocessT.getIffinish() && achievementprocessT.getType().equals(Achievement.TRADEFIRST)) {
+            if (achievementprocessT.getIffinish().equals(AchievementConfig.DOING_TASK) && achievementprocessT.getType().equals(AchievementConfig.TRADEFIRST)) {
                 achievementprocessT.setProcesss(achievement.getTarget());
-                achievementprocessT.setIffinish(true);
+                achievementprocessT.setIffinish(AchievementConfig.COMPLETE_TASK);
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
             }
         }
@@ -387,8 +369,8 @@ public class AchievementService {
      */
     public void executeFirstAddTeam(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
-            if (achievementprocessT.getType().equals(Achievement.TEAMFIRST) && !achievementprocessT.getIffinish()) {
-                achievementprocessT.setIffinish(true);
+            if (achievementprocessT.getType().equals(AchievementConfig.TEAMFIRST) && achievementprocessT.getIffinish().equals(AchievementConfig.DOING_TASK)) {
+                achievementprocessT.setIffinish(AchievementConfig.COMPLETE_TASK);
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
             }
         }
@@ -402,8 +384,8 @@ public class AchievementService {
      */
     public void executeFirstPKWin(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
-            if (achievementprocessT.getType().equals(Achievement.PKFIRST) && !achievementprocessT.getIffinish()) {
-                achievementprocessT.setIffinish(true);
+            if (achievementprocessT.getType().equals(AchievementConfig.PKFIRST) && achievementprocessT.getIffinish().equals(AchievementConfig.DOING_TASK)) {
+                achievementprocessT.setIffinish(AchievementConfig.COMPLETE_TASK);
                 achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
             }
         }
@@ -417,10 +399,10 @@ public class AchievementService {
      */
     public void executeEquipmentStartLevel(User user) {
         for (Achievementprocess achievementprocessT : user.getAchievementprocesses()) {
-            if (achievementprocessT.getType().equals(Achievement.EQUIPMENTSTARTLEVEL) && !achievementprocessT.getIffinish()) {
+            if (achievementprocessT.getType().equals(AchievementConfig.EQUIPMENTSTARTLEVEL) && achievementprocessT.getIffinish().equals(AchievementConfig.DOING_TASK)) {
                 Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocessT.getAchievementid());
                 if (checkUserWeaponStartLevel(user, achievement)) {
-                    achievementprocessT.setIffinish(true);
+                    achievementprocessT.setIffinish(AchievementConfig.COMPLETE_TASK);
                     achievementprocessMapper.updateByPrimaryKeySelective(achievementprocessT);
                 }
             }
@@ -437,7 +419,8 @@ public class AchievementService {
      */
     private boolean checkUserWeaponStartLevel(User user, Achievement achievement) {
         Integer allLevel = 0;
-        for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
+        for (Map.Entry<Integer, Weaponequipmentbar> entry : user.getWeaponequipmentbarMap().entrySet()) {
+            Weaponequipmentbar weaponequipmentbar = entry.getValue();
             allLevel += weaponequipmentbar.getStartlevel();
         }
         Integer tragetLevel = Integer.parseInt(achievement.getTarget());

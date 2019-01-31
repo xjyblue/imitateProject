@@ -1,11 +1,13 @@
 package service.attackservice.service;
 
+import com.google.common.collect.Maps;
 import config.impl.excel.BossSceneConfigResourceLoad;
 import config.impl.excel.EquipmentResourceLoad;
 import config.impl.excel.SceneResourceLoad;
 import config.impl.excel.UserSkillResourceLoad;
 import core.annotation.Region;
 import core.packet.ServerPacket;
+import org.checkerframework.checker.units.qual.A;
 import service.buffservice.entity.BuffConstant;
 import service.buffservice.service.RestraintBuffService;
 import service.caculationservice.service.AttackDamageCaculationService;
@@ -32,6 +34,9 @@ import pojo.Weaponequipmentbar;
 import service.rewardservice.service.RewardService;
 import service.skillservice.entity.UserSkill;
 import service.attackservice.util.AttackUtil;
+import service.teamservice.entity.Team;
+import service.teamservice.entity.TeamCache;
+import service.teamservice.service.TeamService;
 import utils.ChannelUtil;
 import utils.MessageUtil;
 import core.component.monster.Monster;
@@ -73,7 +78,8 @@ public class AttackService {
     private SkillService skillService;
     @Autowired
     private LevelService levelService;
-
+    @Autowired
+    private TeamService teamService;
 
     /**
      * 普通场景战斗退出战斗
@@ -115,7 +121,7 @@ public class AttackService {
         if (user.getTeamId() == null || !BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
             return;
         }
-//      boss场景
+//      boss场景处理
         BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
 //      移除副本中的map
         bossScene.getDamageAll().remove(user);
@@ -123,8 +129,12 @@ public class AttackService {
 //      场景还原
         Scene sceneTarget = SceneResourceLoad.sceneMap.get(user.getPos());
         sceneTarget.getUserMap().put(user.getUsername(), user);
-//      上下文回收
-        BossSceneConfigResourceLoad.bossAreaMap.remove(user.getTeamId());
+
+
+//      处理人物退出队伍
+        Team team = TeamCache.teamMap.get(user.getTeamId());
+        teamService.removeUserFromTeam(user, team);
+
 //      提示
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
         builder.setData(MessageConfig.OUTBOSSAREA);
@@ -642,7 +652,8 @@ public class AttackService {
      */
     private String out(User user, UserSkill userSkill, Monster monster, String attackDamage) {
         String resp = "";
-        for (Weaponequipmentbar weaponequipmentbar : user.getWeaponequipmentbars()) {
+        for (Map.Entry<Integer, Weaponequipmentbar> entry : user.getWeaponequipmentbarMap().entrySet()) {
+            Weaponequipmentbar weaponequipmentbar = entry.getValue();
             Equipment equipment = EquipmentResourceLoad.equipmentMap.get(weaponequipmentbar.getWid());
             resp += System.getProperty("line.separator")
                     + equipment.getName() + "剩余耐久为:" + weaponequipmentbar.getDurability();

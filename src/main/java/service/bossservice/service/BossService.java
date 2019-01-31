@@ -63,7 +63,6 @@ public class BossService {
             return;
         }
         Team team = null;
-
 //      处理用户死亡后重连副本逻辑
         if (user.getTeamId() != null && BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
             ChannelUtil.channelStatus.put(channel, ChannelStatus.BOSSSCENE);
@@ -78,6 +77,8 @@ public class BossService {
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
+
+
 
 //      处理用户一个人加入副本的逻辑
         if (user.getTeamId() == null) {
@@ -106,6 +107,11 @@ public class BossService {
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
+//      进入副本全队投票检查,队伍投票
+//        if(){
+//
+//        }
+
 //      生成新副本
         BossScene bossScene = new BossScene(user.getTeamId(), temp[1]);
         BossSceneConfigResourceLoad.bossAreaMap.put(team.getTeamId(), bossScene);

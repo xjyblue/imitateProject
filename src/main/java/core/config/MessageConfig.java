@@ -14,6 +14,7 @@ public class MessageConfig {
     public static final String DOUBLEPASSWORDERROR = "两次密码不一致";
     public static final String REGISTERSUCCESS = "注册成功请输入：login=用户名=密码进行登录";
     public static final String NOROLE = "请输入有效的种族";
+    public static final String REPEATUSERNAME = "重复的用户名";
 
     public static final String UNMOVELOCAL = "原地无需移动";
     public static final String NOLEVELTOMOVE = "等级不够无法移动";
@@ -29,8 +30,8 @@ public class MessageConfig {
     public static final String UNENOUGHMONEY = "您的金钱不足，请充值";
     public static final String NOUSERBAGID = "背包ID不存在";
     public static final String NOTOUPSTARTLEVEL = "此物品无法升星";
-    public static final String HASHATEQUIP = "请卸下你穿戴的帽子再进行穿戴";
-    public static final String HASCOREEQUIP = "请卸下你的主武器再进行装备";
+    public static final String HASHATEQUIP = "完成帽子的替换";
+    public static final String HASCOREEQUIP = "完成主武器的替换";
 
     public static final String RETREATFIGHT = "您已退出战斗";
     public static final String UNENOUGHMP = "您当前蓝量(MP)不足";
@@ -46,7 +47,7 @@ public class MessageConfig {
     public static final String NOEQUIPGOOD = "您未装备该武器";
     public static final String NOBELONGTOEQUIP = "该装备不属于穿戴物品";
 
-    public static final String NOTEAMMESSAGE = "你还没有队伍，可以输入t=create创建队伍或者t=add=（已有队伍的玩家名）加入队伍";
+    public static final String NOTEAMMESSAGE = "你还没有队伍，可以输入tcreate创建队伍或者tadd=（已有队伍的玩家名）加入队伍";
     public static final String INTEAMNOCREATETEAM = "你已在队伍中无法创建队伍";
     public static final String NOFOUNDTEAM = "你查找的队伍不存在";
     public static final String CREATETEAMSUCCESSMESSAGE = "你成功创建队伍";
@@ -116,6 +117,7 @@ public class MessageConfig {
             + System.getProperty("line.separator") + "[lgu查看已有的工会] [sqg=工会编号 申请加入工会] [cgu=工会名称 创建自己的工会] [zsry 展示工会所有成员信息] [zsck 展示工会仓库]" + System.getProperty("line.separator")
             + "[jxwp=格子编号=数量 捐献工会物品] [backg 退出工会] [sjg=工会成员id=等级 提升工会会员等级] [hq=格子编号=数量 取得工会仓库物品]" + System.getProperty("line.separator");
     public static final String NOCREATEUNION = "无法创建工会，你目前已有工会";
+    public static final String REPEATUNIONNAME = "重复的工会名,无法创建公户";
     public static final String NOOUTUNION = "创始人无法退出工会，你可将工会移交他人再退出";
     public static final String NOAPPLYUNION = "无法加入工会，你已有工会";
     public static final String SUCCESSUNIONAPPLY = "成功创建加入工会申请";
@@ -160,4 +162,15 @@ public class MessageConfig {
     public static final String NO_ENOUGH_MONEY_FOR_AUCTION = "参与竞拍的价格不得低于竞拍单的现价";
     public static final String AUCTION_IS_END = "拍卖结束";
     public static final String NO_AUCTION_FOR_SELF = "用户不能拍卖自己的物品";
+    public static final String NOPKDEADMAN = "无法pk已死亡的玩家";
+    public static final String NOTEAMRECORD = "无玩家队伍记录";
+    public static final String NO_TEAM_NO_TALK = "无队伍无法队伍聊天";
+    public static final String FINISH_TASK = "[------已完成的任务-----]" + System.getProperty("line.separator");
+    public static final String DOING_TASK = "[-----正在进行中的任务-----]" + System.getProperty("line.separator");
+    public static final String NPC_NO_TASK = "该npc无任务可接受";
+    public static final String NO_FOUND_TASK = "找不到该任务";
+    public static final String NO_ACCEPT_REPEAT = "不可重复接受该任务";
+    public static final String SUCCESS_ACCEPT_TASK = "成功接受任务";
+    public static final String NO_REPEAT_REWARD_TASK = "任务没有完成或者你重复想获取奖励，不行哦";
+    public static final String SUCCESS_REWARD_TASK = "成功交付任务获得奖励";
 }

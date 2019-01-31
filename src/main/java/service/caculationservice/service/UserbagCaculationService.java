@@ -3,6 +3,7 @@ package service.caculationservice.service;
 import config.impl.excel.AchievementResourceLoad;
 import config.impl.excel.EquipmentResourceLoad;
 import service.achievementservice.entity.Achievement;
+import service.achievementservice.entity.AchievementConfig;
 import service.achievementservice.service.AchievementService;
 import core.component.good.Equipment;
 import core.component.good.parent.BaseGood;
@@ -73,7 +74,7 @@ public class UserbagCaculationService {
             Equipment equipment = EquipmentResourceLoad.equipmentMap.get(value.getWid());
             for (Achievementprocess achievementprocess : user.getAchievementprocesses()) {
                 Achievement achievement = AchievementResourceLoad.achievementMap.get(achievementprocess.getAchievementid());
-                if (achievementprocess.getType().equals(Achievement.COLLECT)) {
+                if (achievementprocess.getType().equals(AchievementConfig.COLLECT)) {
                     achievementService.executeCollect(achievementprocess, equipment, user, achievement);
                 }
             }
