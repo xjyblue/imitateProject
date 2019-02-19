@@ -1,10 +1,11 @@
 package service.chatservice.service;
 
+import core.annotation.order.OrderRegion;
 import core.channel.ChannelStatus;
-import core.annotation.Order;
-import core.annotation.Region;
+import core.annotation.order.Order;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class ChatService {
     /**
      * 全服大喇叭
@@ -31,13 +32,13 @@ public class ChatService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "chatAll", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE, ChannelStatus.DEADSCENE})
+    @Order(orderMsg = OrderConfig.CHAT_ALL_ORDER, status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE, ChannelStatus.DEADSCENE})
     public void chatAll(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -62,13 +63,13 @@ public class ChatService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "chatOne", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE, ChannelStatus.DEADSCENE})
+    @Order(orderMsg = OrderConfig.CHAT_ONE_ORDER, status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE, ChannelStatus.DEADSCENE})
     public void chatOne(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -84,18 +85,18 @@ public class ChatService {
         }
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.NOONLINEUSER);
+        builder.setData(MessageConfig.NO_ONLINE_USER);
         MessageUtil.sendMessage(channel, builder.build());
     }
 
 
-    @Order(orderMsg = "chatTeam", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE, ChannelStatus.DEADSCENE})
+    @Order(orderMsg = OrderConfig.CHAT_TEAM_ORDER, status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE, ChannelStatus.DEADSCENE})
     public void chatTeam(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }

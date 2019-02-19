@@ -3,9 +3,10 @@ package service.shopservice.service;
 import config.impl.excel.EquipmentResourceLoad;
 import config.impl.excel.HpMedicineResourceLoad;
 import config.impl.excel.MpMedicineResourceLoad;
+import core.annotation.order.OrderRegion;
 import core.channel.ChannelStatus;
-import core.annotation.Order;
-import core.annotation.Region;
+import core.annotation.order.Order;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import service.caculationservice.service.UserbagCaculationService;
 import core.component.good.Equipment;
@@ -22,7 +23,6 @@ import pojo.Userbag;
 import utils.ChannelUtil;
 import utils.MessageUtil;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.UUID;
@@ -35,7 +35,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class ShopService {
     @Autowired
     private UserbagCaculationService userbagCaculationService;
@@ -46,11 +46,11 @@ public class ShopService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qshop", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.LABOURUNION,
+    @Order(orderMsg = OrderConfig.SHOW_SHOP_INFO_ORDER, status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.LABOURUNION,
             ChannelStatus.TRADE, ChannelStatus.BOSSSCENE, ChannelStatus.AUCTION})
     public void queryShopGood(Channel channel, String msg) {
         String resp = System.getProperty("line.separator")
-                + MessageConfig.MESSAGESTART
+                + MessageConfig.MESSAGE_START
                 + System.getProperty("line.separator")
                 + "您好，欢迎来到不充钱就不能玩的商店领域";
 //          回显可购买的武器
@@ -87,7 +87,7 @@ public class ShopService {
                     + System.getProperty("line.separator");
         }
         resp += "[购买武器请输入bshop=物品编号=数量 即可购买]" + System.getProperty("line.separator");
-        resp += MessageConfig.MESSAGEEND;
+        resp += MessageConfig.MESSAGE_END;
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
         builder.setData(resp);
@@ -100,28 +100,28 @@ public class ShopService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "bshop", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.LABOURUNION,
+    @Order(orderMsg = OrderConfig.BUY_SHOP_GOOD_ORDER, status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.LABOURUNION,
             ChannelStatus.TRADE, ChannelStatus.BOSSSCENE, ChannelStatus.AUCTION})
     public void buyShopGood(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //          校验是否为有效的物品id
         if (!checkIfGoodId(temp[1])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.FAILGOODID);
+            builder.setData(MessageConfig.FAIL_GOOD_ID);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //          校验用户的金钱是否足够
         if (!checkUserMoneyEnough(temp[GrobalConfig.TWO], temp[1], channel)) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.UNENOUGHMONEY);
+            builder.setData(MessageConfig.UNENOUGH_MONEY);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }

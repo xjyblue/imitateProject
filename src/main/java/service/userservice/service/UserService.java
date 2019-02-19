@@ -2,10 +2,11 @@ package service.userservice.service;
 
 import com.google.common.collect.Maps;
 import config.impl.excel.SceneResourceLoad;
+import core.annotation.order.OrderRegion;
 import core.channel.ChannelStatus;
-import core.annotation.Order;
-import core.annotation.Region;
+import core.annotation.order.Order;
 import core.component.monster.Monster;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import service.buffservice.entity.BuffConstant;
 import service.npcservice.entity.Npc;
@@ -29,7 +30,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class UserService {
     @Autowired
     private LevelService levelService;
@@ -40,7 +41,7 @@ public class UserService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "aoi", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.AOI_METHOD_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void aoiMethod(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String allStatus = System.getProperty("line.separator")

@@ -1,7 +1,8 @@
 package service.pkservice.service;
 
-import core.annotation.Order;
-import core.annotation.Region;
+import core.annotation.order.Order;
+import core.annotation.order.OrderRegion;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.AttackDamageCaculationService;
@@ -20,8 +21,6 @@ import utils.ChannelUtil;
 import utils.MessageUtil;
 import service.userservice.service.UserService;
 
-import java.math.BigInteger;
-
 /**
  * @ClassName PkService
  * @Description TODO
@@ -30,7 +29,7 @@ import java.math.BigInteger;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class PkService {
     @Autowired
     private AttackDamageCaculationService attackDamageCaculationService;
@@ -49,13 +48,13 @@ public class PkService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "pk", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.PK_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void pkOthers(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -64,35 +63,35 @@ public class PkService {
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
 //       解决鞭尸问题
         if(userTarget.getStatus().equals(GrobalConfig.DEAD)){
-            builder.setData(MessageConfig.NOPKDEADMAN);
+            builder.setData(MessageConfig.NO_PK_DEAD_MAN);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //       解决夸场景pk禁止
         if (userTarget != null && user != null && !user.getPos().equals(userTarget.getPos())) {
-            builder.setData(MessageConfig.NOSUPPORTREMOTEPK);
+            builder.setData(MessageConfig.NO_SUPPORT_REMOTE_PK);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //       解决起始之地不允许pk
         if (user != null && user.getPos().equals(GrobalConfig.STARTSCENE)) {
-            builder.setData(MessageConfig.RESURRECTIONNOPK);
+            builder.setData(MessageConfig.RESURRECTION_NO_PK);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (userTarget == null) {
-            builder.setData(MessageConfig.NOFOUNDPKPERSON);
+            builder.setData(MessageConfig.NO_FOUND_PK_PERSON);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUsername().equals(temp[1])) {
-            builder.setData(MessageConfig.NOPKSELF);
+            builder.setData(MessageConfig.NO_PK_SELF);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         UserSkill userSkill = skillService.getUserSkillByKey(channel, temp[2]);
         if (userSkill == null) {
-            builder.setData(MessageConfig.NOKEYSKILL);
+            builder.setData(MessageConfig.NO_KEY_SKILL);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -101,14 +100,14 @@ public class PkService {
         Integer userSkillMp = Integer.parseInt(userSkill.getSkillMp());
         Integer userMp = Integer.parseInt(user.getMp());
         if (userSkillMp > userMp) {
-            builder.setData(MessageConfig.UNENOUGHMP);
+            builder.setData(MessageConfig.UNENOUGH_MP);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //      人物cd校验
         Userskillrelation userskillrelation = user.getUserskillrelationMap().get(temp[2]);
         if (System.currentTimeMillis() < userskillrelation.getSkillcds() + userSkill.getAttackCd()) {
-            builder.setData(MessageConfig.UNSKILLCD);
+            builder.setData(MessageConfig.NO_SKILL_CD);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -130,7 +129,7 @@ public class PkService {
             builder.setData(resp);
             MessageUtil.sendMessage(channel, builder.build());
 
-            builder.setData(MessageConfig.SELECTLIVEWAY);
+            builder.setData(MessageConfig.SELECT_LIVE_WAY);
             MessageUtil.sendMessage(channelTarget, builder.build());
 //          死亡后处理
 

@@ -2,14 +2,15 @@ package service.skillservice.service;
 
 import config.impl.excel.SceneResourceLoad;
 import config.impl.excel.UserSkillResourceLoad;
-import core.annotation.Region;
+import core.annotation.order.OrderRegion;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
 import core.channel.ChannelStatus;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import mapper.UserskillrelationMapper;
-import core.annotation.Order;
+import core.annotation.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -31,7 +32,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class SkillService {
     @Autowired
     private UserskillrelationMapper userskillrelationMapper;
@@ -42,7 +43,7 @@ public class SkillService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "lookSkill", status = {ChannelStatus.SKILLVIEW})
+    @Order(orderMsg = OrderConfig.LOOK_USER_SKILL_ORDER, status = {ChannelStatus.SKILLVIEW})
     public void lookSkill(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String skillLook = "";
@@ -71,7 +72,7 @@ public class SkillService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "change", status = {ChannelStatus.SKILLVIEW})
+    @Order(orderMsg = OrderConfig.CHANGE_USER_SKILL_KEY_ORDER, status = {ChannelStatus.SKILLVIEW})
     public void changeSkill(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
@@ -103,7 +104,7 @@ public class SkillService {
             }
             if (!flag) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.ERRORORDER);
+                builder.setData(MessageConfig.ERROR_ORDER);
                 MessageUtil.sendMessage(channel, builder.build());
             }
         }
@@ -115,7 +116,7 @@ public class SkillService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "quitSkill", status = {ChannelStatus.SKILLVIEW})
+    @Order(orderMsg = OrderConfig.QUIT_USER_SKILL_VIEW_ORDER, status = {ChannelStatus.SKILLVIEW})
     public void quitSkill(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
@@ -130,11 +131,11 @@ public class SkillService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "viewSkill", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.ENTER_USER_SKILL_VIEW_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void enterSkillView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.SKILLVIEW);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.SKILLVIEWMESG);
+        builder.setData(MessageConfig.SKILL_VIEW_MESG);
         MessageUtil.sendMessage(channel, builder.build());
     }
 
@@ -182,7 +183,7 @@ public class SkillService {
     public boolean checkUserSkillCd(Userskillrelation userskillrelation, Channel channel) {
         if (System.currentTimeMillis() < userskillrelation.getSkillcds()) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.UNSKILLCD);
+            builder.setData(MessageConfig.NO_SKILL_CD);
             MessageUtil.sendMessage(channel, builder.build());
             return false;
         }

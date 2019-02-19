@@ -2,15 +2,16 @@ package service.teamservice.service;
 
 import config.impl.excel.BossSceneConfigResourceLoad;
 import core.channel.ChannelStatus;
-import core.annotation.Region;
+import core.annotation.order.OrderRegion;
 import core.config.GrobalConfig;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import service.achievementservice.service.AchievementService;
 import service.sceneservice.entity.BossScene;
 import core.config.MessageConfig;
 import io.netty.channel.Channel;
 import mapper.TeamapplyinfoMapper;
-import core.annotation.Order;
+import core.annotation.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Teamapplyinfo;
@@ -35,7 +36,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class TeamService {
 
     @Autowired
@@ -51,11 +52,11 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "team", status = {ChannelStatus.TEAM})
+    @Order(orderMsg = OrderConfig.SHOW_TEAM_INFO_ORDER, status = {ChannelStatus.TEAM})
     public void queryTeamInfo(Channel channel, String msg) {
         if (getUser(channel).getTeamId() == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOTEAMMESSAGE);
+            builder.setData(MessageConfig.NO_TEAM_MESSAGE);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         } else {
@@ -71,7 +72,7 @@ public class TeamService {
                 MessageUtil.sendMessage(channel, builder.build());
             } else {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.NOTEAMMESSAGE);
+                builder.setData(MessageConfig.NO_TEAM_MESSAGE);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -84,12 +85,12 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tcreate", status = {ChannelStatus.TEAM})
+    @Order(orderMsg = OrderConfig.CREATE_TEAM_ORDER, status = {ChannelStatus.TEAM})
     public void createTeam(Channel channel, String msg) {
         User user = getUser(channel);
         if (getUser(channel).getTeamId() != null && getTeam(getUser(channel)) != null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.INTEAMNOCREATETEAM);
+            builder.setData(MessageConfig.IN_TEAM_NO_CREATE_TEAM);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -104,7 +105,7 @@ public class TeamService {
         TeamCache.teamMap.put(user.getTeamId(), team);
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.CREATETEAMSUCCESSMESSAGE);
+        builder.setData(MessageConfig.CREATE_TEAM_SUCCESS_MESSAGE);
         MessageUtil.sendMessage(channel, builder.build());
     }
 
@@ -114,13 +115,13 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tremove", status = {ChannelStatus.TEAM})
+    @Order(orderMsg = OrderConfig.REMOVE_TEAM_ALL_MEMBER_ORDER, status = {ChannelStatus.TEAM})
     public void removeTeam(Channel channel, String msg) {
         User user = getUser(channel);
         Team team = getTeam(getUser(channel));
         if (team == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOINTEAMERRORMESSAGE);
+            builder.setData(MessageConfig.NO_IN_TEAM_ERROR_MESSAGE);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -130,7 +131,7 @@ public class TeamService {
                 entry.getValue().setTeamId(null);
             }
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.DISSOLUTIONTEAM);
+            builder.setData(MessageConfig.DISSOLUTION_TEAM);
             MessageUtil.sendMessage(channel, builder.build());
         } else {
             if (team.getUserMap().containsKey(user.getUsername())) {
@@ -138,7 +139,7 @@ public class TeamService {
             }
             user.setTeamId(null);
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.SIGNOUTTEAM);
+            builder.setData(MessageConfig.SIGN_OUT_TEAM);
             MessageUtil.sendMessage(channel, builder.build());
         }
     }
@@ -149,13 +150,13 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tback", status = {ChannelStatus.TEAM})
+    @Order(orderMsg = OrderConfig.BACK_TEAM_ORDER, status = {ChannelStatus.TEAM})
     public void teamAllRemove(Channel channel, String msg) {
         User user = getUser(channel);
         Team team = getTeam(getUser(channel));
         if (team == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOTEAMMESSAGE);
+            builder.setData(MessageConfig.NO_TEAM_MESSAGE);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -163,7 +164,7 @@ public class TeamService {
             TeamCache.teamMap.remove(user.getTeamId());
 
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ONLEAVEFORREMOVE);
+            builder.setData(MessageConfig.ONE_MAN_REMOVE_TEAM);
             MessageUtil.sendMessage(channel, builder.build());
             user.setTeamId(null);
             return;
@@ -177,12 +178,12 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tadd", status = {ChannelStatus.TEAM})
+    @Order(orderMsg = OrderConfig.REQUEST_NEW_TEAM_ORDER, status = {ChannelStatus.TEAM})
     public void addTeam(Channel channel, String msg) {
         User user = getUser(channel);
         if (user.getTeamId() != null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.YOUARENINTEAM);
+            builder.setData(MessageConfig.YOU_ARE_IN_TEAM);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -190,7 +191,7 @@ public class TeamService {
         User userLeader = userService.getUserByNameFromSession(temp[1]);
         if (userLeader == null || getTeam(userLeader) == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOFOUNDTEAM);
+            builder.setData(MessageConfig.NO_FOUND_TEAM);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -198,7 +199,7 @@ public class TeamService {
 //      加入创建申请单
         if (team == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOFOUNDTEAM);
+            builder.setData(MessageConfig.NO_FOUND_TEAM);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -209,7 +210,7 @@ public class TeamService {
         teamapplyinfoMapper.insertSelective(teamapplyinfo);
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.SUCCESSTOAPPLY);
+        builder.setData(MessageConfig.SUCCESS_TO_APPLY);
         MessageUtil.sendMessage(channel, builder.build());
 
         Channel leaderChannel = ChannelUtil.userToChannelMap.get(userLeader);
@@ -224,12 +225,12 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ty", status = {ChannelStatus.TEAM})
+    @Order(orderMsg = OrderConfig.AGREE_ADD_NEW_TEAM_ORDER, status = {ChannelStatus.TEAM})
     public void agreeEnterTeam(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -237,14 +238,14 @@ public class TeamService {
         Teamapplyinfo teamapplyinfo = teamapplyinfoMapper.selectByPrimaryKey(temp[1]);
         if (teamapplyinfo == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOFOUNDTEAMAPPLYINFO);
+            builder.setData(MessageConfig.NO_FOUND_TEAM_APPLY_INFO);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User userTarget = userService.getUserByNameFromSession(teamapplyinfo.getUsername());
         if (userTarget == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.USERNOONLINETOADDTEAM);
+            builder.setData(MessageConfig.USER_NO_ONLINE_TO_ADD_TEAM);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -258,7 +259,7 @@ public class TeamService {
         builder.setData("您同意了" + userTarget.getUsername() + "加入队伍");
         MessageUtil.sendMessage(channel, builder.build());
 
-        builder.setData(MessageConfig.SUCCESSENTERTEAM);
+        builder.setData(MessageConfig.SUCCESS_ENTER_TEAM);
         MessageUtil.sendMessage(channelTarget, builder.build());
 
 //          加入后销毁申请记录，队伍应该数据库持久化的。。。
@@ -274,13 +275,13 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tlu", status = {ChannelStatus.TEAM})
+    @Order(orderMsg = OrderConfig.SHOW_ALL_TEAM_APPLY_INFO_ORDER, status = {ChannelStatus.TEAM})
     public void queryTeamApplyInfo(Channel channel, String msg) {
 //      展示申请者的信息
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getTeamId() == null || !TeamCache.teamMap.containsKey(user.getTeamId())) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOTEAMMESSAGE);
+            builder.setData(MessageConfig.NO_TEAM_MESSAGE);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -375,31 +376,31 @@ public class TeamService {
 
 //      当队长掉线时
         Team team = TeamCache.teamMap.get(user.getTeamId());
-//      移除队伍中的玩家
-        removeUserFromTeam(user, team);
 //      移除副本中的玩家
         if (BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
             BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
             bossScene.getDamageAll().remove(user);
             BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
         }
-        TeamCache.teamMap.get(user.getTeamId()).getUserMap().remove(user.getUsername());
+//      移除队伍中的玩家
+        removeUserFromTeam(user, team);
     }
 
     /**
      * 将某个玩家移出队伍
+     *
      * @param user
      * @param team
      */
     public void removeUserFromTeam(User user, Team team) {
 //      队长退出队伍
-        if(user == team.getLeader()){
+        if (user == team.getLeader()) {
             boolean flag = true;
             for (Map.Entry<String, User> entry : TeamCache.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
                 Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
                 if (entry.getValue() != user) {
                     ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                    builder.setData(user.getUsername() + "已离线退出队伍");
+                    builder.setData(user.getUsername() + "已退出队伍");
                     MessageUtil.sendMessage(channelTemp, builder.build());
                     if (flag) {
                         team.setLeader(entry.getValue());
@@ -409,7 +410,7 @@ public class TeamService {
                     }
                 }
             }
-        }else {
+        } else {
             //      普通玩家退出队伍
             for (Map.Entry<String, User> entry : TeamCache.teamMap.get(user.getTeamId()).getUserMap().entrySet()) {
                 Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
@@ -419,13 +420,14 @@ public class TeamService {
             }
         }
         team.getUserMap().remove(user.getUsername());
+        user.setTeamId(null);
     }
 
-    @Order(orderMsg = "showteam", status = {ChannelStatus.TEAM})
+    @Order(orderMsg = OrderConfig.SHOW_ALL_TEAM_INFO_ORDER, status = {ChannelStatus.TEAM})
     public void queryAllTeam(Channel channel, String msg) {
         if (TeamCache.teamMap.size() == 0) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOTEAMRECORD);
+            builder.setData(MessageConfig.NO_TEAM_RECORD);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -444,11 +446,11 @@ public class TeamService {
         MessageUtil.sendMessage(channel, builder.build());
     }
 
-    @Order(orderMsg = "eteam", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.ENTER_TEAM_VIEW_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void enterTeamView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.TEAM);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.ENTERTEAMMANAGERVIEW);
+        builder.setData(MessageConfig.ENTER_TEAM_MANAGER_VIEW);
         MessageUtil.sendMessage(channel, builder.build());
     }
 
@@ -458,11 +460,11 @@ public class TeamService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qteam", status = {ChannelStatus.TEAM})
+    @Order(orderMsg = OrderConfig.QUIT_TEAM_VIEW_ORDER, status = {ChannelStatus.TEAM})
     public void outTeamView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.OUTTEAMVIEW);
+        builder.setData(MessageConfig.OUT_TEAM_VIEW);
         MessageUtil.sendMessage(channel, builder.build());
     }
 }

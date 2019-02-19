@@ -1,13 +1,14 @@
 package service.weaponservice.service;
 
 import config.impl.excel.EquipmentResourceLoad;
+import core.annotation.order.OrderRegion;
 import core.channel.ChannelStatus;
-import core.annotation.Order;
-import core.annotation.Region;
+import core.annotation.order.Order;
 import core.component.good.Equipment;
 import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import mapper.UserbagMapper;
@@ -19,7 +20,6 @@ import pojo.Userbag;
 import pojo.Weaponequipmentbar;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.HpCaculationService;
-import service.caculationservice.service.UserbagCaculationService;
 import service.userbagservice.service.UserbagService;
 import service.weaponservice.entity.WeaponUtil;
 import utils.ChannelUtil;
@@ -36,7 +36,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class Weaponservice {
     @Autowired
     private AchievementService achievementService;
@@ -55,7 +55,7 @@ public class Weaponservice {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qw", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
+    @Order(orderMsg = OrderConfig.SHOW_WEAPON_MESG_ORDER, status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
     public void queryEquipmentBar(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String wresp = "";
@@ -86,13 +86,13 @@ public class Weaponservice {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "fix", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
+    @Order(orderMsg = OrderConfig.FIX_EQUIPMENT_ORDER, status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
     public void fixEquipment(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (!EquipmentResourceLoad.equipmentMap.containsKey(Integer.parseInt(temp[1]))) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.GOODNOEXIST);
+            builder.setData(MessageConfig.GOOD_NO_EXIST);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -116,7 +116,7 @@ public class Weaponservice {
             }
         }
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.NOEQUIPGOOD);
+        builder.setData(MessageConfig.NO_EQUIP_GOOD);
         MessageUtil.sendMessage(channel, builder.build());
     }
 
@@ -126,13 +126,13 @@ public class Weaponservice {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "wq", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
+    @Order(orderMsg = OrderConfig.TAKE_OFF_WEAPON_ORDER, status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
     public void quitEquipment(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -166,11 +166,11 @@ public class Weaponservice {
                 }
             }
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOEQUIPGOOD);
+            builder.setData(MessageConfig.NO_EQUIP_GOOD);
             MessageUtil.sendMessage(channel, builder.build());
         } else {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.GOODNOEXIST);
+            builder.setData(MessageConfig.GOOD_NO_EXIST);
             MessageUtil.sendMessage(channel, builder.build());
         }
     }
@@ -181,7 +181,7 @@ public class Weaponservice {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ww", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
+    @Order(orderMsg = OrderConfig.TAKE_ON_WEAPON_ORDER, status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
     public void takeEquipment(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
@@ -195,14 +195,14 @@ public class Weaponservice {
         Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOUSERBAGID);
+            builder.setData(MessageConfig.NO_USERBAG_ID);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //          检查该物品是否为可穿戴装备
         if (!EquipmentResourceLoad.equipmentMap.containsKey(userbag.getWid())) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.GOODNOEXIST);
+            builder.setData(MessageConfig.GOOD_NO_EXIST);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -213,7 +213,7 @@ public class Weaponservice {
 //          替换操作
             exchangeEquip(channel, user, userbag, pos);
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.HASCOREEQUIP);
+            builder.setData(MessageConfig.HAS_CORE_EQUIP);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -222,7 +222,7 @@ public class Weaponservice {
 //          替换操作
             exchangeEquip(channel, user, userbag, pos);
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.HASHATEQUIP);
+            builder.setData(MessageConfig.HAS_HAT_EQUIP);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }

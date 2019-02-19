@@ -4,9 +4,9 @@ import config.impl.excel.CollectGoodResourceLoad;
 import config.impl.excel.EquipmentResourceLoad;
 import config.impl.excel.HpMedicineResourceLoad;
 import config.impl.excel.MpMedicineResourceLoad;
+import core.annotation.order.OrderRegion;
 import core.channel.ChannelStatus;
-import core.annotation.Order;
-import core.annotation.Region;
+import core.annotation.order.Order;
 import core.component.good.CollectGood;
 import core.component.good.Equipment;
 import core.component.good.HpMedicine;
@@ -14,6 +14,7 @@ import core.component.good.MpMedicine;
 import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ import utils.MessageUtil;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class UserbagService {
     @Autowired
     private MpCaculationService mpCaculationService;
@@ -63,7 +64,7 @@ public class UserbagService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ub", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE
+    @Order(orderMsg = OrderConfig.USE_USERBAG_ORDER, status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE
             , ChannelStatus.TRADE, ChannelStatus.TEAM, ChannelStatus.LABOURUNION})
     public void useUserbag(Channel channel, String msg) {
         String[] temp = msg.split("=");
@@ -109,13 +110,13 @@ public class UserbagService {
                 sloveUserbag(user, channel, key);
             } else {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.UNSKILLCD);
+                builder.setData(MessageConfig.NO_SKILL_CD);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
         } else {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.GOODNOEXIST);
+            builder.setData(MessageConfig.GOOD_NO_EXIST);
             MessageUtil.sendMessage(channel, builder.build());
         }
     }
@@ -156,7 +157,7 @@ public class UserbagService {
 
         if (userbagNow == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.GOODNOEXISTBAG);
+            builder.setData(MessageConfig.GOOD_NO_EXIST_BAG);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -184,7 +185,7 @@ public class UserbagService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qb", status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE
+    @Order(orderMsg = OrderConfig.SHOW_USERBAG_INFO, status = {ChannelStatus.COMMONSCENE, ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE
             , ChannelStatus.TRADE, ChannelStatus.TEAM, ChannelStatus.LABOURUNION, ChannelStatus.AUCTION})
     public void refreshUserbagInfo(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
@@ -267,6 +268,29 @@ public class UserbagService {
         if (userbag.getTypeof().equals(BaseGood.CHANGEGOOD)) {
             CollectGood collectGood = CollectGoodResourceLoad.collectGoodMap.get(userbag.getWid());
             return "[收集类物品--》] [物品id:" + userbag.getId() + "] [物品名称:" + collectGood.getName() + "]" + "[物品数量：" + userbag.getNum() + "] [物品描述：" + collectGood.getDesc() + "]";
+        }
+        return null;
+    }
+
+    public String getGoodNameByWidAndType(String type, Integer wid) {
+        if (type.equals(BaseGood.MONEY)) {
+            return "[金钱--》]";
+        }
+        if (type.equals(BaseGood.MPMEDICINE)) {
+            MpMedicine mpMedicine = MpMedicineResourceLoad.mpMedicineMap.get(wid);
+            return "[蓝药--》] [物品id:" + wid + "] [药品名称：" + mpMedicine.getName() + "]";
+        }
+        if (type.equals(BaseGood.EQUIPMENT)) {
+            Equipment equipment = EquipmentResourceLoad.equipmentMap.get(wid);
+            return "[武器--》] [物品id:" + wid + "] [武器名称：" + equipment.getName() + "]";
+        }
+        if (type.equals(BaseGood.HPMEDICINE)) {
+            HpMedicine hpMedicine = HpMedicineResourceLoad.hpMedicineMap.get(wid);
+            return "[红药--》] [物品id:" + wid + "] [药品名称：" + hpMedicine.getName() + "]";
+        }
+        if (type.equals(BaseGood.CHANGEGOOD)) {
+            CollectGood collectGood = CollectGoodResourceLoad.collectGoodMap.get(wid);
+            return "[收集类物品--》] [物品id:" + wid + "] [物品名称:" + collectGood.getName() + "]";
         }
         return null;
     }

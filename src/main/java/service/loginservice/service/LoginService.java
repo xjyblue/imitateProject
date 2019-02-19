@@ -2,8 +2,9 @@ package service.loginservice.service;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
-import core.annotation.Region;
+import core.annotation.order.OrderRegion;
 import core.config.GrobalConfig;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import login.entity.LoginUserTask;
 import login.thread.LoginThreadPool;
@@ -11,7 +12,7 @@ import core.config.MessageConfig;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
-import core.annotation.Order;
+import core.annotation.order.Order;
 import org.springframework.stereotype.Component;
 import utils.MessageUtil;
 
@@ -24,7 +25,7 @@ import utils.MessageUtil;
  **/
 @Component
 @Slf4j
-@Region
+@OrderRegion
 public class LoginService {
     /**
      * 登录逻辑
@@ -32,12 +33,12 @@ public class LoginService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "login", status = {ChannelStatus.LOGIN})
+    @Order(orderMsg = OrderConfig.LOGIN_ORDER, status = {ChannelStatus.LOGIN})
     public void login(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }

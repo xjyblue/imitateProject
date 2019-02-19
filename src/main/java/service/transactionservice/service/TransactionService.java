@@ -1,14 +1,11 @@
 package service.transactionservice.service;
 
-import config.impl.excel.EquipmentResourceLoad;
-import config.impl.excel.MpMedicineResourceLoad;
-import core.annotation.Region;
+import core.annotation.order.OrderRegion;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
 import service.caculationservice.service.UserbagCaculationService;
-import core.component.good.Equipment;
-import core.component.good.MpMedicine;
 import core.component.good.parent.BaseGood;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
@@ -16,7 +13,7 @@ import service.transactionservice.entity.TradeCache;
 import service.userbagservice.service.UserbagService;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
-import core.annotation.Order;
+import core.annotation.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -41,7 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class TransactionService {
 
     private Lock lock = new ReentrantLock();
@@ -64,12 +61,12 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ntrade", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.DISAGREE_TRADE_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void cancelTrade(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getTraceId() == null || !TradeCache.tradeMap.containsKey(user.getTraceId())) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOCREATETRADE);
+            builder.setData(MessageConfig.NO_CREATE_TRADE);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -86,7 +83,7 @@ public class TransactionService {
                 TradeCache.tradeMap.remove(user.getTraceId());
                 user.setTraceId(null);
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.CANCELTRADE);
+                builder.setData(MessageConfig.CANCEL_TRADE);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -101,19 +98,19 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ytrade", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.AGREE_TRADE_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void agreeTrade(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!TradeCache.tradeMap.containsKey(temp[1])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOTRADERECORD);
+            builder.setData(MessageConfig.NO_TRADE_RECORD);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -125,7 +122,7 @@ public class TransactionService {
 //          解决取消线程先抢到锁
             if (!TradeCache.tradeMap.containsKey(trade.getTradeId())) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.CANCELTRADE);
+                builder.setData(MessageConfig.CANCEL_TRADE);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -153,7 +150,7 @@ public class TransactionService {
         trade.setEndTime(System.currentTimeMillis() + 500000);
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.SUCCESSCREATETRADE);
+        builder.setData(MessageConfig.SUCCESS_CREATE_TRADE);
         MessageUtil.sendMessage(channel, builder.build());
         MessageUtil.sendMessage(channelStart, builder.build());
 
@@ -170,33 +167,33 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "iftrade", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.TRADE_REQUEST_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void createTrade(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (userService.getUserByNameFromSession(temp[1]) == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOTRACEUSER);
+            builder.setData(MessageConfig.NO_TRACE_USER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Channel channelTarget = ChannelUtil.userToChannelMap.get(userService.getUserByNameFromSession(temp[1]));
         if (channelTarget == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOTRACEUSER);
+            builder.setData(MessageConfig.NO_TRACE_USER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User userTarget = ChannelUtil.channelToUserMap.get(channelTarget);
         if (user.getTraceId() != null && TradeCache.tradeMap.containsKey(user.getTraceId())) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.MANISINGTRADING);
+            builder.setData(MessageConfig.YOU_TRADE_IS_ING);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -205,7 +202,7 @@ public class TransactionService {
 //          解决同意交易和另外创建用户交易请求的锁问题
             if (userTarget.isIfTrade()) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.TRADETARGETHASMAN);
+                builder.setData(MessageConfig.OTHER_TRADE_IS_ING);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -243,7 +240,7 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jyq", status = {ChannelStatus.TRADE})
+    @Order(orderMsg = OrderConfig.TRADING_CANCEL_TRADE_ORDER, status = {ChannelStatus.TRADE})
     public void quitTrade(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = TradeCache.tradeMap.get(user.getTraceId());
@@ -267,7 +264,7 @@ public class TransactionService {
         moneyCaculationService.addMoneyToUser(trade.getUserTo(), trade.getToMoney().toString());
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.FAILTRADEEND);
+        builder.setData(MessageConfig.FAIL_TRADE_END);
         MessageUtil.sendMessage(channelStart, builder.build());
         MessageUtil.sendMessage(channelEnd, builder.build());
 
@@ -295,7 +292,7 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jyy", status = {ChannelStatus.TRADE})
+    @Order(orderMsg = OrderConfig.TRADING_AGREE_TRADE_ORDER, status = {ChannelStatus.TRADE})
     public void trading(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = TradeCache.tradeMap.get(user.getTraceId());
@@ -305,17 +302,17 @@ public class TransactionService {
             agreelock.lock();
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
             if (!trade.isIfexe()) {
-                builder.setData(MessageConfig.FAILTRADEEND);
+                builder.setData(MessageConfig.FAIL_TRADE_END);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             if (user == trade.getUserStart() && trade.getStartUserAgree()) {
-                builder.setData(MessageConfig.REPEATYESTRADE);
+                builder.setData(MessageConfig.REPEAT_YES_TRADE);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             if (user == trade.getUserTo() && trade.getToUserAgree()) {
-                builder.setData(MessageConfig.REPEATYESTRADE);
+                builder.setData(MessageConfig.REPEAT_YES_TRADE);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -327,12 +324,12 @@ public class TransactionService {
             }
             if (selectTradeUser(trade)) {
                 if (user == trade.getUserStart()) {
-                    builder.setData(MessageConfig.YOUCOMFIRMTRADE);
+                    builder.setData(MessageConfig.YOU_COMFIRM_TRADE);
                     MessageUtil.sendMessage(channelStart, builder.build());
                     builder.setData(trade.getUserStart().getUsername() + "同意了此次交易，请您尽快做出抉择");
                     MessageUtil.sendMessage(channelEnd, builder.build());
                 } else {
-                    builder.setData(MessageConfig.YOUCOMFIRMTRADE);
+                    builder.setData(MessageConfig.YOU_COMFIRM_TRADE);
                     MessageUtil.sendMessage(channelEnd, builder.build());
                     builder.setData(trade.getUserTo().getUsername() + "同意了此次交易，请您尽快做出抉择");
                     MessageUtil.sendMessage(channelStart, builder.build());
@@ -354,10 +351,10 @@ public class TransactionService {
             userbagCaculationService.addUserBagForUser(trade.getUserTo(), entry.getValue());
         }
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.SUCCESSTRADEEND);
+        builder.setData(MessageConfig.SUCCESS_TRADE_END);
         MessageUtil.sendMessage(channelStart, builder.build());
 
-        builder.setData(MessageConfig.SUCCESSTRADEEND);
+        builder.setData(MessageConfig.SUCCESS_TRADE_END);
         MessageUtil.sendMessage(channelEnd, builder.build());
 
         ServerPacket.TradeResp.Builder builder1 = ServerPacket.TradeResp.newBuilder();
@@ -396,7 +393,7 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "xjbjy", status = {ChannelStatus.TRADE})
+    @Order(orderMsg = OrderConfig.TRADING_REDUCE_MONEY_ORDER, status = {ChannelStatus.TRADE})
     public void reduceMoney(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = TradeCache.tradeMap.get(user.getTraceId());
@@ -405,7 +402,7 @@ public class TransactionService {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -413,7 +410,7 @@ public class TransactionService {
         if (user == trade.getUserStart()) {
             if (trade.getStartMoney().compareTo(noSendMoney) < 0) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.NOENOUGHMONEYTORESET);
+                builder.setData(MessageConfig.NO_ENOUGH_MONEY_TO_RESET);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             } else {
@@ -423,7 +420,7 @@ public class TransactionService {
         } else {
             if (trade.getToMoney().compareTo(noSendMoney) < 0) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.NOENOUGHMONEYTORESET);
+                builder.setData(MessageConfig.NO_ENOUGH_MONEY_TO_RESET);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             } else {
@@ -451,7 +448,7 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jbjy", status = {ChannelStatus.TRADE})
+    @Order(orderMsg = OrderConfig.TRADING_ADD_MONEY_ORDER, status = {ChannelStatus.TRADE})
     public void addMoney(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = TradeCache.tradeMap.get(user.getTraceId());
@@ -460,7 +457,7 @@ public class TransactionService {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -468,7 +465,7 @@ public class TransactionService {
         BigInteger sendMoney = new BigInteger(temp[1]);
         if (userMoney.compareTo(sendMoney) <= 0) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.TRADENOENOUGHMONEY);
+            builder.setData(MessageConfig.TRADE_NO_ENOUGH_MONEY);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -495,7 +492,7 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jyg", status = {ChannelStatus.TRADE})
+    @Order(orderMsg = OrderConfig.TRADING_ADD_GOOD_ORDER, status = {ChannelStatus.TRADE})
     public void addGood(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = TradeCache.tradeMap.get(user.getTraceId());
@@ -504,7 +501,7 @@ public class TransactionService {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -512,7 +509,7 @@ public class TransactionService {
         Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOUSERBAGID);
+            builder.setData(MessageConfig.NO_USERBAG_ID);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -520,7 +517,7 @@ public class TransactionService {
         if (trade.getUserStart() == user) {
             if (userbag.getNum() < Integer.parseInt(temp[GrobalConfig.TWO])) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.NOENOUGHGOODFORTRADE);
+                builder.setData(MessageConfig.NO_ENOUGH_GOOD_FOR_TRADE);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -543,7 +540,7 @@ public class TransactionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "xjyg", status = {ChannelStatus.TRADE})
+    @Order(orderMsg = OrderConfig.TRADING_REMOVE_GOOD_ORDER, status = {ChannelStatus.TRADE})
     public void reduceGood(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         Trade trade = TradeCache.tradeMap.get(user.getTraceId());
@@ -553,7 +550,7 @@ public class TransactionService {
 //      移除交易单号武平到背包格子
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -586,7 +583,7 @@ public class TransactionService {
             return;
         }
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.ERRORORDER);
+        builder.setData(MessageConfig.ERROR_ORDER);
         MessageUtil.sendMessage(channel, builder.build());
     }
 
@@ -659,21 +656,21 @@ public class TransactionService {
      * @return
      */
     private String outTradeMessage(Trade trade) {
-        String resp = MessageConfig.TRADEMSG;
+        String resp = MessageConfig.TRADE_MSG;
         resp += System.getProperty("line.separator") +
-                MessageConfig.MESSAGESTART + System.getProperty("line.separator");
+                MessageConfig.MESSAGE_START + System.getProperty("line.separator");
         resp += trade.getUserStart().getUsername() + "放到交易单上的物品" + System.getProperty("line.separator");
         resp += trade.getUserStart().getUsername() + "的交易金币：" + trade.getStartMoney().toString() + System.getProperty("line.separator");
         for (Map.Entry<String, Userbag> entry : trade.getStartUserBag().entrySet()) {
             resp += trade.getUserStart().getUsername() + "的背包格子为: " + userbagService.getGoodNameByUserbag(entry.getValue()) + System.getProperty("line.separator");
         }
-        resp += MessageConfig.MESSAGEMID + System.getProperty("line.separator");
+        resp += MessageConfig.MESSAGE_MID + System.getProperty("line.separator");
         resp += trade.getUserTo().getUsername() + "放到交易单上的物品" + System.getProperty("line.separator");
         resp += trade.getUserTo().getUsername() + "的交易金币" + trade.getToMoney().toString() + System.getProperty("line.separator");
         for (Map.Entry<String, Userbag> entry : trade.getToUserBag().entrySet()) {
             resp += trade.getUserTo().getUsername() + "的背包格子为: " + "物品为:" + userbagService.getGoodNameByUserbag(entry.getValue()) + System.getProperty("line.separator");
         }
-        resp += MessageConfig.MESSAGEEND + System.getProperty("line.separator");
+        resp += MessageConfig.MESSAGE_END + System.getProperty("line.separator");
 
         userbagService.refreshUserbagInfo(ChannelUtil.userToChannelMap.get(trade.getUserTo()), null);
         userbagService.refreshUserbagInfo(ChannelUtil.userToChannelMap.get(trade.getUserStart()), null);

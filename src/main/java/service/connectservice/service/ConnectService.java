@@ -1,11 +1,12 @@
 package service.connectservice.service;
 
-import core.annotation.Region;
+import core.annotation.order.OrderRegion;
 import core.config.MessageConfig;
 import core.channel.ChannelStatus;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import io.netty.channel.Channel;
-import core.annotation.Order;
+import core.annotation.order.Order;
 import org.springframework.stereotype.Component;
 import utils.ChannelUtil;
 import utils.MessageUtil;
@@ -18,7 +19,7 @@ import utils.MessageUtil;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class ConnectService {
     /**
      * 登录
@@ -26,11 +27,11 @@ public class ConnectService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "dl", status = {ChannelStatus.COMING})
+    @Order(orderMsg = OrderConfig.SELECT_LOGIN_ORDER, status = {ChannelStatus.COMING})
     public void connect(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.LOGIN);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.LOGINMESSAGE);
+        builder.setData(MessageConfig.LOGIN_MESSAGE);
         MessageUtil.sendMessage(channel, builder.build());
     }
 
@@ -40,11 +41,11 @@ public class ConnectService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "zc", status = {ChannelStatus.COMING})
+    @Order(orderMsg = OrderConfig.SELECT_REGISTER_ORDER, status = {ChannelStatus.COMING})
     public void register(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.REGISTER);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.REGISTERMESSAGE);
+        builder.setData(MessageConfig.REGISTER_MESSAGE);
         MessageUtil.sendMessage(channel, builder.build());
     }
 

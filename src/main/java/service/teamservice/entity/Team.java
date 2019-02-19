@@ -1,8 +1,10 @@
 package service.teamservice.entity;
 
+import com.google.common.collect.Sets;
 import pojo.User;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @ClassName Team
@@ -32,6 +34,32 @@ public class Team {
      * 领队的id
      */
     private String leaderId;
+
+    /**
+     * 进入副本的投票
+     */
+    private Set<String> voteSet = Sets.newHashSet();
+
+    /**
+     * 进入副本的编号
+     */
+    private String bossAreaVoteTarget;
+
+    public String getBossAreaVoteTarget() {
+        return bossAreaVoteTarget;
+    }
+
+    public void setBossAreaVoteTarget(String bossAreaVoteTarget) {
+        this.bossAreaVoteTarget = bossAreaVoteTarget;
+    }
+
+    public Set<String> getVoteSet() {
+        return voteSet;
+    }
+
+    public void setVoteSet(Set<String> voteSet) {
+        this.voteSet = voteSet;
+    }
 
     public String getTeamName() {
         return teamName;

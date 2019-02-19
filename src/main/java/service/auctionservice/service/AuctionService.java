@@ -1,10 +1,11 @@
 package service.auctionservice.service;
 
+import core.annotation.order.OrderRegion;
 import core.channel.ChannelStatus;
-import core.annotation.Region;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
-import core.annotation.Order;
+import core.annotation.order.Order;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import org.springframework.beans.BeanUtils;
@@ -34,7 +35,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class AuctionService {
     @Autowired
     private UserbagService userbagService;
@@ -53,7 +54,7 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "eau", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.ENTER_AUTION_VIEW_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void enterAuctionView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.AUCTION);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
@@ -67,7 +68,7 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qau", status = {ChannelStatus.AUCTION})
+    @Order(orderMsg = OrderConfig.QUIT_AUCTION_ORDER, status = {ChannelStatus.AUCTION})
     public void outAuctionView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
@@ -81,7 +82,7 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "queryau", status = {ChannelStatus.AUCTION})
+    @Order(orderMsg = OrderConfig.SHOW_AUTION_ITEM_ORDER, status = {ChannelStatus.AUCTION})
     public void queryAuctionItems(Channel channel, String msg) {
         refreshAuctionItems(channel);
     }
@@ -92,26 +93,26 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ausj", status = {ChannelStatus.AUCTION})
+    @Order(orderMsg = OrderConfig.UP_AUCTION_ITEM_ORDER, status = {ChannelStatus.AUCTION})
     public void upAuctionItem(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.FIVE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOUSERBAGID);
+            builder.setData(MessageConfig.NO_USERBAG_ID);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!userbagService.checkUserbagNum(userbag, temp[GrobalConfig.TWO])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOENOUGHCHANGEGOOD);
+            builder.setData(MessageConfig.NO_ENOUGH_CHANGE_GOOD);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -134,7 +135,7 @@ public class AuctionService {
         AuctionCache.auctionItemMap.put(auctionItem.getId(), auctionItem);
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.SUCCESS_UP_AUCTIONITEM);
+        builder.setData(MessageConfig.SUCCESS_UP_AUCTION_ITEM);
         MessageUtil.sendMessage(channel, builder.build());
     }
 
@@ -144,14 +145,14 @@ public class AuctionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "auqp", status = {ChannelStatus.AUCTION})
+    @Order(orderMsg = OrderConfig.GET_AUCTION_ITEM_ORDER, status = {ChannelStatus.AUCTION})
     public void getAuctionItem(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
 //      拍卖物品校验
         if (!AuctionCache.auctionItemMap.containsKey(temp[GrobalConfig.ONE])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NO_THIS_AUCTIONITEM);
+            builder.setData(MessageConfig.NO_THIS_AUCTION_ITEM);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -177,14 +178,14 @@ public class AuctionService {
 //              指令校验
                 if (temp.length != GrobalConfig.TWO) {
                     ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                    builder.setData(MessageConfig.ERRORORDER);
+                    builder.setData(MessageConfig.ERROR_ORDER);
                     MessageUtil.sendMessage(channel, builder.build());
                     return;
                 }
 //              拍卖金币校验
                 if (!moneyCaculationService.checkUserHasEnoughMoney(user, auctionItem.getSaleMoney().toString())) {
                     ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                    builder.setData(MessageConfig.NOENOUGHMONEYTOGIVE);
+                    builder.setData(MessageConfig.NO_ENOUGH_MONEY_TO_GIVE);
                     MessageUtil.sendMessage(channel, builder.build());
                     return;
                 }
@@ -209,14 +210,14 @@ public class AuctionService {
 //              指令校验
                 if (temp.length != GrobalConfig.THREE) {
                     ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                    builder.setData(MessageConfig.ERRORORDER);
+                    builder.setData(MessageConfig.ERROR_ORDER);
                     MessageUtil.sendMessage(channel, builder.build());
                     return;
                 }
 //              用户金币校验
                 if (!moneyCaculationService.checkUserHasEnoughMoney(user, temp[GrobalConfig.TWO])) {
                     ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                    builder.setData(MessageConfig.NOENOUGHMONEYTOGIVE);
+                    builder.setData(MessageConfig.NO_ENOUGH_MONEY_TO_GIVE);
                     MessageUtil.sendMessage(channel, builder.build());
                     return;
                 }
@@ -261,7 +262,7 @@ public class AuctionService {
         String queryMsg = "";
         if (AuctionCache.auctionItemMap.size() == 0) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOAUCTIONITEMS);
+            builder.setData(MessageConfig.NO_AUCTION_ITEMS);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }

@@ -2,10 +2,11 @@ package service.emailservice.service;
 
 import config.impl.db.EmailDbLoad;
 import core.channel.ChannelStatus;
-import core.annotation.Order;
-import core.annotation.Region;
+import core.annotation.order.Order;
+import core.annotation.order.OrderRegion;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class EmailService {
     @Autowired
     private UserbagService userbagService;
@@ -46,14 +47,14 @@ public class EmailService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qmail", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.SHOW_EAMIL_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void queryEmail(Channel channel, String msg) {
 //      展示用户的email信息
         User user = ChannelUtil.channelToUserMap.get(channel);
         Map<String, Mail> emailMap = EmailDbLoad.userEmailMap.get(user.getUsername());
         if (emailMap.size() == 0) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.EMPTYEMAIL);
+            builder.setData(MessageConfig.EMPTY_EMAIL);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -79,20 +80,20 @@ public class EmailService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "sendmail", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.SEND_EMAIL_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void sendEmail(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (!EmailDbLoad.userEmailMap.containsKey(temp[GrobalConfig.ONE])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOEMAILUSER);
+            builder.setData(MessageConfig.NO_EMAIL_USER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (temp.length == GrobalConfig.THREE) {
             send(user.getUsername(), temp[GrobalConfig.ONE], temp[GrobalConfig.TWO], null, null);
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.SUCCESSSENDEMIAL);
+            builder.setData(MessageConfig.SUCCESSS_END_EMIAL);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -100,13 +101,13 @@ public class EmailService {
             Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[GrobalConfig.THREE]);
             if (userbag == null) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.NOUSERBAGID);
+                builder.setData(MessageConfig.NO_USERBAG_ID);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             if (!userbagService.checkUserbagNum(userbag, temp[GrobalConfig.FOUR])) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.NOENOUGHCHANGEGOOD);
+                builder.setData(MessageConfig.NO_ENOUGH_CHANGE_GOOD);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -116,7 +117,7 @@ public class EmailService {
             userbagCaculationService.removeUserbagFromUser(user, userbag, Integer.parseInt(temp[4]));
             send(user.getUsername(), temp[GrobalConfig.ONE], temp[GrobalConfig.TWO], userbagNew, null);
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.SUCCESSSENDEMIAL);
+            builder.setData(MessageConfig.SUCCESSS_END_EMIAL);
             MessageUtil.sendMessage(channel, builder.build());
             channel.writeAndFlush("邮件携带了附件:" + userbag.getName());
             return;
@@ -129,19 +130,19 @@ public class EmailService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "receivemail", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.RECEIVE_EMAIL_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void receiveEmail(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!EmailDbLoad.userEmailMap.get(user.getUsername()).containsKey(temp[GrobalConfig.ONE])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.RECEIVEEMAILFAIL);
+            builder.setData(MessageConfig.RECEIVE_EMAIL_FAIL);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -157,7 +158,7 @@ public class EmailService {
             EmailDbLoad.userEmailMap.get(user.getUsername()).get(temp[GrobalConfig.ONE]).setMoney(null);
         }
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.RECEIVEEMAILSUCCESS);
+        builder.setData(MessageConfig.RECEIVE_EMAIL_SUCCESS);
         MessageUtil.sendMessage(channel, builder.build());
     }
 

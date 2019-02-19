@@ -1,7 +1,8 @@
 package service.deadservice.service;
 
 import config.impl.excel.SceneResourceLoad;
-import core.annotation.Region;
+import core.annotation.order.OrderRegion;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import service.sceneservice.entity.Scene;
 import core.config.GrobalConfig;
@@ -9,7 +10,7 @@ import core.config.MessageConfig;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
-import core.annotation.Order;
+import core.annotation.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -25,7 +26,7 @@ import service.userservice.service.UserService;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class DeadService {
     @Autowired
     private UserMapper userMapper;
@@ -39,7 +40,7 @@ public class DeadService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "y", status = {ChannelStatus.DEADSCENE})
+    @Order(orderMsg = OrderConfig.REBORN_ORDER, status = {ChannelStatus.DEADSCENE})
     public void reborn(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (!user.getPos().equals(GrobalConfig.STARTSCENE)) {
@@ -60,7 +61,7 @@ public class DeadService {
 
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.LIVEINSTART);
+        builder.setData(MessageConfig.LIVE_IN_START);
         MessageUtil.sendMessage(channel, builder.build());
 
     }

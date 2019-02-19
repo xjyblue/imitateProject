@@ -43,7 +43,7 @@ public class AchievementUtil {
         }
         Channel channel = ChannelUtil.userToChannelMap.get(user);
         ServerPacket.AchievementResp.Builder builder3 = ServerPacket.AchievementResp.newBuilder();
-        builder3.setData(MessageConfig.FINISH_TASK + finishResp + MessageConfig.MESSAGEMID + System.getProperty("line.separator") + MessageConfig.DOING_TASK + doingResp);
+        builder3.setData(MessageConfig.FINISH_TASK + finishResp + MessageConfig.MESSAGE_MID + System.getProperty("line.separator") + MessageConfig.DOING_TASK + doingResp);
         MessageUtil.sendMessage(channel, builder3.build());
     }
 

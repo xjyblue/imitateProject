@@ -6,7 +6,6 @@ import core.channel.ChannelStatus;
 import core.component.role.Role;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
-import core.packet.PacketType;
 import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
@@ -101,7 +100,7 @@ public class LoginThreadTask implements Runnable {
         User user = userMapper.getUser(loginUserTask.getUsername(), loginUserTask.getPassword());
         if (user == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORPASSWORD);
+            builder.setData(MessageConfig.ERROR_PASSWORD);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -213,6 +212,7 @@ public class LoginThreadTask implements Runnable {
 //              切换渠道处理渠道消息
             User user = ChannelUtil.channelToUserMap.get(channelTarget);
             user.setIfOccupy(true);
+//          更换渠道的状态
             ChannelUtil.channelToUserMap.put(channel, user);
             ChannelUtil.userToChannelMap.put(user, channel);
             ChannelUtil.channelStatus.put(channel, ChannelUtil.channelStatus.get(channelTarget));
@@ -223,7 +223,7 @@ public class LoginThreadTask implements Runnable {
 
             ServerPacket.ChangeChannelResp.Builder builder1 = ServerPacket.ChangeChannelResp.newBuilder();
             builder1.setData("不好意思,有人在别处登录你的游戏号，请选择重新登录或者修改密码");
-            MessageUtil.sendMessage(channel, builder1.build());
+            MessageUtil.sendMessage(channelTarget, builder1.build());
             channelTarget.close();
             return true;
         }

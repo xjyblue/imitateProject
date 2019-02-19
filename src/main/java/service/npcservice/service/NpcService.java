@@ -4,10 +4,11 @@ import config.impl.excel.AchievementResourceLoad;
 import config.impl.excel.EquipmentResourceLoad;
 import config.impl.excel.SceneResourceLoad;
 import core.channel.ChannelStatus;
-import core.annotation.Order;
-import core.annotation.Region;
+import core.annotation.order.Order;
+import core.annotation.order.OrderRegion;
 import core.component.good.Equipment;
 import core.component.good.parent.BaseGood;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import mapper.AchievementprocessMapper;
 import service.achievementservice.entity.AchievementConfig;
@@ -41,7 +42,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class NpcService {
     @Autowired
     private AchievementService achievementService;
@@ -58,14 +59,14 @@ public class NpcService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "npcTalk", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.NPC_TALK_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void talkMethod(Channel channel, String msg) {
         try {
             String[] temp = msg.split("=");
             User user = ChannelUtil.channelToUserMap.get(channel);
             if (temp.length != GrobalConfig.TWO) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.ERRORORDER);
+                builder.setData(MessageConfig.ERROR_ORDER);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -87,7 +88,7 @@ public class NpcService {
                 }
             }
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOFOUNDNPC);
+            builder.setData(MessageConfig.NO_FOUND_NPC);
             MessageUtil.sendMessage(channel, builder.build());
 
         } catch (Exception e) {
@@ -101,13 +102,13 @@ public class NpcService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "npcGet", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.NPC_GET_EQUIP_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void getEquipFromNpc(Channel channel, String msg) {
         try {
             String[] temp = msg.split("=");
             if (temp.length != GrobalConfig.TWO) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.ERRORORDER);
+                builder.setData(MessageConfig.ERROR_ORDER);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -115,13 +116,13 @@ public class NpcService {
             Npc npc = getNpcByUserPos(channel, temp[1]);
             if (npc == null) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.NOFOUNDNPC);
+                builder.setData(MessageConfig.NO_FOUND_NPC);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
             if (npc.getGetGoods().equals(GrobalConfig.NULL)) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.NOEXACHANGEFORNPC);
+                builder.setData(MessageConfig.NO_EXACHANGE_FOR_NPC);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -133,7 +134,7 @@ public class NpcService {
                 if (userbag.getWid().equals(Integer.parseInt(target[0]))) {
                     if (userbag.getNum() < Integer.parseInt(target[1])) {
                         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                        builder.setData(MessageConfig.NOENOUGHCHANGEGOOD + "需要的物品数量为:" + Integer.parseInt(target[1]));
+                        builder.setData(MessageConfig.NO_ENOUGH_CHANGE_GOOD + "需要的物品数量为:" + Integer.parseInt(target[1]));
                         MessageUtil.sendMessage(channel, builder.build());
                         return;
                     }
@@ -167,19 +168,19 @@ public class NpcService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "npcTaskLook", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.LOOK_NPC_ALL_TASK_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void showTaskFromNpc(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Npc npc = getNpcByUserPos(channel, temp[1]);
         if (npc == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOFOUNDNPC);
+            builder.setData(MessageConfig.NO_FOUND_NPC);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -216,13 +217,13 @@ public class NpcService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "npcTaskReceive", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.GET_TASK_FROM_NPC_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void npcTaskReceive(Channel channel, String msg) {
         String[] temp = msg.split("=");
 //      指令校验
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -230,7 +231,7 @@ public class NpcService {
         Npc npc = getNpcByUserPos(channel, temp[1]);
         if (npc == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOFOUNDNPC);
+            builder.setData(MessageConfig.NO_FOUND_NPC);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -276,13 +277,13 @@ public class NpcService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "npcTaskReward", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.RECEIVE_TASK_REWARD_FROM_NPC_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void npcTaskReward(Channel channel, String msg) {
         String[] temp = msg.split("=");
 //      指令校验
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -290,7 +291,7 @@ public class NpcService {
         Npc npc = getNpcByUserPos(channel, temp[1]);
         if (npc == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOFOUNDNPC);
+            builder.setData(MessageConfig.NO_FOUND_NPC);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }

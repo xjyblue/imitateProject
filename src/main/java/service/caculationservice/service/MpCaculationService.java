@@ -69,7 +69,7 @@ public class MpCaculationService {
         Channel channel = ChannelUtil.userToChannelMap.get(user);
         if (userMp < skillMp) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.UNENOUGHMP);
+            builder.setData(MessageConfig.UNENOUGH_MP);
             MessageUtil.sendMessage(channel,builder.build());
             return false;
         }

@@ -1,11 +1,12 @@
 package service.sceneservice.service;
 
 import config.impl.excel.SceneResourceLoad;
+import core.annotation.order.OrderRegion;
 import core.channel.ChannelStatus;
-import core.annotation.Order;
-import core.annotation.Region;
+import core.annotation.order.Order;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import mapper.UserMapper;
@@ -28,7 +29,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class SceneService {
 
     @Autowired
@@ -46,12 +47,12 @@ public class SceneService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "move", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.MOVE_SCENE_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void moveScene(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -59,7 +60,7 @@ public class SceneService {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp[1].equals(SceneResourceLoad.sceneMap.get(user.getPos()).getName())) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.UNMOVELOCAL);
+            builder.setData(MessageConfig.YOU_NO_MOVE_LOCAL);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -67,7 +68,7 @@ public class SceneService {
         Scene sceneTarget = SceneResourceLoad.sceneMap.get(sceneService.getSceneByName(temp[1]).getId());
         if (levelService.getLevelByExperience(user.getExperience()) < Integer.parseInt(sceneTarget.getNeedLevel())) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOLEVELTOMOVE);
+            builder.setData(MessageConfig.NO_LEVEL_TO_MOVE);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -81,7 +82,7 @@ public class SceneService {
         Scene scene = SceneResourceLoad.sceneMap.get(user.getPos());
         if (!SceneResourceLoad.sceneSet.contains(temp[1])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOTARGETTOMOVE);
+            builder.setData(MessageConfig.NO_TARGET_TO_MOVE);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -89,7 +90,7 @@ public class SceneService {
         if (!SceneResourceLoad.sceneMap.get(user.getPos()).getSceneSet().contains(temp[1])) {
 //           场景切换
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.REMOTEMOVEMESSAGE);
+            builder.setData(MessageConfig.REMOTE_MOVE_MESSAGE);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }

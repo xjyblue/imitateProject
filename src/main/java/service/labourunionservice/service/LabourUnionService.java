@@ -1,8 +1,8 @@
 package service.labourunionservice.service;
 
-import core.annotation.Region;
+import core.annotation.order.OrderRegion;
 import core.config.GrobalConfig;
-import core.packet.PacketType;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import service.achievementservice.service.AchievementService;
 import service.caculationservice.service.MoneyCaculationService;
@@ -14,7 +14,7 @@ import service.userservice.service.UserService;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
 import mapper.*;
-import core.annotation.Order;
+import core.annotation.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.*;
@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class LabourUnionService {
     @Autowired
     private UnioninfoMapper unioninfoMapper;
@@ -66,19 +66,19 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jxjb", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.ADD_MONEY_TO_UNION_ORDER, status = {ChannelStatus.LABOURUNION})
     public void giveMoneyToUnion(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!moneyCaculationService.checkUserHasEnoughMoney(user, temp[1])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOENOUGHMONEYTOGIVE);
+            builder.setData(MessageConfig.NO_ENOUGH_MONEY_TO_GIVE);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -88,7 +88,7 @@ public class LabourUnionService {
         unioninfoMapper.updateByPrimaryKey(unioninfo);
         messageToAllInUnion(user.getUnionid(), user.getUsername() + "向工会捐献了" + temp[1] + "个金币");
         ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-        builder.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEMONEYTOUNION);
+        builder.setData(MessageConfig.UNION_MSG + MessageConfig.SUCCESS_GIVE_MONEY_TO_UNION);
         MessageUtil.sendMessage(channel, builder.build());
     }
 
@@ -99,25 +99,25 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "hq", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.GET_UNION_GOOD_TO_USERBAG_ORDER, status = {ChannelStatus.LABOURUNION})
     public void getUserbagFromUnion(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUnionid() == null) {
             ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-            builder.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            builder.setData(MessageConfig.UNION_MSG + MessageConfig.YOU_ARE_NO_UNON);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUnionlevel() > GrobalConfig.THREE) {
             ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-            builder.setData(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE);
+            builder.setData(MessageConfig.UNION_MSG + MessageConfig.NO_ENOUGH_POWER_IN_UNION);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -128,7 +128,7 @@ public class LabourUnionService {
             Userbag userbag = userbagMapper.selectByPrimaryKey(temp[1]);
             if (userbag.getNum() < Integer.parseInt(temp[GrobalConfig.TWO])) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.ERRORUSERBAGNUM);
+                builder.setData(MessageConfig.ERROR_USERBAG_NUM);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -146,7 +146,7 @@ public class LabourUnionService {
                 String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + userbagService.getGoodNameByUserbag(userbag);
                 messageToAllInUnion(user.getUnionid(), resp);
                 ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-                builder.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD);
+                builder.setData(MessageConfig.UNION_MSG + MessageConfig.SUCCESS_GET_UNION_GOOD);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
@@ -178,7 +178,7 @@ public class LabourUnionService {
             String resp = "用户：" + user.getUsername() + "向工会仓库拿取了" + userbagService.getGoodNameByUserbag(userbagNew);
             messageToAllInUnion(user.getUnionid(), resp);
             ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-            builder.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGETUNIONGOOD);
+            builder.setData(MessageConfig.UNION_MSG + MessageConfig.SUCCESS_GET_UNION_GOOD);
             MessageUtil.sendMessage(channel, builder.build());
             return;
 
@@ -195,32 +195,32 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "jxwp", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.GIVE_GOOD_TO_UNION_ORDER, status = {ChannelStatus.LABOURUNION})
     public void giveUserbagToUnion(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUnionid() == null) {
             ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-            builder.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            builder.setData(MessageConfig.UNION_MSG + MessageConfig.YOU_ARE_NO_UNON);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOUSERBAGID);
+            builder.setData(MessageConfig.NO_USERBAG_ID);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (Integer.parseInt(temp[GrobalConfig.TWO]) > userbag.getNum()) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORUSERBAGNUM);
+            builder.setData(MessageConfig.ERROR_USERBAG_NUM);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -253,7 +253,7 @@ public class LabourUnionService {
             String resp = "用户：" + user.getUsername() + "向工会捐献了" + userbagService.getGoodNameByUserbag(userbag);
             messageToAllInUnion(user.getUnionid(), resp);
             ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-            builder.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION);
+            builder.setData(MessageConfig.UNION_MSG + MessageConfig.SUCCESS_GIVE_GOOD_TO_UNION);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -287,7 +287,7 @@ public class LabourUnionService {
         String resp = "用户：" + user.getUsername() + "向工会捐献了" + userbagService.getGoodNameByUserbag(userbagNew);
         messageToAllInUnion(user.getUnionid(), resp);
         ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-        builder.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSGIVEGOODTOUNION);
+        builder.setData(MessageConfig.UNION_MSG + MessageConfig.SUCCESS_GIVE_GOOD_TO_UNION);
         MessageUtil.sendMessage(channel, builder.build());
         return;
     }
@@ -298,12 +298,12 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "zsck", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.SHOW_UNION_GOODS_ORDER, status = {ChannelStatus.LABOURUNION})
     public void showWarehouse(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
             ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-            builder.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            builder.setData(MessageConfig.UNION_MSG + MessageConfig.YOU_ARE_NO_UNON);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -315,31 +315,31 @@ public class LabourUnionService {
         }
         resp += "工会仓库金币数量为：" + unioninfo.getUnionmoney() + System.getProperty("line.separator");
         ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-        builder.setData(MessageConfig.UNIONMSG + resp);
+        builder.setData(MessageConfig.UNION_MSG + resp);
         MessageUtil.sendMessage(channel, builder.build());
         return;
     }
 
-    @Order(orderMsg = "tg", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.REMOVE_MENBER_FROM_UNION_ORDER, status = {ChannelStatus.LABOURUNION})
     public void removeMember(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User userTarget = userMapper.selectByPrimaryKey(temp[1]);
         if (userTarget == null) {
             ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-            builder.setData(MessageConfig.UNIONMSG + MessageConfig.NOUSER);
+            builder.setData(MessageConfig.UNION_MSG + MessageConfig.NO_USER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUnionlevel() >= userTarget.getUnionlevel()) {
             ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-            builder.setData(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE);
+            builder.setData(MessageConfig.UNION_MSG + MessageConfig.NO_ENOUGH_POWER_IN_UNION);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -370,26 +370,26 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "gn", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.DISAGREE_MAN_ENTER_UNION_ORDER, status = {ChannelStatus.LABOURUNION})
     public void disagreeApplyInfo(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Applyunioninfo applyunioninfo = applyunioninfoMapper.selectByPrimaryKey(temp[1]);
         if (applyunioninfo == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOAPPLYINFO);
+            builder.setData(MessageConfig.NO_APPLY_INFO);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //      不同意
         applyunioninfoMapper.deleteByPrimaryKey(applyunioninfo.getApplyid());
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.DISAGREEUSEAPPLY);
+        builder.setData(MessageConfig.DISAGREE_USE_APPLY);
         MessageUtil.sendMessage(channel, builder.build());
         return;
     }
@@ -400,25 +400,25 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "sjg", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.CHANGE_USER_UNION_LEVEL_ORDER, status = {ChannelStatus.LABOURUNION})
     public void memberLevelChange(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUnionlevel() > GrobalConfig.TWO) {
             ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-            builder.setData(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE);
+            builder.setData(MessageConfig.UNION_MSG + MessageConfig.NO_ENOUGH_POWER_IN_UNION);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUnionlevel() >= Integer.parseInt(temp[GrobalConfig.TWO])) {
             ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-            builder.setData(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE);
+            builder.setData(MessageConfig.UNION_MSG + MessageConfig.NO_ENOUGH_POWER_IN_UNION);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -443,12 +443,12 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "zsry", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.SHOW_UNION_MEN_INFO_ORDER, status = {ChannelStatus.LABOURUNION})
     public void queryUnionMemberInfo(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
             ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-            builder.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            builder.setData(MessageConfig.UNION_MSG + MessageConfig.YOU_ARE_NO_UNON);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -459,7 +459,7 @@ public class LabourUnionService {
             resp += String.format(MessageConfig.SHOW_UNION_MEN, userTemp.getUsername(), String.valueOf(userTemp.getUnionlevel()));
         }
         ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-        builder.setData(MessageConfig.UNIONMSG + resp);
+        builder.setData(MessageConfig.UNION_MSG + resp);
         MessageUtil.sendMessage(channel, builder.build());
         return;
     }
@@ -470,19 +470,19 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "gy", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.AGREE_MAN_ENTER_UNION_ORDER, status = {ChannelStatus.LABOURUNION})
     public void agreeApplyInfo(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Applyunioninfo applyunioninfo = applyunioninfoMapper.selectByPrimaryKey(temp[1]);
         if (applyunioninfo == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOAPPLYINFO);
+            builder.setData(MessageConfig.NO_APPLY_INFO);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -500,7 +500,7 @@ public class LabourUnionService {
             userSession.setUnionlevel(4);
         }
         ServerPacket.UnionResp.Builder builder = ServerPacket.UnionResp.newBuilder();
-        builder.setData(MessageConfig.UNIONMSG + "您同意了" + userTarget.getUsername() + "加入本工会");
+        builder.setData(MessageConfig.UNION_MSG + "您同意了" + userTarget.getUsername() + "加入本工会");
         MessageUtil.sendMessage(channel, builder.build());
 
 //      处理第一次加入工会的事件
@@ -519,17 +519,17 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "lsg", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.SHOW_ALL_UNION_APPLY_INFO_ORDER, status = {ChannelStatus.LABOURUNION})
     public void queryApplyInfo(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
         if (user.getUnionid() == null) {
-            builder1.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            builder1.setData(MessageConfig.UNION_MSG + MessageConfig.YOU_ARE_NO_UNON);
             MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
         if (user.getUnionlevel() > GrobalConfig.TWO) {
-            builder1.setData(MessageConfig.UNIONMSG + MessageConfig.FOURZEROTHREE);
+            builder1.setData(MessageConfig.UNION_MSG + MessageConfig.NO_ENOUGH_POWER_IN_UNION);
             MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
@@ -538,7 +538,7 @@ public class LabourUnionService {
         for (Applyunioninfo applyunioninfo : list) {
             resp += "申请编号 [ " + applyunioninfo.getApplyid() + "] 申请用户 [ " + applyunioninfo.getApplyuser() + "] " + System.getProperty("line.separator");
         }
-        builder1.setData(MessageConfig.UNIONMSG + resp);
+        builder1.setData(MessageConfig.UNION_MSG + resp);
         MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
@@ -549,19 +549,19 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "sqg", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.APPLY_ENTER_UNION_ORDER, status = {ChannelStatus.LABOURUNION})
     public void applyUnion(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (user.getUnionid() != null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOAPPLYUNION);
+            builder.setData(MessageConfig.NO_APPLY_UNION);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -569,7 +569,7 @@ public class LabourUnionService {
         Unioninfo unioninfo = unioninfoMapper.selectByPrimaryKey(temp[1]);
         if (unioninfo == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOEXISTUNIONID);
+            builder.setData(MessageConfig.NO_EXIST_UNION_ID);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -577,7 +577,7 @@ public class LabourUnionService {
         int count = applyunioninfoMapper.selectByUserIdAndUnionId(user.getUsername(), temp[1]);
         if (count > 0) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOREPEATUNIONAPPLY);
+            builder.setData(MessageConfig.NO_REPEAT_UNION_APPLY);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -590,7 +590,7 @@ public class LabourUnionService {
         applyunioninfoMapper.insert(applyunioninfo);
 
         ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
-        builder1.setData(MessageConfig.UNIONMSG + MessageConfig.SUCCESSUNIONAPPLY);
+        builder1.setData(MessageConfig.UNION_MSG + MessageConfig.SUCCESS_UNION_APPLY);
         MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
@@ -601,18 +601,18 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "backg", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg =  OrderConfig.BACK_UNION_ORDER, status = {ChannelStatus.LABOURUNION})
     public void outUnion(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getUnionid() == null) {
             ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
-            builder1.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            builder1.setData(MessageConfig.UNION_MSG + MessageConfig.YOU_ARE_NO_UNON);
             MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
         if (user.getUnionlevel() == 1) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOOUTUNION);
+            builder.setData(MessageConfig.NO_OUT_UNION);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -632,26 +632,26 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "cgu", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.CREATE_UNION_ORDER, status = {ChannelStatus.LABOURUNION})
     public void createUnion(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getUnionid() != null) {
             ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
-            builder1.setData(MessageConfig.UNIONMSG +MessageConfig.NOCREATEUNION);
+            builder1.setData(MessageConfig.UNION_MSG +MessageConfig.NO_CREATE_UNION);
             MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
         Unioninfo unioninfoCheck = unioninfoMapper.selectUnionByUnionName(temp[1]);
         if (unioninfoCheck != null) {
             ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
-            builder1.setData(MessageConfig.UNIONMSG + MessageConfig.REPEATUNIONNAME);
+            builder1.setData(MessageConfig.UNION_MSG + MessageConfig.REPEAT_UNION_NAME);
             MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
@@ -669,7 +669,7 @@ public class LabourUnionService {
         unioninfoMapper.insert(unioninfo);
         userMapper.updateByPrimaryKeySelective(userTemp);
         ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
-        builder1.setData(MessageConfig.UNIONMSG + "你创建了" + temp[1] + "工会");
+        builder1.setData(MessageConfig.UNION_MSG + "你创建了" + temp[1] + "工会");
         MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
@@ -680,7 +680,7 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "lgu", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.SHOW_ALL_UNION_INFO_TO_APPLY_ORDER, status = {ChannelStatus.LABOURUNION})
     public void queryUnion(Channel channel, String msg) {
         UnioninfoExample unioninfoExample = new UnioninfoExample();
         List<Unioninfo> list = unioninfoMapper.selectByExample(unioninfoExample);
@@ -689,7 +689,7 @@ public class LabourUnionService {
             resp += System.getProperty("line.separator") + "工会id [ " + unioninfo.getUnionid() + " ]" + "工会名称 [ " + unioninfo.getUnionname() + " ]";
         }
         ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
-        builder1.setData(MessageConfig.UNIONMSG + resp);
+        builder1.setData(MessageConfig.UNION_MSG + resp);
         MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
@@ -700,21 +700,21 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "eg", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.ENTER_UNION_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void enterUnionView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.LABOURUNION);
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.ENTERLABOURVIEW);
+        builder.setData(MessageConfig.ENTER_LABOUR_VIEW);
         MessageUtil.sendMessage(channel, builder.build());
 
         User user = ChannelUtil.channelToUserMap.get(channel);
         ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();
         if (user.getUnionid() == null) {
-            builder1.setData(MessageConfig.UNIONMSG + MessageConfig.YOUARENOUNON);
+            builder1.setData(MessageConfig.UNION_MSG + MessageConfig.YOU_ARE_NO_UNON);
             MessageUtil.sendMessage(channel, builder1.build());
         } else {
-            builder1.setData(MessageConfig.UNIONMSG);
+            builder1.setData(MessageConfig.UNION_MSG);
             MessageUtil.sendMessage(channel, builder1.build());
         }
         return;
@@ -726,11 +726,11 @@ public class LabourUnionService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qtg", status = {ChannelStatus.LABOURUNION})
+    @Order(orderMsg = OrderConfig.QUIT_UNION_ORDER, status = {ChannelStatus.LABOURUNION})
     public void outUnionView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.OUTLABOURVIEW);
+        builder.setData(MessageConfig.OUT_LABOUR_VIEW);
         MessageUtil.sendMessage(channel, builder.build());
 
         ServerPacket.UnionResp.Builder builder1 = ServerPacket.UnionResp.newBuilder();

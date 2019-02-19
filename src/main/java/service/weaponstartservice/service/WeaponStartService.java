@@ -1,10 +1,11 @@
 package service.weaponstartservice.service;
 
 import core.channel.ChannelStatus;
-import core.annotation.Order;
-import core.annotation.Region;
+import core.annotation.order.Order;
+import core.annotation.order.OrderRegion;
 import core.config.GrobalConfig;
 import core.config.MessageConfig;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import io.netty.channel.Channel;
 import mapper.UserbagMapper;
@@ -25,7 +26,7 @@ import utils.MessageUtil;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class WeaponStartService {
 
     @Autowired
@@ -41,12 +42,12 @@ public class WeaponStartService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "iu", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.UP_WEAPON_START_LEVEL_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void upEquipmentStartlevel(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -54,14 +55,14 @@ public class WeaponStartService {
         Userbag userbag = userbagService.getUserbagByUserbagId(user, temp[1]);
         if (userbag == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.GOODNOEXISTBAG);
+            builder.setData(MessageConfig.GOOD_NO_EXIST_BAG);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
 //      开始升星
         if (userbag.getStartlevel() == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOTOUPSTARTLEVEL);
+            builder.setData(MessageConfig.NO_TO_UP_STARTLEVEL);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }

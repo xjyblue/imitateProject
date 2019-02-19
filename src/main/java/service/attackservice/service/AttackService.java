@@ -5,15 +5,14 @@ import config.impl.excel.BossSceneConfigResourceLoad;
 import config.impl.excel.EquipmentResourceLoad;
 import config.impl.excel.SceneResourceLoad;
 import config.impl.excel.UserSkillResourceLoad;
-import core.annotation.Region;
+import core.annotation.order.OrderRegion;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
-import org.checkerframework.checker.units.qual.A;
 import service.buffservice.entity.BuffConstant;
 import service.buffservice.service.RestraintBuffService;
 import service.caculationservice.service.AttackDamageCaculationService;
 import service.caculationservice.service.HpCaculationService;
 import service.caculationservice.service.MpCaculationService;
-import service.levelservice.entity.Level;
 import service.levelservice.service.LevelService;
 import service.sceneservice.entity.Scene;
 import service.sceneservice.entity.BossScene;
@@ -25,7 +24,7 @@ import service.buffservice.service.AttackBuffService;
 import core.channel.ChannelStatus;
 import core.factory.MonsterFactory;
 import io.netty.channel.Channel;
-import core.annotation.Order;
+import core.annotation.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -44,7 +43,6 @@ import service.userservice.service.UserService;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +54,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class AttackService {
     @Autowired
     private AttackDamageCaculationService attackDamageCaculationService;
@@ -89,7 +87,7 @@ public class AttackService {
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    @Order(orderMsg = "cqf", status = {ChannelStatus.ATTACK})
+    @Order(orderMsg = OrderConfig.QUIT_COMMON_FIGHT_ORDER, status = {ChannelStatus.ATTACK})
     public void quitFight(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
 //      副本中返回
@@ -98,7 +96,7 @@ public class AttackService {
         }
         //普通战斗中退出
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.RETREATFIGHT);
+        builder.setData(MessageConfig.RETREAT_FIGHT);
         MessageUtil.sendMessage(channel, builder.build());
 
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
@@ -114,7 +112,7 @@ public class AttackService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "bqf", status = {ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
+    @Order(orderMsg = OrderConfig.QUIT_BOSS_FIGHT_CONFIG_ORDER, status = {ChannelStatus.ATTACK, ChannelStatus.BOSSSCENE})
     public void backBossArea(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
 //      无副本返回
@@ -137,10 +135,12 @@ public class AttackService {
 
 //      提示
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.OUTBOSSAREA);
+        builder.setData(MessageConfig.OUT_BOSS_AREA);
         MessageUtil.sendMessage(channel, builder.build());
 //      渠道状态更新
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
+//      初始化人物攻击的初始目标
+        user.setUserToMonsterMap(Maps.newHashMap());
 //      初始化人物buff
         userService.initUserBuff(user);
     }
@@ -152,7 +152,7 @@ public class AttackService {
      * @param msg
      * @throws IOException
      */
-    @Order(orderMsg = "attack", status = {ChannelStatus.ATTACK})
+    @Order(orderMsg = OrderConfig.CHANGE_FIGHT_TARGET_ORDER, status = {ChannelStatus.ATTACK})
     public void changeTarget(Channel channel, String msg) throws IOException {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (!BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
@@ -161,14 +161,14 @@ public class AttackService {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.THREE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         //检查技能是否存在
         if (!user.getUserskillrelationMap().containsKey(temp[2])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOKEYSKILL);
+            builder.setData(MessageConfig.NO_KEY_SKILL);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -202,31 +202,31 @@ public class AttackService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "recover", status = {ChannelStatus.ATTACK})
+    @Order(orderMsg = OrderConfig.RECOVER_STATUS_BOSSAREA_ORDER, status = {ChannelStatus.ATTACK})
     public void recoverUserHpAndMp(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         if (user.getTeamId() == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NORECOVERUSERHPANDMP);
+            builder.setData(MessageConfig.NO_RECOVER_USER_HP_AND_MP);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NORECOVERUSERHPANDMP);
+            builder.setData(MessageConfig.NO_RECOVER_USER_HP_AND_MP);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
         if (bossScene.isFight()) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NORECOVERUSERHPANDMP);
+            builder.setData(MessageConfig.NO_RECOVER_USER_HP_AND_MP);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         userService.recoverUser(user);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.RECOVRESUCCESS + "===" + user.getUsername() + "的血量为：" + levelService.getMaxHp(user) + "蓝量为：" + levelService.getMaxMp(user));
+        builder.setData(MessageConfig.RECOVRE_SUCCESS + "===" + user.getUsername() + "的血量为：" + levelService.getMaxHp(user) + "蓝量为：" + levelService.getMaxMp(user));
         MessageUtil.sendMessage(channel, builder.build());
     }
 
@@ -250,7 +250,7 @@ public class AttackService {
         //检查技能是否存在
         if (!user.getUserskillrelationMap().containsKey(msg)) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOKEYSKILL);
+            builder.setData(MessageConfig.NO_KEY_SKILL);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -371,7 +371,7 @@ public class AttackService {
      * @param msg
      * @throws IOException
      */
-    @Order(orderMsg = "cattack", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.FIRST_COMMON_FIGHT_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void attackCommonSceneFirst(Channel channel, String msg) throws IOException {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
@@ -379,14 +379,14 @@ public class AttackService {
         Monster monster = getMonsterFirst(user, temp[1], Monster.TYPEOFCOMMONMONSTER);
         if (monster == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOFOUNDMONSTER);
+            builder.setData(MessageConfig.NO_FOUND_MONSTER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         //输入的键位是否存在
         if (!(temp.length == GrobalConfig.THREE && user.getUserskillrelationMap().containsKey(temp[GrobalConfig.TWO]))) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOKEYSKILL);
+            builder.setData(MessageConfig.NO_KEY_SKILL);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -456,7 +456,7 @@ public class AttackService {
             user.getUserToMonsterMap().put(monster.getId(), monster);
             //提醒用户你已进入战斗模式
             ServerPacket.NormalResp.Builder builder2 = ServerPacket.NormalResp.newBuilder();
-            builder2.setData(MessageConfig.ENTERFIGHT);
+            builder2.setData(MessageConfig.ENTER_FIGHT);
             MessageUtil.sendMessage(channel, builder2.build());
         }
     }
@@ -525,7 +525,7 @@ public class AttackService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "battack", status = {ChannelStatus.BOSSSCENE, ChannelStatus.ATTACK})
+    @Order(orderMsg = OrderConfig.FIRST_BOSS_FIGHT_ATTACK_ORDER, status = {ChannelStatus.BOSSSCENE, ChannelStatus.ATTACK})
     public void bossSceneFirstAttack(Channel channel, String msg) {
         String[] temp = msg.split("=");
         User user = ChannelUtil.channelToUserMap.get(channel);
@@ -534,14 +534,14 @@ public class AttackService {
         if (monster == null) {
             //提醒用户你已进入战斗模式
             ServerPacket.NormalResp.Builder builder2 = ServerPacket.NormalResp.newBuilder();
-            builder2.setData(MessageConfig.NOFOUNDMONSTER);
+            builder2.setData(MessageConfig.NO_FOUND_MONSTER);
             MessageUtil.sendMessage(channel, builder2.build());
             return;
         }
         //      键位校验
         if (!(temp.length == GrobalConfig.THREE && user.getUserskillrelationMap().containsKey(temp[GrobalConfig.TWO]))) {
             ServerPacket.NormalResp.Builder builder2 = ServerPacket.NormalResp.newBuilder();
-            builder2.setData(MessageConfig.NOKEYSKILL);
+            builder2.setData(MessageConfig.NO_KEY_SKILL);
             MessageUtil.sendMessage(channel, builder2.build());
             return;
         }

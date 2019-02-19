@@ -28,5 +28,5 @@ public interface AchievementprocessMapper {
 
     int updateByPrimaryKey(Achievementprocess record);
 
-    Achievementprocess selectprocessByUsernameAndAchievementId(@Param("fromUser") String fromUser,@Param("achievementId") Integer achievementId);
+    Achievementprocess selectprocessByUsernameAndAchievementId(@Param("fromUser") String fromUser, @Param("achievementId") Integer achievementId);
 }

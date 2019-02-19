@@ -13,6 +13,8 @@ public class BaseGood {
 
     public static final String MPMEDICINE = "1";
 
+    public static final String MONEY = "0";
+
     public static final String HPMEDICINE = "2";
 
     public static final String CHANGEGOOD = "4";

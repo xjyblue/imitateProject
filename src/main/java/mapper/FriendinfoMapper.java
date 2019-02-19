@@ -28,5 +28,5 @@ public interface FriendinfoMapper {
 
     int updateByPrimaryKey(Friendinfo record);
 
-    void deleteByUserName(@Param("userfrom") String userfrom,@Param("userto") String userto);
+    void deleteByUserName(@Param("userfrom") String userfrom, @Param("userto") String userto);
 }

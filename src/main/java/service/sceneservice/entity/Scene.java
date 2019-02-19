@@ -282,7 +282,7 @@ public class Scene extends BaseThread implements Runnable {
 //                          人物死亡初始化人物buff
                             userService.initUserBuff(user);
                             ServerPacket.NormalResp.Builder builder1 = ServerPacket.NormalResp.newBuilder();
-                            builder1.setData(MessageConfig.SELECTLIVEWAY);
+                            builder1.setData(MessageConfig.SELECT_LIVE_WAY);
                             MessageUtil.sendMessage(channel, builder1.build());
                             return;
                         }

@@ -54,7 +54,7 @@ public class MoneyCaculationService {
         if (removemoney > usermoney) {
             Channel channelT = ChannelUtil.userToChannelMap.get(user);
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOENOUGHMONEYTOGIVE);
+            builder.setData(MessageConfig.NO_ENOUGH_MONEY_TO_GIVE);
             MessageUtil.sendMessage(channelT, builder.build());
             return false;
         }

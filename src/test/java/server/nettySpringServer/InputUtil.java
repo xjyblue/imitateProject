@@ -1,5 +1,6 @@
 package server.nettySpringServer;
 
+import service.luckydrawservice.entity.LuckDrawGoodItem;
 import service.petservice.service.entity.PetConfig;
 import service.petservice.service.entity.PetSkillConfig;
 import utils.ExcelUtil;
@@ -20,28 +21,36 @@ import java.util.List;
 public class InputUtil {
     public static void main(String[] args) throws Exception {
         //将生成的excel转换成文件，还可以用作文件下载
-        File file = new File("src/main/resources/PetSkillConfig.xls");
-        FileOutputStream petSkillConfigfos = new FileOutputStream(file);
+        File file = new File("src/main/resources/LuckDrawItem.xls");
+        FileOutputStream luckDrawGoodItemfos = new FileOutputStream(file);
 
         //对象集合
-        List<PetSkillConfig> petSkillConfigList = new ArrayList<>();
-        PetSkillConfig petSkillConfig = new PetSkillConfig();
-        petSkillConfig.setId("1");
-        petSkillConfig.setSkillName("旭旭轻吻");
-        petSkillConfig.setPetId("1");
-        petSkillConfig.setDamage(50);
-        petSkillConfigList.add(petSkillConfig);
+        List<LuckDrawGoodItem> luckDrawGoodItemList = new ArrayList<>();
 
+        LuckDrawGoodItem luckDrawGoodItem = new LuckDrawGoodItem();
+        luckDrawGoodItem.setId(1);
+        luckDrawGoodItem.setType("3");
+        luckDrawGoodItem.setWid(3004);
+        luckDrawGoodItem.setIfRandom(false);
+        luckDrawGoodItem.setNum(1);
+        luckDrawGoodItem.setStartCount(100);
+        luckDrawGoodItem.setEndCount(120);
+        luckDrawGoodItem.setLuckyDrawItemId(1);
+        luckDrawGoodItemList.add(luckDrawGoodItem);
 
         //设置属性别名（列名）
-        LinkedHashMap<String, String> petSkillConfigAlias = new LinkedHashMap<String, String>();
-        petSkillConfigAlias.put("skillName", "技能名");
-        petSkillConfigAlias.put("id", "技能的id");
-        petSkillConfigAlias.put("petId", "技能所属宠物");
-        petSkillConfigAlias.put("damage", "技能伤害");
+        LinkedHashMap<String, String> luckDrawGoodAlias = new LinkedHashMap<String, String>();
+        luckDrawGoodAlias.put("id", "抽奖单体编号id");
+        luckDrawGoodAlias.put("wid", "物品的id");
+        luckDrawGoodAlias.put("luckyDrawItemId", "抽奖项的编号id");
+        luckDrawGoodAlias.put("ifRandom", "是否随机奖品");
+        luckDrawGoodAlias.put("startCount", "触发初始几率");
+        luckDrawGoodAlias.put("endCount", "触发结束几率");
+        luckDrawGoodAlias.put("num", "奖品数量");
+        luckDrawGoodAlias.put("type", "奖品种类");
 
         //标题
-        String headLine = "petSkillConfig表";
-        ExcelUtil.pojo2Excel(petSkillConfigList, petSkillConfigfos, petSkillConfigAlias, headLine);
+        String headLine = "luckDrawGoodItem表";
+        ExcelUtil.pojo2Excel(luckDrawGoodItemList, luckDrawGoodItemfos, luckDrawGoodAlias, headLine);
     }
 }

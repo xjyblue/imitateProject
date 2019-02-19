@@ -1,9 +1,11 @@
 package service.bossservice.service;
 
+import com.google.common.collect.Sets;
 import config.impl.excel.BossSceneConfigResourceLoad;
 import config.impl.excel.SceneResourceLoad;
 import config.impl.thread.ThreadPeriodTaskLoad;
-import core.annotation.Region;
+import core.annotation.order.OrderRegion;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import service.sceneservice.entity.BossScene;
 import core.component.monster.Monster;
@@ -12,7 +14,7 @@ import core.config.MessageConfig;
 import core.config.GrobalConfig;
 import core.channel.ChannelStatus;
 import io.netty.channel.Channel;
-import core.annotation.Order;
+import core.annotation.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.User;
@@ -34,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class BossService {
     @Autowired
     private LevelService levelService;
@@ -45,12 +47,13 @@ public class BossService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "ef", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.ENTER_BOSSAREA_CONFIG, status = {ChannelStatus.COMMONSCENE})
     public void enterBossArea(Channel channel, String msg) {
         String[] temp = msg.split("=");
+//      输入校验
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -58,28 +61,18 @@ public class BossService {
 //      10级以下无法进入副本
         if (levelService.getLevelByExperience(user.getExperience()) < GrobalConfig.MIN_ENTER_BOSSSCENE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOLEVELTOMOVE);
+            builder.setData(MessageConfig.NO_LEVEL_TO_MOVE);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Team team = null;
-//      处理用户死亡后重连副本逻辑
+//      处理用户死亡后重连副本逻辑,死亡后无法重连副本，只能等待副本结束
         if (user.getTeamId() != null && BossSceneConfigResourceLoad.bossAreaMap.containsKey(user.getTeamId())) {
-            ChannelUtil.channelStatus.put(channel, ChannelStatus.BOSSSCENE);
-//          进入副本，用户场景线程转移
-            BossScene bossScene = BossSceneConfigResourceLoad.bossAreaMap.get(user.getTeamId());
-            bossScene.getUserMap().put(user.getUsername(), user);
-
-            Scene scene = SceneResourceLoad.sceneMap.get(user.getPos());
-            scene.getUserMap().remove(user.getUsername());
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.REBRORNANDCONNECTBOSSAREA);
+            builder.setData(MessageConfig.DEAD_NOALLOW_CONNECT_BOSSAREA);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
-
-
-
 //      处理用户一个人加入副本的逻辑
         if (user.getTeamId() == null) {
             team = new Team();
@@ -95,33 +88,104 @@ public class BossService {
             team = TeamCache.teamMap.get(user.getTeamId());
             if (checkAllManAlive(team)) {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.SOMEBODYDEAD);
+                builder.setData(MessageConfig.SOMEBODY_DEAD);
                 MessageUtil.sendMessage(channel, builder.build());
                 return;
             }
         }
+
 //      进入副本队长检查
         if (!team.getLeader().getUsername().equals(user.getUsername())) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.YOUARENOLEADER);
+            builder.setData(MessageConfig.YOU_ARE_NO_LEADER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
-//      进入副本全队投票检查,队伍投票
-//        if(){
-//
-//        }
 
+//      队伍一个人直接进入
+        ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
+        if (team.getUserMap().size() == GrobalConfig.ONE) {
+            allMenEnterNewBossArea(temp[1], team);
+        } else {
+            builder.setData(MessageConfig.ENTER_BOSSAREA_BEGIN_VOTE);
+            MessageUtil.sendMessage(channel, builder.build());
+//       触发投票检查
+            team.setBossAreaVoteTarget(temp[1]);
+            team.getVoteSet().add(user.getUsername());
+            bossAreaVoteMessageToAll(team);
+        }
+    }
+
+    /**
+     * 投票进副本
+     *
+     * @param channel
+     * @param msg
+     */
+    @Order(orderMsg = OrderConfig.AGREE_ENTER_BOSSAREA_ORDER, status = {ChannelStatus.COMMONSCENE})
+    public void enterBossAreaVote(Channel channel, String msg) {
+        User user = ChannelUtil.channelToUserMap.get(channel);
+        Team team = TeamCache.teamMap.get(user.getTeamId());
+        ServerPacket.NormalResp.Builder normalResp = ServerPacket.NormalResp.newBuilder();
+        if (team.getVoteSet().contains(user.getUsername())) {
+            normalResp.setData(MessageConfig.YOU_ALREADY_AGREE_VOTE);
+            MessageUtil.sendMessage(channel, normalResp.build());
+            return;
+        }
+        team.getVoteSet().add(user.getUsername());
+        bossAreaVoteMessageToAll(team);
+//      校验是否达到开启副本的同意投票数
+        if (team.getVoteSet().size() == team.getUserMap().size()) {
+//          全队进入副本
+            allMenEnterNewBossArea(team.getBossAreaVoteTarget(), team);
+        }
+    }
+
+
+    /**
+     * 投票提示
+     *
+     * @param team
+     */
+    private void bossAreaVoteMessageToAll(Team team) {
+        ServerPacket.NormalResp.Builder normalResp = ServerPacket.NormalResp.newBuilder();
+//      展示已投票通过的人
+        String resp = "";
+        for (String agreeMan : team.getVoteSet()) {
+            resp += (agreeMan + " ");
+        }
+//      通知所有人
+        for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
+            Channel channelT = ChannelUtil.userToChannelMap.get(entry.getValue());
+            User user = ChannelUtil.channelToUserMap.get(channelT);
+            if (team.getVoteSet().contains(user.getUsername())) {
+                normalResp.setData(MessageConfig.ALREADY_ENTER_BOSSAREA + " [已投票通过的人有：" + resp + "]");
+                MessageUtil.sendMessage(channelT, normalResp.build());
+            } else {
+                normalResp.setData(MessageConfig.IF_ENTER_BOSSAREA + " [已投票通过的人有：" + resp + "]");
+                MessageUtil.sendMessage(channelT, normalResp.build());
+            }
+        }
+    }
+
+    /**
+     * 进入副本的逻辑
+     *
+     * @param team
+     */
+    private void allMenEnterNewBossArea(String bossAreaId, Team team) {
+//      初始化队伍投票机制
+        team.setVoteSet(Sets.newHashSet());
+        team.setBossAreaVoteTarget(null);
 //      生成新副本
-        BossScene bossScene = new BossScene(user.getTeamId(), temp[1]);
+        BossScene bossScene = new BossScene(team.getTeamId(), bossAreaId);
         BossSceneConfigResourceLoad.bossAreaMap.put(team.getTeamId(), bossScene);
+//      改变用户渠道状态
+        changeChannelStatus(team, bossScene);
 //      开启副本场景帧频线程
         Future future = ThreadPeriodTaskLoad.BOSS_AREA_THREAD_POOL.scheduleAtFixedRate(bossScene, 0, 30, TimeUnit.MILLISECONDS);
         ThreadPeriodTaskLoad.futureMap.put(bossScene.getTeamId(), future);
         bossScene.setFutureMap(ThreadPeriodTaskLoad.futureMap);
-
-//      改变用户渠道状态
-        changeChannelStatus(team, bossScene);
     }
 
 
@@ -159,7 +223,7 @@ public class BossService {
             Channel channel = ChannelUtil.userToChannelMap.get(entry.getValue());
             ChannelUtil.channelStatus.put(channel, ChannelStatus.BOSSSCENE);
 
-            String resp = "进入" + bossScene.getBossName() + "副本,出现boss有：";
+            String resp = "[全队同意加入副本]" + "进入" + bossScene.getBossName() + "副本,出现boss有：";
             for (Map.Entry<String, Monster> entryMonster : bossScene.getMonsters().get(bossScene.getSequence().get(0)).entrySet()) {
                 resp += entryMonster.getValue().getName() + " ";
             }

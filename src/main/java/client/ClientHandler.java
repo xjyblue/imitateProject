@@ -107,6 +107,8 @@ public class ClientHandler extends ChannelHandlerAdapter {
             if (respType == ProtoBufEnum.SERVER_PACKET_CHANGECHANNELRESP.getiValue()) {
                 clientConfig.setChannel(null);
                 jTextArea = clientStart.getjTextArea1();
+                ServerPacket.ChangeChannelResp changeChannelResp = (ServerPacket.ChangeChannelResp) msg;
+                respData = changeChannelResp.getData();
             }
             String resp = jTextArea.getText();
             resp += "客户端收到：" + respData + System.getProperty("line.separator");

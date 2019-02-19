@@ -1,21 +1,19 @@
-package core.reflect;
+package core.reflect.base;
 
 import java.lang.reflect.Method;
 
 /**
- * @ClassName InvokeMethod
+ * @ClassName BaseInvokeMethod
  * @Description TODO
  * @Author xiaojianyu
- * @Date 2019/1/11 11:58
+ * @Date 2019/2/16 16:23
  * @Version 1.0
  **/
-public class InvokeMethod {
+public class BaseInvokeMethod {
 
     private Method method;
 
     private Object object;
-
-    private String order;
 
     public Method getMethod() {
         return method;
@@ -31,13 +29,5 @@ public class InvokeMethod {
 
     public void setObject(Object object) {
         this.object = object;
-    }
-
-    public String getOrder() {
-        return order;
-    }
-
-    public void setOrder(String order) {
-        this.order = order;
     }
 }

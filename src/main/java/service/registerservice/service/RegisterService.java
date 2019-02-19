@@ -3,7 +3,8 @@ package service.registerservice.service;
 import config.impl.excel.AchievementResourceLoad;
 import config.impl.excel.LevelResourceLoad;
 import config.impl.excel.RoleResourceLoad;
-import core.annotation.Region;
+import core.annotation.order.OrderRegion;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import lombok.extern.slf4j.Slf4j;
 import service.achievementservice.entity.Achievement;
@@ -16,7 +17,7 @@ import service.levelservice.entity.Level;
 import mapper.AchievementprocessMapper;
 import mapper.UserMapper;
 import mapper.UserskillrelationMapper;
-import core.annotation.Order;
+import core.annotation.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.Achievementprocess;
@@ -39,7 +40,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 @Slf4j
 public class RegisterService {
     @Autowired
@@ -59,31 +60,31 @@ public class RegisterService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "register", status = {ChannelStatus.REGISTER})
+    @Order(orderMsg = OrderConfig.REGISTER_ORDER, status = {ChannelStatus.REGISTER})
     public void register(Channel channel, String msg) {
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.FIVE) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!temp[GrobalConfig.TWO].equals(temp[GrobalConfig.THREE])) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.DOUBLEPASSWORDERROR);
+            builder.setData(MessageConfig.DOUBLE_PASSWORD_ERROR);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         if (!RoleResourceLoad.roleMap.containsKey(Integer.parseInt(temp[GrobalConfig.FOUR]))) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOROLE);
+            builder.setData(MessageConfig.NO_ROLE);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User userCheck = userMapper.selectByPrimaryKey(temp[1]);
         if (userCheck != null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.REPEATUSERNAME);
+            builder.setData(MessageConfig.REPEAT_USERNAME);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -142,7 +143,7 @@ public class RegisterService {
         }
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.REGISTERSUCCESS);
+        builder.setData(MessageConfig.REGISTER_SUCCESS);
         MessageUtil.sendMessage(channel, builder.build());
         ChannelUtil.channelStatus.put(channel, ChannelStatus.LOGIN);
     }

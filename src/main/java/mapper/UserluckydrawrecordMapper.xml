@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="mapper.UserluckydrawrecordMapper" >
+  <resultMap id="BaseResultMap" type="pojo.Userluckydrawrecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="username" property="username" jdbcType="VARCHAR" />
+    <result column="luckyDrawId" property="luckydrawid" jdbcType="INTEGER" />
+    <result column="nowCount" property="nowcount" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, username, luckyDrawId, nowCount
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="pojo.UserluckydrawrecordExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from userluckydrawrecord
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from userluckydrawrecord
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from userluckydrawrecord
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="pojo.UserluckydrawrecordExample" >
+    delete from userluckydrawrecord
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="pojo.Userluckydrawrecord" useGeneratedKeys="true" keyProperty="id">
+    insert into userluckydrawrecord (id, username, luckyDrawId, 
+      nowCount)
+    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{luckydrawid,jdbcType=INTEGER}, 
+      #{nowcount,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="pojo.Userluckydrawrecord" >
+    insert into userluckydrawrecord
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="username != null" >
+        username,
+      </if>
+      <if test="luckydrawid != null" >
+        luckyDrawId,
+      </if>
+      <if test="nowcount != null" >
+        nowCount,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="username != null" >
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="luckydrawid != null" >
+        #{luckydrawid,jdbcType=INTEGER},
+      </if>
+      <if test="nowcount != null" >
+        #{nowcount,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="pojo.UserluckydrawrecordExample" resultType="java.lang.Integer" >
+    select count(*) from userluckydrawrecord
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update userluckydrawrecord
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.username != null" >
+        username = #{record.username,jdbcType=VARCHAR},
+      </if>
+      <if test="record.luckydrawid != null" >
+        luckyDrawId = #{record.luckydrawid,jdbcType=INTEGER},
+      </if>
+      <if test="record.nowcount != null" >
+        nowCount = #{record.nowcount,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update userluckydrawrecord
+    set id = #{record.id,jdbcType=INTEGER},
+      username = #{record.username,jdbcType=VARCHAR},
+      luckyDrawId = #{record.luckydrawid,jdbcType=INTEGER},
+      nowCount = #{record.nowcount,jdbcType=INTEGER}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="pojo.Userluckydrawrecord" >
+    update userluckydrawrecord
+    <set >
+      <if test="username != null" >
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="luckydrawid != null" >
+        luckyDrawId = #{luckydrawid,jdbcType=INTEGER},
+      </if>
+      <if test="nowcount != null" >
+        nowCount = #{nowcount,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="pojo.Userluckydrawrecord" >
+    update userluckydrawrecord
+    set username = #{username,jdbcType=VARCHAR},
+      luckyDrawId = #{luckydrawid,jdbcType=INTEGER},
+      nowCount = #{nowcount,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <resultMap type="pojo.Userluckydrawrecord" id="userLuckyDrawRecordMap">
+    <id column="zid" property="id"/>
+    <result column="zusername" property="username"/>
+    <result column="zluckyDrawId" property="luckydrawid"/>
+    <result column="znowCount" property="nowcount"/>
+    <collection property="userluckydrawitemrecordList" ofType="pojo.Userluckydrawitemrecord" column="fid">
+      <id column="fid" property="id"/><!-- 这里的column对应的是下面查询的别名，而不是表字段名 -->
+      <result column="falreadyCount" property="alreadycount"/><!-- property对应JavaBean中的属性名 -->
+      <result column="fitemId" property="itemid"/>
+      <result column="fluckyDrawId" property="luckydrawid"/>
+    </collection>
+  </resultMap>
+
+  <select id="selectByUserNameAndLuckyDrawRecordId" resultMap="userLuckyDrawRecordMap">
+        SELECT
+        z.id as zid,
+        z.username as zusername,
+        z.luckyDrawId as zluckyDrawId,
+        z.nowCount as znowCount,
+	    f.alreadyCount as falreadyCount,
+	    f.id as fid,
+	    f.itemId as fitemId,
+	    f.luckyDrawId as fluckyDrawId
+        FROM userluckydrawrecord z LEFT JOIN userluckydrawitemrecord f ON z.id = f.luckyDrawId
+        where z.username = #{username} and z.luckyDrawId = #{luckyDrawId}
+    </select>
+</mapper>

@@ -14,8 +14,6 @@ import service.skillservice.entity.UserSkill;
 import utils.ChannelUtil;
 import utils.MessageUtil;
 
-import javax.sql.rowset.serial.SerialArray;
-
 /**
  * @ClassName RestraintBuffService
  * @Description 技能反制效果
@@ -36,7 +34,7 @@ public class RestraintBuffService {
                 return true;
             } else {
                 ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                builder.setData(MessageConfig.SLEEPMESSAGE);
+                builder.setData(MessageConfig.SLEEP_MESSAGE);
                 MessageUtil.sendMessage(channel, builder.build());
                 return false;
             }

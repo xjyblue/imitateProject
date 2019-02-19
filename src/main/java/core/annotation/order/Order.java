@@ -1,4 +1,4 @@
-package core.annotation;
+package core.annotation.order;
 
 import java.lang.annotation.*;
 import java.util.List;

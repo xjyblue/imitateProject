@@ -2,7 +2,7 @@ package core;
 
 
 import config.impl.reflect.ReflectMethodLoad;
-import core.reflect.InvokeMethod;
+import core.reflect.son.OrderInvokeMethod;
 import org.springframework.stereotype.Component;
 
 import io.netty.channel.Channel;
@@ -34,8 +34,8 @@ public class ServiceDistributor {
         if (ReflectMethodLoad.methodMap.containsKey(temp[0])) {
             String chStatus = ChannelUtil.channelStatus.get(ch);
             if (ReflectMethodLoad.orderStatusMap.get(temp[0]).contains(chStatus)) {
-                InvokeMethod invokeMethod = ReflectMethodLoad.methodMap.get(temp[0]);
-                invokeMethod.getMethod().invoke(invokeMethod.getObject(), ch, msg);
+                OrderInvokeMethod orderInvokeMethod = ReflectMethodLoad.methodMap.get(temp[0]);
+                orderInvokeMethod.getMethod().invoke(orderInvokeMethod.getObject(), ch, msg);
             }
         }
     }

@@ -1,7 +1,8 @@
 package service.friendservice.service;
 
-import core.annotation.Region;
+import core.annotation.order.OrderRegion;
 import core.config.GrobalConfig;
+import core.config.OrderConfig;
 import core.packet.ServerPacket;
 import service.achievementservice.entity.AchievementConfig;
 import service.achievementservice.service.AchievementService;
@@ -11,7 +12,7 @@ import io.netty.channel.Channel;
 import mapper.FriendapplyinfoMapper;
 import mapper.FriendinfoMapper;
 import mapper.UserMapper;
-import core.annotation.Order;
+import core.annotation.order.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pojo.*;
@@ -30,7 +31,7 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Component
-@Region
+@OrderRegion
 public class FriendService {
     @Autowired
     private FriendapplyinfoMapper friendapplyinfoMapper;
@@ -49,15 +50,15 @@ public class FriendService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "efriend", status = {ChannelStatus.COMMONSCENE})
+    @Order(orderMsg = OrderConfig.ENTER_FRIEND_VIEW_ORDER, status = {ChannelStatus.COMMONSCENE})
     public void enterFriendView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.FRIEND);
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.ENTERFRIENDVIEW);
+        builder.setData(MessageConfig.ENTER_FRIEND_VIEW);
         MessageUtil.sendMessage(channel, builder.build());
 
         ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
-        builder1.setData(MessageConfig.FRIENDMSG);
+        builder1.setData(MessageConfig.FRIEND_MSG);
         MessageUtil.sendMessage(channel, builder1.build());
         return;
     }
@@ -68,12 +69,12 @@ public class FriendService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "qfriend", status = {ChannelStatus.FRIEND})
+    @Order(orderMsg = OrderConfig.QUIT_FRIEND_VIEW_ORDER, status = {ChannelStatus.FRIEND})
     public void quitFriendView(Channel channel, String msg) {
         ChannelUtil.channelStatus.put(channel, ChannelStatus.COMMONSCENE);
 
         ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-        builder.setData(MessageConfig.OUTFRIENDVIEW);
+        builder.setData(MessageConfig.OUT_FRIEND_VIEW);
         MessageUtil.sendMessage(channel, builder.build());
 
         ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
@@ -88,20 +89,20 @@ public class FriendService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "tyf", status = {ChannelStatus.FRIEND})
+    @Order(orderMsg = OrderConfig.AGREE_GET_NEW_FRIEND_ORDER, status = {ChannelStatus.FRIEND})
     public void agreeApplyInfo(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         Friendapplyinfo friendapplyinfo = friendapplyinfoMapper.selectByPrimaryKey(temp[1]);
         if (friendapplyinfo == null) {
             ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
-            builder1.setData(MessageConfig.FRIENDMSG + MessageConfig.NOFRIENDRECORD);
+            builder1.setData(MessageConfig.FRIEND_MSG + MessageConfig.NO_FRIEND_RECORD);
             MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
@@ -119,7 +120,7 @@ public class FriendService {
         friendapplyinfoMapper.updateByPrimaryKeySelective(friendapplyinfo);
 //      通知双方如果在线的话
         ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
-        builder1.setData(MessageConfig.FRIENDMSG + "你同意了" + friendapplyinfo.getFromuser() + "的好友申请");
+        builder1.setData(MessageConfig.FRIEND_MSG + "你同意了" + friendapplyinfo.getFromuser() + "的好友申请");
         MessageUtil.sendMessage(channel, builder1.build());
 
         User userTarget = userService.getUserByNameFromSession(friendapplyinfo.getFromuser());
@@ -145,7 +146,7 @@ public class FriendService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "lufriend", status = {ChannelStatus.FRIEND})
+    @Order(orderMsg = OrderConfig.SHOW_ALL_FRIEND_ORDER, status = {ChannelStatus.FRIEND})
     public void queryFriendToSelf(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         FriendinfoExample friendinfoExample = new FriendinfoExample();
@@ -155,7 +156,7 @@ public class FriendService {
         String resp = "你的好友有";
         if (list.size() == 0) {
             ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
-            builder1.setData(MessageConfig.FRIENDMSG + MessageConfig.NOFRIEND);
+            builder1.setData(MessageConfig.FRIEND_MSG + MessageConfig.NO_FRIEND);
             MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
@@ -163,7 +164,7 @@ public class FriendService {
             resp += "[" + friendinfo.getFriendname() + "] " + System.getProperty("line.separator");
         }
         ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
-        builder1.setData(MessageConfig.FRIENDMSG + resp);
+        builder1.setData(MessageConfig.FRIEND_MSG + resp);
         MessageUtil.sendMessage(channel, builder1.build());
     }
 
@@ -173,13 +174,13 @@ public class FriendService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "sqfriend", status = {ChannelStatus.FRIEND})
+    @Order(orderMsg = OrderConfig.ASK_FRIEND_ORDER, status = {ChannelStatus.FRIEND})
     public void applyFriendToOther(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         String[] temp = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
@@ -189,12 +190,12 @@ public class FriendService {
         List<User> list = userMapper.selectByExample(userExample);
         if (list.size() == GrobalConfig.ZERO) {
             ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
-            builder1.setData(MessageConfig.FRIENDMSG + MessageConfig.NOFOUNDMAN);
+            builder1.setData(MessageConfig.FRIEND_MSG + MessageConfig.NO_FOUND_MAN);
             MessageUtil.sendMessage(channel, builder1.build());
             return;
         } else {
             ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
-            builder1.setData(MessageConfig.FRIENDMSG + "你已向" + temp[1] + "发出了好友申请");
+            builder1.setData(MessageConfig.FRIEND_MSG + "你已向" + temp[1] + "发出了好友申请");
             MessageUtil.sendMessage(channel, builder1.build());
         }
         Friendapplyinfo friendapplyinfo = new Friendapplyinfo();
@@ -211,7 +212,7 @@ public class FriendService {
      * @param channel
      * @param msg
      */
-    @Order(orderMsg = "lsfriend", status = {ChannelStatus.FRIEND})
+    @Order(orderMsg = OrderConfig.SHOW_NEW_FRIEND_REQUEST_ORDER, status = {ChannelStatus.FRIEND})
     public void queryApplyUserInfo(Channel channel, String msg) {
         User user = ChannelUtil.channelToUserMap.get(channel);
         FriendapplyinfoExample friendapplyinfoExample = new FriendapplyinfoExample();
@@ -222,7 +223,7 @@ public class FriendService {
         String resp = "";
         if (list.size() == 0) {
             ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
-            builder1.setData(MessageConfig.FRIENDMSG + "您无好友申请记录");
+            builder1.setData(MessageConfig.FRIEND_MSG + "您无好友申请记录");
             MessageUtil.sendMessage(channel, builder1.build());
             return;
         }
@@ -230,23 +231,23 @@ public class FriendService {
             resp += "[" + friendapplyinfo.getFromuser() + "] 向您发起了好友申请" + "[申请编号：" + friendapplyinfo.getId() + "]" + System.getProperty("line.separator");
         }
         ServerPacket.FriendResp.Builder builder1 = ServerPacket.FriendResp.newBuilder();
-        builder1.setData(MessageConfig.FRIENDMSG + resp);
+        builder1.setData(MessageConfig.FRIEND_MSG + resp);
         MessageUtil.sendMessage(channel, builder1.build());
     }
 
-    @Order(orderMsg = "removefriend", status = {ChannelStatus.FRIEND})
+    @Order(orderMsg = OrderConfig.REMOVE_FRIEND_ORDER, status = {ChannelStatus.FRIEND})
     public void removefriend(Channel channel, String msg) {
         String temp[] = msg.split("=");
         if (temp.length != GrobalConfig.TWO) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.ERRORORDER);
+            builder.setData(MessageConfig.ERROR_ORDER);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }
         User userT = userMapper.selectByPrimaryKey(temp[1]);
         if (userT == null) {
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.NOFOUNDMAN);
+            builder.setData(MessageConfig.NO_FOUND_MAN);
             MessageUtil.sendMessage(channel, builder.build());
             return;
         }

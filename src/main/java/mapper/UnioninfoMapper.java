@@ -28,6 +28,6 @@ public interface UnioninfoMapper {
 
     int updateByPrimaryKey(Unioninfo record);
 
-    Unioninfo selectUnionByUnionName(@Param("unionName")String unionName);
+    Unioninfo selectUnionByUnionName(@Param("unionName") String unionName);
     
 }

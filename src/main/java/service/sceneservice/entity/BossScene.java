@@ -452,7 +452,7 @@ public class BossScene extends BaseThread implements Runnable {
                 userService.initUserBuff(userTarget);
 //                  移除怪物所针对的boss
                 AttackUtil.removeAllMonster(userTarget);
-//                  人物战斗中死亡
+//                  人物战斗中死亡,将人物的状态置为死亡
                 ChannelUtil.channelStatus.put(channelTarget, ChannelStatus.DEADSCENE);
 //                  把人物从战斗场景移除到初始场景
                 Scene scene = SceneResourceLoad.sceneMap.get(GrobalConfig.STARTSCENE);
@@ -498,10 +498,12 @@ public class BossScene extends BaseThread implements Runnable {
 //                  人数不够告诉玩家不能继续下去了
                     Future future = futureMap.remove(teamId);
                     future.cancel(true);
+//                  提示
                     Channel channelTarget = ChannelUtil.userToChannelMap.get(userTarget);
                     ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-                    builder.setData(MessageConfig.NOENOUGHMANTOFIGHT);
+                    builder.setData(MessageConfig.NO_ENOUGH_MAN_TO_FIGHT);
                     MessageUtil.sendMessage(channelTarget, builder.build());
+//                  移除玩家
                     BossSceneConfigResourceLoad.bossAreaMap.remove(teamId);
                     moveAllUser();
                     return true;
@@ -537,7 +539,7 @@ public class BossScene extends BaseThread implements Runnable {
     private boolean checkIfTimeOut() {
         if (System.currentTimeMillis() > bossSceneEndTime) {
             BossSceneConfigResourceLoad.bossAreaMap.remove(teamId);
-            sendTimeOutToAll(teamId, MessageConfig.BOSSAREATIMEOUT);
+            sendTimeOutToAll(teamId, MessageConfig.BOSS_AREA_TIME_OUT);
             stopBossScene();
             moveAllUser();
             return true;
@@ -644,9 +646,8 @@ public class BossScene extends BaseThread implements Runnable {
         Team team = TeamCache.teamMap.get(teamId);
         for (Map.Entry<String, User> entry : team.getUserMap().entrySet()) {
             Channel channelTemp = ChannelUtil.userToChannelMap.get(entry.getValue());
-            ChannelUtil.channelStatus.put(channelTemp, ChannelStatus.DEADSCENE);
             ServerPacket.NormalResp.Builder builder = ServerPacket.NormalResp.newBuilder();
-            builder.setData(MessageConfig.BOSSFAIL);
+            builder.setData(MessageConfig.BOSS_FAIL);
             MessageUtil.sendMessage(channelTemp, builder.build());
         }
     }
@@ -831,6 +832,12 @@ public class BossScene extends BaseThread implements Runnable {
         }
     }
 
+    /**
+     * 选取攻击的对象
+     *
+     * @param bossScene
+     * @return
+     */
     private User getMaxDamageUser(BossScene bossScene) {
 //      选取嘲讽对象
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
@@ -843,7 +850,7 @@ public class BossScene extends BaseThread implements Runnable {
         User userTarget = null;
         for (Map.Entry<User, String> entry : bossScene.getDamageAll().entrySet()) {
             Integer temp = Integer.parseInt(entry.getValue());
-            if (temp > max && !entry.getKey().getStatus().equals(GrobalConfig.DEAD)) {
+            if (temp >= max && !entry.getKey().getStatus().equals(GrobalConfig.DEAD) && userMap.containsKey(entry.getKey().getUsername())) {
                 max = temp;
                 userTarget = entry.getKey();
             }
@@ -851,7 +858,7 @@ public class BossScene extends BaseThread implements Runnable {
 //      这里是为了解决如果某部分玩家都没有进行攻击，需要重新锁定目标的时候就应该从副本中找，而不是从最大伤害中找
         if (userTarget == null) {
             for (Map.Entry<String, User> entry : TeamCache.teamMap.get(bossScene.getTeamId()).getUserMap().entrySet()) {
-                if (!entry.getValue().getStatus().equals(GrobalConfig.DEAD)) {
+                if (!entry.getValue().getStatus().equals(GrobalConfig.DEAD) && userMap.containsKey(entry.getValue().getUsername())) {
                     userTarget = entry.getValue();
                 }
             }

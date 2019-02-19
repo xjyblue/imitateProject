@@ -71,7 +71,7 @@ public class LevelService {
     }
 
     /**
-     * 根据经验值提升人物等级
+     * 根据经验值提升人物等级，触发成就
      *
      * @param user
      * @param value
@@ -121,7 +121,7 @@ public class LevelService {
         addValue += Integer.parseInt(level.getMaxMp());
         double factor = caculateFactorByRole(level, user);
         addValue *= factor;
-//      这里可以附加装备属性
+//      这里可以附加装备属性，修改装备属性的附加值可以提升装备伤害
         return addValue + "";
     }
 
